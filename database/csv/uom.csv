@@ -1,0 +1,66 @@
+uom,uom_text
+"""",Inch
+B1M,Bundle x 1000
+B20,Bag x 20 KG
+B25,Bilao x 25
+B50,Box x 50
+BAG,Bag
+BAR,bar
+BD2,Bundle X 415 PC
+BDL,Bundle
+BG3,Bag x 25 KG
+BG5,Bag x 22.73
+bnh,Bunch
+BOX,Box
+BT,Bottle
+BT1,Bottle 1
+BT2,Bottle x 2
+btl,British Thermal Unit/US Pound
+BX2,Box x 1000 PC
+C04,Case x 4
+C05,Case x 24
+C07,Case x 25
+C12,Case x 12
+C17,Case x 17 KG
+C20,Case x20 KG
+C32,Case x 10.50 L
+C7,Case x 14.10 KG
+CA1,Case x 10
+CA6,Case x 6
+CA7,Case x 10.8
+CAN,Canister
+CBY,Carboy
+CN1,Can X 0.29 KG
+CON,Container
+CS1,Case 1
+CS6,Case x 5 KG
+CV,Case
+DR,Drum
+DR1,Drum 1
+DR2,Drum 2
+G,Gram
+GA4,Gallon X 4.26 KG
+GAL,US Gallon
+KG,Kilogram
+KGM,Kilogram/Mole
+L,Liter
+M,Meter
+ML,Milliliter
+OZ,Ounce
+P50,Pack x 50
+PAC,Pack
+PAI,Pail
+PC,Piece
+PM5,Pack x 5 KG
+PTN,Portion
+RO2,Roll 2
+ROL,Roll
+sac,Sack
+SB1,Small Box
+set,Set
+SVG,Serving
+TAL,Bundle (tali)
+TIN,Tin
+TR,Tray
+TUB,Tube
+YD,Yards

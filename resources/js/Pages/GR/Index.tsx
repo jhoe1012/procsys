@@ -1,0 +1,349 @@
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { Head, Link, router } from '@inertiajs/react';
+import { PageProps, IMessage, IGRHeader, IGRMaterials, IGRHeaderPage } from '@/types';
+
+import { useState, useEffect, KeyboardEvent } from 'react';
+import Pagination from '@/Components/Pagination';
+import TextInput from '@/Components/TextInput';
+import { useToast } from '@/Components/ui/use-toast';
+import { Toaster } from '@/Components/ui/toaster';
+import Modal from '@/Components/Modal';
+
+export default function Index({
+  auth,
+  gr_header,
+  queryParams = {},
+  message,
+}: PageProps<{ gr_header: IGRHeaderPage }> & PageProps<{ queryParams: any }> & PageProps<{ message: IMessage }>) {
+  const [selectedGr, setSelectedGr] = useState<IGRHeader | null>(null);
+  const [grmaterials, setGrmaterials] = useState<IGRMaterials[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const { toast } = useToast();
+
+  queryParams = queryParams || {};
+
+  useEffect(() => {
+    if (message?.success) {
+      toast({
+        title: message.success,
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (selectedGr) {
+      setGrmaterials(selectedGr.grmaterials || []);
+    }
+  }, [selectedGr]);
+
+  const searchFieldChanged = (name: string, value: string) => {
+    if (value) {
+      queryParams[name] = value;
+    } else {
+      delete queryParams[name];
+    }
+
+    router.get(route('gr.index'), queryParams);
+  };
+
+  const handleKeyPress = (name: string, e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter') return;
+
+    searchFieldChanged(name, (e.target as HTMLInputElement).value);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+  };
+
+  return (
+    <AuthenticatedLayout
+      user={auth.user}
+      menus={auth.menu}
+      header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Goods Receipt List</h2>}>
+      <Head title="View PO " />
+
+      <Toaster />
+
+      <div className="py-2">
+        <div className="max-w-8xl mx-auto sm:px-6 lg:px-2">
+          <div className="bg-gray-50 text-black overflow-hidden shadow-sm sm:rounded-lg">
+            <div className="p-5 flex flex-wrap gap-2">
+              <div className="flex-1">
+                <table className=" table-auto w-full text-xs text-left rtl:text-right text-gray-500">
+                  <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b-2 border-gray-500">
+                    <tr className="text-nowrap">
+                      <th className="px-3 py-2"> </th>
+                      <th className="px-1 py-2">
+                        <TextInput
+                          className="h-7 text-xs p-1 m-0"
+                          defaultValue={queryParams.gr_number_from}
+                          onBlur={(e) => searchFieldChanged('gr_number_from', e.target.value)}
+                          onKeyDown={(e) => handleKeyPress('gr_number_from', e)}
+                        />
+                      </th>
+                      <th className="px-1 py-2">
+                        <TextInput
+                          className="h-7 text-xs p-1 m-0"
+                          defaultValue={queryParams.po_number_from}
+                          onBlur={(e) => searchFieldChanged('po_number_from', e.target.value)}
+                          onKeyDown={(e) => handleKeyPress('po_number_from', e)}
+                        />
+                      </th>
+                      <th className="px-1 py-2"></th>
+                      <th className="px-1 py-2"></th>
+                      <th className="px-1 py-2"></th>
+                      <th className="px-1 py-2">
+                        <TextInput
+                          type="date"
+                          className="h-7 text-xs p-1 m-0"
+                          defaultValue={queryParams.entry_date_from}
+                          onBlur={(e) => searchFieldChanged('entry_date_from', e.target.value)}
+                          onKeyDown={(e) => handleKeyPress('entry_date_from', e)}
+                        />
+                      </th>
+                      <th className="px-1 py-2">
+                        <TextInput
+                          type="date"
+                          className="h-7 text-xs p-1 m-0"
+                          defaultValue={queryParams.posting_date_from}
+                          onBlur={(e) => searchFieldChanged('posting_date_from', e.target.value)}
+                          onKeyDown={(e) => handleKeyPress('posting_date_from', e)}
+                        />
+                      </th>
+                      <th className="px-1 py-2">
+                        <TextInput
+                          type="date"
+                          className="h-7 text-xs p-1 m-0"
+                          defaultValue={queryParams.actual_date_from}
+                          onBlur={(e) => searchFieldChanged('actual_date_from', e.target.value)}
+                          onKeyDown={(e) => handleKeyPress('actual_date_from', e)}
+                        />
+                      </th>
+                    </tr>
+                    <tr className="text-nowrap">
+                      <th className="px-3 py-2"> </th>
+                      <th className="px-1 py-2">
+                        <TextInput
+                          className="h-7 text-xs p-1 m-0"
+                          defaultValue={queryParams.gr_number_to}
+                          onBlur={(e) => searchFieldChanged('gr_number_to', e.target.value)}
+                          onKeyDown={(e) => handleKeyPress('gr_number_to', e)}
+                        />
+                      </th>
+                      <th className="px-1 py-2">
+                        <TextInput
+                          className="h-7 text-xs p-1 m-0"
+                          defaultValue={queryParams.po_number_to}
+                          onBlur={(e) => searchFieldChanged('po_number_to', e.target.value)}
+                          onKeyDown={(e) => handleKeyPress('po_number_to', e)}
+                        />
+                      </th>
+                      <th className="px-1 py-2">
+                        <TextInput
+                          className="h-7 text-xs p-1 m-0"
+                          defaultValue={queryParams.plant}
+                          onBlur={(e) => searchFieldChanged('plant', e.target.value)}
+                          onKeyDown={(e) => handleKeyPress('plant', e)}
+                        />
+                      </th>
+                      <th className="px-1 py-2">
+                        <TextInput
+                          className="h-7 text-xs p-1 m-0"
+                          defaultValue={queryParams.vendor}
+                          onBlur={(e) => searchFieldChanged('vendor', e.target.value)}
+                          onKeyDown={(e) => handleKeyPress('vendor', e)}
+                        />
+                      </th>
+                      <th className="px-1 py-2">
+                        <TextInput
+                          className="h-7 text-xs p-1 m-0"
+                          defaultValue={queryParams.entered_by}
+                          onBlur={(e) => searchFieldChanged('entered_by', e.target.value)}
+                          onKeyDown={(e) => handleKeyPress('entered_by', e)}
+                        />
+                      </th>
+                      <th className="px-1 py-2">
+                        <TextInput
+                          type="date"
+                          className="h-7 text-xs p-1 m-0"
+                          defaultValue={queryParams.entry_date_to}
+                          onBlur={(e) => searchFieldChanged('entry_date_to', e.target.value)}
+                          onKeyDown={(e) => handleKeyPress('entry_date_to', e)}
+                        />
+                      </th>
+                      <th className="px-1 py-2">
+                        <TextInput
+                          type="date"
+                          className="h-7 text-xs p-1 m-0"
+                          defaultValue={queryParams.posting_date_to}
+                          onBlur={(e) => searchFieldChanged('posting_date_to', e.target.value)}
+                          onKeyDown={(e) => handleKeyPress('posting_date_to', e)}
+                        />
+                      </th>
+                      <th className="px-1 py-2">
+                        <TextInput
+                          type="date"
+                          className="h-7 text-xs p-1 m-0"
+                          defaultValue={queryParams.actual_date_to}
+                          onBlur={(e) => searchFieldChanged('actual_date_to', e.target.value)}
+                          onKeyDown={(e) => handleKeyPress('actual_date_to', e)}
+                        />
+                      </th>
+                    </tr>
+                  </thead>
+                  <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b-2 border-gray-500">
+                    <tr className="text-nowrap">
+                      <th className="px-3 py-2"> </th>
+                      <th className="px-3 py-2 w-[5%]"> Document Number</th>
+                      <th className="px-3 py-2 w-[5%]"> PO Number</th>
+                      <th className="px-3 py-2 w-[5%]"> Plant</th>
+                      <th className="px-3 py-2 w-[30%]"> Vendor</th>
+                      <th className="px-3 py-2"> Entered By</th>
+                      <th className="px-3 py-2"> Entry Date</th>
+                      <th className="px-3 py-2"> Posting Date</th>
+                      <th className="px-3 py-2"> Actual Date of Receipt</th>
+                      {/* <th className="px-3 py-2"> Status</th> */}
+                      <th className="px-3 py-2"></th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="text-xs text-black">
+                    {gr_header.data.length > 0 ? (
+                      gr_header.data.map((gr) => (
+                        <tr className="bg-white border-b" key={gr.id}>
+                          <td className="px-3 py-2">
+                            <input
+                              type="radio"
+                              name="sel"
+                              onClick={() => {
+                                setSelectedGr(gr);
+                                setModalOpen(true);
+                              }}
+                            />
+                          </td>
+                          <td className="px-3 py-2">{gr.gr_number}</td>
+                          <td className="px-3 py-2">{gr.po_number}</td>
+                          <td className="px-3 py-2">
+                            {gr.plant} - {gr.plants?.name1}
+                          </td>
+                          <td className="px-3 py-2">
+                            {gr.vendor_id} - {gr.vendors?.name_1}
+                          </td>
+                          <td className="px-3 py-2">{gr.created_name}</td>
+                          <td className="px-3 py-2">{gr.entry_date}</td>
+                          <td className="px-3 py-2">{gr.posting_date}</td>
+                          <td className="px-3 py-2">{gr.actual_date}</td>
+                          {/* <td className="px-3 py-2">{gr.status}</td> */}
+                          <td className="px-3 py-2">
+                            <a
+                              // text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 shadow-lg shadow-green-500/50 dark:shadow-lg dark:shadow-green-800/80 font-medium rounded-lg text-sm p-1 text-center
+                              className=""
+                              href={route('gr.print', gr.id)}
+                              target="_blank">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke-width="1.5"
+                                stroke="currentColor"
+                                class="size-6">
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"
+                                />
+                              </svg>
+                            </a>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <td className="px-3 py-2 text-center" colSpan={8}>
+                        No Records Found
+                      </td>
+                    )}
+                  </tbody>
+                </table>
+                <Pagination links={gr_header.meta.links} />
+              </div>
+              <Modal show={modalOpen} onClose={closeModal} maxWidth="3xl">
+                <div className="flex-1 p-5">
+                  <table className="w-full text-xs text-left rtl:text-right text-gray-500">
+                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b-2 border-gray-500">
+                      <tr className="text-nowrap">
+                        <th className="px-3 py-2"> </th>
+                      </tr>
+                    </thead>
+                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b-2 border-gray-500">
+                      <tr className="text-nowrap">
+                        <th className="px-3 py-2">Stat</th>
+                        <th className="px-3 py-2">ItemNo</th>
+                        <th className="px-3 py-2">Material</th>
+                        <th className="px-3 py-2">Short Text</th>
+                        {/* <th className="px-3 py-2">PO Qty</th> */}
+                        <th className="px-3 py-2">Qty</th>
+                        <th className="px-3 py-2">Unit</th>
+                        <th className="px-3 py-2">PO Del Date</th>
+                        <th className="px-3 py-2">Batch</th>
+                        <th className="px-3 py-2">Mfg Date</th>
+                        <th className="px-3 py-2">SLED/BBD</th>
+                        <th className="px-3 py-2">POItem</th>
+                      </tr>
+                    </thead>
+                    {selectedGr && (
+                      <tbody className="text-xs text-black">
+                        {grmaterials.map((grMaterial) => (
+                          <tr className="bg-white border-b" key={grMaterial.id}>
+                            <td className="px-3 py-2">
+                              {grMaterial.is_cancel ? (
+                                <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">
+                                  Cancelled
+                                </span>
+                              ) : (
+                                ''
+                              )}
+                            </td>
+                            <td className="px-3 py-2">{grMaterial.item_no}</td>
+                            <td className="px-3 py-2">{grMaterial.mat_code}</td>
+                            <td className="px-3 py-2">{grMaterial.short_text}</td>
+                            <td className="px-3 py-2">{grMaterial.gr_qty}</td>
+                            <td className="px-3 py-2">{grMaterial.unit}</td>
+                            <td className="px-3 py-2">{grMaterial.po_deliv_date?.toString()}</td>
+                            <td className="px-3 py-2">{grMaterial.batch}</td>
+                            <td className="px-3 py-2">{grMaterial.mfg_date?.toString()}</td>
+                            <td className="px-3 py-2">{grMaterial.sled_bbd?.toString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    )}
+                  </table>
+                </div>
+                <div className="flex flex-row-reverse pt-2">
+                  <div>
+                    {selectedGr?.id && (
+                      <>
+                        {auth.permissions.gr.cancel && (
+                          <Link
+                            href={route('gr.edit', selectedGr.gr_number)}
+                            className=" p-3 m-3 bg-gray-100 inline-flex items-center justify-center whitespace-nowrap rounded-md text-xs font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input  hover:bg-gray-400 hover:text-accent-foreground hover:border-gray-500">
+                            Cancel GR
+                          </Link>
+                        )}
+                        <Link
+                          href={route('gr.show', selectedGr.gr_number)}
+                          className=" p-3 m-3 bg-yellow-500 inline-flex items-center justify-center whitespace-nowrap rounded-md text-xs font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input  hover:bg-yellow-400 hover:text-accent-foreground hover:border-gray-500">
+                          Display GR
+                        </Link>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </Modal>
+            </div>
+          </div>
+        </div>
+      </div>
+    </AuthenticatedLayout>
+  );
+}

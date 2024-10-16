@@ -1,0 +1,256 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Resources\GRHeaderResource;
+use App\Http\Resources\POHeaderResource;
+use App\Models\ApproveStatus;
+use App\Models\GrHeader;
+use App\Models\GrMaterial;
+use App\Models\PoHeader;
+use App\Models\PoMaterial;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
+use Inertia\Inertia;
+
+class GRController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+        $query = GrHeader::query();
+
+        $query = $query->with(['grmaterials', 'plants', 'vendors']);
+
+        $user_plants = $request->user()->plants->map(function ($items) {
+            return $items->plant;
+        })->toArray();
+
+        $query->whereIn('plant', $user_plants);
+
+        // if (Gate::allows('approve.pr')) {
+        //     // TODO ADD FILTERING FOR APPROVAL OF pr
+        // }
+        if (request('gr_number_from') && !request('gr_number_to')) {
+            $query->where('gr_number', 'like', "%" . request('gr_number_from') . "%");
+        }
+        if (request('gr_number_from') &&  request('gr_number_to')) {
+            $query->whereBetween('gr_number', [request('gr_number_from'), request('gr_number_to')]);
+        }
+        if (request('po_number_from') && !request('po_number_to')) {
+            $query->where('po_number', 'like', "%" . request('po_number_from') . "%");
+        }
+        if (request('po_number_from') &&  request('po_number_to')) {
+            $query->whereBetween('po_number', [request('po_number_from'), request('po_number_to')]);
+        }
+        if (request('plant')) {
+            $query->where('plant', 'ilike', "%" . request('plant') . "%");
+        }
+        if (request('vendor')) {
+            $query->where('vendor_id', 'ilike', "%" . request('vendor') . "%");
+        }
+        if (request('entered_by')) {
+            $query->where('created_name', 'ilike', "%" . request('entered_by') . "%");
+        }
+        if (request('entry_date_from') && !request('entry_date_to')) {
+            $query->whereDate('entry_date', request('entry_date_from'));
+        }
+        if (request('entry_date_from') && request('entry_date_to')) {
+            $query->whereBetween('entry_date', [request('entry_date_from'), request('entry_date_to')]);
+        }
+        if (request('posting_date_from') && !request('posting_date_to')) {
+            $query->whereDate('posting_date', request('posting_date_from'));
+        }
+        if (request('posting_date_from') && request('posting_date_to')) {
+            $query->whereBetween('posting_date', [request('posting_date_from'), request('posting_date_to')]);
+        }
+        if (request('actual_date_from') && !request('actual_date_to')) {
+            $query->whereDate('actual_date', request('actual_date_from'));
+        }
+        if (request('actual_date_from') && request('actual_date_to')) {
+            $query->whereBetween('actual_date', [request('actual_date_from'), request('actual_date_to')]);
+        }
+
+        $gr_header = $query->orderBy('entry_date', 'desc')
+            ->orderBy('gr_number', 'desc')
+            ->paginate(20)
+            ->onEachSide(5);
+
+        return Inertia::render('GR/Index', [
+            'gr_header' => GRHeaderResource::collection($gr_header),
+            'queryParams' => $request->query() ?: null,
+            'message' => ['success' => session('success'), 'error' => session('error')],
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+
+        return Inertia::render('GR/Create', [
+            'ponumber' => PoHeader::select('po_number as value', 'po_number as label')
+                ->where('status', Str::ucfirst(ApproveStatus::APPROVED))
+                ->get()
+                ->toArray(),
+        ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        // dd($request->all());
+        $gr_header = new GrHeader();
+        $gr_header->po_number = $request->input('po_number');
+        $gr_header->created_name = $request->input('created_name');
+        $gr_header->vendor_id = $request->input('vendor_id');
+        $gr_header->plant = $request->input('plant');
+
+        $gr_header->entry_date = $request->input('entry_date');
+        $gr_header->posting_date = $request->input('posting_date');
+        $gr_header->actual_date = $request->input('actual_date');
+        $gr_header->delivery_note = $request->input('delivery_note');
+        $gr_header->header_text = $request->input('header_text');
+        $gr_header->save();
+
+
+        $gr_materials = collect($request->input('grmaterials'))
+            ->filter(fn($item) => ! empty($item['mat_code']))
+            ->values()
+            ->map(fn($item, $index) => new GrMaterial([
+                'po_material_id' => $item['po_material_id'],
+                'item_no' => ($index + 1) * 10,
+                'mat_code' => $item['mat_code'],
+                'short_text' => $item['short_text'],
+                'gr_qty' => $item['gr_qty'],
+                'unit' => $item['unit'],
+                'po_deliv_date' => $item['po_deliv_date'],
+                'batch' => $item['batch'] ?? null,
+                'mfg_date' =>   Carbon::parse($item['mfg_date'])->format('Y-m-d'),
+                'sled_bbd' =>  Carbon::parse($item['sled_bbd'])->format('Y-m-d') ,
+                'po_number' => $item['po_number'],
+                'po_item' => $item['po_item'],
+                'dci' => $item['gr_qty'] >= $item['po_gr_qty'] ?: $item['dci'], 
+            ]));
+
+
+
+        $gr_header->refresh();
+        $gr_header->grmaterials()->saveMany($gr_materials);
+
+        foreach ($gr_materials as $gr_material) {
+
+            $gr_material->pomaterials->po_gr_qty = $gr_material->gr_qty <= $gr_material->pomaterials->po_gr_qty
+                ? $gr_material->pomaterials->po_gr_qty - $gr_material->gr_qty
+                : 0;
+
+            // $po_material = PoMaterial::findOrFail($gr_material->po_material_id);
+
+            // $po_material->po_gr_qty =  $gr_material->gr_qty <=  $po_material->po_gr_qty
+            //     ?   $po_material->po_gr_qty - $gr_material->gr_qty
+            //     : 0;
+
+            $gr_material->pomaterials->save();
+        }
+
+        return to_route("gr.index")->with('success', "GR {$gr_header->gr_number} created.");
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $grnumber)
+    {
+        $gr_header = GrHeader::with(['grmaterials', 'vendors', 'plants'])
+            ->where('gr_number', $grnumber)
+            ->firstOrFail();
+
+        // dd($gr_header);
+        // dd( new GRHeaderResource($gr_header));
+        return Inertia::render('GR/Show', [
+            'grheader' => new GRHeaderResource($gr_header),
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $grnumber)
+    {
+        $gr_header = GrHeader::with(['grmaterials', 'vendors', 'plants'])
+            ->where('gr_number', $grnumber)
+            ->firstOrFail();
+
+        // dd($gr_header);
+        // dd( new GRHeaderResource($gr_header));
+        return Inertia::render('GR/Edit', [
+            'grheader' => new GRHeaderResource($gr_header),
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+    }
+    public function getPoDetails($ponumber)
+    {
+
+        $gr_header = PoHeader::with([
+            'plants',
+            'vendors',
+            'pomaterials' => fn($query) => $query->where('po_gr_qty', '>', 0)
+        ])->where('po_number', $ponumber)
+            ->first();
+
+        return  new POHeaderResource($gr_header);
+    }
+    public function cancel(Request $request, $id)
+    {
+
+        foreach ($request->input('grmaterials') as $grmaterial) {
+            if ($grmaterial['id']) {
+                $gr_material = GrMaterial::with('pomaterials')->findOrFail($grmaterial['id']);
+                if ($gr_material->is_cancel) continue;
+                $gr_material->cancel_by = auth()?->user()?->id;
+                $gr_material->is_cancel = true;
+                $gr_material->cancel_datetime = date('Y-m-d H:i:s');
+
+                //  dd($gr_material->pomaterials );
+                if ($gr_material->pomaterials instanceof PoMaterial) {
+                    $gr_material->pomaterials->po_gr_qty += $gr_material->gr_qty;
+                    $gr_material->pomaterials->save();
+                }
+                $gr_material->save();
+            }
+        }
+
+        return to_route("gr.index")->with('success', "GR item(s) cancelled.");
+    }
+
+    public function printGr(Request $request, $id)
+    {
+        $grHeader = GrHeader::with(['grmaterials', 'plants', 'vendors'])->findOrFail($id);
+
+        //   dd($grHeader);
+
+        return view('print.gr', ['grHeader' => $grHeader]);
+    }
+}
