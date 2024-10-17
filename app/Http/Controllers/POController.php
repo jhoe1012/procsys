@@ -74,6 +74,8 @@ class POController extends Controller
         }
         if (request('status')) {
             $query->where('status', 'ilike', "%" . request('status') . "%");
+        } if (request('control_no')) {
+            $query->where('control_no', 'ilike', "%" . request('control_no') . "%");
         }
 
 

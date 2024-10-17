@@ -93,6 +93,7 @@ export default function Index({
                       <th className="px-1 py-2"></th>
                       <th className="px-1 py-2"></th>
                       <th className="px-1 py-2"></th>
+                      <th className="px-1 py-2"></th>
                       <th className="px-1 py-2">
                         <TextInput
                           type="date"
@@ -120,6 +121,14 @@ export default function Index({
                           defaultValue={queryParams.po_number_to}
                           onBlur={(e) => searchFieldChanged('po_number_to', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('po_number_to', e)}
+                        />
+                      </th>
+                      <th className="px-1 py-2">
+                        <TextInput
+                          className="h-7 text-xs p-1 m-0"
+                          defaultValue={queryParams.control_no}
+                          onBlur={(e) => searchFieldChanged('control_no', e.target.value)}
+                          onKeyDown={(e) => handleKeyPress('control_no', e)}
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -170,14 +179,6 @@ export default function Index({
                           defaultValue={queryParams.status}
                           onBlur={(e) => searchFieldChanged('status', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('status', e)}
-                        />
-                      </th>
-                      <th className="px-1 py-2">
-                        <TextInput
-                          className="h-7 text-xs p-1 m-0"
-                          defaultValue={queryParams.agent}
-                          onBlur={(e) => searchFieldChanged('agent', e.target.value)}
-                          onKeyDown={(e) => handleKeyPress('agent', e)}
                         />
                       </th>
                     </tr>
