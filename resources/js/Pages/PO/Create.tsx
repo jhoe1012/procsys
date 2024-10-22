@@ -12,6 +12,7 @@ import 'react-datasheet-grid/dist/style.css';
 import { useState, useEffect, FormEventHandler } from 'react';
 import AddPrtoPo from './Partial/AddPrtoPo';
 import { Table, TableBody, TableCell, TableRow } from '@/Components/ui/table';
+import Dropzone from '@/Components/Dropzone';
 
 import {
   DataSheetGrid,
@@ -32,34 +33,8 @@ import { DELIVERY_ADDRESS, NOTES } from '@/lib/constants';
 const Create = ({ auth, vendors }: PageProps & PageProps<{ vendors: [] }>) => {
   const doc_date = new Date().toLocaleDateString();
   const { toast } = useToast();
-  const [material, setMaterial] = useState<IPOMaterial[]>([
-    // {
-    //   sel: false,
-    //   id: undefined,
-    //   po_header_id: undefined,
-    //   status: '',
-    //   item_no: undefined,
-    //   mat_code: '',
-    //   short_text: '',
-    //   po_qty: 0,
-    //   net_price: 0.0,
-    //   per_unit: 0,
-    //   unit: '',
-    //   total_po_value: 0,
-    //   item_free: false,
-    //   currency: '',
-    //   del_date: undefined,
-    //   mat_grp: '',
-    //   requested_by: '',
-    //   pr_number: undefined,
-    //   pr_item: undefined,
-    //   item_text: '',
-    //   created_by: '',
-    //   updated_by: '',
-    //   created_at: '',
-    //   updated_at: '',
-    // },
-  ]);
+  const [files, setFiles] = useState([]);
+  const [material, setMaterial] = useState<IPOMaterial[]>([]);
 
   const [vendor, setVendor] = useState<IVendor | undefined>();
 
@@ -156,7 +131,7 @@ const Create = ({ auth, vendors }: PageProps & PageProps<{ vendors: [] }>) => {
         value.item_no = (operation.fromRowIndex + 1) * 10;
         value.po_qty = value.po_qty < value.min_order_qty ? value.min_order_qty : value.po_qty;
         value.po_qty = value.po_qty > value.qty_open ? value.qty_open : value.po_qty;
-        value.converted_qty = value.po_qty * ( value.conversion / value.denominator ) ;
+        value.converted_qty = value.po_qty * (value.conversion / value.denominator);
 
         value.total_value = ((value.net_price ?? 0) / (value.per_unit ?? 0)) * (value.po_qty ?? 0);
 
@@ -170,8 +145,10 @@ const Create = ({ auth, vendors }: PageProps & PageProps<{ vendors: [] }>) => {
 
   useEffect(() => {
     const poTotal = material.reduce((acc, mat) => acc + (mat.total_value || 0), 0);
-    setData((prevHeader: IPOHeader) => ({ ...prevHeader, total_po_value: poTotal/* , pomaterials: material */  }));
-  }, [material]);
+    setData((prevHeader: IPOHeader) => ({ ...prevHeader, total_po_value: poTotal , attachment: files }));
+  }, [material, files]);
+
+  
 
   // useEffect(() => {
   //   if (data.plant) {
@@ -187,7 +164,7 @@ const Create = ({ auth, vendors }: PageProps & PageProps<{ vendors: [] }>) => {
   const getVendorInfo = async (vendor_id) => {
     try {
       setVendor(undefined);
-      const response = await window.axios.get( route('po.vendor',vendor_id)) //`/api/vendor/${vendor_id}`);
+      const response = await window.axios.get(route('po.vendor', vendor_id)); //`/api/vendor/${vendor_id}`);
       setVendor(response.data.data);
     } catch (error) {
       console.log('Error fetching vendor info: ', error);
@@ -253,7 +230,7 @@ const Create = ({ auth, vendors }: PageProps & PageProps<{ vendors: [] }>) => {
         }
       }
     }
-    
+
     return flag;
   };
 
@@ -300,10 +277,13 @@ const Create = ({ auth, vendors }: PageProps & PageProps<{ vendors: [] }>) => {
                 </div>
                 <div className="flex-none w-40">
                   <Label htmlFor="date">Delivery Date</Label>
-                  <Input type="date" id="deliv_date" defaultValue={data.deliv_date} 
-                   onChange={(e) => setData('deliv_date', e.target.value)} 
-                   required={true}
-                   />
+                  <Input
+                    type="date"
+                    id="deliv_date"
+                    defaultValue={data.deliv_date}
+                    onChange={(e) => setData('deliv_date', e.target.value)}
+                    required={true}
+                  />
                 </div>
                 <div className="flex-none w-96">
                   <Label>Vendor</Label>
@@ -373,53 +353,48 @@ const Create = ({ auth, vendors }: PageProps & PageProps<{ vendors: [] }>) => {
                     <TabsTrigger value="vendor">Vendor Info</TabsTrigger>
                   </TabsList>
                   <TabsContent value="header_text">
-                    <Textarea
-                      value={data.header_text}
-                      onChange={(e) => setData('header_text', e.target.value)}
-                      
-                    />
+                    <Textarea value={data.header_text} onChange={(e) => setData('header_text', e.target.value)} />
                   </TabsContent>
                   <TabsContent value="notes">
-                  <CSelect defaultValue={data.notes} onValueChange={(value) => setData('notes', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Notes" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {
-                      NOTES.map((note) => (
+                    <CSelect defaultValue={data.notes} onValueChange={(value) => setData('notes', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Notes" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {NOTES.map((note) => (
                           <SelectItem value={note} key={note}>
                             {note}
                           </SelectItem>
                         ))}
-                    </SelectContent>
-                  </CSelect>
+                      </SelectContent>
+                    </CSelect>
                   </TabsContent>
                   <TabsContent value="deliveryAddress">
                     <CSelect defaultValue={data.deliv_addr} onValueChange={(value) => setData('deliv_addr', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Address" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {
-                      DELIVERY_ADDRESS.map((address) => (
+                      <SelectTrigger>
+                        <SelectValue placeholder="Address" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DELIVERY_ADDRESS.map((address) => (
                           <SelectItem value={address} key={address}>
                             {address}
                           </SelectItem>
                         ))}
-                    </SelectContent>
-                  </CSelect>
+                      </SelectContent>
+                    </CSelect>
                   </TabsContent>
                   <TabsContent value="approver_text">
                     <Textarea value={data.approver_text} onChange={(e) => setData('approver_text', e.target.value)} />
                   </TabsContent>
                   <TabsContent value="workflow"></TabsContent>
                   <TabsContent value="attachment">
-                    <Input
+                    {/* <Input
                       type="file"
                       className="min-h-10"
                       multiple
                       onChange={(e) => setData('attachment', e.target.files || undefined)}
-                    />
+                    /> */}
+                    <Dropzone files={files} setFiles={setFiles} /> 
                   </TabsContent>
                   <TabsContent value="vendor">
                     <Card>
@@ -514,12 +489,14 @@ const Create = ({ auth, vendors }: PageProps & PageProps<{ vendors: [] }>) => {
                   <TabsContent value="ItemText">
                     <Textarea />
                   </TabsContent>
-                 
                 </Tabs>
                 <div className="p-5 justify-end grid grid-cols-8 gap-4">
                   {auth.permissions.po.create && (
                     <>
-                      <Button variant="outline" disabled={processing} className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110]">
+                      <Button
+                        variant="outline"
+                        disabled={processing}
+                        className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110]">
                         Save
                       </Button>
                       <Link

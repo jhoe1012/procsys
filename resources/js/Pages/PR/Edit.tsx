@@ -30,6 +30,8 @@ import Discard from '@/Components/Discard';
 import { formatNumber } from '@/lib/utils';
 import FlagForAction from '@/Components/FlagForAction';
 import { SEQ_DRAFT, STATUS_APPROVED, STATUS_REJECTED, STATUS_REWORK } from '@/lib/constants';
+import Dropzone from '@/Components/Dropzone';
+import { XMarkIcon } from '@heroicons/react/24/solid';
 
 const Edit = ({
   auth,
@@ -47,6 +49,7 @@ const Edit = ({
   const [material, setMaterial] = useState<IPRMaterial[]>([]);
 
   const [itemDetails, setItemDetails] = useState([]);
+  const [files, setFiles] = useState([]);
 
   // const [data, setData] = useState<IPRHeader>(prheader1);
 
@@ -269,20 +272,20 @@ const Edit = ({
     const prTotal = material.reduce((acc, mat) => acc + (mat.total_value || 0), 0);
     const m_checked = material.filter((item) => item.sel == true).map((item) => item.mat_code)[0];
     // console.log(m_checked);
-    setData((prevHeader: IPRHeader) => ({ ...prevHeader, total_pr_value: prTotal /* , prmaterials: material */ }));
+    setData((prevHeader: IPRHeader) => ({ ...prevHeader, total_pr_value: prTotal , attachment: files }));
     const m_item_details = item_details.filter((item) => item.mat_code == m_checked);
     setItemDetails(m_item_details);
-  }, [material]);
+  }, [material, files]);
 
-  useEffect(() => {
-    if (data.plant) {
-      if (auth.user.plants) {
-        const deliv_addr = auth.user.plants.filter((plant) => plant.plant === data.plant);
-        const address = `${deliv_addr[0].street} ${deliv_addr[0].street2} ${deliv_addr[0].district} ${deliv_addr[0].city} ${deliv_addr[0].country_code} ${deliv_addr[0].postal_code}`;
-        setData((prevHeader: IPRHeader) => ({ ...prevHeader, deliv_addr: address }));
-      }
-    }
-  }, [data.plant]);
+  // useEffect(() => {
+  //   if (data.plant) {
+  //     if (auth.user.plants) {
+  //       const deliv_addr = auth.user.plants.filter((plant) => plant.plant === data.plant);
+  //       const address = `${deliv_addr[0].street} ${deliv_addr[0].street2} ${deliv_addr[0].district} ${deliv_addr[0].city} ${deliv_addr[0].country_code} ${deliv_addr[0].postal_code}`;
+  //       setData((prevHeader: IPRHeader) => ({ ...prevHeader, deliv_addr: address }));
+  //     }
+  //   }
+  // }, [data.plant]);
 
   return (
     <AuthenticatedLayout
@@ -380,49 +383,28 @@ const Edit = ({
                       </TableBody>
                     </Table>
                   </TabsContent>
-
                   <TabsContent value="attachment">
-                    <ScrollArea className="h-[100px] w-[500px] rounded-md border mb-2">
+                    <ul className="mt-3 mb-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-5 ">
                       {prheader.attachments &&
                         prheader.attachments.map((attachment) => (
-                          <div className="m-1 p-1 flex justify-between border">
-                            <a href={'/' + attachment.filepath} className="text-blue-600 visited:text-purple-600 ">
-                              {attachment.filename}
-                            </a>
+                          <li key={attachment.filename} className="relative h-12 rounded-md shadow-lg p-2 bg-white">
                             {auth.permissions.pr.edit && (
                               <Link
                                 preserveScroll
                                 href={route('attachment.delete', attachment.id)}
                                 method="delete"
                                 as="button"
-                                className="pr-3">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  x="0px"
-                                  y="0px"
-                                  width="20"
-                                  height="20"
-                                  viewBox="0 0 48 48">
-                                  <path
-                                    fill="#F44336"
-                                    d="M21.5 4.5H26.501V43.5H21.5z"
-                                    transform="rotate(45.001 24 24)"></path>
-                                  <path
-                                    fill="#F44336"
-                                    d="M21.5 4.5H26.5V43.501H21.5z"
-                                    transform="rotate(135.008 24 24)"></path>
-                                </svg>
+                                className="w-7 h-7  bg-slate-100 rounded-full flex justify-center items-center absolute top-3 right-2 hover:bg-red-200 transition-colors">
+                                <XMarkIcon className="w-6 h-6  text-red-600 hover:fill-red-700 transition-colors" />
                               </Link>
                             )}
-                          </div>
+                            <p className="mt-2 text-blue-600 text-sm font-medium truncate pr-7">
+                              <a href={'/' + attachment.filepath} download={true}>{attachment.filename}</a>
+                            </p>
+                          </li>
                         ))}
-                    </ScrollArea>
-                    <Input
-                      type="file"
-                      className="min-h-10"
-                      multiple
-                      onChange={(e) => setData('attachment', e.target.files || undefined)}
-                    />
+                    </ul>
+                    <Dropzone files={files} setFiles={setFiles} />
                   </TabsContent>
                 </Tabs>
               </div>
@@ -468,7 +450,7 @@ const Edit = ({
                 <Tabs defaultValue="itemDetails" className="max-w-xl">
                   <TabsList>
                     <TabsTrigger value="itemDetails">Item Details</TabsTrigger>
-                    <TabsTrigger value="deliveryAddress">Delivery Address</TabsTrigger>
+                    {/* <TabsTrigger value="deliveryAddress">Delivery Address</TabsTrigger> */}
                     <TabsTrigger value="action">Action</TabsTrigger>
                   </TabsList>
                   <TabsContent value="itemDetails">
@@ -497,9 +479,9 @@ const Edit = ({
                       </TableBody>
                     </Table>
                   </TabsContent>
-                  <TabsContent value="deliveryAddress">
+                  {/* <TabsContent value="deliveryAddress">
                     <Textarea value={data.deliv_addr} onChange={(e) => setData('deliv_addr', e.target.value)} />
-                  </TabsContent>
+                  </TabsContent> */}
                   <TabsContent value="action">
                     {auth.permissions.pr.edit && (
                       <>

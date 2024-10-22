@@ -6,28 +6,17 @@ import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
 import 'react-datasheet-grid/dist/style.css';
 import { useState } from 'react';
-import {
-  DataSheetGrid,
-  checkboxColumn,
-  textColumn,
-  intColumn,
-  keyColumn,
-  floatColumn
-} from 'react-datasheet-grid';
+import { DataSheetGrid, checkboxColumn, textColumn, intColumn, keyColumn, floatColumn } from 'react-datasheet-grid';
 import { Toaster } from '@/Components/ui/toaster';
 import { Card, CardContent } from '@/Components/ui/card';
 
 const Show = ({ auth, grheader }: PageProps & PageProps<{ grheader: IGRHeader }>) => {
-  //   const dateToday = new Date().toISOString().substring(0, 10);
-
-  //   const { toast } = useToast();
   const [material, setMaterial] = useState<IGRMaterials[]>(grheader.grmaterials);
 
   const columns = [
     { ...keyColumn('item_no', intColumn), title: 'ItmNo', maxWidth: 50, disabled: true },
     { ...keyColumn('mat_code', textColumn), title: 'Material', maxWidth: 130, disabled: true },
-    { ...keyColumn('short_text', textColumn), title: 'Short Text', maxWidth: 350, disabled: true },
-    { ...keyColumn('po_gr_qty', floatColumn), title: 'PO Qty', maxWidth: 130, disabled: true },
+    { ...keyColumn('short_text', textColumn), title: 'Short Text', maxWidth: 500, disabled: true },
     { ...keyColumn('gr_qty', floatColumn), title: 'Qty', maxWidth: 130, disabled: true },
     { ...keyColumn('unit', textColumn), title: 'Unit', maxWidth: 55, disabled: true },
     { ...keyColumn('po_deliv_date', textColumn), title: 'PO Del Date', maxWidth: 130, disabled: true },
@@ -43,42 +32,6 @@ const Show = ({ auth, grheader }: PageProps & PageProps<{ grheader: IGRHeader }>
     '--dsg-cell-disabled-background-color': 'rgb(245, 245, 245)',
     '--dsg-border-color': '#bfbdbd',
   };
-
-  //   const handleSubmit: FormEventHandler = async (e) => {
-  //     e.preventDefault();
-  //     // if (handleCheck()) {
-  //     //   console.log(data);
-  //     //   post(route('gr.store'));
-  //     // }
-  //   };
-
-//   const styles = {
-//     control: (provided: CSSObjectWithLabel) => ({
-//       ...provided,
-//       minHeight: '1.75rem',
-//       height: '1.75rem',
-//       fontSize: '0.875rem',
-//       borderColor: 'hsl(var(--input))',
-//     }),
-
-//     valueContainer: (provided: CSSObjectWithLabel) => ({
-//       ...provided,
-//       height: '1.75rem',
-//       padding: '0 6px',
-//     }),
-
-//     input: (provided: CSSObjectWithLabel) => ({
-//       ...provided,
-//       margin: '0px',
-//     }),
-//     indicatorSeparator: () => ({
-//       display: 'none',
-//     }),
-//     indicatorsContainer: (provided: CSSObjectWithLabel) => ({
-//       ...provided,
-//       height: '1.75rem',
-//     }),
-//   };
 
   return (
     <AuthenticatedLayout
@@ -164,9 +117,6 @@ const Show = ({ auth, grheader }: PageProps & PageProps<{ grheader: IGRHeader }>
                 onChange={setMaterial}
                 columns={columns}
                 style={customStyle}
-                // autoAddRow
-                //lockRows
-                // disableContextMenu
                 disableExpandSelection
                 rowHeight={30}
                 className="text-sm"
@@ -180,25 +130,8 @@ const Show = ({ auth, grheader }: PageProps & PageProps<{ grheader: IGRHeader }>
                   className="h-10 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:border-gray-500">
                   Cancel
                 </Link>
-
-                {/* {auth.permissions.gr.create && (
-                    <>
-                      <Button
-                        variant="outline"
-                        // disabled={processing}
-                        className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110]">
-                        Post
-                      </Button>
-                      <Link
-                        href={route('gr.index')}
-                        className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:border-gray-500">
-                        Cancel
-                      </Link>
-                    </>
-                  )} */}
               </div>
             </div>
-            {/* </form> */}
           </div>
         </div>
       </div>

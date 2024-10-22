@@ -8,11 +8,11 @@ import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
 import { Select as CSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/table';
-
 import 'react-datasheet-grid/dist/style.css';
 import ItemDetails from './ItemDetails';
 import { useState, useEffect, FormEventHandler } from 'react';
 import AddPrtoPo from './Partial/AddPrtoPo';
+import Dropzone from '@/Components/Dropzone';
 
 import {
   DataSheetGrid,
@@ -34,6 +34,7 @@ import { Card, CardContent } from '@/Components/ui/card';
 import { ScrollArea } from '@/Components/ui/scroll-area';
 import FlagForAction from '@/Components/FlagForAction';
 import { DELIVERY_ADDRESS, NOTES, SEQ_DRAFT, STATUS_APPROVED, STATUS_REJECTED, STATUS_REWORK } from '@/lib/constants';
+import { XMarkIcon } from '@heroicons/react/24/solid';
 
 const Edit = ({
   auth,
@@ -52,6 +53,7 @@ const Edit = ({
 
   const [apprSeq, setApprSeq] = useState<IApprover>();
   const [vendor, setVendor] = useState<IVendor | undefined>(poheader.vendors);
+  const [files, setFiles] = useState([]);
 
   const { data, setData, post, errors, reset, processing } = useForm<IPOHeader>({
     id: poheader.id,
@@ -191,8 +193,8 @@ const Edit = ({
 
   useEffect(() => {
     const poTotal = material.reduce((acc, mat) => acc + (mat.total_value || 0), 0);
-    setData((prevHeader: IPOHeader) => ({ ...prevHeader, total_po_value: poTotal /* , pomaterials: material */ }));
-  }, [material]);
+    setData((prevHeader: IPOHeader) => ({ ...prevHeader, total_po_value: poTotal, attachment: files }));
+  }, [material, files]);
 
   // useEffect(() => {
   //   if (data.plant) {
@@ -284,6 +286,7 @@ const Edit = ({
         preserveScroll: true,
         onSuccess: (page) => {
           reset();
+          setFiles([])
         },
       });
     }
@@ -487,47 +490,33 @@ const Edit = ({
                     </Table>
                   </TabsContent>
                   <TabsContent value="attachment">
-                    <ScrollArea className="h-[100px] w-[500px] rounded-md border mb-2">
+                    <ul className="mt-3 mb-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-5 ">
                       {poheader.attachments &&
                         poheader.attachments.map((attachment) => (
-                          <div className="m-1 p-1 flex justify-between border">
-                            <a href={'/' + attachment.filepath} className="text-blue-600 visited:text-purple-600 ">
-                              {attachment.filename}
-                            </a>
-                            {auth.permissions.po.edit && (
+                          <li key={attachment.filename} className="relative h-12 rounded-md shadow-lg p-2 bg-white">
+                            {auth.permissions.pr.edit && (
                               <Link
                                 preserveScroll
                                 href={route('attachment.delete', attachment.id)}
                                 method="delete"
                                 as="button"
-                                className="pr-3">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  x="0px"
-                                  y="0px"
-                                  width="20"
-                                  height="20"
-                                  viewBox="0 0 48 48">
-                                  <path
-                                    fill="#F44336"
-                                    d="M21.5 4.5H26.501V43.5H21.5z"
-                                    transform="rotate(45.001 24 24)"></path>
-                                  <path
-                                    fill="#F44336"
-                                    d="M21.5 4.5H26.5V43.501H21.5z"
-                                    transform="rotate(135.008 24 24)"></path>
-                                </svg>
+                                className="w-7 h-7  bg-slate-100 rounded-full flex justify-center items-center absolute top-3 right-2 hover:bg-red-200 transition-colors">
+                                <XMarkIcon className="w-6 h-6  text-red-600 hover:fill-red-700 transition-colors" />
                               </Link>
                             )}
-                          </div>
+                            <p className="mt-2 text-blue-600 text-sm font-medium truncate pr-7">
+                              <a href={'/' + attachment.filepath} download={true}>{attachment.filename}</a>
+                            </p>
+                          </li>
                         ))}
-                    </ScrollArea>
-                    <Input
+                    </ul>
+                    {/* <Input
                       type="file"
                       className="min-h-10"
                       multiple
                       onChange={(e) => setData('attachment', e.target.files || undefined)}
-                    />
+                    /> */}
+                    <Dropzone files={files} setFiles={setFiles} />
                   </TabsContent>
                   <TabsContent value="vendor">
                     <Card>
@@ -642,7 +631,7 @@ const Edit = ({
                         <Link
                           preserveScroll
                           href={route('po.update-controlno')}
-                          data={{ id : poheader.id, control_no: data.control_no }}
+                          data={{ id: poheader.id, control_no: data.control_no }}
                           as="button"
                           type="button"
                           className="p-2 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:border-gray-100 ">

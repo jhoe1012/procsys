@@ -132,9 +132,7 @@ const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => 
       .filter((item) => item.mat_code !== undefined)
       .map((item, index) => ({ ...item, item_no: (index + 1) * 10 }));
 
-    setMaterial(updatedMaterial);
-    console.log('data from hnadle check', data);
-    console.log('updatedMaterial', updatedMaterial);
+    setMaterial(updatedMaterial); 
 
     if (updatedMaterial.length <= 0) {
       toast({
@@ -168,10 +166,7 @@ const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => 
 
   const getPODetails = async (ponumber: number) => {
     try {
-      const response = await window.axios.get(route('po.details', ponumber)); //   `/api/po-details/${ponumber}`);
-      console.log(response);
-      console.log('data before set', data);
-
+      const response = await window.axios.get(route('po.details', ponumber));  
       const updateMaterial = response.data.pomaterials.map((item) => ({
         id: undefined,
         gr_header_id: undefined,
@@ -200,7 +195,6 @@ const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => 
       });
 
       setMaterial(updateMaterial);
-      console.log('after set', data);
     } catch (error) {
       console.log('Error fetching po info: ', error);
     }
@@ -209,7 +203,6 @@ const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => 
   const handleSubmit: FormEventHandler = async (e) => {
     e.preventDefault();
     if (handleCheck()) {
-      console.log(data);
       post(route('gr.store'));
     }
   };
@@ -262,10 +255,6 @@ const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => 
                   <Label>&nbsp;</Label>
                   <Input type="text" defaultValue="Purchase Order" disabled />
                 </div>
-                {/* <div className="flex-none w-40">
-                  <Label htmlFor="created_by">Created By</Label>
-                  <Input type="text" id="control_no" defaultValue={data.created_name} disabled />
-                </div> */}
                 <div className="flex-none w-40">
                   <Label>PO Number</Label>
                   <Select
@@ -322,15 +311,6 @@ const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => 
                             <Label htmlFor="entry_date">Entry entry_date</Label>
                             <Input type="date" id="entry_date" value={data.entry_date} disabled />
                           </div>
-                          {/* <div className="flex-none w-36">
-                            <Label htmlFor="posting_date">Posting Date</Label>
-                            <Input
-                              type="date"
-                              id="posting_date"
-                              defaultValue={data.posting_date}
-                              onChange={(e) => setData('posting_date', e.target.value)}
-                            />
-                          </div> */}
                           <div className="flex-none w-36">
                             <Label htmlFor="actual_date">Actual Date of Reciept</Label>
                             <Input
@@ -339,8 +319,7 @@ const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => 
                               defaultValue={data.actual_date}
                               onChange={(e) => setData('actual_date', e.target.value)}
                             />
-                          </div>
-
+                          </div> 
                           <div className="flex-none w-36">
                             <Label htmlFor="delivery_note">Delivery Note / SI #</Label>
                             <Input
@@ -370,10 +349,7 @@ const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => 
                   value={material}
                   onChange={updateMaterial}
                   columns={columns}
-                  style={customStyle}
-                  // autoAddRow
-                  //lockRows
-                  // disableContextMenu
+                  style={customStyle} 
                   disableExpandSelection
                   rowHeight={30}
                   className="text-sm"
@@ -399,10 +375,7 @@ const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => 
                   )}
                 </div>
               </div>
-            </form>
-            {/* {auth.permissions.po.create && (
-              
-            )} */}
+            </form> 
           </div>
         </div>
       </div>

@@ -240,6 +240,7 @@ export default function Index({
                         <th className="px-3 py-2">Material</th>
                         <th className="px-3 py-2">Short Text</th>
                         <th className="px-3 py-2">Del Date</th>
+                        <th className="px-3 py-2">Quantity</th>
                         <th className="px-3 py-2">Open Qty</th>
                         <th className="px-3 py-2">Unit</th>
                         <th className="px-3 py-2">Total Value</th>
@@ -255,6 +256,7 @@ export default function Index({
                           <td className="px-3 py-2">{prmaterial.mat_code}</td>
                           <td className="px-3 py-2">{prmaterial.short_text}</td>
                           <td className="px-3 py-2">{prmaterial.del_date?.toString()}</td>
+                          <td className="px-3 py-2">{prmaterial.qty}</td>
                           <td className="px-3 py-2">{prmaterial.qty_open}</td>
                           <td className="px-3 py-2">{prmaterial.unit}</td>
                           <td className="px-3 py-2">{formatNumber(prmaterial.total_value ?? 0)}</td>

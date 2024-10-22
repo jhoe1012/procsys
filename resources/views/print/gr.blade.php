@@ -67,8 +67,8 @@
             <tr>
                 <th>Purchase Order: </th>
                 <td>{{ $grHeader->po_number }}</td>
-                <th>Purchasing Group: </th>
-                <td></td>
+                <th>DR # / SI #  </th>
+                <td>{{ $grHeader->delivery_note }} </td>
             </tr>
         </table>
 

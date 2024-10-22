@@ -7,7 +7,6 @@ import { Textarea } from '@/Components/ui/textarea';
 import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
-
 import 'react-datasheet-grid/dist/style.css';
 import { useState, useEffect, FormEventHandler } from 'react';
 import { Choice } from '@/Components/SelectComponent';
@@ -26,6 +25,7 @@ import {
 import { Toaster } from '@/Components/ui/toaster';
 import { useToast } from '@/Components/ui/use-toast';
 import { formatNumber } from '@/lib/utils';
+import Dropzone from '@/Components/Dropzone';
 
 const Create = ({
   auth,
@@ -34,6 +34,8 @@ const Create = ({
 }: PageProps<{ mat_code: Choice[] }> & PageProps<{ mat_desc: Choice[] }>) => {
   const dateToday = new Date().toLocaleDateString();
   const { toast } = useToast();
+const [files, setFiles] = useState([]);
+
   const [material, setMaterial] = useState<IPRMaterial[]>([
     {
       sel: false,
@@ -227,7 +229,7 @@ const Create = ({
   const handleSubmit: FormEventHandler = async (e) => {
     e.preventDefault();
     if (handleCheck()) {
-      console.log(data);
+      
       post(route('pr.store'));
     }
   };
@@ -290,10 +292,10 @@ const Create = ({
   };
 
   useEffect(() => {
-    console.log(material);
     const prTotal = material.reduce((acc, mat) => acc + (mat.total_value || 0), 0);
-    setData((prevHeader: IPRHeader) => ({ ...prevHeader, total_pr_value: prTotal/* , prmaterials: material  */}));
-  }, [material]);
+    setData((prevHeader: IPRHeader) => ({ ...prevHeader, total_pr_value: prTotal, attachment: files}));
+  }, [material, files]);
+
 
   // useEffect(() => {
   //   if (data.plant) {
@@ -376,12 +378,13 @@ const Create = ({
                   </TabsContent>
                   <TabsContent value="workflow"></TabsContent>
                   <TabsContent value="attachment">
-                    <Input
+                    {/* <Input
                       type="file"
                       className="min-h-10"
                       multiple
                       onChange={(e) => setData('attachment', e.target.files || undefined)}
-                    />
+                    /> */}
+                    <Dropzone files={files} setFiles={setFiles}/>
                   </TabsContent>
                 </Tabs>
               </div>
