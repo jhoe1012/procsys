@@ -13,7 +13,6 @@ import 'react-datasheet-grid/dist/style.css';
 import { useState, useEffect, FormEventHandler } from 'react';
 import { Choice } from '@/Components/SelectComponent';
 import selectColumn from '@/Components/SelectComponent';
-import { ScrollArea } from '@/Components/ui/scroll-area';
 import {
   DataSheetGrid,
   checkboxColumn,
@@ -47,11 +46,9 @@ const Edit = ({
   const dateToday = new Date().toLocaleDateString();
 
   const [material, setMaterial] = useState<IPRMaterial[]>([]);
-
   const [itemDetails, setItemDetails] = useState([]);
   const [files, setFiles] = useState([]);
-
-  // const [data, setData] = useState<IPRHeader>(prheader1);
+  const [apprSeq, setApprSeq] = useState<IApprover>();
 
   const { data, setData, post, errors, reset, processing } = useForm<IPRHeader>({
     id: prheader.id,
@@ -63,7 +60,6 @@ const Edit = ({
     plant: prheader.plant,
     reason_pr: prheader.reason_pr,
     header_text: prheader.header_text,
-    // workflows: prheader.workflows,
     total_pr_value: prheader.total_pr_value,
     status: prheader.status || '',
     deliv_addr: prheader.deliv_addr,
@@ -71,11 +67,6 @@ const Edit = ({
     attachments: [],
     _method: 'patch',
   });
-
-  const [apprSeq, setApprSeq] = useState<IApprover>();
-
-  //TODO USE DRY METHOD
-  const approvalStatus = { approve: 'approved', rework: 'rework', reject: 'rejected' };
 
   const { toast } = useToast();
 
@@ -123,14 +114,12 @@ const Edit = ({
 
     for (const operation of operations) {
       if (operation.type === 'UPDATE') {
-        // for (let i = operation.fromRowIndex; i <= operation.fromRowIndex; i++) {
         const value = updatedMaterial[operation.fromRowIndex];
         const oldValue = oldMaterialValue[operation.fromRowIndex];
 
         if (value.mat_code && value.mat_code !== oldValue.mat_code) {
           const materialInfo = await getMaterialInfo(value.mat_code);
           if (materialInfo) {
-            // value.item_no = (operation.fromRowIndex + 1) * 10;
             value.short_text = materialInfo.mat_desc;
             value.ord_unit = materialInfo.base_uom;
             value.unit = materialInfo.base_uom;
@@ -146,7 +135,6 @@ const Edit = ({
         if (value.short_text && value.short_text !== oldValue.short_text) {
           const materialInfo = await getMaterialInfo(value.short_text);
           if (materialInfo) {
-            // value.item_no = (operation.fromRowIndex + 1) * 10;
             value.mat_code = materialInfo.mat_code;
             value.ord_unit = materialInfo.base_uom;
             value.unit = materialInfo.base_uom;
@@ -162,9 +150,7 @@ const Edit = ({
         if (value.qty !== oldValue.qty) {
           value.total_value = ((value.price ?? 0) / (value.per_unit ?? 0)) * (value.qty ?? 0);
         }
-
         value.item_no = (operation.fromRowIndex + 1) * 10;
-        // }
       }
     }
 
@@ -179,6 +165,7 @@ const Edit = ({
         preserveScroll: true,
         onSuccess: (page) => {
           reset();
+          setFiles([]);
         },
       });
     }
@@ -246,7 +233,6 @@ const Edit = ({
     }));
 
     setMaterial(updateDeldate || []);
-    // setData({...data, prmaterials: updateDeldate });
     if (message?.success) {
       toast({
         title: message.success,
@@ -262,30 +248,16 @@ const Edit = ({
 
     if (auth.user.approvers) {
       setApprSeq(auth.user.approvers.filter((approver) => approver.type == 'pr')[0]);
-
-      // let appr_seq = auth.user.approvers.filter((approver) => approver.type == 'pr');
-      // console.log(auth.user.approvers.filter((approver) => approver.type == 'pr')[0]);
     }
   }, []);
 
   useEffect(() => {
     const prTotal = material.reduce((acc, mat) => acc + (mat.total_value || 0), 0);
     const m_checked = material.filter((item) => item.sel == true).map((item) => item.mat_code)[0];
-    // console.log(m_checked);
-    setData((prevHeader: IPRHeader) => ({ ...prevHeader, total_pr_value: prTotal , attachment: files }));
+    setData((prevHeader: IPRHeader) => ({ ...prevHeader, total_pr_value: prTotal, attachment: files }));
     const m_item_details = item_details.filter((item) => item.mat_code == m_checked);
     setItemDetails(m_item_details);
   }, [material, files]);
-
-  // useEffect(() => {
-  //   if (data.plant) {
-  //     if (auth.user.plants) {
-  //       const deliv_addr = auth.user.plants.filter((plant) => plant.plant === data.plant);
-  //       const address = `${deliv_addr[0].street} ${deliv_addr[0].street2} ${deliv_addr[0].district} ${deliv_addr[0].city} ${deliv_addr[0].country_code} ${deliv_addr[0].postal_code}`;
-  //       setData((prevHeader: IPRHeader) => ({ ...prevHeader, deliv_addr: address }));
-  //     }
-  //   }
-  // }, [data.plant]);
 
   return (
     <AuthenticatedLayout
@@ -293,9 +265,7 @@ const Edit = ({
       menus={auth.menu}
       header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Edit Purchase Requisition</h2>}>
       <Head title="PR Create" />
-
       <Toaster />
-
       <div className="py-2">
         <div className="max-w-8xl mx-auto sm:px-6 lg:px-2">
           <div className="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg">
@@ -399,7 +369,9 @@ const Edit = ({
                               </Link>
                             )}
                             <p className="mt-2 text-blue-600 text-sm font-medium truncate pr-7">
-                              <a href={'/' + attachment.filepath} download={true}>{attachment.filename}</a>
+                              <a href={'/' + attachment.filepath} download={true}>
+                                {attachment.filename}
+                              </a>
                             </p>
                           </li>
                         ))}
@@ -431,8 +403,6 @@ const Edit = ({
                   onChange={updateMaterial}
                   columns={columns}
                   style={customStyle}
-                  // autoAddRow
-                  // disableContextMenu
                   disableExpandSelection
                   rowHeight={30}
                   className="text-sm"
@@ -450,11 +420,9 @@ const Edit = ({
                 <Tabs defaultValue="itemDetails" className="max-w-xl">
                   <TabsList>
                     <TabsTrigger value="itemDetails">Item Details</TabsTrigger>
-                    {/* <TabsTrigger value="deliveryAddress">Delivery Address</TabsTrigger> */}
                     <TabsTrigger value="action">Action</TabsTrigger>
                   </TabsList>
                   <TabsContent value="itemDetails">
-                    {/* <ItemDetails item_details={itemDetails} /> */}
                     <Table className="w-11/2 text-sm ml-5 border border-collapse">
                       <TableHeader>
                         <TableRow>
@@ -479,9 +447,6 @@ const Edit = ({
                       </TableBody>
                     </Table>
                   </TabsContent>
-                  {/* <TabsContent value="deliveryAddress">
-                    <Textarea value={data.deliv_addr} onChange={(e) => setData('deliv_addr', e.target.value)} />
-                  </TabsContent> */}
                   <TabsContent value="action">
                     {auth.permissions.pr.edit && (
                       <>
@@ -511,10 +476,6 @@ const Edit = ({
                 <div className="p-5 justify-end grid grid-cols-8 gap-4">
                   {auth.permissions.pr.edit && (
                     <>
-                      {/* <Button onClick={()=>handleCheck()} type="button" variant="outline" className="hover:border-gray-500">
-                        Check
-                      </Button> */}
-
                       <Button
                         type="submit"
                         variant="outline"

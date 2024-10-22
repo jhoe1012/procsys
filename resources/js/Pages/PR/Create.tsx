@@ -12,7 +12,6 @@ import { useState, useEffect, FormEventHandler } from 'react';
 import { Choice } from '@/Components/SelectComponent';
 import selectColumn from '@/Components/SelectComponent';
 import { Operation } from 'react-datasheet-grid/dist/types';
-
 import {
   DataSheetGrid,
   checkboxColumn,
@@ -34,7 +33,7 @@ const Create = ({
 }: PageProps<{ mat_code: Choice[] }> & PageProps<{ mat_desc: Choice[] }>) => {
   const dateToday = new Date().toLocaleDateString();
   const { toast } = useToast();
-const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState([]);
 
   const [material, setMaterial] = useState<IPRMaterial[]>([
     {
@@ -74,7 +73,6 @@ const [files, setFiles] = useState([]);
       del_date: undefined,
       mat_grp: undefined,
       purch_grp: undefined,
-
     },
     {
       sel: false,
@@ -94,7 +92,6 @@ const [files, setFiles] = useState([]);
       del_date: undefined,
       mat_grp: undefined,
       purch_grp: undefined,
-
     },
   ]);
 
@@ -122,26 +119,26 @@ const [files, setFiles] = useState([]);
     { ...keyColumn('short_text', selectColumn({ choices: mat_desc })), title: 'Short Text', minWidth: 300 },
     { ...keyColumn('qty', floatColumn), title: 'Qty', minWidth: 70 },
     { ...keyColumn('ord_unit', textColumn), title: 'Ord Unit', minWidth: 55 },
-  //   { ...keyColumn('altUom',  {
-  //     component: ({ rowData, setValue }) => (
-  //          rowData &&
-  //         <select
-  //             value={rowData.selection}
-  //             onChange={(e) => setValue(e.target.value)}
-  //         >
-  //             {console.log('rowData', rowData)}
-  //             <option value="" disabled>Select an option</option>
-  //             {rowData.map((item) => (
-                 
-  //                 <option key={item} value={item}>
-  //                       {console.log('item', item)}
-  //                     {item}
-  //                 </option>
-  //             ))}
-  //         </select>
-  
-  //     ),
-  // }), title: ' Unit', minWidth: 100 },
+    //   { ...keyColumn('altUom',  {
+    //     component: ({ rowData, setValue }) => (
+    //          rowData &&
+    //         <select
+    //             value={rowData.selection}
+    //             onChange={(e) => setValue(e.target.value)}
+    //         >
+    //             {console.log('rowData', rowData)}
+    //             <option value="" disabled>Select an option</option>
+    //             {rowData.map((item) => (
+
+    //                 <option key={item} value={item}>
+    //                       {console.log('item', item)}
+    //                     {item}
+    //                 </option>
+    //             ))}
+    //         </select>
+
+    //     ),
+    // }), title: ' Unit', minWidth: 100 },
     // { ...keyColumn('qty_ordered', floatColumn), title: 'Qty Ordered', minWidth: 70, disabled: true },
     // { ...keyColumn('qty_open', floatColumn), title: 'Qty Open', minWidth: 55, disabled: true },
     { ...keyColumn('price', floatColumn), title: 'Price', minWidth: 70, disabled: true },
@@ -162,7 +159,9 @@ const [files, setFiles] = useState([]);
 
   const getMaterialInfo = async (material: string) => {
     try {
-      const response = await window.axios.get(route('material.details'), { params: { material: material, plant: data.plant } });
+      const response = await window.axios.get(route('material.details'), {
+        params: { material: material, plant: data.plant },
+      });
       return response.data.data;
     } catch (error) {
       console.error('Error fetching material info:', error);
@@ -176,14 +175,12 @@ const [files, setFiles] = useState([]);
 
     for (const operation of operations) {
       if (operation.type === 'UPDATE') {
-        // for (let i = operation.fromRowIndex; i <= operation.fromRowIndex; i++) {
         const value = updatedMaterial[operation.fromRowIndex];
         const oldValue = oldMaterialValue[operation.fromRowIndex];
 
         if (value.mat_code && value.mat_code !== oldValue.mat_code) {
           const materialInfo = await getMaterialInfo(value.mat_code);
           if (materialInfo) {
-            // value.item_no = (operation.fromRowIndex + 1) * 10;
             value.short_text = materialInfo.mat_desc;
             value.ord_unit = materialInfo.base_uom;
             value.unit = materialInfo.base_uom;
@@ -199,8 +196,7 @@ const [files, setFiles] = useState([]);
         if (value.short_text && value.short_text !== oldValue.short_text) {
           const materialInfo = await getMaterialInfo(value.short_text);
           if (materialInfo) {
-            // value.item_no = (operation.fromRowIndex + 1) * 10;
-            value.altUom = materialInfo.altUoms.map((item) => item.alt_uom)
+            value.altUom = materialInfo.altUoms.map((item) => item.alt_uom);
             value.mat_code = materialInfo.mat_code;
             value.ord_unit = materialInfo.base_uom;
             value.unit = materialInfo.base_uom;
@@ -218,7 +214,6 @@ const [files, setFiles] = useState([]);
         }
 
         value.item_no = (operation.fromRowIndex + 1) * 10;
-        // }
       }
     }
 
@@ -229,7 +224,6 @@ const [files, setFiles] = useState([]);
   const handleSubmit: FormEventHandler = async (e) => {
     e.preventDefault();
     if (handleCheck()) {
-      
       post(route('pr.store'));
     }
   };
@@ -242,7 +236,7 @@ const [files, setFiles] = useState([]);
       .map((item, index) => ({ ...item, item_no: (index + 1) * 10 }));
 
     setMaterial(item);
-    
+
     if (item.length <= 0) {
       toast({
         variant: 'destructive',
@@ -293,19 +287,8 @@ const [files, setFiles] = useState([]);
 
   useEffect(() => {
     const prTotal = material.reduce((acc, mat) => acc + (mat.total_value || 0), 0);
-    setData((prevHeader: IPRHeader) => ({ ...prevHeader, total_pr_value: prTotal, attachment: files}));
+    setData((prevHeader: IPRHeader) => ({ ...prevHeader, total_pr_value: prTotal, attachment: files }));
   }, [material, files]);
-
-
-  // useEffect(() => {
-  //   if (data.plant) {
-  //     if (auth.user.plants) {
-  //       const deliv_addr = auth.user.plants.filter((plant) => plant.plant === data.plant);
-  //       const address = `${deliv_addr[0].street} ${deliv_addr[0].street2} ${deliv_addr[0].district} ${deliv_addr[0].city} ${deliv_addr[0].country_code} ${deliv_addr[0].postal_code}`;
-  //       setData((prevHeader: IPRHeader) => ({ ...prevHeader, deliv_addr: address }));
-  //     }
-  //   }
-  // }, [data.plant]);
 
   return (
     <AuthenticatedLayout
@@ -378,13 +361,7 @@ const [files, setFiles] = useState([]);
                   </TabsContent>
                   <TabsContent value="workflow"></TabsContent>
                   <TabsContent value="attachment">
-                    {/* <Input
-                      type="file"
-                      className="min-h-10"
-                      multiple
-                      onChange={(e) => setData('attachment', e.target.files || undefined)}
-                    /> */}
-                    <Dropzone files={files} setFiles={setFiles}/>
+                    <Dropzone files={files} setFiles={setFiles} />
                   </TabsContent>
                 </Tabs>
               </div>
@@ -413,7 +390,6 @@ const [files, setFiles] = useState([]);
                   columns={columns}
                   style={customStyle}
                   autoAddRow
-                  // disableContextMenu
                   disableExpandSelection
                   rowHeight={30}
                   className="text-sm"
@@ -428,24 +404,9 @@ const [files, setFiles] = useState([]);
                 </div>
               </div>
               <div className="p-2 pt-0">
-                {/* <Tabs defaultValue="deliveryAddress" className="max-w-xl">
-                  <TabsList> */}
-                    {/* <TabsTrigger value="itemDetails">Item Details</TabsTrigger> */}
-                    {/* <TabsTrigger value="deliveryAddress">Delivery Address</TabsTrigger>
-                  </TabsList> */}
-                  {/* <TabsContent value="itemDetails">
-                    <ItemDetails />
-                  </TabsContent> */}
-                  {/* <TabsContent value="deliveryAddress">
-                    <Textarea value={data.deliv_addr} onChange={(e) => setData('deliv_addr', e.target.value)} />
-                  </TabsContent>
-                </Tabs> */}
                 <div className="p-5 justify-end grid grid-cols-8 gap-4">
                   {auth.permissions.pr.create && (
                     <>
-                      {/* <Button onClick={handleCheck} type="button" variant="outline" className="hover:border-gray-500">
-                        Check
-                      </Button> */}
                       <Button
                         variant="outline"
                         disabled={processing}

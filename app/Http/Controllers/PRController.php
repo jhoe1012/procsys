@@ -172,7 +172,7 @@ class PRController extends Controller
             $pr_header->attachments()->saveMany($files);
         }
 
-        return to_route("pr.index")->with('success', "PR {$pr_header->pr_number} created.");
+        return to_route("pr.edit", $pr_header->pr_number)->with('success', "PR {$pr_header->pr_number} created.");
     }
 
     public function submit($id)
@@ -335,7 +335,7 @@ class PRController extends Controller
             $pr_header->attachments()->saveMany($files);
         }
 
-        return to_route("pr.index")->with('success', 'PR updated successfully');
+        return to_route("pr.edit", $pr_header->pr_number)->with('success', 'PR updated successfully');
     }
 
     public function approve(Request $request)
