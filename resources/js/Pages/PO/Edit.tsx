@@ -494,7 +494,7 @@ const Edit = ({
                       {poheader.attachments &&
                         poheader.attachments.map((attachment) => (
                           <li key={attachment.filename} className="relative h-12 rounded-md shadow-lg p-2 bg-white">
-                            {auth.permissions.pr.edit && (
+                            {auth.permissions.po.edit && (
                               <Link
                                 preserveScroll
                                 href={route('attachment.delete', attachment.id)}
