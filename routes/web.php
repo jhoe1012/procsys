@@ -10,27 +10,9 @@ use App\Http\Controllers\PRController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\VendorController;
-use App\Http\Resources\PRHeaderResource;
-use App\Mail\MyTestEmail;
-use App\Mail\PrApprovedEmail;
-use App\Mail\PrForApprovalEmail;
-use App\Models\MaterialNetPrice;
-use App\Models\MaterialValuation;
-use App\Models\Plant;
-use App\Models\PrHeader;
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Route::get('/', function () {
-//     return Inertia::render('Welcome', [
-//         'canLogin' => Route::has('login'),
-//         'canRegister' => Route::has('register'),
-//         'laravelVersion' => Application::VERSION,
-//         'phpVersion' => PHP_VERSION,
-//     ]);
-// });
 
 Route::get('/', function () {
     return Inertia::render('Dashboard');
@@ -99,26 +81,14 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/report-pr', [ReportController::class, "prReport"])->name("report.pr");
     Route::get('/report-pr-download', [ReportController::class, "downloadPrReport"])->name("download.report.pr");
-
     Route::get('/report-po', [ReportController::class, "poReport"])->name("report.po");
     Route::get('/report-po-download', [ReportController::class, "downloadPoReport"])->name("download.report.po");
-
-
     Route::get('/report-gr', [ReportController::class, "grReport"])->name("report.gr");
     Route::get('/report-gr-download', [ReportController::class, "downloadGrReport"])->name("download.report.gr");
+    Route::get('/report-material', [ReportController::class, "materialReport"])->name("report.material");
+    Route::get('/report-material-download', [ReportController::class, "downloadMaterialReport"])->name("download.material.gr");
+    
 
-    // Route::get('/test-email',  function () {
-    //     $pr_header = PrHeader::with('createdBy', 'workflows', 'attachments', 'prmaterials', 'plants')->findOrFail(1);
-
-    //     Mail::to('lolito.cabornay@goldilocks.com')
-    //         ->send(new PrApprovedEmail(
-    //             'Lolito',
-    //             $pr_header
-    //         ));
-
-        // $name = 'test';
-        // Mail::to('lolito.cabornay@goldilocks.com')->send(new MyTestEmail($name));
-    // });
 });
 
 require __DIR__ . '/auth.php';

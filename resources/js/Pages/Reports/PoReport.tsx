@@ -1,10 +1,10 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
 import { PageProps } from '@/types';
-
 import { formatNumber } from '@/lib/utils';
 import Pagination from '@/Components/Pagination';
 import PoReportFilter from './Partials/PoReportFilter';
+import DownloadButton from '@/Components/DownloadButton';
 
 export default function PoReport({ auth, poReport, queryParams }: PageProps) {
   queryParams = queryParams || {};
@@ -22,29 +22,11 @@ export default function PoReport({ auth, poReport, queryParams }: PageProps) {
           <h2 className="font-semibold text-xl text-gray-800 leading-tight">PO Report</h2>
           <div className="flex gap-2">
             <PoReportFilter queryParams={queryParams} filterReport={filterReport} />
-            <a
-              href={route('download.report.po', { ...queryParams })}
-              target="_blank"
-              className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 shadow-lg shadow-green-500/50 dark:shadow-lg dark:shadow-green-800/80 font-medium rounded-lg text-sm p-1 text-center "
-              title="Download">
-              <svg
-                className="size-6"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
-                />
-              </svg>
-            </a>
+            <DownloadButton href={route('download.report.po', { ...queryParams })} />
           </div>
         </div>
       }>
-      <Head title="View Approvers" />
+      <Head title="Purchase Order Report" />
 
       <div className="py-2">
         <div className="max-w-8xl mx-auto sm:px-6 lg:px-2">
@@ -55,6 +37,7 @@ export default function PoReport({ auth, poReport, queryParams }: PageProps) {
                   <tr className="text-nowrap">
                     <th className="px-1 py-2">Pur. Doc</th>
                     <th className="px-1 py-2">GR Doc</th>
+                    <th className="px-1 py-2">Control No.</th>
                     <th className="px-3 py-2">Item</th>
                     <th className="px-3 py-2">Doc Date</th>
                     <th className="px-3 py-2">PGr</th>
@@ -83,6 +66,7 @@ export default function PoReport({ auth, poReport, queryParams }: PageProps) {
                       <tr className="bg-white border-b" key={index}>
                         <td className="px-1 py-2">{po.po_number}</td>
                         <td className="px-1 py-2">{po.gr_number}</td>
+                        <td className="px-1 py-2">{po.control_no}</td>
                         <td className="px-1 py-2">{po.item_no}</td>
                         <td className="px-1 py-2">{po.doc_date}</td>
                         <td className="px-1 py-2">{po.purch_grp}</td>

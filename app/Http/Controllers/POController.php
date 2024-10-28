@@ -33,10 +33,8 @@ use Inertia\Response;
 
 class POController extends Controller
 {
-
     public function index(Request $request)
     {
-
         $query = PoHeader::query();
         $query = $query->with(['workflows', 'attachments', 'pomaterials', 'plants', 'vendors']);
 
@@ -74,20 +72,15 @@ class POController extends Controller
         }
         if (request('status')) {
             $query->where('status', 'ilike', "%" . request('status') . "%");
-        } if (request('control_no')) {
+        }
+        if (request('control_no')) {
             $query->where('control_no', 'ilike', "%" . request('control_no') . "%");
         }
-
 
         $po_header = $query->orderBy('doc_date', 'desc')
             ->orderBy('po_number', 'desc')
             ->paginate(20)
             ->onEachSide(5);
-
-        // dd($po_header);
-        // echo "<pre>";
-        // print_r(POHeaderResource::collection($po_header));
-        // echo "</pre>";
 
         return Inertia::render('PO/Index', [
             'po_header' => POHeaderResource::collection($po_header),
@@ -97,8 +90,6 @@ class POController extends Controller
     }
     public function create(): Response
     {
-        // $vendors = ;
-        // dd();
         return Inertia::render('PO/Create', [
             'vendors' => Vendor::selectRaw('supplier as value , supplier || \' - \'||name_1 as label')->orderBy('name_1')->get()->toArray()
         ]);
@@ -106,9 +97,6 @@ class POController extends Controller
 
     public function store(Request $request)
     {
-
-
-        // $po_header_request = $request->all();
         $po_header = new PoHeader();
         $po_header->control_no = $request->input('control_no');
         $po_header->vendor_id = $request->input('vendor_id');
@@ -158,47 +146,12 @@ class POController extends Controller
 
                 ])
             );
-
-        // if (!empty($request->input('pomaterials'))) {
-        //     foreach ($request->input('pomaterials') as $item) {
-        //         if (isset($item['mat_code'])) {
-        //             $po_materials[] = new PoMaterial([
-        //                 'pr_material_id' => $item['pr_material_id'],
-        //                 'item_no' => $item['item_no'],
-        //                 'mat_code' => $item['mat_code'],
-        //                 'short_text' => $item['short_text'],
-        //                 'po_qty' => $item['po_qty'],
-        //                 'po_gr_qty' => $item['po_qty'],
-        //                 'net_price' => $item['net_price'],
-        //                 'per_unit' => $item['per_unit'],
-        //                 'unit' => $item['unit'],
-        //                 'total_value' => $item['total_value'],
-        //                 'item_free' => $item['item_free'] ?? false,
-        //                 'currency' => $item['currency'],
-        //                 'del_date' => Carbon::parse($item['del_date'])->format('Y-m-d'),
-        //                 'mat_grp' => $item['mat_grp'],
-        //                 'requested_by' => $item['requested_by'],
-        //                 'pr_number' => $item['pr_number'],
-        //                 'pr_item' => $item['pr_item'],
-        //                 'item_text' => $item['item_text'] ?? '',
-        //                 'conversion' => $item['conversion'],
-        //                 'denominator' => $item['denominator'],
-        //                 'converted_qty' => $item['converted_qty'],
-        //                 'pr_unit' => $item['pr_unit'],
-        //             ]);
-        //         }
-        //     }
-        // }
-
         $po_header->refresh();
-
         $po_header->pomaterials()->saveMany($po_materials);
-        // update PR Materials
         $this->_updatePrMaterial($po_materials);
 
         if ($request->hasFile('attachment')) {
             $files = [];
-            // $allowedfileExtension = ['pdf', 'jpg', 'png', 'docx', 'xlsx'];
             foreach ($request->file('attachment') as $file) {
                 $filename = $file->getClientOriginalName();
                 $filepath = time() . "_" . $file->getClientOriginalName();
@@ -215,7 +168,6 @@ class POController extends Controller
             $po_header->attachments()->saveMany($files);
         }
 
-
         return to_route("po.edit",  $po_header->po_number)->with('success', "PO {$po_header->po_number} created.");
     }
     public function edit(Request $request, $ponumber)
@@ -231,8 +183,6 @@ class POController extends Controller
     }
     public function update(Request $request, $id)
     {
-
-        // $po_header = new PoHeader();
         $po_header = PoHeader::findOrFail($id);
         $po_header->control_no = $request->input('control_no');
         $po_header->vendor_id = $request->input('vendor_id');
@@ -248,17 +198,12 @@ class POController extends Controller
         $po_header->status = Str::ucfirst(ApproveStatus::DRAFT);
         $po_header->appr_seq = 0;
         $po_header->save();
-        //   dd($request->input('pomaterials'));
-        // $po_materials = [];
 
         $po_materials = collect($request->input('pomaterials'))
             ->filter(fn($item) => ! empty($item['mat_code']))
             ->values();
 
-
-        // if (!empty($request->input('pomaterials'))) {
         foreach ($po_materials as $key => $item) {
-            // if (isset($item['mat_code'])) {
             $converted_qty_old_value = 0;
             if (isset($item['id'])) {
                 $po_material = POMaterial::find($item['id']);
@@ -301,18 +246,11 @@ class POController extends Controller
                     $po_material->prmaterials->save();
                 }
             }
-
-            // }
         }
-        // }
-
-
         $po_header->refresh();
-        // $po_header->pomaterials()->saveMany($po_materials);
 
         if ($request->hasFile('attachment')) {
             $files = [];
-            // $allowedfileExtension = ['pdf', 'jpg', 'png', 'docx', 'xlsx'];
             foreach ($request->file('attachment') as $file) {
                 $filename = $file->getClientOriginalName();
                 $filepath = time() . "_" . $file->getClientOriginalName();
@@ -332,7 +270,6 @@ class POController extends Controller
     }
     public function submit($id)
     {
-
         $po_header = POHeader::with('createdBy')->findOrFail($id);
 
         $approvers = Approvers::where('amount_from', '<=', $po_header->total_po_value)
@@ -359,19 +296,11 @@ class POController extends Controller
                 ->where('seq', 1)
                 ->first();
 
-
-
-
             Mail::to($approvers->user->email)
                 ->send(new PoForApprovalEmail(
                     $approvers->user->name,
                     $po_header
                 ));
-            // Mail::to($approvers->user->email)
-            //     ->send(new PrForApprovalEmail(
-            //         $approvers->user->name,
-            //         $po_header
-            //     ));
 
             return to_route("po.index")->with('success', "PR {$po_header->po_number} sent for approval.");
         }
@@ -381,7 +310,6 @@ class POController extends Controller
     public function discard($id)
     {
         $po_header = PoHeader::with(['pomaterials', 'pomaterials.prmaterials'])->findOrFail($id);
-
 
         foreach ($po_header->pomaterials as $pomaterial) {
             $pomaterial->status = PoMaterial::FLAG_DELETE;
@@ -393,31 +321,12 @@ class POController extends Controller
         }
         $po_header->status = Str::ucfirst(ApproveStatus::CANCELLED);
         $po_header->appr_seq = -1;
-
         $po_header->save();
-
-
-        // $update_po_material = PoMaterial::where('po_header_id', $id)->update(['status' => 'X']);
-        // $po_materials = PoMaterial::with('prmaterials')->where()
-
-        // if ($po_material->prmaterials instanceof PrMaterial) {
-
-        //     $po_material->prmaterials->qty_open  = ($converted_qty_old_value + $po_material->prmaterials->qty_open) - $po_material->converted_qty;
-        //     $po_material->prmaterials->qty_ordered = ($converted_qty_old_value - $po_material->prmaterials->qty_ordered) + $po_material->converted_qty;
-        //     $po_material->prmaterials->save();
-        // }
 
         return to_route("po.edit", $po_header->po_number)->with('success', "Purchase order discarded.");
     }
     public function approve(Request $request)
     {
-
-        // $type = [
-        //     'approve' => ApproveStatus::APPROVED,
-        //     'rework' => ApproveStatus::REWORKED,
-        //     'reject' => ApproveStatus::REJECTED
-        // ];
-
         $po_header = PoHeader::with('pomaterials.prmaterials')
             ->where('po_number', $request->input('po_number'))
             ->first();
@@ -523,8 +432,6 @@ class POController extends Controller
             ->get();
 
         return PRMaterialsResource::collection($pr_material);
-
-        // dd(PRMaterialsResource::collection($prs));
     }
 
     public function flagDelete(Request $request)

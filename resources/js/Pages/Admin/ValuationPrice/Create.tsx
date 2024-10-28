@@ -2,7 +2,7 @@ import { useState, FormEventHandler } from 'react';
 import Modal from '@/Components/Modal';
 import { useForm } from '@inertiajs/react';
 import { Label } from '@/Components/ui/label';
-import AsnycSelect from 'react-select/async';
+import AsyncSelect from 'react-select/async';
 import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
 import { IMaterialValuation } from '@/types';
@@ -81,7 +81,7 @@ export default function Create({ p_plants }) {
               <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="material">
                 Material
               </Label>
-              <AsnycSelect
+              <AsyncSelect
                 className="m-2 w-full border-gray-500"
                 cacheOptions
                 defaultOptions

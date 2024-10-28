@@ -119,57 +119,30 @@ const Edit = ({
   };
 
   const handleAddtoPo = (pomaterials) => {
-    // console.log(data);
-    // const poMaterial = data.map((mat, index) => ({
-    //   ...mat,
-    //   item_no: 0 ,
-    //   total_value: 0,/*  po_qty: 0, net_price: 0, total_value: 0  */
-    // }));
-    // console.log('po material', data);
-
     setMaterial([...material, ...pomaterials]);
-    // setData({ ...data, pomaterials: [...data.pomaterials, ...pomaterials] })
   };
 
   const updateMaterial = (newValue: IPOMaterial[], operations: Operation[]) => {
     const updatedMaterial = [...newValue];
-    // const oldMaterialValue = [...material];
     console.log('updatedMaterial', updatedMaterial);
     for (const operation of operations) {
       if (operation.type === 'UPDATE') {
         const value = updatedMaterial[operation.fromRowIndex];
-        // const oldValue = oldMaterialValue[operation.fromRowIndex];
-
-        // if (value.po_qty !== oldValue.po_qty) {
-        // if (value.item_free) {
         value.net_price = value.item_free ? 0 : value.net_price;
-        // }
-
         value.item_no = (operation.fromRowIndex + 1) * 10;
         // value.po_qty = value.po_qty > value.qty_open ? value.qty_open : value.po_qty;
         value.po_qty = value.po_qty < value.min_order_qty ? value.min_order_qty : value.po_qty;
         value.converted_qty = value.po_qty * (value.conversion / value.denominator);
-
         value.total_value = ((value.net_price ?? 0) / (value.per_unit ?? 0)) * (value.po_qty ?? 0);
-
-        // }
       }
     }
     console.log('update', updatedMaterial);
     setMaterial(updatedMaterial);
     setData({ ...data, pomaterials: updatedMaterial });
   };
-  // useEffect(() => {
-  //   const updateDeldate = poheader.pomaterials.map((pomaterial) => ({
-  //     ...pomaterial,
-  //     del_date: new Date(pomaterial.del_date || ''),
-  //   }));
-
-  //   setMaterial(updateDeldate || []);
-
-  // }, []);
+ 
   useEffect(() => {
-    // setData({...data, prmaterials: updateDeldate });
+ 
     if (message?.success) {
       toast({
         title: message.success,
@@ -185,9 +158,6 @@ const Edit = ({
 
     if (auth.user.approvers) {
       setApprSeq(auth.user.approvers.filter((approver) => approver.type == 'po')[0]);
-
-      //   // let appr_seq = auth.user.approvers.filter((approver) => approver.type == 'pr');
-      //   // console.log(auth.user.approvers.filter((approver) => approver.type == 'pr')[0]);
     }
   }, []);
 
@@ -196,16 +166,7 @@ const Edit = ({
     setData((prevHeader: IPOHeader) => ({ ...prevHeader, total_po_value: poTotal, attachment: files }));
   }, [material, files]);
 
-  // useEffect(() => {
-  //   if (data.plant) {
-  //     if (auth.user.plants) {
-  //       const deliv_addr = auth.user.plants.filter((plant) => plant.plant === data.plant);
-  //       const address = `${deliv_addr[0].street} ${deliv_addr[0].street2} ${deliv_addr[0].district} ${deliv_addr[0].city} ${deliv_addr[0].country_code} ${deliv_addr[0].postal_code}`;
-  //       setData((prevHeader: IPOHeader) => ({ ...prevHeader, deliv_addr: address }));
-  //     }
-  //   }
-  // }, [data.plant]);
-
+  
   const getVendorInfo = async (vendor_id) => {
     try {
       setVendor(undefined);
@@ -286,7 +247,7 @@ const Edit = ({
         preserveScroll: true,
         onSuccess: (page) => {
           reset();
-          setFiles([])
+          setFiles([]);
         },
       });
     }
@@ -505,17 +466,13 @@ const Edit = ({
                               </Link>
                             )}
                             <p className="mt-2 text-blue-600 text-sm font-medium truncate pr-7">
-                              <a href={'/' + attachment.filepath} download={true}>{attachment.filename}</a>
+                              <a href={'/' + attachment.filepath} download={true}>
+                                {attachment.filename}
+                              </a>
                             </p>
                           </li>
                         ))}
                     </ul>
-                    {/* <Input
-                      type="file"
-                      className="min-h-10"
-                      multiple
-                      onChange={(e) => setData('attachment', e.target.files || undefined)}
-                    /> */}
                     <Dropzone files={files} setFiles={setFiles} />
                   </TabsContent>
                   <TabsContent value="vendor">
@@ -601,30 +558,8 @@ const Edit = ({
               <div className="p-2 pt-0">
                 <Tabs defaultValue="itemDetails" className="max-w-xl">
                   <TabsList>
-                    {/* <TabsTrigger value="itemDetails">Item Details</TabsTrigger> */}
-                    {/* <TabsTrigger value="ItemText">Item Text</TabsTrigger> */}
-                    {/* <TabsTrigger value="deliveryAddress">Delivery Address</TabsTrigger> */}
                     <TabsTrigger value="action">Action</TabsTrigger>
                   </TabsList>
-                  {/* <TabsContent value="itemDetails">
-                    <ItemDetails />
-                  </TabsContent> */}
-                  {/* <TabsContent value="ItemText"><Textarea /></TabsContent> */}
-                  {/* <TabsContent value="deliveryAddress">
-                    <Textarea value={data.deliv_addr} onChange={(e) => setData('deliv_addr', e.target.value)} />
-                    <CSelect defaultValue={data.deliv_addr} onValueChange={(value) => setData('deliv_addr', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Address" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DELIVERY_ADDRESS.map((address) => (
-                          <SelectItem value={address} key={address}>
-                            {address}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </CSelect>
-                  </TabsContent>  */}
                   <TabsContent value="action">
                     {auth.permissions.po.edit && (
                       <>
@@ -689,16 +624,6 @@ const Edit = ({
                         p_title="Discard this Purchase Order ?"
                         p_url="po.discard"
                       />
-
-                      {/* <Link
-                        disabled={poheader.appr_seq <= SEQ_DRAFT}
-                        preserveScroll
-                        href={route('po.recall', poheader.id)}
-                        as="button"
-                        type="button"
-                        className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2  border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:border-gray-500 disabled:cursor-not-allowed disabled:opacity-100">
-                        Recall
-                      </Link> */}
 
                       <AddPrtoPo
                         p_vendor={data.vendor_id}

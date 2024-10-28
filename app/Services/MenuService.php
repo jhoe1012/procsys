@@ -87,6 +87,11 @@ class MenuService
                         'label' => 'GR Report',
                         'permissions' =>true,
                         'href' => route('report.gr'),
+                    ],
+                    [
+                        'label' => 'Material Report',
+                        'permissions' =>true,
+                        'href' => route('report.material'),
                     ]
                 ]
             ],

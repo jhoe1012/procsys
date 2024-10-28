@@ -22,6 +22,8 @@ class POReportExport implements FromArray, WithHeadings
     {
         return [
             'Pur. Doc',
+            'GR Doc',
+            'Control No',
             'Item',
             'Doc Date',
             'PGr',
@@ -30,14 +32,18 @@ class POReportExport implements FromArray, WithHeadings
             'Material',
             'Short Text',
             'Matl Grp',
-            'Quantity',
-            'Unit',
+            'PO Quantity',
+            'PO Unit',
+            'Open PO Qty',
+            'GR Quantity',
+            'GR Unit',
             'Net Price',
             'Total Value',
-            'Release Date',
             'Crcy',
             'Plant',
+            'Release Date',
             'Status',
+            'Created By',
         ];
     }
 }

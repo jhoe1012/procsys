@@ -15,8 +15,6 @@ class ReportController extends Controller
 {
     public function prReport(Request $request)
     {
-
-        // $pr_report = 
         return Inertia::render('Reports/PrReport', [
             'prReport' => $this->_getPrReport($request)->paginate(perPage: 20)->onEachSide(5),
             'queryParams' => $request->query() ?: null,
@@ -58,6 +56,25 @@ class ReportController extends Controller
         ]);
     }
     public function downloadGrReport(Request $request)
+    {
+        return Excel::download(
+            new GRReportExport($this->_getGrReport($request)->get()->toArray()),
+            'GR Report.xlsx',
+            \Maatwebsite\Excel\Excel::XLSX
+        );
+    }
+    
+
+    public function materialReport(Request $request)
+    {
+        // dd($this->_getMaterialReport($request)->get());
+        return Inertia::render('Reports/MaterialReport', [
+            'materialReport' => $this->_getMaterialReport($request)->paginate(perPage: 20)->onEachSide(5),
+            'queryParams' => $request->query() ?: null,
+
+        ]);
+    }
+    public function downloadMaterialReport(Request $request)
     {
         return Excel::download(
             new GRReportExport($this->_getGrReport($request)->get()->toArray()),
@@ -163,6 +180,7 @@ class ReportController extends Controller
         $query = DB::table('po_headers')->select(
             'po_headers.po_number',
             'gr_headers.gr_number',
+            'po_headers.control_no',
             'po_materials.item_no',
             'po_headers.doc_date',
             'po_materials.purch_grp',
@@ -180,6 +198,7 @@ class ReportController extends Controller
             'po_materials.total_value',
             'po_materials.currency',
             'po_headers.plant',
+            'po_headers.release_date',
             'po_materials.status',
             'po_headers.created_name',
         )
@@ -187,8 +206,6 @@ class ReportController extends Controller
             ->Join('vendors', 'vendors.supplier', '=', 'po_headers.vendor_id')
             ->leftJoin('gr_materials', 'gr_materials.po_material_id', '=', 'po_materials.id')
             ->leftJoin('gr_headers', 'gr_headers.id', '=', 'gr_materials.gr_header_id');
-
-        // ->Join('po_headers', 'po_headers.id', '=', 'po_materials.po_header_id');
 
         if ($request->input('purch_grp')) {
             $query->where('po_materials.purch_grp', 'ilike', "%" . $request->input('purch_grp') . "%");
@@ -200,16 +217,17 @@ class ReportController extends Controller
         if ($request->input('supplier_name')) {
             $query->where('vendors.name_1', 'ilike', "%" . $request->input('supplier_name') . "%");
         }
-        // if ($request->input('prnumber_from') && $request->input('prnumber_to')) {
-        //     $query->whereBetween('pr_headers.pr_number', [$request->input('prnumber_from'), $request->input('prnumber_to')]);
-        // } elseif ($request->input('prnumber_from')) {
-        //     $query->where('pr_headers.pr_number', 'ilike', "%" . $request->input('prnumber_from') . "%");
-        // }
 
         if ($request->input('ponumber_from') && $request->input('ponumber_to')) {
             $query->whereBetween('po_headers.po_number', [$request->input('ponumber_from'), $request->input('ponumber_to')]);
         } elseif ($request->input('ponumber_from')) {
             $query->where('po_headers.po_number', 'ilike', "%" . $request->input('ponumber_from') . "%");
+        }
+
+        if ($request->input('controlno_from') && $request->input('controlno_to')) {
+            $query->whereBetween('po_headers.control_no', [$request->input('controlno_from'), $request->input('controlno_to')]);
+        } elseif ($request->input('controlno_from')) {
+            $query->where('po_headers.control_no', 'ilike', "%" . $request->input('controlno_from') . "%");
         }
 
         if ($request->input('matcode_from') && $request->input('matcode_to')) {
@@ -221,24 +239,6 @@ class ReportController extends Controller
         if ($request->input('short_text')) {
             $query->where('po_materials.short_text', 'ilike', "%" . $request->input('short_text') . "%");
         }
-
-        // if ($request->input('request_date_from') && $request->input('request_date_to')) {
-        //     $query->whereBetween('pr_headers.doc_date', [$request->input('request_date_from'), $request->input('request_date_to')]);
-        // } elseif ($request->input('request_date_from')) {
-        //     $query->whereDate('pr_headers.doc_date',  $request->input('request_date_from'));
-        // }
-
-        // if ($request->input('deliv_date_from') && $request->input('deliv_date_to')) {
-        //     $query->whereBetween('pr_materials.del_date', [$request->input('deliv_date_from'), $request->input('deliv_date_to')]);
-        // } elseif ($request->input('deliv_date_from')) {
-        //     $query->whereDate('pr_materials.del_date',  $request->input('deliv_date_from'));
-        // }
-
-        // if ($request->input('deliv_date_from') && $request->input('deliv_date_to')) {
-        //     $query->whereBetween('pr_materials.del_date', [$request->input('deliv_date_from'), $request->input('deliv_date_to')]);
-        // } elseif ($request->input('deliv_date_from')) {
-        //     $query->whereDate('pr_materials.del_date',  $request->input('deliv_date_from'));
-        // }
 
         if ($request->input('release_date_from') && $request->input('release_date_to')) {
             $query->whereBetween('po_headers.release_date', [$request->input('release_date_from'), $request->input('release_date_to')]);
@@ -256,9 +256,6 @@ class ReportController extends Controller
 
         $query->orderBy('po_headers.po_number')
             ->orderBy('po_materials.item_no');
-
-        // $query->ddRawSql();
-        // dd($query->get());
 
         return $query;
     }
@@ -293,7 +290,7 @@ class ReportController extends Controller
             ->join('gr_headers', 'gr_headers.id',  '=', 'gr_materials.gr_header_id')
             ->Join('vendors', 'vendors.supplier', '=', 'gr_headers.vendor_id')
             ->leftJoin('po_materials', 'po_materials.id', '=', 'gr_materials.po_material_id');
-        
+
         if ($request->input('grnumber_from') && $request->input('grnumber_to')) {
             $query->whereBetween('gr_headers.gr_number', [$request->input('grnumber_from'), $request->input('grnumber_to')]);
         } elseif ($request->input('grnumber_from')) {
@@ -333,8 +330,65 @@ class ReportController extends Controller
         $query->orderBy('gr_headers.gr_number')
             ->orderBy('gr_materials.item_no');
 
-        // $query->ddRawSql();
-        // dd($query->get());
+        return $query;
+    }
+
+    public function _getMaterialReport($request)
+    {
+        $query = DB::table('materials')->select(
+            'materials.mat_code',
+            'materials.mat_desc',
+            'materials.old_mat_code',
+            'materials.base_uom',
+            'materials.order_uom',
+            'alternative_uoms.alt_uom',
+            'alternative_uoms.counter',
+            'alternative_uoms.denominator',
+            'alternative_uoms.ean_num',
+            'alternative_uoms.ean_upc',
+            'alternative_uoms.ean_category',
+            'alternative_uoms.unit_of_weight'
+        )
+            ->leftJoin('alternative_uoms', 'materials.mat_code', '=', 'alternative_uoms.mat_code');
+
+        // if ($request->input('grnumber_from') && $request->input('grnumber_to')) {
+        //     $query->whereBetween('gr_headers.gr_number', [$request->input('grnumber_from'), $request->input('grnumber_to')]);
+        // } elseif ($request->input('grnumber_from')) {
+        //     $query->where('gr_headers.gr_number', 'ilike', "%" . $request->input('grnumber_from') . "%");
+        // }
+
+        // if ($request->input('ponumber_from') && $request->input('ponumber_to')) {
+        //     $query->whereBetween('gr_headers.po_number', [$request->input('ponumber_from'), $request->input('ponumber_to')]);
+        // } elseif ($request->input('ponumber_from')) {
+        //     $query->where('gr_headers.po_number', 'ilike', "%" . $request->input('ponumber_from') . "%");
+        // }
+        // if ($request->input('created_name')) {
+        //     $query->where('gr_headers.created_name', 'ilike', "%" . $request->input('created_name') . "%");
+        // }
+        // if ($request->input('entry_date_from') && $request->input('entry_date_to')) {
+        //     $query->whereBetween('gr_headers.entry_date', [$request->input('entry_date_from'), $request->input('entry_date_to')]);
+        // } elseif ($request->input('entry_date_from')) {
+        //     $query->whereDate('gr_headers.entry_date',  $request->input('entry_date_from'));
+        // }
+        // if ($request->input('actual_date_from') && $request->input('actual_date_to')) {
+        //     $query->whereBetween('gr_headers.actual_date', [$request->input('actual_date_from'), $request->input('actual_date_to')]);
+        // } elseif ($request->input('actual_date_from')) {
+        //     $query->whereDate('gr_headers.actual_date',  $request->input('actual_date_from'));
+        // }
+        // if ($request->input('delivery_note')) {
+        //     $query->where('gr_headers.delivery_note', 'ilike', "%" . $request->input('delivery_note') . "%");
+        // }
+        // if ($request->input('mat_code_from') && $request->input('mat_code_to')) {
+        //     $query->whereBetween('gr_materials.mat_code', [$request->input('mat_code_from'), $request->input('mat_code_to')]);
+        // } elseif ($request->input('mat_code_from')) {
+        //     $query->where('gr_materials.mat_code', 'ilike', "%" . $request->input('mat_code_from') . "%");
+        // }
+        // if ($request->input('short_text')) {
+        //     $query->where('gr_materials.short_text', 'ilike', "%" . $request->input('short_text') . "%");
+        // }
+        
+        $query->orderBy('materials.mat_code')
+            ->orderBy('alternative_uoms.counter');
 
         return $query;
     }

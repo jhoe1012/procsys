@@ -257,7 +257,44 @@ const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => 
                 </div>
                 <div className="flex-none w-40">
                   <Label>PO Number</Label>
-                  <Select
+                  {/* <Select
+                    required={true}
+                    value={vendors?.find(({ value }) => value === data.vendor_id) ?? null}
+                    options={vendors}
+                    onChange={({ value, label }) => {
+                      setData({ ...data, vendor_id: value, vendor_name: label });
+                      getVendorInfo(value);
+                    }}
+                    styles={{
+                      control: (provided, state) => ({
+                        ...provided,
+                        minHeight: '1.75rem',
+                        height: '1.75rem',
+                        fontSize: '0.875rem',
+                        borderColor: 'hsl(var(--input))',
+                      }),
+
+                      valueContainer: (provided, state) => ({
+                        ...provided,
+                        height: '1.75rem',
+                        padding: '0 6px',
+                      }),
+
+                      input: (provided, state) => ({
+                        ...provided,
+                        margin: '0px',
+                      }),
+                      indicatorSeparator: (state) => ({
+                        display: 'none',
+                      }),
+                      indicatorsContainer: (provided, state) => ({
+                        ...provided,
+                        height: '1.75rem',
+                      }),
+                    }}
+                  />
+                </div> */}
+                  {/* <Select
                     required={true}
                     placeholder="Purchase Order "
                     value={ponumber?.find(({ value }) => value === data.po_number) ?? null}
@@ -266,7 +303,7 @@ const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => 
                       getPODetails(value);
                     }}
                     styles={styles}
-                  />
+                  /> */}
                 </div>
                 <div className="flex-none w-40">
                   <Label htmlFor="gr_number">Document Number</Label>

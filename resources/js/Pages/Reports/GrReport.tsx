@@ -1,11 +1,9 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
 import { PageProps } from '@/types';
-
-import { formatNumber } from '@/lib/utils';
 import Pagination from '@/Components/Pagination';
-import PrReportFilter from './Partials/PrReportFilter';
 import GrReportFilter from './Partials/GrReportFilter';
+import DownloadButton from '@/Components/DownloadButton';
 
 export default function GrReport({ auth, grReport, queryParams }: PageProps) {
   queryParams = queryParams || {};
@@ -23,29 +21,11 @@ export default function GrReport({ auth, grReport, queryParams }: PageProps) {
           <h2 className="font-semibold text-xl text-gray-800 leading-tight">GR Report</h2>
           <div className="flex gap-2">
             <GrReportFilter queryParams={queryParams} filterReport={filterReport} />
-            <a
-              href={route('download.report.gr', { ...queryParams })}
-              target="_blank"
-              className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 shadow-lg shadow-green-500/50 dark:shadow-lg dark:shadow-green-800/80 font-medium rounded-lg text-sm p-1 text-center "
-              title="Download">
-              <svg
-                className="size-6"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
-                />
-              </svg>
-            </a>
+            <DownloadButton href={route('download.report.gr', { ...queryParams })} />
           </div>
         </div>
       }>
-      <Head title="View Approvers" />
+      <Head title="Good Receipt Report" />
 
       <div className="py-2">
         <div className="max-w-8xl mx-auto sm:px-6 lg:px-2">

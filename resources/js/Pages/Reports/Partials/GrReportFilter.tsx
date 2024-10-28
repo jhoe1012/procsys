@@ -3,6 +3,7 @@ import Modal from '@/Components/Modal';
 import { Label } from '@/Components/ui/label';
 import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
+import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/solid';
 
 export default function GrReportFilter({
   queryParams,
@@ -43,26 +44,14 @@ export default function GrReportFilter({
         onClick={() => setShowModal(true)}
         className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 shadow-lg shadow-green-500/50 dark:shadow-lg dark:shadow-green-800/80 font-medium rounded-lg text-sm p-1 text-center"
         title="Filter">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="size-6 ">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"
-          />
-        </svg>
+        <AdjustmentsHorizontalIcon className="h-6 w-6" />
       </button>
 
       <Modal show={showModal} onClose={closeModal} maxWidth="xl">
         <div className="m-2">
-        <div className="flex ">
+          <div className="flex ">
             <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
-             GR Number
+              GR Number
             </Label>
             <Input
               className="m-2 w-full border-gray-300 h-10"
@@ -83,7 +72,7 @@ export default function GrReportFilter({
           </div>
           <div className="flex ">
             <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
-             PO Number
+              PO Number
             </Label>
             <Input
               className="m-2 w-full border-gray-300 h-10"
@@ -118,7 +107,7 @@ export default function GrReportFilter({
 
           <div className="flex ">
             <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
-             Entry Date
+              Entry Date
             </Label>
             <Input
               className="m-2 w-full border-gray-300 h-10"
@@ -140,7 +129,7 @@ export default function GrReportFilter({
 
           <div className="flex ">
             <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
-             Actual Recv. Date
+              Actual Recv. Date
             </Label>
             <Input
               className="m-2 w-full border-gray-300 h-10"
@@ -175,7 +164,7 @@ export default function GrReportFilter({
 
           <div className="flex ">
             <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
-             Material
+              Material
             </Label>
             <Input
               className="m-2 w-full border-gray-300 h-10"

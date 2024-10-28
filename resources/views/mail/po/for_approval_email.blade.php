@@ -76,7 +76,7 @@
 
 <body>
     <div class="container">
-        <h2>Approval Required: Purchase Order {{ $po_header->pr_number }}</h2>
+        <h2>Approval Required: Purchase Order {{ $po_header->po_number }}</h2>
         <p>Dear {{ $approver_name }},</p>
         <p>I am writing to seek your approval for a purchase order that has been submitted for review. Below are
             the details of the order:</p>

@@ -51,11 +51,11 @@ export default function Approval({ p_po_number, p_type = '', p_title='', p_disab
           <h2 className="text-lg font-medium text-gray-900">
             Are you sure you want to {p_title} this Purchase Order ?
           </h2>
-          {p_type != 'approved' ? (
-            <Textarea placeholder="message" value={data.message} onChange={(e) => setData('message', e.target.value)} required={true} />
-          ) : (
-            ''
-          )}
+          {/* {p_type != 'approved' ? ( */}
+            <Textarea placeholder="Notes" value={data.message} onChange={(e) => setData('message', e.target.value)} required={p_type != 'approved'} />
+          {/* ) : ( */}
+            {/* '' */}
+          {/* )} */}
 
           <div className="mt-6 flex justify-end">
             <SecondaryButton onClick={closeModal}>Cancel</SecondaryButton>

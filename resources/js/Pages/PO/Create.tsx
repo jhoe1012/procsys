@@ -167,6 +167,7 @@ const Create = ({ auth, vendors }: PageProps & PageProps<{ vendors: [] }>) => {
       const response = await window.axios.get(route('po.vendor', vendor_id)); //`/api/vendor/${vendor_id}`);
       setVendor(response.data.data);
     } catch (error) {
+      setVendor(undefined);
       console.log('Error fetching vendor info: ', error);
     }
   };
