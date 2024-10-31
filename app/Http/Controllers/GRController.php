@@ -32,9 +32,6 @@ class GRController extends Controller
 
         $query->whereIn('plant', $user_plants);
 
-        // if (Gate::allows('approve.pr')) {
-        //     // TODO ADD FILTERING FOR APPROVAL OF pr
-        // }
         if (request('gr_number_from') && !request('gr_number_to')) {
             $query->where('gr_number', 'like', "%" . request('gr_number_from') . "%");
         }
@@ -94,10 +91,10 @@ class GRController extends Controller
     {
 
         return Inertia::render('GR/Create', [
-            'ponumber' => PoHeader::select('po_number as value', 'po_number as label')
-                ->where('status', Str::ucfirst(ApproveStatus::APPROVED))
-                ->get()
-                ->toArray(),
+            // 'ponumber' => PoHeader::select('po_number as value', 'po_number as label')
+            //     ->where('status', Str::ucfirst(ApproveStatus::APPROVED))
+            //     ->get()
+            //     ->toArray(),
         ]);
     }
 
@@ -106,7 +103,6 @@ class GRController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
         $gr_header = new GrHeader();
         $gr_header->po_number = $request->input('po_number');
         $gr_header->created_name = $request->input('created_name');
@@ -120,7 +116,6 @@ class GRController extends Controller
         $gr_header->header_text = $request->input('header_text');
         $gr_header->save();
 
-
         $gr_materials = collect($request->input('grmaterials'))
             ->filter(fn($item) => ! empty($item['mat_code']))
             ->values()
@@ -133,14 +128,12 @@ class GRController extends Controller
                 'unit' => $item['unit'],
                 'po_deliv_date' => $item['po_deliv_date'],
                 'batch' => $item['batch'] ?? null,
-                'mfg_date' =>   Carbon::parse($item['mfg_date'])->format('Y-m-d'),
-                'sled_bbd' =>  Carbon::parse($item['sled_bbd'])->format('Y-m-d') ,
+                'mfg_date' => Carbon::parse($item['mfg_date'])->format('Y-m-d'),
+                'sled_bbd' => Carbon::parse($item['sled_bbd'])->format('Y-m-d'),
                 'po_number' => $item['po_number'],
                 'po_item' => $item['po_item'],
-                'dci' => $item['gr_qty'] >= $item['po_gr_qty'] ?: $item['dci'], 
+                'dci' => $item['gr_qty'] >= $item['po_gr_qty'] ?: $item['dci'],
             ]));
-
-
 
         $gr_header->refresh();
         $gr_header->grmaterials()->saveMany($gr_materials);
@@ -150,13 +143,6 @@ class GRController extends Controller
             $gr_material->pomaterials->po_gr_qty = $gr_material->gr_qty <= $gr_material->pomaterials->po_gr_qty
                 ? $gr_material->pomaterials->po_gr_qty - $gr_material->gr_qty
                 : 0;
-
-            // $po_material = PoMaterial::findOrFail($gr_material->po_material_id);
-
-            // $po_material->po_gr_qty =  $gr_material->gr_qty <=  $po_material->po_gr_qty
-            //     ?   $po_material->po_gr_qty - $gr_material->gr_qty
-            //     : 0;
-
             $gr_material->pomaterials->save();
         }
 
@@ -171,9 +157,6 @@ class GRController extends Controller
         $gr_header = GrHeader::with(['grmaterials', 'vendors', 'plants'])
             ->where('gr_number', $grnumber)
             ->firstOrFail();
-
-        // dd($gr_header);
-        // dd( new GRHeaderResource($gr_header));
         return Inertia::render('GR/Show', [
             'grheader' => new GRHeaderResource($gr_header),
         ]);
@@ -193,22 +176,6 @@ class GRController extends Controller
         return Inertia::render('GR/Edit', [
             'grheader' => new GRHeaderResource($gr_header),
         ]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
     public function getPoDetails($ponumber)
     {
@@ -233,7 +200,6 @@ class GRController extends Controller
                 $gr_material->is_cancel = true;
                 $gr_material->cancel_datetime = date('Y-m-d H:i:s');
 
-                //  dd($gr_material->pomaterials );
                 if ($gr_material->pomaterials instanceof PoMaterial) {
                     $gr_material->pomaterials->po_gr_qty += $gr_material->gr_qty;
                     $gr_material->pomaterials->save();
@@ -248,9 +214,20 @@ class GRController extends Controller
     public function printGr(Request $request, $id)
     {
         $grHeader = GrHeader::with(['grmaterials', 'plants', 'vendors'])->findOrFail($id);
-
-        //   dd($grHeader);
-
         return view('print.gr', ['grHeader' => $grHeader]);
+    }
+
+    public function searchPOControlNo(Request $request)
+    {
+
+        $poHeader = PoHeader::select('po_number', 'control_no')
+            ->where('status', Str::ucfirst(ApproveStatus::APPROVED))
+            ->whereNotNull('control_no')
+            ->where(fn($query) => $query->where('po_number', 'ilike', "%{$request->input('search')}%")
+                ->orWhere('control_no', 'ilike', "%{$request->input('search')}%"))
+            ->get()
+            ->toArray();
+
+        return $poHeader;
     }
 }

@@ -37,7 +37,6 @@ const Edit = ({ auth, grheader }: PageProps & PageProps<{ grheader: IGRHeader }>
     { ...keyColumn('item_no', intColumn), title: 'ItmNo', maxWidth: 50, disabled: true },
     { ...keyColumn('mat_code', textColumn), title: 'Material', maxWidth: 130, disabled: true },
     { ...keyColumn('short_text', textColumn), title: 'Short Text', maxWidth: 500, disabled: true },
-    // { ...keyColumn('po_gr_qty', floatColumn), title: 'PO Qty', maxWidth: 130, disabled: true },
     { ...keyColumn('gr_qty', floatColumn), title: 'Qty', maxWidth: 130, disabled: true },
     { ...keyColumn('unit', textColumn), title: 'Unit', maxWidth: 55, disabled: true },
     { ...keyColumn('po_deliv_date', textColumn), title: 'PO Del Date', maxWidth: 130, disabled: true },

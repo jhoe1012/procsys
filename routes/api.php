@@ -30,6 +30,7 @@ Route::get('/vendor-search', [VendorController::class, 'search'])->name('vendor.
 Route::get('/material-search', [MaterialController::class, 'search'])->name('material.search');
 Route::get('/uom-search', [AlternativeUomController::class, 'search'])->name('uom.search');
 Route::get('/user-search', [ApproverController::class, 'search'])->name('user.search');
+Route::get('/po-control', [GRController::class, 'searchPOControlNo'])->name('po-control.search');
 
 
 

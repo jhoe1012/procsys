@@ -49,11 +49,7 @@ const Show = ({ auth, grheader }: PageProps & PageProps<{ grheader: IGRHeader }>
                 <Label>&nbsp;</Label>
                 <Input type="text" defaultValue="Goods Reciept" disabled />
               </div>
-              <div className="flex-none w-40">
-                <Label>&nbsp;</Label>
-                <Input type="text" defaultValue="Purchase Order" disabled />
-              </div>
-              <div className="flex-none w-40">
+              <div className="flex-none w-60">
                 <Label>PO Number</Label>
                 <Input type="text" id="gr_number" value={grheader.po_number} disabled />
               </div>
@@ -61,7 +57,7 @@ const Show = ({ auth, grheader }: PageProps & PageProps<{ grheader: IGRHeader }>
                 <Label htmlFor="gr_number">Document Number</Label>
                 <Input type="text" id="gr_number" value={grheader.gr_number} disabled />
               </div>
-              <div className="flex-none w-52">
+              <div className="flex-none w-72">
                 <Label>Vendor</Label>
                 <Input type="text" value={grheader.vendors?.supplier + '-' + grheader.vendors?.name_1} disabled />
               </div>
@@ -90,11 +86,11 @@ const Show = ({ auth, grheader }: PageProps & PageProps<{ grheader: IGRHeader }>
                         </div>
                         <div className="flex-none w-36">
                           <Label htmlFor="posting_date">Posting Date</Label>
-                          <Input id="posting_date" defaultValue={grheader.posting_date} disabled />
+                          <Input type="date"id="posting_date" defaultValue={grheader.posting_date} disabled />
                         </div>
                         <div className="flex-none w-36">
                           <Label htmlFor="actual_date">Actual Date of Reciept</Label>
-                          <Input type="text" id="actual_date" defaultValue={grheader.actual_date} disabled />
+                          <Input type="date" id="actual_date" defaultValue={grheader.actual_date} disabled />
                         </div>
 
                         <div className="flex-none w-36">

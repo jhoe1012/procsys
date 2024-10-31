@@ -1,29 +1,30 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { PageProps, IGRMaterials, IGRHeader } from '@/types';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/ui/tabs';
+import 'react-datasheet-grid/dist/style.css';
+import { FormEventHandler, useState } from 'react';
+import {
+  checkboxColumn,
+  DataSheetGrid,
+  dateColumn,
+  floatColumn,
+  intColumn,
+  keyColumn,
+  textColumn,
+} from 'react-datasheet-grid';
+import { Operation } from 'react-datasheet-grid/dist/types';
+import { CSSObjectWithLabel } from 'react-select';
+import AsyncSelect from 'react-select/async';
 import { Button } from '@/Components/ui/button';
+import { Card, CardContent } from '@/Components/ui/card';
 import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
 import { Select as CSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
-import Select, { CSSObjectWithLabel } from 'react-select';
-import 'react-datasheet-grid/dist/style.css';
-import { useState, FormEventHandler } from 'react';
-import {
-  DataSheetGrid,
-  checkboxColumn,
-  textColumn,
-  intColumn,
-  keyColumn,
-  floatColumn,
-  dateColumn,
-} from 'react-datasheet-grid';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/ui/tabs';
 import { Toaster } from '@/Components/ui/toaster';
 import { useToast } from '@/Components/ui/use-toast';
-import { Card, CardContent } from '@/Components/ui/card';
-import { Operation } from 'react-datasheet-grid/dist/types';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { IGRHeader, IGRMaterials, PageProps } from '@/types';
+import { Head, Link, useForm } from '@inertiajs/react';
 
-const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => {
+const Create = ({ auth }: PageProps ) => {
   const dateToday = new Date().toISOString().substring(0, 10);
 
   const { toast } = useToast();
@@ -66,10 +67,11 @@ const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => 
     },
   ]);
 
-  const { data, setData, post, errors, reset, transform, processing } = useForm<IGRHeader>({
+  const { data, setData, post, errors, reset, processing } = useForm<IGRHeader>({
     id: 0,
     gr_number: undefined,
     po_number: undefined,
+    control_no: undefined,
     created_name: auth.user.name,
     vendor_id: undefined,
     vendor_name: '',
@@ -132,7 +134,7 @@ const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => 
       .filter((item) => item.mat_code !== undefined)
       .map((item, index) => ({ ...item, item_no: (index + 1) * 10 }));
 
-    setMaterial(updatedMaterial); 
+    setMaterial(updatedMaterial);
 
     if (updatedMaterial.length <= 0) {
       toast({
@@ -166,7 +168,7 @@ const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => 
 
   const getPODetails = async (ponumber: number) => {
     try {
-      const response = await window.axios.get(route('po.details', ponumber));  
+      const response = await window.axios.get(route('po.details', ponumber));
       const updateMaterial = response.data.pomaterials.map((item) => ({
         id: undefined,
         gr_header_id: undefined,
@@ -188,7 +190,8 @@ const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => 
 
       setData({
         ...data,
-        po_number: ponumber,
+        po_number: response.data.po_number,
+        control_no: response.data.control_no,
         plant: response.data.plants.plant,
         vendor_id: response.data.vendors.supplier,
         vendor_name: `${response.data.vendors.supplier} - ${response.data.vendors.name_1}`,
@@ -197,6 +200,22 @@ const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => 
       setMaterial(updateMaterial);
     } catch (error) {
       console.log('Error fetching po info: ', error);
+    }
+  };
+
+  const fetchPoControlNo = async (inputValue) => {
+    if (!inputValue) return [];
+
+    try {
+      const response = await window.axios.get(route('po-control.search', { search: inputValue }));
+
+      return response.data.map((item) => ({
+        value: item.po_number,
+        label: `${item.control_no} | ${item.po_number}`,
+      }));
+    } catch (e) {
+      console.log('Error fetching data:', e);
+      return [];
     }
   };
 
@@ -251,65 +270,29 @@ const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => 
                   <Label>&nbsp;</Label>
                   <Input type="text" defaultValue="Goods Reciept" disabled />
                 </div>
-                <div className="flex-none w-40">
-                  <Label>&nbsp;</Label>
-                  <Input type="text" defaultValue="Purchase Order" disabled />
-                </div>
-                <div className="flex-none w-40">
+
+                <div className="flex-none w-60">
                   <Label>PO Number</Label>
-                  {/* <Select
+                  <AsyncSelect
+                    cacheOptions
+                    defaultOptions
+                    loadOptions={fetchPoControlNo}
+                    value={
+                      data.po_number ? { label: `${data.control_no} | ${data.po_number}`, value: data.po_number } : null
+                    }
+                    onChange={(option: any) => {
+                      getPODetails(option?.value);
+                    }}
+                    placeholder="Select PO Number"
                     required={true}
-                    value={vendors?.find(({ value }) => value === data.vendor_id) ?? null}
-                    options={vendors}
-                    onChange={({ value, label }) => {
-                      setData({ ...data, vendor_id: value, vendor_name: label });
-                      getVendorInfo(value);
-                    }}
-                    styles={{
-                      control: (provided, state) => ({
-                        ...provided,
-                        minHeight: '1.75rem',
-                        height: '1.75rem',
-                        fontSize: '0.875rem',
-                        borderColor: 'hsl(var(--input))',
-                      }),
-
-                      valueContainer: (provided, state) => ({
-                        ...provided,
-                        height: '1.75rem',
-                        padding: '0 6px',
-                      }),
-
-                      input: (provided, state) => ({
-                        ...provided,
-                        margin: '0px',
-                      }),
-                      indicatorSeparator: (state) => ({
-                        display: 'none',
-                      }),
-                      indicatorsContainer: (provided, state) => ({
-                        ...provided,
-                        height: '1.75rem',
-                      }),
-                    }}
-                  />
-                </div> */}
-                  {/* <Select
-                    required={true}
-                    placeholder="Purchase Order "
-                    value={ponumber?.find(({ value }) => value === data.po_number) ?? null}
-                    options={ponumber}
-                    onChange={({ value }) => {
-                      getPODetails(value);
-                    }}
                     styles={styles}
-                  /> */}
+                  />
                 </div>
                 <div className="flex-none w-40">
                   <Label htmlFor="gr_number">Document Number</Label>
                   <Input type="text" id="gr_number" value={data.gr_number} disabled />
                 </div>
-                <div className="flex-none w-52">
+                <div className="flex-none w-72">
                   <Label>Vendor</Label>
                   <Input type="text" value={data.vendor_name} disabled />
                 </div>
@@ -356,7 +339,7 @@ const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => 
                               defaultValue={data.actual_date}
                               onChange={(e) => setData('actual_date', e.target.value)}
                             />
-                          </div> 
+                          </div>
                           <div className="flex-none w-36">
                             <Label htmlFor="delivery_note">Delivery Note / SI #</Label>
                             <Input
@@ -386,7 +369,7 @@ const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => 
                   value={material}
                   onChange={updateMaterial}
                   columns={columns}
-                  style={customStyle} 
+                  style={customStyle}
                   disableExpandSelection
                   rowHeight={30}
                   className="text-sm"
@@ -412,7 +395,7 @@ const Create = ({ auth, ponumber }: PageProps & PageProps<{ ponumber: [] }>) => 
                   )}
                 </div>
               </div>
-            </form> 
+            </form>
           </div>
         </div>
       </div>

@@ -333,6 +333,7 @@ export interface IGRHeader {
   id: number;
   gr_number?: number;
   po_number?: number;
+  control_no?: string;
   created_name: string;
   vendor_id?: string;
   vendor_name?: string;
