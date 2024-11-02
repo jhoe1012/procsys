@@ -41,6 +41,7 @@ export default function Index({
   const searchFieldChanged = (name: string, value: string) => {
     if (value) {
       queryParams[name] = value;
+      if (queryParams['page']) delete queryParams['page'];
     } else {
       delete queryParams[name];
     }
@@ -60,7 +61,6 @@ export default function Index({
     setModalOpenm(false);
   };
 
-  
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -85,6 +85,7 @@ export default function Index({
                           defaultValue={queryParams.pr_number_from}
                           onBlur={(e) => searchFieldChanged('pr_number_from', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('pr_number_from', e)}
+                          placeholder="PR No. From"
                         />
                       </th>
                       <th className="px-1 py-2"></th>
@@ -117,6 +118,7 @@ export default function Index({
                           defaultValue={queryParams.pr_number_to}
                           onBlur={(e) => searchFieldChanged('pr_number_to', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('pr_number_to', e)}
+                          placeholder="PR No. To"
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -125,6 +127,7 @@ export default function Index({
                           defaultValue={queryParams.plant}
                           onBlur={(e) => searchFieldChanged('plant', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('plant', e)}
+                          placeholder="Plant"
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -133,6 +136,7 @@ export default function Index({
                           defaultValue={queryParams.create_name}
                           onBlur={(e) => searchFieldChanged('create_name', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('create_name', e)}
+                          placeholder="Created By"
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -141,6 +145,7 @@ export default function Index({
                           defaultValue={queryParams.requested_by}
                           onBlur={(e) => searchFieldChanged('requested_by', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('requested_by', e)}
+                          placeholder="Requested By"
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -167,6 +172,7 @@ export default function Index({
                           defaultValue={queryParams.status}
                           onBlur={(e) => searchFieldChanged('status', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('status', e)}
+                          placeholder="Status"
                         />
                       </th>
                     </tr>
@@ -181,7 +187,7 @@ export default function Index({
                       <th className="px-3 py-2"> Doc Date</th>
                       <th className="px-3 py-2"> Last Update</th>
                       <th className="px-3 py-2"> Status</th>
-                      <th className="px-3 py-2"> Plant Name</th>
+                      {/* <th className="px-3 py-2"> Plant Name</th> */}
                     </tr>
                   </thead>
 
@@ -200,13 +206,15 @@ export default function Index({
                             />
                           </td>
                           <td className="px-3 py-2">{pr.pr_number}</td>
-                          <td className="px-3 py-2">{pr.plant}</td>
+                          <td className="px-3 py-2">
+                            {pr.plant} - {pr?.plants?.name1}
+                          </td>
                           <td className="px-3 py-2">{pr.created_name}</td>
                           <td className="px-3 py-2">{pr.requested_by}</td>
                           <td className="px-3 py-2">{pr.doc_date}</td>
                           <td className="px-3 py-2">{pr.updated_at}</td>
                           <td className="px-3 py-2">{pr.status}</td>
-                          <td className="px-3 py-2">{pr?.plants?.name1}</td>
+                          {/* <td className="px-3 py-2">{pr?.plants?.name1}</td> */}
                         </tr>
                       ))
                     ) : (

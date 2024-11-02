@@ -81,6 +81,7 @@ const Index = ({
                           defaultValue={queryParams.gr_number_from}
                           onBlur={(e) => searchFieldChanged('gr_number_from', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('gr_number_from', e)}
+                          placeholder='GR No. From'
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -89,6 +90,7 @@ const Index = ({
                           defaultValue={queryParams.po_number_from}
                           onBlur={(e) => searchFieldChanged('po_number_from', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('po_number_from', e)}
+                          placeholder='PO No. From'
                         />
                       </th>
                       <th className="px-1 py-2"></th>
@@ -103,7 +105,7 @@ const Index = ({
                           onKeyDown={(e) => handleKeyPress('entry_date_from', e)}
                         />
                       </th>
-                      <th className="px-1 py-2">
+                      {/* <th className="px-1 py-2">
                         <TextInput
                           type="date"
                           className="h-7 text-xs p-1 m-0"
@@ -111,7 +113,7 @@ const Index = ({
                           onBlur={(e) => searchFieldChanged('posting_date_from', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('posting_date_from', e)}
                         />
-                      </th>
+                      </th> */}
                       <th className="px-1 py-2">
                         <TextInput
                           type="date"
@@ -130,6 +132,7 @@ const Index = ({
                           defaultValue={queryParams.gr_number_to}
                           onBlur={(e) => searchFieldChanged('gr_number_to', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('gr_number_to', e)}
+                          placeholder='GR No. To'
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -138,6 +141,7 @@ const Index = ({
                           defaultValue={queryParams.po_number_to}
                           onBlur={(e) => searchFieldChanged('po_number_to', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('po_number_to', e)}
+                          placeholder='PO No. To'
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -146,14 +150,16 @@ const Index = ({
                           defaultValue={queryParams.plant}
                           onBlur={(e) => searchFieldChanged('plant', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('plant', e)}
+                          placeholder='Plant'
                         />
                       </th>
                       <th className="px-1 py-2">
                         <TextInput
-                          className="h-7 text-xs p-1 m-0"
+                          className="h-7 w-full text-xs p-1 m-0"
                           defaultValue={queryParams.vendor}
                           onBlur={(e) => searchFieldChanged('vendor', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('vendor', e)}
+                          placeholder='Vendor'
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -162,6 +168,7 @@ const Index = ({
                           defaultValue={queryParams.entered_by}
                           onBlur={(e) => searchFieldChanged('entered_by', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('entered_by', e)}
+                          placeholder='Entered By'
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -173,7 +180,7 @@ const Index = ({
                           onKeyDown={(e) => handleKeyPress('entry_date_to', e)}
                         />
                       </th>
-                      <th className="px-1 py-2">
+                      {/* <th className="px-1 py-2">
                         <TextInput
                           type="date"
                           className="h-7 text-xs p-1 m-0"
@@ -181,7 +188,7 @@ const Index = ({
                           onBlur={(e) => searchFieldChanged('posting_date_to', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('posting_date_to', e)}
                         />
-                      </th>
+                      </th> */}
                       <th className="px-1 py-2">
                         <TextInput
                           type="date"
@@ -202,7 +209,7 @@ const Index = ({
                       <th className="px-3 py-2 w-[30%]"> Vendor</th>
                       <th className="px-3 py-2"> Entered By</th>
                       <th className="px-3 py-2"> Entry Date</th>
-                      <th className="px-3 py-2"> Posting Date</th>
+                      {/* <th className="px-3 py-2"> Posting Date</th> */}
                       <th className="px-3 py-2"> Actual Date of Receipt</th>
                       {/* <th className="px-3 py-2"> Status</th> */}
                       <th className="px-3 py-2"></th>
@@ -233,7 +240,7 @@ const Index = ({
                           </td>
                           <td className="px-3 py-2">{gr.created_name}</td>
                           <td className="px-3 py-2">{gr.entry_date}</td>
-                          <td className="px-3 py-2">{gr.posting_date}</td>
+                          {/* <td className="px-3 py-2">{gr.posting_date}</td> */}
                           <td className="px-3 py-2">{gr.actual_date}</td>
                           <td className="px-3 py-2">
                             <a className="" href={route('gr.print', gr.id)} target="_blank">

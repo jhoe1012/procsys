@@ -1,11 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import {
-  PageProps, IMessage,
-  IPOHeaderPage,
-  IPOHeader,
-  IPOMaterial
-} from '@/types';
+import { PageProps, IMessage, IPOHeaderPage, IPOHeader, IPOMaterial } from '@/types';
 import Modal from '@/Components/Modal';
 
 import { useState, useEffect, KeyboardEvent } from 'react';
@@ -45,6 +40,7 @@ export default function Index({
   const searchFieldChanged = (name: string, value: string) => {
     if (value) {
       queryParams[name] = value;
+      if (queryParams['page']) delete queryParams['page'];
     } else {
       delete queryParams[name];
     }
@@ -88,6 +84,7 @@ export default function Index({
                           defaultValue={queryParams.po_number_from}
                           onBlur={(e) => searchFieldChanged('po_number_from', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('po_number_from', e)}
+                          placeholder='PO No. From'
                         />
                       </th>
                       <th className="px-1 py-2"></th>
@@ -121,6 +118,7 @@ export default function Index({
                           defaultValue={queryParams.po_number_to}
                           onBlur={(e) => searchFieldChanged('po_number_to', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('po_number_to', e)}
+                          placeholder='PO No. To'
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -129,6 +127,7 @@ export default function Index({
                           defaultValue={queryParams.control_no}
                           onBlur={(e) => searchFieldChanged('control_no', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('control_no', e)}
+                          placeholder='Control No.'
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -137,6 +136,7 @@ export default function Index({
                           defaultValue={queryParams.plant}
                           onBlur={(e) => searchFieldChanged('plant', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('plant', e)}
+                          placeholder='Plant'
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -145,6 +145,7 @@ export default function Index({
                           defaultValue={queryParams.vendor}
                           onBlur={(e) => searchFieldChanged('vendor', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('vendor', e)}
+                          placeholder='Vendor'
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -153,6 +154,7 @@ export default function Index({
                           defaultValue={queryParams.created_name}
                           onBlur={(e) => searchFieldChanged('created_name', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('created_name', e)}
+                          placeholder='Created By'
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -179,6 +181,7 @@ export default function Index({
                           defaultValue={queryParams.status}
                           onBlur={(e) => searchFieldChanged('status', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('status', e)}
+                          placeholder='Status'
                         />
                       </th>
                     </tr>
@@ -194,7 +197,6 @@ export default function Index({
                       <th className="px-3 py-2"> Doc Date</th>
                       <th className="px-3 py-2"> Deliv. Date</th>
                       <th className="px-3 py-2"> Status</th>
-                      
                     </tr>
                   </thead>
 
