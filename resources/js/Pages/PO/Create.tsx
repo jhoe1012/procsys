@@ -103,15 +103,7 @@ const Create = ({ auth, vendors }: PageProps & PageProps<{ vendors: [] }>) => {
   };
 
   const handleAddtoPo = (pomaterials) => {
-    // console.log(data);
-    // const poMaterial = data.map((mat, index) => ({
-    //   ...mat,
-    //   item_no: 0 ,
-    //   total_value: 0,/*  po_qty: 0, net_price: 0, total_value: 0  */
-    // }));
-    // console.log('po material', data);
     setMaterial([...material, ...pomaterials]);
-    // setData({ ...data, pomaterials: [...data.pomaterials, ...pomaterials] })
   };
 
   const updateMaterial = (newValue: IPOMaterial[], operations: Operation[]) => {
@@ -138,7 +130,6 @@ const Create = ({ auth, vendors }: PageProps & PageProps<{ vendors: [] }>) => {
         // }
       }
     }
-    console.log('update', updatedMaterial);
     setMaterial(updatedMaterial);
     setData({ ...data, pomaterials: updatedMaterial });
   };
@@ -148,18 +139,15 @@ const Create = ({ auth, vendors }: PageProps & PageProps<{ vendors: [] }>) => {
     setData((prevHeader: IPOHeader) => ({ ...prevHeader, total_po_value: poTotal , attachment: files }));
   }, [material, files]);
 
-  
-
-  // useEffect(() => {
-  //   if (data.plant) {
-  //     console.log('usefeect');
-  //     if (auth.user.plants) {
-  //       const deliv_addr = auth.user.plants.filter((plant) => plant.plant === data.plant);
-  //       const address = `${deliv_addr[0].street} ${deliv_addr[0].street2} ${deliv_addr[0].district} ${deliv_addr[0].city} ${deliv_addr[0].country_code} ${deliv_addr[0].postal_code}`;
-  //       setData((prevHeader: IPOHeader) => ({ ...prevHeader, deliv_addr: address }));
-  //     }
-  //   }
-  // }, [data.plant]);
+  useEffect(() => {
+    if (errors.hasOwnProperty('error')) {
+      toast({
+        variant: 'destructive',
+        description: errors.error,
+      });
+      
+    }
+  }, [errors]);
 
   const getVendorInfo = async (vendor_id) => {
     try {

@@ -12,6 +12,22 @@ class PoHeader extends Model
 {
     use HasFactory, CreatedUpdatedBy;
 
+    protected $fillable =[
+        'control_no',
+        'vendor_id',
+        'created_name',
+        'doc_date',
+        'plant',
+        'header_text',
+        'approver_text',
+        'total_po_value',
+        'status',
+        'appr_seq',
+        'deliv_addr',
+        'deliv_date',
+        'notes',
+    ];
+
     protected function casts(): array
     {
         return [

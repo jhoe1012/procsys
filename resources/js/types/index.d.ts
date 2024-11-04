@@ -274,6 +274,7 @@ export interface IPOMaterial {
   id?: number;
   po_header_id?: number;
   po_material_id?: number;
+  pr_material_id?:number;
   status?: string;
   item_no?: number;
   mat_code?: string;

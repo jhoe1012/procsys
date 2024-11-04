@@ -17,6 +17,7 @@ class POMaterialsResource extends JsonResource
         return [
             'id' => $this->id,
             'po_header_id' => $this->po_header_id,
+            'pr_material_id' => $this->pr_material_id,
             'status' => $this->status,
             'item_no' => $this->item_no,
             'mat_code' => $this->mat_code,

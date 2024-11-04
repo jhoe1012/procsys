@@ -290,6 +290,16 @@ const Create = ({
     setData((prevHeader: IPRHeader) => ({ ...prevHeader, total_pr_value: prTotal, attachment: files }));
   }, [material, files]);
 
+  useEffect(() => {
+    if (errors.hasOwnProperty('error')) {
+      toast({
+        variant: 'destructive',
+        description: errors.error,
+      });
+      
+    }
+  }, [errors]);
+
   return (
     <AuthenticatedLayout
       user={auth.user}

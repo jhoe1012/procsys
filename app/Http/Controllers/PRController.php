@@ -13,13 +13,16 @@ use App\Models\Attachment;
 use App\Models\Material;
 use App\Models\PrHeader;
 use App\Models\PrMaterial;
+use App\Services\AttachmentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -93,86 +96,43 @@ class PRController extends Controller
 
     public function store(Request $request)
     {
+        try {
+            return DB::transaction(function () use ($request) {
+                $pr_materials = collect($request->input('prmaterials'))
+                    ->filter(fn($item) => !empty($item['mat_code']))
+                    ->map(fn($item, $index) => new PrMaterial($this->_mapPrMaterialData($item, $index)))
+                    ->values();
+                $total_pr_value = $pr_materials->sum('total_value');
+                $pr_header = PrHeader::create(array_merge(
+                    $request->only([
+                        'created_name',
+                        'requested_by',
+                        'plant',
+                        'reason_pr',
+                        'header_text',
+                        'deliv_addr'
+                    ]),
+                    [
+                        'doc_date' => Carbon::parse($request->input('doc_date'))->format('Y-m-d'),
+                        'total_pr_value' => $total_pr_value,
+                        'appr_seq' => 0,
+                        'status' => Str::ucfirst(ApproveStatus::DRAFT),
+                    ]
+                ));
+                $pr_header->prmaterials()->saveMany($pr_materials->all());
 
-        $pr_header = new PrHeader();
-        $pr_header->created_name = $request->input('created_name');
-        $pr_header->doc_date = Carbon::parse($request->input('doc_date'))->format('Y-m-d');
-        $pr_header->requested_by = $request->input('requested_by');
-        $pr_header->plant = $request->input('plant');
-        $pr_header->reason_pr = $request->input('reason_pr');
-        $pr_header->header_text = $request->input('header_text');
-        $pr_header->total_pr_value = $request->input('total_pr_value');
-        $pr_header->deliv_addr = $request->input('deliv_addr');
-        $pr_header->status = Str::ucfirst(ApproveStatus::DRAFT);
-        $pr_header->appr_seq = 0;
-        $pr_header->save();
-
-        $pr_material = [];
-        $pr_material = collect($request->input('prmaterials'))
-            ->filter(fn($item) => ! empty($item['mat_code']))
-            ->values()
-            ->map(fn($item, $index) => new PrMaterial([
-                'item_no' => ($index + 1) * 10,
-                'mat_code' => $item['mat_code'],
-                'short_text' => $item['short_text'],
-                'qty' => $item['qty'],
-                'qty_open' => $item['qty'],
-                'price' => $item['price'],
-                'ord_unit' => $item['ord_unit'],
-                'per_unit' => $item['per_unit'],
-                'unit' => $item['unit'],
-                'total_value' => $item['total_value'],
-                'currency' => $item['currency'],
-                'del_date' => Carbon::parse($item['del_date'])->format('Y-m-d'),
-                'mat_grp' => $item['mat_grp'],
-                'purch_grp' => $item['purch_grp'],
-
-            ]));
-
-
-        // if (!empty($request->input('prmaterials'))) {
-        //     foreach ($request->input('prmaterials') as $key => $item) {
-        //         if (isset($item['mat_code'])) {
-        //             $pr_material[] = new PrMaterial([
-        //                 'item_no' => ($key + 1 ) * 10,  // $item['item_no'],
-        //                 'mat_code' => $item['mat_code'],
-        //                 'short_text' => $item['short_text'],
-        //                 'qty' => $item['qty'],
-        //                 'qty_open' => $item['qty'],
-        //                 'price' => $item['price'],
-        //                 'ord_unit' => $item['ord_unit'],
-        //                 'per_unit' => $item['per_unit'],
-        //                 'unit' => $item['unit'],
-        //                 'total_value' => $item['total_value'],
-        //                 'currency' => $item['currency'],
-        //                 'del_date' => Carbon::parse($item['del_date'])->format('Y-m-d'),
-        //                 'mat_grp' => $item['mat_grp'],
-        //             ]);
-        //         }
-        //     }
-        // }
-        $pr_header->refresh();
-        $pr_header->prmaterials()->saveMany($pr_material);
-
-        if ($request->hasFile('attachment')) {
-            $files = [];
-            foreach ($request->file('attachment') as $file) {
-                $filename = $file->getClientOriginalName();
-                $filepath = time() . "_" . $file->getClientOriginalName();
-                $extension = $file->getClientOriginalExtension();
-                $check = in_array(strtolower($extension), Attachment::ALLOWED_FILES);
-                if ($check) {
-                    $file->move(public_path('attachments'), $filepath);
-                    $files[] = new Attachment([
-                        'filename' => $filename,
-                        'filepath' => 'attachments/' . $filepath,
-                    ]);
+                if ($attachments = AttachmentService::handleAttachments($request)) {
+                    $pr_header->attachments()->saveMany($attachments);
                 }
-            }
-            $pr_header->attachments()->saveMany($files);
-        }
 
-        return to_route("pr.edit", $pr_header->pr_number)->with('success', "PR {$pr_header->pr_number} created.");
+                return to_route("pr.edit", $pr_header->pr_number)->with('success', "PR {$pr_header->pr_number} created.");
+            }, 2);
+        } catch (\Exception $exception) {
+            Log::error($exception->getMessage());
+            throw ValidationException::withMessages([
+                'error' => 'An error occurred while creating the PR. Please try again.'
+            ]);
+        }
     }
 
     public function submit($id)
@@ -268,74 +228,70 @@ class PRController extends Controller
 
     public function update(Request $request, $id)
     {
-        $pr_header = PrHeader::findOrFail($id);
-        $pr_header->requested_by = $request->input('requested_by');
-        $pr_header->plant = $request->input('plant');
-        $pr_header->reason_pr = $request->input('reason_pr');
-        $pr_header->header_text = $request->input('header_text');
-        $pr_header->total_pr_value = $request->input('total_pr_value');
-        $pr_header->deliv_addr = $request->input('deliv_addr');
-        $pr_header->status = Str::ucfirst(ApproveStatus::DRAFT);
-        $pr_header->appr_seq = 0;
-        $pr_header->save();
-        $pr_header->refresh();
+        try {
+            return  DB::transaction(function () use ($request, $id) {
+                $pr_header = PrHeader::findOrFail($id);
+                $pr_materials = collect($request->input('prmaterials'))
+                    ->filter(fn($item) => !empty($item['mat_code']))
+                    ->map(fn($item, $index) => $this->_mapOrUpdatePrMaterial($item, $index, $pr_header->id))
+                    ->map(function ($item) {
+                        if (isset($item['id'])) {
+                            $pr_material = PrMaterial::find($item['id']);
+                        } else {
+                            $pr_material = new PrMaterial();
+                            $pr_material->pr_headers_id = $item['pr_headers_id'];
+                        }
+                        $pr_material->item_no = $item['item_no'];
+                        $pr_material->mat_code = $item['mat_code'];
+                        $pr_material->short_text = $item['short_text'];
+                        $pr_material->qty = $item['qty'];
+                        $pr_material->qty_open = $item['qty_open'];
+                        $pr_material->price = $item['price'];
+                        $pr_material->ord_unit = $item['ord_unit'];
+                        $pr_material->per_unit = $item['per_unit'];
+                        $pr_material->unit = $item['unit'];
+                        $pr_material->total_value = $item['total_value'];
+                        $pr_material->currency = $item['currency'];
+                        $pr_material->del_date = $item['del_date'];
+                        $pr_material->mat_grp = $item['mat_grp'];
+                        $pr_material->purch_grp = $item['purch_grp'];
+                        $pr_material->save();
 
-        // $pr_material = [];
+                        return $item;
+                    })->values();
 
-        $pr_materials = collect($request->input('prmaterials'))
-            ->filter(fn($item) => ! empty($item['mat_code']))
-            ->values();
+                $total_pr_value = $pr_materials->filter(fn($item) => $item['status'] != 'X')->sum('total_value');
+                $pr_header->update(
+                    array_merge(
+                        $request->only([
+                            'created_name',
+                            'requested_by',
+                            'plant',
+                            'reason_pr',
+                            'header_text',
+                            'deliv_addr'
+                        ]),
+                        [
+                            'doc_date' => Carbon::parse($request->input('doc_date'))->format('Y-m-d'),
+                            'total_pr_value' =>  $total_pr_value,
+                            'appr_seq' => 0,
+                            'status' => Str::ucfirst(ApproveStatus::DRAFT),
+                        ]
+                    )
+                );
 
-
-        // if (!empty($request->input('prmaterials'))) {
-        foreach ($pr_materials as $key => $item) {
-            if (isset($item['mat_code'])) {
-                if (isset($item['id'])) {
-                    $pr_material = PrMaterial::find($item['id']);
-                } else {
-                    $pr_material = new PrMaterial();
-                    $pr_material->pr_headers_id = $pr_header->id;
+                if ($attachments = AttachmentService::handleAttachments($request)) {
+                    $pr_header->attachments()->saveMany($attachments);
                 }
-                $pr_material->item_no = ($key + 1) * 10; // $item['item_no'];
-                $pr_material->mat_code = $item['mat_code'];
-                $pr_material->short_text = $item['short_text'];
-                $pr_material->qty = $item['qty'];
-                $pr_material->qty_open = $item['qty'];
-                $pr_material->price = $item['price'];
-                $pr_material->ord_unit = $item['ord_unit'];
-                $pr_material->per_unit = $item['per_unit'];
-                $pr_material->unit = $item['unit'];
-                $pr_material->total_value = $item['total_value'];
-                $pr_material->currency = $item['currency'];
-                $pr_material->del_date = Carbon::parse($item['del_date'])->format('Y-m-d');
-                $pr_material->mat_grp = $item['mat_grp'];
-                $pr_material->purch_grp = $item['purch_grp'];
-
-                $pr_material->save();
-            }
+                
+                 return to_route("pr.edit", $pr_header->pr_number)->with('success', 'PR updated successfully');
+            });
+        } catch (\Exception $exception) {
+            Log::error($exception->getMessage());
+            throw ValidationException::withMessages([
+                'error' => 'An error occurred while creating the PR. Please try again.'
+            ]);
         }
-        // }
-
-        if ($request->hasfile('attachment')) {
-            $files = [];
-            // $allowedfileExtension = ['pdf', 'jpg', 'png', 'docx', 'xlsx'];
-            foreach ($request->file('attachment') as $file) {
-                $filename = $file->getClientOriginalName();
-                $filepath = time() . "_" . $file->getClientOriginalName();
-                $extension = $file->getClientOriginalExtension();
-                $check = in_array($extension, Attachment::ALLOWED_FILES);
-                if ($check) {
-                    $file->move(public_path('attachments'), $filepath);
-                    $files[] = new Attachment([
-                        'filename' => $filename,
-                        'filepath' => 'attachments/' . $filepath,
-                    ]);
-                }
-            }
-            $pr_header->attachments()->saveMany($files);
-        }
-
-        return to_route("pr.edit", $pr_header->pr_number)->with('success', 'PR updated successfully');
     }
 
     public function approve(Request $request)
@@ -451,14 +407,18 @@ class PRController extends Controller
     }
     public function flagDelete(Request $request)
     {
-
         foreach ($request->input('ids') as $id) {
             $pr_material = PrMaterial::findOrFail($id);
             $pr_material->status = PrMaterial::FLAG_DELETE;
             $pr_material->save();
         }
+
+        $pr_header = PrHeader::findOrFail($pr_material->prheader->id);
+        $pr_header->total_pr_value = PrMaterial::where('pr_headers_id', $pr_header->id)->where('status', '<>', 'X')->sum('total_value');
+        $pr_header->save();
+
         // dd($pr_material->prheader->pr_number);
-        return to_route("pr.edit", $pr_material->prheader->pr_number)->with('success', "Mark id(s) for deletion.");
+        return to_route("pr.edit", $pr_material->prheader->pr_number)->with('success', "Mark item(s) for deletion.");
     }
     public function flagComplete(Request $request)
     {
@@ -480,5 +440,34 @@ class PRController extends Controller
         $prHeader->save();
 
         return to_route("pr.edit", $prHeader->pr_number)->with('success', "PR Recalled");
+    }
+
+    private function _mapPrMaterialData(array $item, int $index)
+    {
+        return [
+            'item_no' => ($index + 1) * 10,
+            'mat_code' => $item['mat_code'],
+            'short_text' => $item['short_text'],
+            'qty' => $item['qty'],
+            'qty_open' => $item['qty'],
+            'price' => $item['price'],
+            'ord_unit' => $item['ord_unit'],
+            'per_unit' => $item['per_unit'],
+            'unit' => $item['unit'],
+            'total_value' => $item['qty'] * $item['price'],
+            'currency' => $item['currency'],
+            'del_date' => Carbon::parse($item['del_date'])->format('Y-m-d'),
+            'mat_grp' => $item['mat_grp'],
+            'purch_grp' => $item['purch_grp'],
+            'status' => $item['status'] ?? null,
+        ];
+    }
+
+    private function _mapOrUpdatePrMaterial(array $item, int $index, int $pr_header_id)
+    {
+        return array_merge(
+            $this->_mapPrMaterialData($item, $index),
+            ['pr_headers_id' => $pr_header_id, 'id' => $item['id'] ?? null]
+        );
     }
 }

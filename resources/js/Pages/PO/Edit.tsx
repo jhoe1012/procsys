@@ -124,7 +124,6 @@ const Edit = ({
 
   const updateMaterial = (newValue: IPOMaterial[], operations: Operation[]) => {
     const updatedMaterial = [...newValue];
-    console.log('updatedMaterial', updatedMaterial);
     for (const operation of operations) {
       if (operation.type === 'UPDATE') {
         const value = updatedMaterial[operation.fromRowIndex];
@@ -136,7 +135,6 @@ const Edit = ({
         value.total_value = ((value.net_price ?? 0) / (value.per_unit ?? 0)) * (value.po_qty ?? 0);
       }
     }
-    console.log('update', updatedMaterial);
     setMaterial(updatedMaterial);
     setData({ ...data, pomaterials: updatedMaterial });
   };
@@ -159,13 +157,22 @@ const Edit = ({
     if (auth.user.approvers) {
       setApprSeq(auth.user.approvers.filter((approver) => approver.type == 'po')[0]);
     }
-  }, []);
+  }, [message]);
 
   useEffect(() => {
     const poTotal = material.reduce((acc, mat) => acc + (mat.total_value || 0), 0);
     setData((prevHeader: IPOHeader) => ({ ...prevHeader, total_po_value: poTotal, attachment: files }));
   }, [material, files]);
 
+  useEffect(() => {
+    if (errors.hasOwnProperty('error')) {
+      toast({
+        variant: 'destructive',
+        description: errors.error,
+      });
+      
+    }
+  }, [errors]);
   
   const getVendorInfo = async (vendor_id) => {
     try {
@@ -185,7 +192,6 @@ const Edit = ({
       .map((item, index) => ({ ...item, item_no: (index + 1) * 10 }));
 
     setMaterial(item);
-    console.log('item', item);
     if (item.length <= 0) {
       toast({
         variant: 'destructive',
@@ -242,7 +248,6 @@ const Edit = ({
   const handleSubmit: FormEventHandler = async (e) => {
     e.preventDefault();
     if (handleCheck()) {
-      console.log(data);
       post(route('po.update', poheader.id), {
         preserveScroll: true,
         onSuccess: (page) => {

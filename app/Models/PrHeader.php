@@ -12,6 +12,19 @@ class PrHeader extends Model
 {
     use HasFactory, CreatedUpdatedBy;
 
+    protected $fillable = [
+        'created_name',
+        'doc_date',
+        'requested_by',
+        'plant',
+        'reason_pr',
+        'header_text',
+        'total_pr_value',
+        'status',
+        'appr_seq',
+        'deliv_addr',
+    ];
+
     protected function casts(): array
     {
         return [

@@ -20,13 +20,17 @@ use App\Models\PoMaterial;
 use App\Models\PrHeader;
 use App\Models\PrMaterial;
 use App\Models\Vendor;
+use App\Services\AttachmentService;
 use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -97,78 +101,49 @@ class POController extends Controller
 
     public function store(Request $request)
     {
-        $po_header = new PoHeader();
-        $po_header->control_no = $request->input('control_no');
-        $po_header->vendor_id = $request->input('vendor_id');
-        $po_header->created_name = $request->input('created_name');
-        $po_header->doc_date = $request->input('doc_date');
-        $po_header->plant = $request->input('plant');
-        $po_header->header_text = $request->input('header_text');
-        $po_header->approver_text = $request->input('approver_text');
-        $po_header->total_po_value = $request->input('total_po_value');
-        $po_header->deliv_addr = $request->input('deliv_addr');
-        $po_header->deliv_date = $request->input('deliv_date');
-        $po_header->notes = $request->input('notes');
-        $po_header->status = Str::ucfirst(ApproveStatus::DRAFT);
-        $po_header->appr_seq = 0;
-        $po_header->save();
 
-        $po_materials = [];
+        try {
+            return DB::transaction(function () use ($request) {
+                $po_materials = collect($request->input('pomaterials'))
+                    ->filter(fn($item) => !empty($item['mat_code']))
+                    ->map(fn($item, $index) => new PoMaterial($this->_mapPoMaterialData($item, $index)))
+                    ->values();
+                $total_po_value = $po_materials->sum('total_value');
+                $po_header = PoHeader::create(array_merge(
+                    $request->only([
+                        'control_no',
+                        'vendor_id',
+                        'created_name',
+                        'plant',
+                        'header_text',
+                        'approver_text',
+                        'deliv_addr',
+                        'deliv_date',
+                        'notes',
+                    ]),
+                    [
+                        'doc_date' => Carbon::parse($request->input('doc_date'))->format('Y-m-d'),
+                        'total_po_value' => $total_po_value,
+                        'appr_seq' => 0,
+                        'status' => Str::ucfirst(ApproveStatus::DRAFT),
+                    ]
+                ));
 
-        $po_materials = collect($request->input('pomaterials'))
-            ->filter(fn($item) => ! empty($item['mat_code']))
-            ->values()
-            ->map(
-                fn($item, $index) => new PoMaterial([
-                    'pr_material_id' => $item['pr_material_id'],
-                    'item_no' => ($index + 1) * 10,
-                    'mat_code' => $item['mat_code'],
-                    'short_text' => $item['short_text'],
-                    'po_qty' => $item['po_qty'],
-                    'po_gr_qty' => $item['po_qty'],
-                    'net_price' => $item['net_price'],
-                    'per_unit' => $item['per_unit'],
-                    'unit' => $item['unit'],
-                    'total_value' => $item['total_value'],
-                    'item_free' => $item['item_free'] ?? false,
-                    'currency' => $item['currency'],
-                    'del_date' => Carbon::parse($item['del_date'])->format('Y-m-d'),
-                    'mat_grp' => $item['mat_grp'],
-                    'requested_by' => $item['requested_by'],
-                    'pr_number' => $item['pr_number'],
-                    'pr_item' => $item['pr_item'],
-                    'item_text' => $item['item_text'] ?? '',
-                    'conversion' => $item['conversion'],
-                    'denominator' => $item['denominator'],
-                    'converted_qty' => $item['converted_qty'],
-                    'pr_unit' => $item['pr_unit'],
-                    'purch_grp' => $item['purch_grp'] ?? '',
+                $po_header->pomaterials()->saveMany($po_materials->all());
+                $this->_updatePrMaterial($po_materials->all());
 
-                ])
-            );
-        $po_header->refresh();
-        $po_header->pomaterials()->saveMany($po_materials);
-        $this->_updatePrMaterial($po_materials);
-
-        if ($request->hasFile('attachment')) {
-            $files = [];
-            foreach ($request->file('attachment') as $file) {
-                $filename = $file->getClientOriginalName();
-                $filepath = time() . "_" . $file->getClientOriginalName();
-                $extension = $file->getClientOriginalExtension();
-                $check = in_array(strtolower($extension), Attachment::ALLOWED_FILES);
-                if ($check) {
-                    $file->move(public_path('attachments'), $filepath);
-                    $files[] = new Attachment([
-                        'filename' => $filename,
-                        'filepath' => 'attachments/' . $filepath,
-                    ]);
+                if ($attachments = AttachmentService::handleAttachments($request)) {
+                    $po_header->attachments()->saveMany($attachments);
                 }
-            }
-            $po_header->attachments()->saveMany($files);
-        }
 
-        return to_route("po.edit",  $po_header->po_number)->with('success', "PO {$po_header->po_number} created.");
+                return to_route("po.edit", $po_header->po_number)->with('success', "PO {$po_header->po_number} created.");
+            }, 2);
+        } catch (\Exception $exception) {
+            Log::error($exception->getMessage());
+            throw ValidationException::withMessages([
+                'error' => 'An error occurred while creating the PO. Please try again.'
+            ]);
+        }
     }
     public function edit(Request $request, $ponumber)
     {
@@ -183,90 +158,85 @@ class POController extends Controller
     }
     public function update(Request $request, $id)
     {
-        $po_header = PoHeader::findOrFail($id);
-        $po_header->control_no = $request->input('control_no');
-        $po_header->vendor_id = $request->input('vendor_id');
-        $po_header->created_name = $request->input('created_name');
-        $po_header->doc_date = $request->input('doc_date');
-        $po_header->plant = $request->input('plant');
-        $po_header->header_text = $request->input('header_text');
-        $po_header->approver_text = $request->input('approver_text');
-        $po_header->total_po_value = $request->input('total_po_value');
-        $po_header->deliv_addr = $request->input('deliv_addr');
-        $po_header->deliv_date = $request->input('deliv_date');
-        $po_header->notes = $request->input('notes');
-        $po_header->status = Str::ucfirst(ApproveStatus::DRAFT);
-        $po_header->appr_seq = 0;
-        $po_header->save();
+        try {
+            return  DB::transaction(function () use ($request, $id) {
+                $po_header = PoHeader::findOrFail($id);
+                $po_materials = collect($request->input('pomaterials'))
+                    ->filter(fn($item) => !empty($item['mat_code']))
+                    ->map(fn($item, $index) => $this->_mapOrUpdatePoMaterial($item, $index, $po_header->id))
+                    ->map(function ($item) {
+                        if (isset($item['id'])) {
+                            $po_material = POMaterial::find($item['id']);
+                            $converted_qty_old_value = $po_material->converted_qty;
+                        } else {
+                            $po_material = new POMaterial();
+                        }
+                        $po_material->pr_material_id = $item['pr_material_id'];
+                        $po_material->item_no = $item['item_no'];
+                        $po_material->mat_code = $item['mat_code'];
+                        $po_material->short_text = $item['short_text'];
+                        $po_material->po_qty = $item['po_qty'];
+                        $po_material->po_gr_qty = $item['po_gr_qty'];
+                        $po_material->net_price = $item['net_price'];
+                        $po_material->per_unit = $item['per_unit'];
+                        $po_material->unit = $item['unit'];
+                        $po_material->total_value = $item['total_value'];
+                        $po_material->item_free = $item['item_free'];
+                        $po_material->currency = $item['currency'];
+                        $po_material->del_date = $item['del_date'];
+                        $po_material->mat_grp = $item['mat_grp'];
+                        $po_material->requested_by = $item['requested_by'];
+                        $po_material->pr_number = $item['pr_number'];
+                        $po_material->pr_item = $item['pr_item'];
+                        $po_material->item_text = $item['item_text'];
+                        $po_material->conversion = $item['conversion'];
+                        $po_material->denominator = $item['denominator'];
+                        $po_material->converted_qty = $item['converted_qty'];
+                        $po_material->pr_unit = $item['pr_unit'];
+                        $po_material->purch_grp = $item['purch_grp'];
+                        $po_material->save();
 
-        $po_materials = collect($request->input('pomaterials'))
-            ->filter(fn($item) => ! empty($item['mat_code']))
-            ->values();
+                        if ($po_material->prmaterials instanceof PrMaterial) {
+                            $po_material->prmaterials->qty_open  = ($converted_qty_old_value + $po_material->prmaterials->qty_open) - $po_material->converted_qty;
+                            $po_material->prmaterials->qty_ordered = ($converted_qty_old_value - $po_material->prmaterials->qty_ordered) + $po_material->converted_qty;
+                            $po_material->prmaterials->save();
+                        }
+                        return $item;
+                    })->values();
 
-        foreach ($po_materials as $key => $item) {
-            $converted_qty_old_value = 0;
-            if (isset($item['id'])) {
-                $po_material = POMaterial::find($item['id']);
-                $converted_qty_old_value = $po_material->converted_qty;
-            } else {
-                $po_material = new POMaterial();
-                $po_material->po_header_id = $po_header->id;
-            }
+                $total_po_value = $po_materials->filter(fn($item) => $item['status'] != 'X')->sum('total_value');
+                $po_header->update(array_merge(
+                    $request->only([
+                        'control_no',
+                        'vendor_id',
+                        'created_name',
+                        'plant',
+                        'header_text',
+                        'approver_text',
+                        'deliv_addr',
+                        'deliv_date',
+                        'notes',
+                    ]),
+                    [
+                        'doc_date' => Carbon::parse($request->input('doc_date'))->format('Y-m-d'),
+                        'total_po_value' => $total_po_value,
+                        'appr_seq' => 0,
+                        'status' => Str::ucfirst(ApproveStatus::DRAFT),
+                    ]
+                ));
 
-            if ($po_material instanceof PoMaterial) {
-                $po_material->pr_material_id = $item['pr_material_id'] ?? $po_material->pr_material_id;
-                $po_material->item_no = ($key + 1) * 10; // $item['item_no'];
-                $po_material->mat_code = $item['mat_code'];
-                $po_material->short_text = $item['short_text'];
-                $po_material->po_qty = $item['po_qty'];
-                $po_material->po_gr_qty = $item['po_qty'];
-                $po_material->net_price = $item['net_price'];
-                $po_material->per_unit = $item['per_unit'];
-                $po_material->unit = $item['unit'];
-                $po_material->total_value = $item['total_value'];
-                $po_material->item_free = $item['item_free'] ?? false;
-                $po_material->currency = $item['currency'];
-                $po_material->del_date = $item['del_date'];
-                $po_material->mat_grp = $item['mat_grp'];
-                $po_material->requested_by = $item['requested_by'];
-                $po_material->pr_number = $item['pr_number'];
-                $po_material->pr_item = $item['pr_item'];
-                $po_material->item_text = $item['item_text'] ?? null;
-                $po_material->conversion = $item['conversion'];
-                $po_material->denominator = $item['denominator'];
-                $po_material->converted_qty = $item['converted_qty'];
-                $po_material->pr_unit = $item['pr_unit'];
-                $po_material->purch_grp = $item['purch_grp'] ?? null;
-                $po_material->save();
-
-                if ($po_material->prmaterials instanceof PrMaterial) {
-
-                    $po_material->prmaterials->qty_open  = ($converted_qty_old_value + $po_material->prmaterials->qty_open) - $po_material->converted_qty;
-                    $po_material->prmaterials->qty_ordered = ($converted_qty_old_value - $po_material->prmaterials->qty_ordered) + $po_material->converted_qty;
-                    $po_material->prmaterials->save();
+                if ($attachments = AttachmentService::handleAttachments($request)) {
+                    $po_header->attachments()->saveMany($attachments);
                 }
-            }
-        }
-        $po_header->refresh();
 
-        if ($request->hasFile('attachment')) {
-            $files = [];
-            foreach ($request->file('attachment') as $file) {
-                $filename = $file->getClientOriginalName();
-                $filepath = time() . "_" . $file->getClientOriginalName();
-                $extension = $file->getClientOriginalExtension();
-                if (in_array(strtolower($extension), Attachment::ALLOWED_FILES)) {
-                    $file->move(public_path('attachments'), $filepath);
-                    $files[] = new Attachment([
-                        'filename' => $filename,
-                        'filepath' => 'attachments/' . $filepath,
-                    ]);
-                }
-            }
-            $po_header->attachments()->saveMany($files);
+                return to_route("po.edit", $po_header->po_number)->with('success', "PO {$po_header->po_number} updated.");
+            });
+        } catch (\Exception $exception) {
+            Log::error($exception->getMessage());
+            throw ValidationException::withMessages([
+                'error' => 'An error occurred while creating the PO. Please try again.'
+            ]);
         }
-
-        return to_route("po.edit", $po_header->po_number)->with('success', "PO {$po_header->po_number} updated.");
     }
     public function submit($id)
     {
@@ -501,5 +471,41 @@ class POController extends Controller
                 $pomaterial->prmaterials->save();
             }
         }
+    }
+    private function _mapPoMaterialData(array $item, int $index)
+    {
+        return  [
+            'pr_material_id' => $item['pr_material_id'],
+            'item_no' => ($index + 1) * 10,
+            'mat_code' => $item['mat_code'],
+            'short_text' => $item['short_text'],
+            'po_qty' => $item['po_qty'],
+            'po_gr_qty' => $item['po_qty'],
+            'net_price' => $item['net_price'],
+            'per_unit' => $item['per_unit'],
+            'unit' => $item['unit'],
+            'total_value' => $item['po_qty'] * $item['net_price'],
+            'item_free' => $item['item_free'] ?? false,
+            'currency' => $item['currency'],
+            'del_date' => Carbon::parse($item['del_date'])->format('Y-m-d'),
+            'mat_grp' => $item['mat_grp'],
+            'requested_by' => $item['requested_by'],
+            'pr_number' => $item['pr_number'],
+            'pr_item' => $item['pr_item'],
+            'item_text' => $item['item_text'] ?? '',
+            'conversion' => $item['conversion'],
+            'denominator' => $item['denominator'],
+            'converted_qty' => $item['converted_qty'],
+            'pr_unit' => $item['pr_unit'],
+            'purch_grp' => $item['purch_grp'] ?? '',
+            'status' => $item['status'] ?? '',
+        ];
+    }
+    private function _mapOrUpdatePoMaterial(array $item, int $index, int $po_header_id)
+    {
+        return array_merge(
+            $this->_mapPoMaterialData($item, $index),
+            ['po_header_id' => $po_header_id, 'id' => $item['id'] ?? null]
+        );
     }
 }

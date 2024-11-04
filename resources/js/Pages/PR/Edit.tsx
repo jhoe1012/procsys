@@ -45,7 +45,12 @@ const Edit = ({
   PageProps<{ message: IMessage }>) => {
   const dateToday = new Date().toLocaleDateString();
 
-  const [material, setMaterial] = useState<IPRMaterial[]>([]);
+  const [material, setMaterial] = useState<IPRMaterial[]>(
+    prheader.prmaterials.map((prmaterial) => ({
+      ...prmaterial,
+      del_date: new Date(prmaterial.del_date || ''),
+    }))
+  );
   const [itemDetails, setItemDetails] = useState([]);
   const [files, setFiles] = useState([]);
   const [apprSeq, setApprSeq] = useState<IApprover>();
@@ -227,12 +232,6 @@ const Edit = ({
   };
 
   useEffect(() => {
-    const updateDeldate = prheader.prmaterials.map((prmaterial) => ({
-      ...prmaterial,
-      del_date: new Date(prmaterial.del_date || ''),
-    }));
-
-    setMaterial(updateDeldate || []);
     if (message?.success) {
       toast({
         title: message.success,
@@ -249,15 +248,24 @@ const Edit = ({
     if (auth.user.approvers) {
       setApprSeq(auth.user.approvers.filter((approver) => approver.type == 'pr')[0]);
     }
-  }, []);
+  }, [message]);
 
   useEffect(() => {
-    const prTotal = material.reduce((acc, mat) => acc + (mat.total_value || 0), 0);
+    const prTotal = material.filter((mat) => mat?.status != 'X').reduce((acc, mat) => acc + (mat.total_value || 0), 0);
     const m_checked = material.filter((item) => item.sel == true).map((item) => item.mat_code)[0];
     setData((prevHeader: IPRHeader) => ({ ...prevHeader, total_pr_value: prTotal, attachment: files }));
     const m_item_details = item_details.filter((item) => item.mat_code == m_checked);
     setItemDetails(m_item_details);
   }, [material, files]);
+
+  useEffect(() => {
+    if (errors.hasOwnProperty('error')) {
+      toast({
+        variant: 'destructive',
+        description: errors.error,
+      });
+    }
+  }, [errors]);
 
   return (
     <AuthenticatedLayout
