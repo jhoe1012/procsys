@@ -209,17 +209,16 @@ const Index = ({
                       <th className="px-3 py-2 w-[30%]"> Vendor</th>
                       <th className="px-3 py-2"> Entered By</th>
                       <th className="px-3 py-2"> Entry Date</th>
-                      {/* <th className="px-3 py-2"> Posting Date</th> */}
                       <th className="px-3 py-2"> Actual Date of Receipt</th>
-                      {/* <th className="px-3 py-2"> Status</th> */}
                       <th className="px-3 py-2"></th>
                     </tr>
                   </thead>
 
                   <tbody className="text-xs text-black">
                     {gr_header.data.length > 0 ? (
-                      gr_header.data.map((gr) => (
-                        <tr className="bg-white border-b" key={gr.id}>
+                      gr_header.data.map((gr, index) => (
+                        // <tr className="bg-white border-b" key={gr.id}>
+                        <tr className={'border-b ' + (index % 2 === 0 ? 'bg-gray-100' : 'bg-white')}  key={gr.id}>
                           <td className="px-3 py-2">
                             <input
                               type="radio"

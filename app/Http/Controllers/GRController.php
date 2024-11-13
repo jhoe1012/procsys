@@ -11,7 +11,6 @@ use App\Models\PoHeader;
 use App\Models\PoMaterial;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -74,7 +73,7 @@ class GRController extends Controller
 
         $gr_header = $query->orderBy('entry_date', 'desc')
             ->orderBy('gr_number', 'desc')
-            ->paginate(20)
+            ->paginate(50)
             ->onEachSide(5);
 
         return Inertia::render('GR/Index', [

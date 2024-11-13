@@ -31,7 +31,7 @@ export default function GrReport({ auth, grReport, queryParams }: PageProps) {
         <div className="max-w-8xl mx-auto sm:px-6 lg:px-2">
           <div className="bg-gray-50 text-black shadow-sm sm:rounded-lg ">
             <div className="overflow-x-auto">
-              <table className=" table-auto w-[130rem]   text-xs text-left rtl:text-right text-gray-500">
+              <table className=" table-auto w-[150rem]   text-xs text-left rtl:text-right text-gray-500">
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b-2 border-gray-500">
                   <tr className="text-nowrap">
                     <th className="px-1 py-2">GR Number</th>
@@ -41,7 +41,7 @@ export default function GrReport({ auth, grReport, queryParams }: PageProps) {
                     <th className="px-1 py-2">Supplier Name</th>
                     <th className="px-1 py-2">Plant</th>
                     <th className="px-1 py-2">Entry Date</th>
-                    <th className="px-1 py-2">Actual Receive Date </th>
+                    <th className="px-1 py-2">Actual Recv Date</th>
                     <th className="px-1 py-2">Delivery Note</th>
                     <th className="px-1 py-2">Header Text</th>
                     <th className="px-1 py-2">Item No</th>
@@ -61,7 +61,8 @@ export default function GrReport({ auth, grReport, queryParams }: PageProps) {
                 <tbody className="text-xs text-black">
                   {grReport.data.length > 0 ? (
                     grReport.data.map((gr, index) => (
-                      <tr className="bg-white border-b" key={index}>
+                      // <tr className="bg-white border-b" key={index}>
+                      <tr className={'border-b ' + (index % 2 === 0 ? 'bg-gray-100' : 'bg-white')} key={index}>
                         <td className="px-3 py-2">{gr.gr_number}</td>
                         <td className="px-3 py-2">{gr.po_number}</td>
                         <td className="px-3 py-2">{gr.created_name}</td>

@@ -138,21 +138,16 @@
                         <td width='15%' class="align-top">
                             {{ $pomaterial->taxClass?->tax_class == 1
                                 ? Number::currency($pomaterial->net_price * ($pomaterial->taxClass?->tax_value * 0.01 + 1), 'PHP')
-                                : Number::currency($pomaterial->net_price, 'PHP') }}
+                                : Number::currency($pomaterial->net_price, 'PHP') }} 
                         </td>
                         @php
                             $totalValue =
                                 $pomaterial->taxClass?->tax_class == 1
-                                    ? $pomaterial->total_value * ($pomaterial->taxClass?->tax_value * 0.01 + 1)
-                                    : $pomaterial->total_value;
+                                    ? round($pomaterial->net_price  * ($pomaterial->taxClass?->tax_value * 0.01 + 1), 2)  * $pomaterial->po_qty  
+                                    : round($pomaterial->net_price  * $pomaterial->po_qty );
                             $grandTotal += $totalValue;
                         @endphp
                         <td width='15%' class="align-top">
-
-                            {{-- {{ $pomaterial->taxClass?->tax_class == 1
-                                ? Number::currency($pomaterial->total_value * ($pomaterial->taxClass?->tax_value * 0.01 + 1), 'PHP')
-                                : Number::currency($pomaterial->total_value, 'PHP') }} --}}
-
                             @php
                                 echo Number::currency($totalValue, 'PHP');
                             @endphp
@@ -170,27 +165,13 @@
             @php
                 echo Number::currency($grandTotal, 'PHP');
             @endphp
-            {{-- {{ Number::currency($poHeader->total_po_value, 'PHP') }} --}}
         </div>
         <div class='buyer'>
             {{ $poHeader->created_name }}
         </div>
         <div class='approver'>
             {{ $approvers }}
-            {{-- @foreach ($poHeader->workflows as $approver)
-                @if ($loop->index >= 1)
-                    /
-                @endif
-                {{ $approver->approved_by }}
-            @endforeach --}}
-            {{-- {{ date('d/m/Y', strtotime($poHeader->release_date)) }} --}}
             <br />
-            {{-- @foreach ($poHeader->workflows as $approver)
-            @if ($loop->index >= 1)
-                /
-            @endif
-            {{ $approver->position }}
-        @endforeach --}}
         </div>
     </div>
 

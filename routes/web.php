@@ -86,7 +86,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/report-gr', [ReportController::class, "grReport"])->name("report.gr");
     Route::get('/report-gr-download', [ReportController::class, "downloadGrReport"])->name("download.report.gr");
     Route::get('/report-material', [ReportController::class, "materialReport"])->name("report.material");
-    Route::get('/report-material-download', [ReportController::class, "downloadMaterialReport"])->name("download.material.gr");
+    Route::get('/report-material-download', [ReportController::class, "downloadMaterialReport"])->name("download.report.material");
     
 
 });

@@ -385,7 +385,7 @@ const Edit = ({
                 <Tabs defaultValue="header_text" className="max-w-8xl">
                   <TabsList>
                     <TabsTrigger value="header_text">Header Text</TabsTrigger>
-                    <TabsTrigger value="approver_text">Approver Text</TabsTrigger>
+                    <TabsTrigger value="approver_text">Remarks</TabsTrigger>
                     <TabsTrigger value="notes">Notes</TabsTrigger>
                     <TabsTrigger value="deliv_addr">Delivery Address</TabsTrigger>
                     <TabsTrigger value="workflow">Workflow</TabsTrigger>

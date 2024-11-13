@@ -50,17 +50,25 @@ export default function PoReportFilter({
       <Modal show={showModal} onClose={closeModal} maxWidth="xl">
         <div className="m-2">
           <div className="flex ">
-            <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="type">
-              Purchasing Group
+            <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
+              Doc Date
             </Label>
             <Input
+              className="m-2 w-full border-gray-300 h-10"
+              type="date"
+              defaultValue={queryParams.doc_date_from}
+              onBlur={(e) => searchFieldChanged('doc_date_from', e.target.value)}
+              onKeyDown={(e) => handleKeyPress('doc_date_from', e)}
+            />
+            <Input
               className="m-2 w-full border-gray-300 h-10 "
-              type="text"
-              defaultValue={queryParams.purch_grp}
-              onBlur={(e) => searchFieldChanged('purch_grp', e.target.value)}
-              onKeyDown={(e) => handleKeyPress('purch_grp', e)}
+              type="date"
+              defaultValue={queryParams.doc_date_to}
+              onBlur={(e) => searchFieldChanged('doc_date_to', e.target.value)}
+              onKeyDown={(e) => handleKeyPress('doc_date_to', e)}
             />
           </div>
+
           <div className="flex ">
             <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
               Supplier
@@ -258,6 +266,19 @@ export default function PoReportFilter({
               defaultValue={queryParams.plant}
               onBlur={(e) => searchFieldChanged('plant', e.target.value)}
               onKeyDown={(e) => handleKeyPress('plant', e)}
+            />
+          </div>
+
+          <div className="flex ">
+            <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="type">
+              Purchasing Group
+            </Label>
+            <Input
+              className="m-2 w-full border-gray-300 h-10 "
+              type="text"
+              defaultValue={queryParams.purch_grp}
+              onBlur={(e) => searchFieldChanged('purch_grp', e.target.value)}
+              onKeyDown={(e) => handleKeyPress('purch_grp', e)}
             />
           </div>
 

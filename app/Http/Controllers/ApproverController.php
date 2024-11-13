@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreApproversRequest;
-use App\Http\Requests\UpdateApproversRequest;
 use App\Http\Resources\ApproverResource;
 use App\Http\Resources\UserResource;
 use App\Models\Approvers;
@@ -41,7 +39,7 @@ class ApproverController extends Controller
         $vendor = $query->orderBy(column: 'type', direction: 'asc')
             ->orderBy('plant', 'asc')
             ->orderBy('seq', 'asc')
-            ->paginate(10)
+            ->paginate(50)
             ->onEachSide(5);
 
         $plants =  Plant::select('plant', "name1")

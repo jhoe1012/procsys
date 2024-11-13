@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Exports\GRReportExport;
+use App\Exports\MaterialReportExport;
 use App\Exports\POReportExport;
 use App\Exports\PRReportExport;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -16,7 +16,7 @@ class ReportController extends Controller
     public function prReport(Request $request)
     {
         return Inertia::render('Reports/PrReport', [
-            'prReport' => $this->_getPrReport($request)->paginate(perPage: 20)->onEachSide(5),
+            'prReport' => $this->_getPrReport($request)->paginate(50)->onEachSide(5),
             'queryParams' => $request->query() ?: null,
 
         ]);
@@ -34,7 +34,7 @@ class ReportController extends Controller
     public function poReport(Request $request)
     {
         return Inertia::render('Reports/PoReport', [
-            'poReport' => $this->_getPoReport($request)->paginate(perPage: 20)->onEachSide(5),
+            'poReport' => $this->_getPoReport($request)->paginate(50)->onEachSide(5),
             'queryParams' => $request->query() ?: null,
 
         ]);
@@ -50,7 +50,7 @@ class ReportController extends Controller
     public function grReport(Request $request)
     {
         return Inertia::render('Reports/GrReport', [
-            'grReport' => $this->_getGrReport($request)->paginate(perPage: 20)->onEachSide(5),
+            'grReport' => $this->_getGrReport($request)->paginate(50)->onEachSide(5),
             'queryParams' => $request->query() ?: null,
 
         ]);
@@ -63,13 +63,13 @@ class ReportController extends Controller
             \Maatwebsite\Excel\Excel::XLSX
         );
     }
-    
+
 
     public function materialReport(Request $request)
     {
         // dd($this->_getMaterialReport($request)->get());
         return Inertia::render('Reports/MaterialReport', [
-            'materialReport' => $this->_getMaterialReport($request)->paginate(perPage: 20)->onEachSide(5),
+            'materialReport' => $this->_getMaterialReport($request)->paginate(50)->onEachSide(5),
             'queryParams' => $request->query() ?: null,
 
         ]);
@@ -77,8 +77,8 @@ class ReportController extends Controller
     public function downloadMaterialReport(Request $request)
     {
         return Excel::download(
-            new GRReportExport($this->_getGrReport($request)->get()->toArray()),
-            'GR Report.xlsx',
+            new MaterialReportExport($this->_getMaterialReport($request)->get()->toArray()),
+            'Material Report.xlsx',
             \Maatwebsite\Excel\Excel::XLSX
         );
     }
@@ -179,8 +179,9 @@ class ReportController extends Controller
     {
         $query = DB::table('po_headers')->select(
             'po_headers.po_number',
-            'gr_headers.gr_number',
             'po_headers.control_no',
+            'gr_headers.gr_number',
+            'gr_headers.actual_date',
             'po_materials.item_no',
             'po_headers.doc_date',
             'po_materials.purch_grp',
@@ -196,6 +197,7 @@ class ReportController extends Controller
             'gr_materials.unit AS gr_unit',
             'po_materials.net_price',
             'po_materials.total_value',
+            DB::raw('po_materials.net_price * gr_materials.gr_qty AS gr_total_value'),
             'po_materials.currency',
             'po_headers.plant',
             'po_headers.release_date',
@@ -206,6 +208,12 @@ class ReportController extends Controller
             ->Join('vendors', 'vendors.supplier', '=', 'po_headers.vendor_id')
             ->leftJoin('gr_materials', 'gr_materials.po_material_id', '=', 'po_materials.id')
             ->leftJoin('gr_headers', 'gr_headers.id', '=', 'gr_materials.gr_header_id');
+
+        if ($request->input('doc_date_from') && $request->input('doc_date_to')) {
+            $query->whereBetween('po_headers.doc_date', [$request->input('doc_date_from'), $request->input('doc_date_to')]);
+        } elseif ($request->input('doc_date_from')) {
+            $query->whereDate('po_headers.doc_date',  $request->input('doc_date_from'));
+        }
 
         if ($request->input('purch_grp')) {
             $query->where('po_materials.purch_grp', 'ilike', "%" . $request->input('purch_grp') . "%");
@@ -302,6 +310,14 @@ class ReportController extends Controller
         } elseif ($request->input('ponumber_from')) {
             $query->where('gr_headers.po_number', 'ilike', "%" . $request->input('ponumber_from') . "%");
         }
+
+        if ($request->input('supplier_code')) {
+            $query->where('gr_headers.vendor_id', 'ilike', "%" . $request->input('supplier_code') . "%");
+        }
+        if ($request->input('supplier_name')) {
+            $query->where('vendors.name_1', 'ilike', "%" . $request->input('supplier_name') . "%");
+        }
+
         if ($request->input('created_name')) {
             $query->where('gr_headers.created_name', 'ilike', "%" . $request->input('created_name') . "%");
         }
@@ -338,7 +354,6 @@ class ReportController extends Controller
         $query = DB::table('materials')->select(
             'materials.mat_code',
             'materials.mat_desc',
-            'materials.old_mat_code',
             'materials.base_uom',
             'materials.order_uom',
             'alternative_uoms.alt_uom',
@@ -348,44 +363,17 @@ class ReportController extends Controller
             'alternative_uoms.ean_upc',
             'alternative_uoms.ean_category',
             'alternative_uoms.unit_of_weight'
-        )
-            ->leftJoin('alternative_uoms', 'materials.mat_code', '=', 'alternative_uoms.mat_code');
+        )->leftJoin('alternative_uoms', 'materials.mat_code', '=', 'alternative_uoms.mat_code');
 
-        // if ($request->input('grnumber_from') && $request->input('grnumber_to')) {
-        //     $query->whereBetween('gr_headers.gr_number', [$request->input('grnumber_from'), $request->input('grnumber_to')]);
-        // } elseif ($request->input('grnumber_from')) {
-        //     $query->where('gr_headers.gr_number', 'ilike', "%" . $request->input('grnumber_from') . "%");
-        // }
-
-        // if ($request->input('ponumber_from') && $request->input('ponumber_to')) {
-        //     $query->whereBetween('gr_headers.po_number', [$request->input('ponumber_from'), $request->input('ponumber_to')]);
-        // } elseif ($request->input('ponumber_from')) {
-        //     $query->where('gr_headers.po_number', 'ilike', "%" . $request->input('ponumber_from') . "%");
-        // }
-        // if ($request->input('created_name')) {
-        //     $query->where('gr_headers.created_name', 'ilike', "%" . $request->input('created_name') . "%");
-        // }
-        // if ($request->input('entry_date_from') && $request->input('entry_date_to')) {
-        //     $query->whereBetween('gr_headers.entry_date', [$request->input('entry_date_from'), $request->input('entry_date_to')]);
-        // } elseif ($request->input('entry_date_from')) {
-        //     $query->whereDate('gr_headers.entry_date',  $request->input('entry_date_from'));
-        // }
-        // if ($request->input('actual_date_from') && $request->input('actual_date_to')) {
-        //     $query->whereBetween('gr_headers.actual_date', [$request->input('actual_date_from'), $request->input('actual_date_to')]);
-        // } elseif ($request->input('actual_date_from')) {
-        //     $query->whereDate('gr_headers.actual_date',  $request->input('actual_date_from'));
-        // }
-        // if ($request->input('delivery_note')) {
-        //     $query->where('gr_headers.delivery_note', 'ilike', "%" . $request->input('delivery_note') . "%");
-        // }
-        // if ($request->input('mat_code_from') && $request->input('mat_code_to')) {
-        //     $query->whereBetween('gr_materials.mat_code', [$request->input('mat_code_from'), $request->input('mat_code_to')]);
-        // } elseif ($request->input('mat_code_from')) {
-        //     $query->where('gr_materials.mat_code', 'ilike', "%" . $request->input('mat_code_from') . "%");
-        // }
-        // if ($request->input('short_text')) {
-        //     $query->where('gr_materials.short_text', 'ilike', "%" . $request->input('short_text') . "%");
-        // }
+        if ($request->input('mat_code_from') && $request->input('mat_code_to')) {
+            $query->whereBetween('materials.mat_code', [$request->input('mat_code_from'), $request->input('mat_code_to')]);
+        } elseif ($request->input('mat_code_from')) {
+            $query->where('materials.mat_code', 'ilike', "%" . $request->input('mat_code_from') . "%");
+        }
+ 
+        if ($request->input('mat_desc')) {
+            $query->where('materials.mat_desc', 'ilike', "%" . $request->input('mat_desc') . "%");
+        }
         
         $query->orderBy('materials.mat_code')
             ->orderBy('alternative_uoms.counter');

@@ -193,8 +193,9 @@ export default function Index({
 
                   <tbody className="text-xs text-black">
                     {pr_header.data.length > 0 ? (
-                      pr_header.data.map((pr) => (
-                        <tr className="bg-white border-b" key={pr.id}>
+                      pr_header.data.map((pr, index) => (
+                        // <tr className="bg-white border-b" key={pr.id}>
+                        <tr className={'border-b ' + (index % 2 === 0 ? 'bg-gray-100' : 'bg-white')} key={pr.id}>
                           <td className="px-3 py-2">
                             <input
                               type="radio"

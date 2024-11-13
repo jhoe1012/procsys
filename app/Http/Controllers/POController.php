@@ -3,26 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\ApproveStatusResource;
 use App\Http\Resources\POHeaderResource;
 use App\Http\Resources\PRMaterialsResource;
-use App\Http\Resources\PRPOMaterialsResource;
-use App\Http\Resources\VendorResource;
 use App\Mail\PoApprovedEmail;
 use App\Mail\PoForApprovalEmail;
 use App\Mail\PoRejectedReworkEmail;
 use App\Mail\PrForApprovalEmail;
 use App\Models\Approvers;
 use App\Models\ApproveStatus;
-use App\Models\Attachment;
 use App\Models\PoHeader;
 use App\Models\PoMaterial;
-use App\Models\PrHeader;
 use App\Models\PrMaterial;
 use App\Models\Vendor;
 use App\Services\AttachmentService;
 use Carbon\Carbon;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -40,7 +34,7 @@ class POController extends Controller
     public function index(Request $request)
     {
         $query = PoHeader::query();
-        $query = $query->with(['workflows', 'attachments', 'pomaterials', 'plants', 'vendors']);
+        $query = $query->with(['pomaterials', 'plants', 'vendors']);
 
         $user_plants = $request->user()->plants->map(function ($items) {
             return $items->plant;
@@ -78,12 +72,16 @@ class POController extends Controller
             $query->where('status', 'ilike', "%" . request('status') . "%");
         }
         if (request('control_no')) {
-            $query->where('control_no', 'ilike', "%" . request('control_no') . "%");
+            if (request('control_no') == 'blank') {
+                $query->whereNull('control_no');
+            } else {
+                $query->where('control_no', 'ilike', "%" . request('control_no') . "%");
+            }
         }
 
         $po_header = $query->orderBy('doc_date', 'desc')
             ->orderBy('po_number', 'desc')
-            ->paginate(20)
+            ->paginate(50)
             ->onEachSide(5);
 
         return Inertia::render('PO/Index', [
@@ -165,12 +163,14 @@ class POController extends Controller
                     ->filter(fn($item) => !empty($item['mat_code']))
                     ->map(fn($item, $index) => $this->_mapOrUpdatePoMaterial($item, $index, $po_header->id))
                     ->map(function ($item) {
+                        $converted_qty_old_value = 0;
                         if (isset($item['id'])) {
                             $po_material = POMaterial::find($item['id']);
                             $converted_qty_old_value = $po_material->converted_qty;
                         } else {
                             $po_material = new POMaterial();
                         }
+                        $po_material->po_header_id = $item['po_header_id'];
                         $po_material->pr_material_id = $item['pr_material_id'];
                         $po_material->item_no = $item['item_no'];
                         $po_material->mat_code = $item['mat_code'];
@@ -205,6 +205,7 @@ class POController extends Controller
                     })->values();
 
                 $total_po_value = $po_materials->filter(fn($item) => $item['status'] != 'X')->sum('total_value');
+                $total_po_value  = $total_po_value != 0 ? $total_po_value : $po_header->total_po_value ;
                 $po_header->update(array_merge(
                     $request->only([
                         'control_no',
@@ -314,8 +315,8 @@ class POController extends Controller
                 $po_header->status = $approver_2nd->desc;
                 $email_status = 1;
             } elseif (
-                $po_header->total_po_value  >= $approver->amount_from
-                && $po_header->total_po_value  <= $approver->amount_to
+               /*  $po_header->total_po_value  >= $approver->amount_from
+                &&  */$po_header->total_po_value  <= $approver->amount_to
             ) {
                 $po_header->status = Str::ucfirst(ApproveStatus::APPROVED);
                 $po_header->release_date = Carbon::now()->format('Y-m-d H:i:s');
@@ -429,7 +430,7 @@ class POController extends Controller
             'vendors',
             'pomaterials.taxClass',
             'workflows' => fn($query) => $query->where('status', Str::ucfirst(ApproveStatus::APPROVED)),
-            'pomaterials' => fn($query) => $query->whereNull('status')
+            'pomaterials' => fn($query) => $query->whereNull('status')->orWhere('status', '')
         ])->findOrFail($id);
 
         //   dd($poHeader);

@@ -2,13 +2,13 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { PageProps, IMessage, IPOHeaderPage, IPOHeader, IPOMaterial } from '@/types';
 import Modal from '@/Components/Modal';
-
 import { useState, useEffect, KeyboardEvent } from 'react';
 import Pagination from '@/Components/Pagination';
 import TextInput from '@/Components/TextInput';
 import { useToast } from '@/Components/ui/use-toast';
 import { Toaster } from '@/Components/ui/toaster';
-import { formatNumber } from '@/lib/utils';
+import { formatNumber, reactSelectStyles } from '@/lib/utils';
+import AsyncSelect from 'react-select/async';
 
 export default function Index({
   auth,
@@ -60,6 +60,21 @@ export default function Index({
     setModalOpen(false);
   };
 
+  const fetchVendor = async (inputValue) => {
+    if (!inputValue) return [];
+
+    try {
+      const response = await window.axios.get(route('vendor.search', { search: inputValue }));
+      return response.data.data.map((item) => ({
+        value: item.supplier,
+        label: `${item.supplier} - ${item.name_1}`,
+      }));
+    } catch (e) {
+      console.log('Error fetching data:', e);
+      return [];
+    }
+  };
+
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -84,7 +99,7 @@ export default function Index({
                           defaultValue={queryParams.po_number_from}
                           onBlur={(e) => searchFieldChanged('po_number_from', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('po_number_from', e)}
-                          placeholder='PO No. From'
+                          placeholder="PO No. From"
                         />
                       </th>
                       <th className="px-1 py-2"></th>
@@ -118,7 +133,7 @@ export default function Index({
                           defaultValue={queryParams.po_number_to}
                           onBlur={(e) => searchFieldChanged('po_number_to', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('po_number_to', e)}
-                          placeholder='PO No. To'
+                          placeholder="PO No. To"
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -127,7 +142,7 @@ export default function Index({
                           defaultValue={queryParams.control_no}
                           onBlur={(e) => searchFieldChanged('control_no', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('control_no', e)}
-                          placeholder='Control No.'
+                          placeholder="Control No."
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -136,16 +151,21 @@ export default function Index({
                           defaultValue={queryParams.plant}
                           onBlur={(e) => searchFieldChanged('plant', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('plant', e)}
-                          placeholder='Plant'
+                          placeholder="Plant"
                         />
                       </th>
                       <th className="px-1 py-2">
-                        <TextInput
-                          className="h-7 text-xs p-1 m-0"
-                          defaultValue={queryParams.vendor}
-                          onBlur={(e) => searchFieldChanged('vendor', e.target.value)}
-                          onKeyDown={(e) => handleKeyPress('vendor', e)}
-                          placeholder='Vendor'
+                        <AsyncSelect
+                          className="p-2 w-full border-gray-500"
+                          cacheOptions
+                          defaultOptions
+                          loadOptions={fetchVendor}
+                          value={
+                            queryParams.vendor ? { label: `${queryParams.vendor} `, value: queryParams.vendor } : null
+                          }
+                          onChange={(option: any) => searchFieldChanged('vendor', option?.value)}
+                          placeholder="Vendor"
+                          styles={reactSelectStyles}
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -154,7 +174,7 @@ export default function Index({
                           defaultValue={queryParams.created_name}
                           onBlur={(e) => searchFieldChanged('created_name', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('created_name', e)}
-                          placeholder='Created By'
+                          placeholder="Created By"
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -181,7 +201,7 @@ export default function Index({
                           defaultValue={queryParams.status}
                           onBlur={(e) => searchFieldChanged('status', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('status', e)}
-                          placeholder='Status'
+                          placeholder="Status"
                         />
                       </th>
                     </tr>
@@ -202,8 +222,9 @@ export default function Index({
 
                   <tbody className="text-xs text-black">
                     {po_header.data.length > 0 ? (
-                      po_header.data.map((po) => (
-                        <tr className="bg-white border-b" key={po.id}>
+                      po_header.data.map((po, index) => (
+                        // <tr className="bg-white border-b" key={po.id}>
+                        <tr className={'border-b ' + (index % 2 === 0 ? 'bg-gray-100' : 'bg-white')}  key={po.id}>
                           <td className="px-3 py-2">
                             <input
                               type="radio"

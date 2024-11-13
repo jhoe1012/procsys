@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreMaterialNetPriceRequest;
-use App\Http\Requests\UpdateMaterialNetPriceRequest;
 use App\Http\Resources\MaterialNetPriceResource;
 use App\Models\MaterialNetPrice;
 use App\Models\Plant;
@@ -33,7 +31,7 @@ class MaterialNetPriceController extends Controller
 
         $materialNetPrice = $query->orderBy('mat_code', 'desc')
             ->orderBy('valid_from', 'desc')
-            ->paginate(20)
+            ->paginate(50)
             ->onEachSide(5);
 
         //   dd($materialNetPrice_price);

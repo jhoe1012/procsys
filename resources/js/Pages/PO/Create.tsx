@@ -334,7 +334,7 @@ const Create = ({ auth, vendors }: PageProps & PageProps<{ vendors: [] }>) => {
                 <Tabs defaultValue="header_text" className="max-w-8xl">
                   <TabsList>
                     <TabsTrigger value="header_text">Header Text</TabsTrigger>
-                    <TabsTrigger value="approver_text">Approver Text</TabsTrigger>
+                    <TabsTrigger value="approver_text">Remarks</TabsTrigger>
                     <TabsTrigger value="notes">Notes</TabsTrigger>
                     <TabsTrigger value="deliveryAddress">Delivery Address</TabsTrigger>
                     <TabsTrigger value="workflow">Workflow</TabsTrigger>

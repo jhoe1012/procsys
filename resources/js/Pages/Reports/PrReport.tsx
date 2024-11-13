@@ -62,7 +62,8 @@ export default function PrReport({ auth, prReport, queryParams }: PageProps) {
                 <tbody className="text-xs text-black">
                   {prReport.data.length > 0 ? (
                     prReport.data.map((pr, index) => (
-                      <tr className="bg-white border-b" key={index}>
+                      // <tr className="bg-white border-b" key={index}>
+                      <tr className={'border-b ' + (index % 2 === 0 ? 'bg-gray-100' : 'bg-white')} key={index}>
                         <td className="px-3 py-2">{pr.purch_grp}</td>
                         <td className="px-3 py-2">{pr.pr_number}</td>
                         <td className="px-3 py-2">{pr.po_number}</td>

@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreVendorRequest;
-use App\Http\Requests\UpdateVendorRequest;
 use App\Http\Resources\VendorResource;
 use App\Models\Vendor;
 use Illuminate\Http\Request;
@@ -37,7 +35,7 @@ class VendorController extends Controller
         }
 
         $vendor = $query->orderBy('name_1', 'desc')
-            ->paginate(10)
+            ->paginate(50)
             ->onEachSide(5);
 
         return Inertia::render('Admin/Vendor/Index', [

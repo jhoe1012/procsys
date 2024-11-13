@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreMaterialValuationRequest;
-use App\Http\Requests\UpdateMaterialValuationRequest;
+use App\Http\Controllers\Controller; 
 use App\Http\Resources\MaterialValuationResource;
 use App\Models\MaterialValuation;
 use App\Models\Plant;
@@ -31,7 +29,7 @@ class MaterialValuationController extends Controller
 
         $materialValuation = $query->orderBy('mat_code', 'desc')
             ->orderBy('valid_from', 'desc')
-            ->paginate(20)
+            ->paginate(50)
             ->onEachSide(5);
             
         $plant =  Plant::select('plant', "name1")

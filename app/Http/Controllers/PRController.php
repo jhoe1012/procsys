@@ -9,7 +9,6 @@ use App\Mail\PrForApprovalEmail;
 use App\Mail\PrRejectedReworkEmail;
 use App\Models\Approvers;
 use App\Models\ApproveStatus;
-use App\Models\Attachment;
 use App\Models\Material;
 use App\Models\PrHeader;
 use App\Models\PrMaterial;
@@ -32,7 +31,7 @@ class PRController extends Controller
     {
         $query = PrHeader::query();
 
-        $query = $query->with(['workflows', 'attachments', 'prmaterials', 'plants']);
+        $query = $query->with(['prmaterials', 'plants']);
 
         $user_plants = $request->user()->plants->map(function ($items) {
             return $items->plant;
@@ -75,7 +74,7 @@ class PRController extends Controller
 
         $pr_header = $query->orderBy('doc_date', 'desc')
             ->orderBy('pr_number', 'desc')
-            ->paginate(20)
+            ->paginate(50)
             ->onEachSide(5);
 
         return Inertia::render('PR/Index', [
@@ -261,6 +260,7 @@ class PRController extends Controller
                     })->values();
 
                 $total_pr_value = $pr_materials->filter(fn($item) => $item['status'] != 'X')->sum('total_value');
+                $total_pr_value  = $total_pr_value != 0 ? $total_pr_value : $pr_header->total_pr_value ;
                 $pr_header->update(
                     array_merge(
                         $request->only([

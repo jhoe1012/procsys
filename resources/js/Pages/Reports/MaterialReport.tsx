@@ -3,7 +3,7 @@ import { Head, router } from '@inertiajs/react';
 import { PageProps } from '@/types';
 import { formatNumber } from '@/lib/utils';
 import Pagination from '@/Components/Pagination';
-import PrReportFilter from './Partials/PrReportFilter';
+import MaterialReportFilter from './Partials/MaterialReportFilter';
 import { ArrowDownTrayIcon } from '@heroicons/react/24/solid';
 import DownloadButton from '@/Components/DownloadButton';
 
@@ -22,8 +22,8 @@ export default function MaterialReport({ auth, materialReport, queryParams }: Pa
         <div className="flex flex-row justify-between">
           <h2 className="font-semibold text-xl text-gray-800 leading-tight">Material Report</h2>
           <div className="flex gap-2">
-            {/* <PrReportFilter queryParams={queryParams} filterReport={filterReport} /> */}
-            {/* <DownloadButton href={route('download.report.pr', { ...queryParams })} /> */}
+            <MaterialReportFilter queryParams={queryParams} filterReport={filterReport} />
+            <DownloadButton href={route('download.report.material', { ...queryParams })} />
           </div>
         </div>
       }>
@@ -53,7 +53,8 @@ export default function MaterialReport({ auth, materialReport, queryParams }: Pa
                 <tbody className="text-xs text-black">
                   {materialReport.data.length > 0 ? (
                     materialReport.data.map((material, index) => (
-                      <tr className="bg-white border-b" key={index}>
+                      // <tr className="bg-white border-b" key={index}>
+                      <tr className={'border-b ' + (index % 2 === 0 ? 'bg-gray-100' : 'bg-white')} key={index}>
                         <td className="px-3 py-2">{material.mat_code}</td>
                         <td className="px-3 py-2">{material.mat_desc}</td>
                         <td className="px-3 py-2">{material.base_uom}</td>
