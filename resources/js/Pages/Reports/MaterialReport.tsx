@@ -39,7 +39,7 @@ export default function MaterialReport({ auth, materialReport, queryParams }: Pa
                     <th className="px-1 py-2">Material</th>
                     <th className="px-3 py-2">Material Description</th>
                     <th className="px-3 py-2">Base UOM</th>
-                    <th className="px-3 py-2">Oder UOM</th>
+                    <th className="px-3 py-2">Order UOM</th>
                     <th className="px-3 py-2">Alt. Uom</th>
                     <th className="px-3 py-2">Counter</th>
                     <th className="px-3 py-2">Denominator</th>

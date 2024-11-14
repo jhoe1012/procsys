@@ -24,7 +24,7 @@ class MaterialReportExport implements FromArray, WithHeadings
             'Material',
             'Material Description',
             'Base UOM',
-            'Oder UOM',
+            'Order UOM',
             'Alt. Uom',
             'Counter',
             'Denominator',

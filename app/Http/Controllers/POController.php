@@ -205,7 +205,7 @@ class POController extends Controller
                     })->values();
 
                 $total_po_value = $po_materials->filter(fn($item) => $item['status'] != 'X')->sum('total_value');
-                $total_po_value  = $total_po_value != 0 ? $total_po_value : $po_header->total_po_value ;
+                $total_po_value  = $total_po_value != 0 ? $total_po_value : $po_header->total_po_value;
                 $po_header->update(array_merge(
                     $request->only([
                         'control_no',
@@ -245,38 +245,40 @@ class POController extends Controller
 
         $approvers = Approvers::where('amount_from', '<=', $po_header->total_po_value)
             ->where('plant', $po_header->plant)
-            ->where('type', Approvers::TYPE_PO)->orderBy('seq')->get();
+            ->where('type', Approvers::TYPE_PO)
+            ->orderBy('seq')
+            ->get();
 
-        if ($approvers->count() > 0) {
-            foreach ($approvers as $approver) {
-                $approver_status = new ApproveStatus();
-                $approver_status->po_number = $po_header->po_number;
-                $approver_status->status = $approver->desc;
-                $approver_status->position = $approver->position;
-                $approver_status->seq = $approver->seq;
-                $approver_status->save();
-            }
+        if ($approvers->isEmpty()) {
+            return to_route("po.edit", $po_header->po_number)->with('error', "No Approver Found.");
+        }
+        // delete approve status where user id is null to keep the status clean
+        ApproveStatus::where('po_number', $po_header->po_number)->whereNull('user_id')->delete();
 
-            $po_header->status = $approvers[0]->desc;
-            $po_header->appr_seq = $approvers[0]->seq;
-            $po_header->save();
+        $approvers->each(function ($approver) use ($po_header) {       
+            ApproveStatus::create([
+                'po_number' => $po_header->po_number,
+                'status'    => $approver->desc,
+                'position'  => $approver->position,
+                'seq'       => $approver->seq,
+            ]);
+        });
 
-            $approvers = Approvers::with('user')
-                ->where('plant', $po_header->plant)
-                ->where('type', Approvers::TYPE_PO)
-                ->where('seq', 1)
-                ->first();
+        $firstApprover = $approvers->first();
+        $po_header->update([
+            'status'   => $firstApprover->desc,
+            'appr_seq' => $firstApprover->seq,
+        ]);
 
-            Mail::to($approvers->user->email)
+        if ($firstApprover->user) {
+            Mail::to($firstApprover->user->email)
                 ->send(new PoForApprovalEmail(
-                    $approvers->user->name,
+                    $firstApprover->user->name,
                     $po_header
                 ));
-
-            return to_route("po.index")->with('success', "PR {$po_header->po_number} sent for approval.");
         }
 
-        return to_route("po.index")->with('error', "No Approver Found.");
+        return to_route("po.index")->with('success', "PR {$po_header->po_number} sent for approval.");
     }
     public function discard($id)
     {
@@ -315,8 +317,7 @@ class POController extends Controller
                 $po_header->status = $approver_2nd->desc;
                 $email_status = 1;
             } elseif (
-               /*  $po_header->total_po_value  >= $approver->amount_from
-                &&  */$po_header->total_po_value  <= $approver->amount_to
+                $po_header->total_po_value  <= $approver->amount_to
             ) {
                 $po_header->status = Str::ucfirst(ApproveStatus::APPROVED);
                 $po_header->release_date = Carbon::now()->format('Y-m-d H:i:s');

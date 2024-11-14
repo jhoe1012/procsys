@@ -22,14 +22,13 @@ class ApproveStatus extends Model
 
     protected $fillable = [
         'pr_number',
+        'po_number',
+        'position',
         'status',
         'approved_by',
         'user_id',
         'approved_date',
-        'created_by',
-        'updated_by',
-        'created_at',
-        'updated_at',
+        'seq',
     ];
 
     public function prheader(): BelongsTo
