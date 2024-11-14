@@ -1,3 +1,6 @@
+* Thu Nov 14 2024 jhoe1012 <jhoecabornay@gmail.com> (30d35a0)
+- FIX SUBMIT STATUS DUPLICATES
+
 * Wed Nov 13 2024 jhoe1012 <jhoecabornay@gmail.com> (3b4098e)
 - FIX PO PRINTING VAT COMPUTATION TO 2 DECIMAL 
 - UPDATE PO REPORT 
