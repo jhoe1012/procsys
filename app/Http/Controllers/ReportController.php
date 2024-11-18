@@ -184,6 +184,7 @@ class ReportController extends Controller
             'gr_headers.actual_date',
             'po_materials.item_no',
             'po_headers.doc_date',
+            'po_headers.deliv_date',
             'po_materials.purch_grp',
             'vendors.supplier',
             'vendors.name_1',
@@ -203,6 +204,7 @@ class ReportController extends Controller
             'po_headers.release_date',
             'po_materials.status',
             'po_headers.created_name',
+            'po_headers.deliv_addr',
         )
             ->join('po_materials', 'po_materials.po_header_id',  '=', 'po_headers.id')
             ->Join('vendors', 'vendors.supplier', '=', 'po_headers.vendor_id')
@@ -213,6 +215,12 @@ class ReportController extends Controller
             $query->whereBetween('po_headers.doc_date', [$request->input('doc_date_from'), $request->input('doc_date_to')]);
         } elseif ($request->input('doc_date_from')) {
             $query->whereDate('po_headers.doc_date',  $request->input('doc_date_from'));
+        }
+
+        if ($request->input('deliv_date_from') && $request->input('deliv_date_to')) {
+            $query->whereBetween('po_headers.deliv_date', [$request->input('deliv_date_from'), $request->input('deliv_date_to')]);
+        } elseif ($request->input('deliv_date_from')) {
+            $query->whereDate('po_headers.deliv_date',  $request->input('deliv_date_from'));
         }
 
         if ($request->input('purch_grp')) {

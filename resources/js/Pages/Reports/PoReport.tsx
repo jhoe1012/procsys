@@ -32,7 +32,7 @@ export default function PoReport({ auth, poReport, queryParams }: PageProps) {
         <div className="max-w-8xl mx-auto sm:px-6 lg:px-2">
           <div className="bg-gray-50 text-black shadow-sm sm:rounded-lg ">
             <div className="overflow-x-auto">
-              <table className=" table-auto w-[170rem]   text-xs text-left rtl:text-right text-gray-500">
+              <table className=" table-auto w-[200rem]   text-xs text-left rtl:text-right text-gray-500">
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b-2 border-gray-500">
                   <tr className="text-nowrap">
                     <th className="px-1 py-2">Pur. Doc</th>
@@ -41,6 +41,7 @@ export default function PoReport({ auth, poReport, queryParams }: PageProps) {
                     <th className="px-1 py-2">Actual Date Recv</th>
                     <th className="px-3 py-2">Item</th>
                     <th className="px-3 py-2">Doc Date</th>
+                    <th className="px-1 py-2">Delivery Date</th>
                     <th className="px-3 py-2">PGr</th>
                     <th className="px-3 py-2">Supplier</th>
                     <th className="px-3 py-2">Supplier Name</th>
@@ -60,6 +61,7 @@ export default function PoReport({ auth, poReport, queryParams }: PageProps) {
                     <th className="px-3 py-2">Release Date</th>
                     <th className="px-3 py-2">Status</th>
                     <th className="px-3 py-2">Created By</th>
+                    <th className="px-3 py-2">Devlivery Address</th>
                   </tr>
                 </thead>
 
@@ -73,6 +75,7 @@ export default function PoReport({ auth, poReport, queryParams }: PageProps) {
                         <td className="px-1 py-2">{po.actual_date}</td>
                         <td className="px-1 py-2">{po.item_no}</td>
                         <td className="px-1 py-2">{po.doc_date}</td>
+                        <td className="px-1 py-2">{po.deliv_date}</td>
                         <td className="px-1 py-2">{po.purch_grp}</td>
                         <td className="px-1 py-2">{po.supplier}</td>
                         <td className="px-1 py-2">{po.name_1}</td>
@@ -92,6 +95,7 @@ export default function PoReport({ auth, poReport, queryParams }: PageProps) {
                         <td className="px-1 py-2">{po.release_date}</td>
                         <td className="px-1 py-2">{po.status}</td>
                         <td className="px-1 py-2">{po.created_name}</td>
+                        <td className="px-1 py-2">{po.deliv_addr}</td>
                       </tr>
                     ))
                   ) : (

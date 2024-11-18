@@ -27,6 +27,7 @@ class POReportExport implements FromArray, WithHeadings
             'Actual Date Recv',
             'Item',
             'Doc Date',
+            'Delivery Date',
             'PGr',
             'Supplier',
             'Supplier Name',
@@ -46,6 +47,7 @@ class POReportExport implements FromArray, WithHeadings
             'Release Date',
             'Status',
             'Created By',
+            'Delivery Address',
         ];
     }
 }

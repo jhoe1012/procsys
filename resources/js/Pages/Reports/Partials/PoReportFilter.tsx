@@ -71,6 +71,26 @@ export default function PoReportFilter({
 
           <div className="flex ">
             <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
+              Delivery Date
+            </Label>
+            <Input
+              className="m-2 w-full border-gray-300 h-10"
+              type="date"
+              defaultValue={queryParams.deliv_date_from}
+              onBlur={(e) => searchFieldChanged('deliv_date_from', e.target.value)}
+              onKeyDown={(e) => handleKeyPress('deliv_date_from', e)}
+            />
+            <Input
+              className="m-2 w-full border-gray-300 h-10 "
+              type="date"
+              defaultValue={queryParams.deliv_date_to}
+              onBlur={(e) => searchFieldChanged('deliv_date_to', e.target.value)}
+              onKeyDown={(e) => handleKeyPress('deliv_date_to', e)}
+            />
+          </div>
+
+          <div className="flex ">
+            <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
               Supplier
             </Label>
             <Input
@@ -91,27 +111,6 @@ export default function PoReportFilter({
             />
           </div>
 
-          {/* <div className="flex ">
-            <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
-              PR Number
-            </Label>
-            <Input
-              className="m-2 w-full border-gray-300 h-10"
-              type="text"
-              defaultValue={queryParams.prnumber_from}
-              onBlur={(e) => searchFieldChanged('prnumber_from', e.target.value)}
-              onKeyDown={(e) => handleKeyPress('prnumber_from', e)}
-              placeholder="From"
-            />
-            <Input
-              className="m-2 w-full border-gray-300 h-10 "
-              type="text"
-              defaultValue={queryParams.prnumber_to}
-              onBlur={(e) => searchFieldChanged('prnumber_to', e.target.value)}
-              onKeyDown={(e) => handleKeyPress('prnumber_to', e)}
-              placeholder="To"
-            />
-          </div> */}
           <div className="flex ">
             <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
               PO Number
@@ -187,44 +186,7 @@ export default function PoReportFilter({
               onKeyDown={(e) => handleKeyPress('short_text', e)}
             />
           </div>
-          {/* <div className="flex ">
-            <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
-              Request Date
-            </Label>
-            <Input
-              className="m-2 w-full border-gray-300 h-10"
-              type="date"
-              defaultValue={queryParams.request_date_from}
-              onBlur={(e) => searchFieldChanged('request_date_from', e.target.value)}
-              onKeyDown={(e) => handleKeyPress('request_date_from', e)}
-            />
-            <Input
-              className="m-2 w-full border-gray-300 h-10 "
-              type="date"
-              defaultValue={queryParams.request_date_to}
-              onBlur={(e) => searchFieldChanged('request_date_to', e.target.value)}
-              onKeyDown={(e) => handleKeyPress('request_date_to', e)}
-            />
-          </div>
-          <div className="flex ">
-            <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
-              Deliv. Date
-            </Label>
-            <Input
-              className="m-2 w-full border-gray-300 h-10"
-              type="date"
-              defaultValue={queryParams.deliv_date_from}
-              onBlur={(e) => searchFieldChanged('deliv_date_from', e.target.value)}
-              onKeyDown={(e) => handleKeyPress('deliv_date_from', e)}
-            />
-            <Input
-              className="m-2 w-full border-gray-300 h-10 "
-              type="date"
-              defaultValue={queryParams.deliv_date_to}
-              onBlur={(e) => searchFieldChanged('deliv_date_to', e.target.value)}
-              onKeyDown={(e) => handleKeyPress('deliv_date_to', e)}
-            />
-          </div> */}
+{/*          
           <div className="flex ">
             <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
               Release Date
@@ -243,7 +205,7 @@ export default function PoReportFilter({
               onBlur={(e) => searchFieldChanged('release_date_to', e.target.value)}
               onKeyDown={(e) => handleKeyPress('release_date_to', e)}
             />
-          </div>
+          </div> */}
           <div className="flex ">
             <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="type">
               Created By
