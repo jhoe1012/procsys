@@ -1,3 +1,9 @@
+* Mon Nov 18 2024 jhoe1012 <jhoecabornay@gmail.com> (e6172e8)
+- ADD DELIVERY DATE IN PO REPORT
+
+* Thu Nov 14 2024 jhoe1012 <jhoecabornay@gmail.com> (05c15f9)
+-  v1.0.4
+
 * Thu Nov 14 2024 jhoe1012 <jhoecabornay@gmail.com> (30d35a0)
 - FIX SUBMIT STATUS DUPLICATES
 
@@ -41,6 +47,3 @@
 
 * Thu Oct 17 2024 jhoe1012 <jhoecabornay@gmail.com> (c0c8357)
 - v1.0.1 - FIX PO INDEX FILTER
-
-* Wed Oct 16 2024 jhoe1012 <jhoecabornay@gmail.com> (988ef4c)
-- v1.0.0
