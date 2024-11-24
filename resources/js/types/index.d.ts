@@ -205,6 +205,7 @@ export interface IPRMaterial {
   qty_ordered?: number;
   qty_open?: number;
   price?: number;
+  valuation_price: number;
   per_unit?: number;
   unit?: string;
   total_value?: number;
@@ -212,7 +213,10 @@ export interface IPRMaterial {
   del_date?: Date;
   mat_grp?: string;
   purch_grp?: string;
-  altUom?: Array<string>;
+  altUomSelect?: Array<string>;
+  altUom?: IAlternativeUom[];
+  conversion?: number;
+  converted_qty?:number;
   created_by?: string;
   updated_by?: string;
   created_at?: string;
@@ -426,3 +430,36 @@ export type Choice = {
   label: string;
   value: string;
 };
+
+export interface FormFieldProps {
+  label: string;
+  id: string;
+  type?: string;
+  value?: string;
+  defaultValue?: string;
+  required?: boolean;
+  disabled?: boolean;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+export interface GenericSelectProps<T> {
+  label: string;
+  items: T[] | undefined;
+  valueKey: keyof T; 
+  displayKey: keyof T; 
+  value: string;
+  onValueChange: (value: string) => void;
+  placeholder?: string;
+}
+
+export interface TabItem {
+  value: string;
+  label: string;
+  content: React.ReactNode;
+}
+
+export interface TabsProps {
+  defaultValue: string;
+  tabs: TabItem[];
+  className?: string;
+}

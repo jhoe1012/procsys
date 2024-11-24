@@ -460,6 +460,9 @@ class PRController extends Controller
             'mat_grp' => $item['mat_grp'],
             'purch_grp' => $item['purch_grp'],
             'status' => $item['status'] ?? null,
+            'valuation_price' => $item['valuation_price'],
+            'conversion' => $item['conversion'],
+            'converted_qty' => $item['converted_qty'],
         ];
     }
 

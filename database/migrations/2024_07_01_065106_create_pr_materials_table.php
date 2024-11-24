@@ -30,10 +30,6 @@ return new class extends Migration
             $table->date('del_date');
             $table->string('mat_grp')->nullable();
             $table->string('purch_grp')->nullable();
-            $table->decimal('conversion', 15,2);
-            $table->decimal('denominator', 15,2);
-            $table->decimal('converted_qty', 15,2);
-            $table->string('base_unit', 10);
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();
             $table->timestamps();

@@ -23,7 +23,7 @@ class MaterialResource extends JsonResource
             "mat_type" => $this->mat_type,
             "mat_grp_code" => $this->mat_grp_code,
             "base_uom" => $this->base_uom,
-            "order_uom" => $this->mat_grp_code,
+            "order_uom" => $this->order_uom,
             "min_rem_shelf_life" => $this->min_rem_shelf_life,
             "total_shelf_life" => $this->total_shelf_life,
             "created_by" => $this->created_by,

@@ -12,7 +12,7 @@ class PoHeader extends Model
 {
     use HasFactory, CreatedUpdatedBy;
 
-    protected $fillable =[
+    protected $fillable = [
         'control_no',
         'vendor_id',
         'created_name',
@@ -38,7 +38,7 @@ class PoHeader extends Model
             'updated_at' => 'datetime',
         ];
     }
-   
+
     public function plants(): HasOne
     {
         return $this->hasOne(Plant::class, 'plant', 'plant');
@@ -55,7 +55,7 @@ class PoHeader extends Model
     public function workflows(): HasMany
     {
         return $this->hasMany(ApproveStatus::class, 'po_number', 'po_number')
-            ->oldest('created_at')
+            ->oldest('approved_date')
             ->orderBy('seq');;
     }
     public function attachments(): HasMany
@@ -79,6 +79,4 @@ class PoHeader extends Model
                 ->increment('current_value');
         });
     }
-    
-   
 }
