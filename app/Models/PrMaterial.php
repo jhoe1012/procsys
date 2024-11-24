@@ -31,6 +31,9 @@ class PrMaterial extends Model
         'del_date',
         'mat_grp',
         'purch_grp',
+        'conversion',
+        'converted_qty',
+        'valuation_price',
     ];
 
 
@@ -44,19 +47,25 @@ class PrMaterial extends Model
             'per_unit' => 'integer',
             'total_value' => 'float',
             'del_date' => 'datetime',
+            'conversion' => 'float',
+            'converted_qty' => 'float',
+            'valuation_price' => 'float',
         ];
     }
     public function prheader(): BelongsTo
     {
         return $this->belongsTo(PrHeader::class, 'pr_headers_id', 'id');
     }
-    public function pomaterials() : HasMany {
+    public function pomaterials(): HasMany
+    {
         return $this->hasMany(PoMaterial::class, 'po_material_id', 'id');
     }
-    public function materialNetPrices() : HasMany {
+    public function materialNetPrices(): HasMany
+    {
         return $this->hasMany(MaterialNetPrice::class, 'mat_code', 'mat_code');
     }
-    public function altUoms() : HasMany {
+    public function altUoms(): HasMany
+    {
         return $this->hasMany(AlternativeUom::class, 'mat_code', 'mat_code');
     }
 }

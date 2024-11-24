@@ -43,7 +43,7 @@ class PrHeader extends Model
     public function workflows(): HasMany
     {
         return $this->hasMany(ApproveStatus::class, 'pr_number', 'pr_number')
-            ->oldest('created_at')
+            ->oldest('approved_date')
             ->orderBy('seq');
     }
     public function plants(): HasOne
