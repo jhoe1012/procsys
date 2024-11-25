@@ -72,7 +72,8 @@ class PRController extends Controller
             $query->where('status', 'ilike', "%" . request('status') . "%");
         }
 
-        $pr_header = $query->orderBy('doc_date', 'desc')
+        $pr_header = $query->orderBy('status', 'asc')
+            ->orderBy('doc_date', 'desc')
             ->orderBy('pr_number', 'desc')
             ->paginate(50)
             ->onEachSide(5);
@@ -176,7 +177,7 @@ class PRController extends Controller
     public function edit(Request $request, $prnumber)
     {
 
-        $pr_header = PrHeader::with('plants', 'prmaterials', 'workflows', 'attachments')
+        $pr_header = PrHeader::with('plants', 'prmaterials', 'prmaterials.altUoms', 'workflows', 'attachments')
             ->where('pr_number', $prnumber)
             ->firstOrFail();
 
@@ -254,13 +255,16 @@ class PRController extends Controller
                         $pr_material->del_date = $item['del_date'];
                         $pr_material->mat_grp = $item['mat_grp'];
                         $pr_material->purch_grp = $item['purch_grp'];
+                        $pr_material->valuation_price = $item['valuation_price'];
+                        $pr_material->conversion = $item['conversion'];
+                        $pr_material->converted_qty = $item['converted_qty'];
                         $pr_material->save();
 
                         return $item;
                     })->values();
 
                 $total_pr_value = $pr_materials->filter(fn($item) => $item['status'] != 'X')->sum('total_value');
-                $total_pr_value  = $total_pr_value != 0 ? $total_pr_value : $pr_header->total_pr_value ;
+                $total_pr_value  = $total_pr_value != 0 ? $total_pr_value : $pr_header->total_pr_value;
                 $pr_header->update(
                     array_merge(
                         $request->only([
@@ -283,8 +287,8 @@ class PRController extends Controller
                 if ($attachments = AttachmentService::handleAttachments($request)) {
                     $pr_header->attachments()->saveMany($attachments);
                 }
-                
-                 return to_route("pr.edit", $pr_header->pr_number)->with('success', 'PR updated successfully');
+
+                return to_route("pr.edit", $pr_header->pr_number)->with('success', 'PR updated successfully');
             });
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
@@ -296,11 +300,6 @@ class PRController extends Controller
 
     public function approve(Request $request)
     {
-        // $type = [
-        //     'approve' => ApproveStatus::APPROVED,
-        //     'rework' => ApproveStatus::REWORKED,
-        //     'reject' => ApproveStatus::REJECTED
-        // ];
 
         $pr_header = PrHeader::with('createdBy', 'workflows', 'attachments', 'prmaterials', 'plants')
             ->where('pr_number', $request->pr_number)

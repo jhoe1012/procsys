@@ -21,7 +21,7 @@ class ApproveStatusResource extends JsonResource
             'approved_by' => $this->approved_by,
             'position' => $this->position,
             'user_id' => $this->user_id,
-            'approved_date' => $this->approved_date,
+            'approved_date' => $this->approved_date ? $this->approved_date->toDayDateTimeString() : '',
             'seq' => $this->seq,
             'message' => $this->message,
             'created_at' => $this->created_at,

@@ -8,7 +8,7 @@ import Pagination from '@/Components/Pagination';
 import TextInput from '@/Components/TextInput';
 import { useToast } from '@/Components/ui/use-toast';
 import { Toaster } from '@/Components/ui/toaster';
-import { formatNumber } from '@/lib/utils';
+import { formatLongDate, formatNumber, formatShortDate } from '@/lib/utils';
 
 export default function Index({
   auth,
@@ -55,10 +55,10 @@ export default function Index({
     searchFieldChanged(name, (e.target as HTMLInputElement).value);
   };
 
-  const [modalOpen, setModalOpenm] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const closeModal = () => {
-    setModalOpenm(false);
+    setModalOpen(false);
   };
 
   return (
@@ -202,7 +202,7 @@ export default function Index({
                               name="sel"
                               onClick={() => {
                                 setSelectedPR(pr);
-                                setModalOpenm(true);
+                                setModalOpen(true);
                               }}
                             />
                           </td>
@@ -212,8 +212,8 @@ export default function Index({
                           </td>
                           <td className="px-3 py-2">{pr.created_name}</td>
                           <td className="px-3 py-2">{pr.requested_by}</td>
-                          <td className="px-3 py-2">{pr.doc_date}</td>
-                          <td className="px-3 py-2">{pr.updated_at}</td>
+                          <td className="px-3 py-2">{formatShortDate(pr.doc_date)}</td>
+                          <td className="px-3 py-2">{formatLongDate(pr.updated_at)}</td>
                           <td className="px-3 py-2">{pr.status}</td>
                           {/* <td className="px-3 py-2">{pr?.plants?.name1}</td> */}
                         </tr>
@@ -251,7 +251,7 @@ export default function Index({
                         <th className="px-3 py-2">Del Date</th>
                         <th className="px-3 py-2">Quantity</th>
                         <th className="px-3 py-2">Open Qty</th>
-                        <th className="px-3 py-2">Unit</th>
+                        <th className="px-3 py-2">Ord. Unit</th>
                         <th className="px-3 py-2">Total Value</th>
                         <th className="px-3 py-2">Curr</th>
                       </tr>
@@ -264,10 +264,10 @@ export default function Index({
                           <td className="px-3 py-2">{prmaterial.item_no}</td>
                           <td className="px-3 py-2">{prmaterial.mat_code}</td>
                           <td className="px-3 py-2">{prmaterial.short_text}</td>
-                          <td className="px-3 py-2">{prmaterial.del_date?.toString()}</td>
+                          <td className="px-3 py-2">{formatShortDate(prmaterial.del_date)}</td>
                           <td className="px-3 py-2">{prmaterial.qty}</td>
                           <td className="px-3 py-2">{prmaterial.qty_open}</td>
-                          <td className="px-3 py-2">{prmaterial.unit}</td>
+                          <td className="px-3 py-2">{prmaterial.ord_unit}</td>
                           <td className="px-3 py-2">{formatNumber(prmaterial.total_value ?? 0)}</td>
                           <td className="px-3 py-2">{prmaterial.currency}</td>
                         </tr>
