@@ -1,49 +1,23 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { PageProps, IPRMaterial, IPRHeader } from '@/types';
+import { PageProps, IPRMaterial, IPRHeader, TabItem } from '@/types';
+import { Button, Textarea, Input, Label, Toaster, useToast } from '@/Components/ui/';
 import {
-  Button,
-  Textarea,
-  Input,
-  Label,
-  Toaster,
-  useToast
-} from '@/Components/ui/';
-import {
-  DataSheetGrid, checkboxColumn,
+  DataSheetGrid,
+  checkboxColumn,
   textColumn,
   intColumn,
   keyColumn,
   floatColumn,
-  dateColumn
+  dateColumn,
 } from 'react-datasheet-grid';
 import 'react-datasheet-grid/dist/style.css';
 import { useState, useEffect, useMemo, FormEventHandler } from 'react';
 import { Operation } from 'react-datasheet-grid/dist/types';
-import { formatNumber, customDataSheetStyle, dateToday } from '@/Lib/utils';
+import { formatNumber } from '@/lib/utils';
 import { Loading, Dropzone, selectColumn, Choice, InputField, SelectField, TabFields } from '@/Components';
 import { useMaterial, usePRMaterialValidation } from '@/Hooks';
-
-
-const defaultMaterial = {
-  sel: false,
-  item_no: undefined,
-  status: undefined,
-  mat_code: undefined,
-  short_text: undefined,
-  qty: undefined,
-  ord_unit: undefined,
-  qty_ordered: undefined,
-  qty_open: undefined,
-  price: undefined,
-  per_unit: undefined,
-  unit: undefined,
-  total_value: undefined,
-  currency: undefined,
-  del_date: undefined,
-  mat_grp: undefined,
-  purch_grp: undefined,
-};
+import { CUSTOM_DATA_SHEET_STYLE, DATE_TODAY, DEFAULT_PR_MATERIAL } from '@/lib/constants';
 
 const Create = ({
   auth,
@@ -54,13 +28,13 @@ const Create = ({
   const [files, setFiles] = useState([]);
   const { updateMaterialPR, computeConversion, isLoading } = useMaterial();
   const { validateMaterials } = usePRMaterialValidation();
-  const [material, setMaterial] = useState<IPRMaterial[]>(Array(10).fill({ ...defaultMaterial }));
+  const [material, setMaterial] = useState<IPRMaterial[]>(Array(10).fill({ ...DEFAULT_PR_MATERIAL }));
 
   const { data, setData, post, errors, reset, processing } = useForm<IPRHeader>({
     id: 0,
     pr_number: '',
     created_name: auth.user.name,
-    doc_date: dateToday,
+    doc_date: DATE_TODAY,
     requested_by: auth.user.name,
     plant: auth.user.plants !== undefined ? auth.user.plants[0]?.plant : '',
     reason_pr: '',
@@ -86,7 +60,7 @@ const Create = ({
             rowData && (
               <select
                 className="border-none w-full shadow-none bg-none px-1 py-0 active:border-none hover:border-none"
-                defaultValue={rowData.find(({ value }) => value === material[rowIndex].ord_unit) ?? null}
+                // defaultValue={rowData.find(({ value }) => value === material[rowIndex].ord_unit) ?? null}
                 onChange={(e) => {
                   setMaterial((prevMaterial) => {
                     const newMaterial = [...prevMaterial];
@@ -110,7 +84,7 @@ const Create = ({
       },
       { ...keyColumn('ord_unit', textColumn), title: 'Ord Unit', minWidth: 55 },
       { ...keyColumn('price', floatColumn), title: 'Price', minWidth: 90, disabled: true },
-      { ...keyColumn('unit', textColumn), title: 'Unit', minWidth: 50, disabled: true },
+      { ...keyColumn('unit', textColumn), title: 'B.Unit', minWidth: 50, disabled: true },
       { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 90, disabled: true },
       { ...keyColumn('currency', textColumn), title: 'Curr', minWidth: 50, disabled: true },
       { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 130 },
@@ -124,6 +98,7 @@ const Create = ({
     {
       value: 'reasonForPr',
       label: 'Reason for PR',
+      visible: true,
       content: (
         <Textarea value={data.reason_pr} onChange={(e) => setData('reason_pr', e.target.value)} required={true} />
       ),
@@ -131,11 +106,13 @@ const Create = ({
     {
       value: 'headerText',
       label: 'Header Text',
+      visible: true,
       content: <Textarea value={data.header_text} onChange={(e) => setData('header_text', e.target.value)} />,
     },
     {
       value: 'attachment',
       label: 'Attachment',
+      visible: true,
       content: <Dropzone files={files} setFiles={setFiles} />,
     },
   ];
@@ -147,9 +124,9 @@ const Create = ({
 
   const handleSubmit: FormEventHandler = async (e) => {
     e.preventDefault();
-    const {isValid, updatedMaterials} = validateMaterials(material)
-    setMaterial(updatedMaterials)
-    if ( isValid) {
+    const { isValid, updatedMaterials } = validateMaterials(material);
+    setMaterial(updatedMaterials);
+    if (isValid) {
       post(route('pr.store'));
     }
   };
@@ -210,11 +187,11 @@ const Create = ({
               </div>
               <div className="p-2">
                 <DataSheetGrid
-                  createRow={() => defaultMaterial}
+                  createRow={() => DEFAULT_PR_MATERIAL}
                   value={material}
                   onChange={updateMaterial}
                   columns={columns}
-                  style={customDataSheetStyle}
+                  style={CUSTOM_DATA_SHEET_STYLE}
                   autoAddRow
                   disableExpandSelection
                   rowHeight={30}

@@ -7,8 +7,9 @@ import Pagination from '@/Components/Pagination';
 import TextInput from '@/Components/TextInput';
 import { useToast } from '@/Components/ui/use-toast';
 import { Toaster } from '@/Components/ui/toaster';
-import { formatNumber, reactSelectStyles } from '@/lib/utils';
+import { formatNumber } from '@/lib/utils';
 import AsyncSelect from 'react-select/async';
+import { REACT_SELECT_STYLES } from '@/lib/constants';
 
 export default function Index({
   auth,
@@ -165,7 +166,7 @@ export default function Index({
                           }
                           onChange={(option: any) => searchFieldChanged('vendor', option?.value)}
                           placeholder="Vendor"
-                          styles={reactSelectStyles}
+                          styles={REACT_SELECT_STYLES}
                         />
                       </th>
                       <th className="px-1 py-2">

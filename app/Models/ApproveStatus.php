@@ -31,6 +31,13 @@ class ApproveStatus extends Model
         'seq',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'approved_date' => 'datetime',
+        ];
+    }
+
     public function prheader(): BelongsTo
     {
         return $this->belongsTo(PrHeader::class, 'pr_number', 'pr_number');

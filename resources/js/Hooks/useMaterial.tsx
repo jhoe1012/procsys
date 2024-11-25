@@ -20,7 +20,7 @@ export default function useMaterial() {
   };
 
   const computeConversion = (material: IPRMaterial, _ord_unit: string) => {
-    const alt_uom = material.altUom?.find(({ alt_uom }) => alt_uom === _ord_unit) || {};
+    const alt_uom = material.alt_uom?.find(({ alt_uom }) => alt_uom === _ord_unit) || {};
     const conversion = (alt_uom.counter ?? 1) / (alt_uom.denominator ?? 1);
     const price = material.valuation_price * conversion;
     const converted_qty = (material.qty ?? 0) * conversion;
@@ -82,7 +82,7 @@ export default function useMaterial() {
 
               Object.assign(value, {
                 altUomSelect,
-                altUom: altUoms,
+                alt_uom: altUoms,
                 mat_code: materialInfo.mat_code,
                 short_text: materialInfo.mat_desc,
                 ord_unit: ord_unit,

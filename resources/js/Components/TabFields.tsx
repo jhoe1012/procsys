@@ -13,7 +13,7 @@ const TabFields: React.FC<TabsProps> = ({ defaultValue, tabs, className }) => {
       </TabsList>
       {tabs.map((tab) => (
         <TabsContent value={tab.value} key={tab.value}>
-          {tab.content}
+          {tab.visible && tab.content}
         </TabsContent>
       ))}
     </Tabs>

@@ -214,9 +214,9 @@ export interface IPRMaterial {
   mat_grp?: string;
   purch_grp?: string;
   altUomSelect?: Array<string>;
-  altUom?: IAlternativeUom[];
+  alt_uom?: IAlternativeUom[];
   conversion?: number;
-  converted_qty?:number;
+  converted_qty?: number;
   created_by?: string;
   updated_by?: string;
   created_at?: string;
@@ -278,7 +278,7 @@ export interface IPOMaterial {
   id?: number;
   po_header_id?: number;
   po_material_id?: number;
-  pr_material_id?:number;
+  pr_material_id?: number;
   status?: string;
   item_no?: number;
   mat_code?: string;
@@ -445,8 +445,8 @@ export interface FormFieldProps {
 export interface GenericSelectProps<T> {
   label: string;
   items: T[] | undefined;
-  valueKey: keyof T; 
-  displayKey: keyof T; 
+  valueKey: keyof T;
+  displayKey: keyof T;
   value: string;
   onValueChange: (value: string) => void;
   placeholder?: string;
@@ -455,6 +455,7 @@ export interface GenericSelectProps<T> {
 export interface TabItem {
   value: string;
   label: string;
+  visible: boolean;
   content: React.ReactNode;
 }
 
@@ -462,4 +463,12 @@ export interface TabsProps {
   defaultValue: string;
   tabs: TabItem[];
   className?: string;
+}
+
+export interface IitemDetails {
+  doc: string;
+  itm: string;
+  sts: string;
+  qty: number;
+  unit: string;
 }
