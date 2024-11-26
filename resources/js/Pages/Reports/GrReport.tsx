@@ -4,6 +4,7 @@ import { PageProps } from '@/types';
 import Pagination from '@/Components/Pagination';
 import GrReportFilter from './Partials/GrReportFilter';
 import DownloadButton from '@/Components/DownloadButton';
+import { formatNumber } from '@/lib/utils';
 
 export default function GrReport({ auth, grReport, queryParams }: PageProps) {
   queryParams = queryParams || {};
@@ -36,6 +37,7 @@ export default function GrReport({ auth, grReport, queryParams }: PageProps) {
                   <tr className="text-nowrap">
                     <th className="px-1 py-2">GR Number</th>
                     <th className="px-1 py-2">PO Number</th>
+                    <th className="px-1 py-2">Control Number</th>
                     <th className="px-1 py-2">Created by</th>
                     <th className="px-1 py-2">Supplier</th>
                     <th className="px-1 py-2">Supplier Name</th>
@@ -50,6 +52,8 @@ export default function GrReport({ auth, grReport, queryParams }: PageProps) {
                     <th className="px-1 py-2">Qty</th>
                     <th className="px-1 py-2">Unit</th>
                     <th className="px-1 py-2">Open PO</th>
+                    <th className="px-1 py-2">Price</th>
+                    <th className="px-1 py-2">Total Value</th>
                     <th className="px-1 py-2">Batch</th>
                     <th className="px-1 py-2">Mfg Date</th>
                     <th className="px-1 py-2">SLED / BBD</th>
@@ -65,6 +69,7 @@ export default function GrReport({ auth, grReport, queryParams }: PageProps) {
                       <tr className={'border-b ' + (index % 2 === 0 ? 'bg-gray-100' : 'bg-white')} key={index}>
                         <td className="px-3 py-2">{gr.gr_number}</td>
                         <td className="px-3 py-2">{gr.po_number}</td>
+                        <td className="px-3 py-2">{gr.control_no}</td>
                         <td className="px-3 py-2">{gr.created_name}</td>
                         <td className="px-3 py-2">{gr.supplier}</td>
                         <td className="px-3 py-2">{gr.name_1}</td>
@@ -79,6 +84,8 @@ export default function GrReport({ auth, grReport, queryParams }: PageProps) {
                         <td className="px-3 py-2">{gr.gr_qty}</td>
                         <td className="px-3 py-2">{gr.unit}</td>
                         <td className="px-3 py-2">{gr.po_gr_qty}</td>
+                        <td className="px-3 py-2">{formatNumber(gr.net_price)}</td>
+                        <td className="px-3 py-2">{formatNumber(gr.total_value)}</td>
                         <td className="px-3 py-2">{gr.batch}</td>
                         <td className="px-3 py-2">{gr.mfg_date}</td>
                         <td className="px-3 py-2">{gr.sled_bbd}</td>

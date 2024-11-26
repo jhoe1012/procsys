@@ -280,6 +280,7 @@ class ReportController extends Controller
         $query = DB::table('gr_materials')->select(
             'gr_headers.gr_number',
             'gr_headers.po_number',
+            'po_headers.control_no',
             'gr_headers.created_name',
             'vendors.supplier',
             'vendors.name_1',
@@ -294,6 +295,8 @@ class ReportController extends Controller
             'gr_materials.gr_qty',
             'gr_materials.unit',
             'po_materials.po_gr_qty',
+            'po_materials.net_price',
+            DB::raw('po_materials.net_price * gr_materials.gr_qty AS total_value'),
             'gr_materials.batch',
             'gr_materials.mfg_date',
             'gr_materials.sled_bbd',
@@ -305,7 +308,8 @@ class ReportController extends Controller
         )
             ->join('gr_headers', 'gr_headers.id',  '=', 'gr_materials.gr_header_id')
             ->Join('vendors', 'vendors.supplier', '=', 'gr_headers.vendor_id')
-            ->leftJoin('po_materials', 'po_materials.id', '=', 'gr_materials.po_material_id');
+            ->leftJoin('po_materials', 'po_materials.id', '=', 'gr_materials.po_material_id')
+            ->leftJoin('po_headers', 'po_headers.po_number', '=', 'gr_headers.po_number' );
 
         if ($request->input('grnumber_from') && $request->input('grnumber_to')) {
             $query->whereBetween('gr_headers.gr_number', [$request->input('grnumber_from'), $request->input('grnumber_to')]);
@@ -317,6 +321,12 @@ class ReportController extends Controller
             $query->whereBetween('gr_headers.po_number', [$request->input('ponumber_from'), $request->input('ponumber_to')]);
         } elseif ($request->input('ponumber_from')) {
             $query->where('gr_headers.po_number', 'ilike', "%" . $request->input('ponumber_from') . "%");
+        }
+
+        if ($request->input('control_from') && $request->input('control_to')) {
+            $query->whereBetween('po_headers.control_no', [$request->input('control_from'), $request->input('control_to')]);
+        } elseif ($request->input('control_from')) {
+            $query->where('po_headers.control_no', 'ilike', "%" . $request->input('control_from') . "%");
         }
 
         if ($request->input('supplier_code')) {
@@ -378,11 +388,11 @@ class ReportController extends Controller
         } elseif ($request->input('mat_code_from')) {
             $query->where('materials.mat_code', 'ilike', "%" . $request->input('mat_code_from') . "%");
         }
- 
+
         if ($request->input('mat_desc')) {
             $query->where('materials.mat_desc', 'ilike', "%" . $request->input('mat_desc') . "%");
         }
-        
+
         $query->orderBy('materials.mat_code')
             ->orderBy('alternative_uoms.counter');
 

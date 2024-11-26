@@ -91,7 +91,27 @@ export default function GrReportFilter({
               placeholder="To"
             />
           </div>
-
+          <div className="flex ">
+            <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
+              Control Number
+            </Label>
+            <Input
+              className="m-2 w-full border-gray-300 h-10"
+              type="text"
+              defaultValue={queryParams.control_from}
+              onBlur={(e) => searchFieldChanged('control_from', e.target.value)}
+              onKeyDown={(e) => handleKeyPress('control_from', e)}
+              placeholder="From"
+            />
+            <Input
+              className="m-2 w-full border-gray-300 h-10 "
+              type="text"
+              defaultValue={queryParams.control_to}
+              onBlur={(e) => searchFieldChanged('control_to', e.target.value)}
+              onKeyDown={(e) => handleKeyPress('control_to', e)}
+              placeholder="To"
+            />
+          </div>
           <div className="flex ">
             <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
               Supplier

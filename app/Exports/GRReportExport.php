@@ -23,6 +23,7 @@ class GRReportExport implements FromArray, WithHeadings
         return [
             'GR Number',
             'PO Number',
+            'Control Number',
             'Created By',
             'Supplier',
             'Supplier Name',
@@ -37,6 +38,8 @@ class GRReportExport implements FromArray, WithHeadings
             'Qty',
             'Unit',
             'Open PO',
+            'Price',
+            'Total Value',
             'Batch',
             'MFG Date',
             'SLED / BBD',
