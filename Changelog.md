@@ -1,3 +1,9 @@
+* Tue Nov 26 2024 jhoe1012 <jhoecabornay@gmail.com> (2074d04)
+- UPDATE GR REPORT
+
+* Mon Nov 18 2024 jhoe1012 <jhoecabornay@gmail.com> (d8213bd)
+- v1.0.5
+ 
 * Mon Nov 18 2024 jhoe1012 <jhoecabornay@gmail.com> (e6172e8)
 - ADD DELIVERY DATE IN PO REPORT
 
