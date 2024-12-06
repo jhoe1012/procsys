@@ -1,3 +1,10 @@
+* Thu Oct 17 2024 jhoe1012 <jhoecabornay@gmail.com> (c0c8357)
+- v1.0.1 - FIX PO INDEX FILTER* Fri Dec 06 2024 jhoe1012 <jhoecabornay@gmail.com> (da62f51)
+- ADD OPEN PO QTY IN FILTERING
+
+* Tue Nov 26 2024 jhoe1012 <jhoecabornay@gmail.com> (8bd0261)
+- v1.0.6
+- 
 * Tue Nov 26 2024 jhoe1012 <jhoecabornay@gmail.com> (2074d04)
 - UPDATE GR REPORT
 
@@ -50,6 +57,3 @@
 
 * Tue Oct 22 2024 jhoe1012 <jhoecabornay@gmail.com> (74826c1)
 - ADD DRAG AND DROP FILE UPLOAD - REMOVE UNUSED CODE IN GR
-
-* Thu Oct 17 2024 jhoe1012 <jhoecabornay@gmail.com> (c0c8357)
-- v1.0.1 - FIX PO INDEX FILTER
