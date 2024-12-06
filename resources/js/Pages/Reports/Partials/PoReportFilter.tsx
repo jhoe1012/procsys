@@ -4,6 +4,7 @@ import { Label } from '@/Components/ui/label';
 import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
 import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/solid';
+import Checkbox from '@/Components/Checkbox';
 
 export default function PoReportFilter({
   queryParams,
@@ -14,7 +15,7 @@ export default function PoReportFilter({
 }) {
   const [showModal, setShowModal] = useState(false);
 
-  const searchFieldChanged = (name: string, value: string) => {
+  const searchFieldChanged = (name: string, value: any) => {
     if (value) {
       queryParams[name] = value;
     } else {
@@ -186,7 +187,7 @@ export default function PoReportFilter({
               onKeyDown={(e) => handleKeyPress('short_text', e)}
             />
           </div>
-{/*          
+          {/*          
           <div className="flex ">
             <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
               Release Date
@@ -231,20 +232,24 @@ export default function PoReportFilter({
             />
           </div>
 
-          <div className="flex ">
-            <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="type">
+          <div className="flex items-center space-x-4">
+            <Label className="text-sm text-right w-7/12" htmlFor="type">
               Purchasing Group
             </Label>
             <Input
-              className="m-2 w-full border-gray-300 h-10 "
+              className="h-10 w-full border-gray-300"
               type="text"
               defaultValue={queryParams.purch_grp}
               onBlur={(e) => searchFieldChanged('purch_grp', e.target.value)}
               onKeyDown={(e) => handleKeyPress('purch_grp', e)}
             />
+            <Checkbox onChange={(e) => searchFieldChanged('open_po', e.target.checked)} />
+            <Label className="text-sm  w-full" htmlFor="type">
+              With Open PO
+            </Label>
           </div>
 
-          <div className="flex content-center justify-center gap-4 mb-5">
+          <div className="flex content-center justify-center gap-4 m-5">
             <Button
               onClick={handleFilter}
               variant="outline"

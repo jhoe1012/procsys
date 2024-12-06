@@ -263,12 +263,17 @@ class ReportController extends Controller
         }
 
         if ($request->input('created_name')) {
-            $query->where('pr_headers.created_name', 'ilike', "%" . $request->input('created_name') . "%");
+            $query->where('po_headers.created_name', 'ilike', "%" . $request->input('created_name') . "%");
         }
 
         if ($request->input('plant')) {
-            $query->where('pr_headers.plant', 'ilike', "%" . $request->input('plant') . "%");
+            $query->where('po_headers.plant', 'ilike', "%" . $request->input('plant') . "%");
         }
+
+        if ($request->input('open_po')) {
+            $query->where('po_materials.po_gr_qty', '>', '0');
+        }
+
 
         $query->orderBy('po_headers.po_number')
             ->orderBy('po_materials.item_no');
@@ -309,7 +314,7 @@ class ReportController extends Controller
             ->join('gr_headers', 'gr_headers.id',  '=', 'gr_materials.gr_header_id')
             ->Join('vendors', 'vendors.supplier', '=', 'gr_headers.vendor_id')
             ->leftJoin('po_materials', 'po_materials.id', '=', 'gr_materials.po_material_id')
-            ->leftJoin('po_headers', 'po_headers.po_number', '=', 'gr_headers.po_number' );
+            ->leftJoin('po_headers', 'po_headers.po_number', '=', 'gr_headers.po_number');
 
         if ($request->input('grnumber_from') && $request->input('grnumber_to')) {
             $query->whereBetween('gr_headers.gr_number', [$request->input('grnumber_from'), $request->input('grnumber_to')]);
