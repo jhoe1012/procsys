@@ -12,7 +12,7 @@ const SelectField = <T extends Record<string, any>>({
 }: GenericSelectProps<T>) => {
   return (
     <div className="flex-auto">
-      <Label>{label}</Label>
+      {label && <Label>{label}</Label>}
       <Select defaultValue={value} onValueChange={onValueChange}>
         <SelectTrigger>
           <SelectValue placeholder={placeholder} />

@@ -1,5 +1,6 @@
-import { Button } from '@/Components/ui/button';
+import { InputField } from '@/Components';
 import {
+  Button,
   Dialog,
   DialogClose,
   DialogContent,
@@ -8,26 +9,36 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/Components/ui/dialog';
-import { Input } from '@/Components/ui/input';
-import { Label } from '@/Components/ui/label';
+} from '@/Components/ui';
+import { usePOMaterial } from '@/Hooks';
 import { formatNumber } from '@/lib/utils';
-import { useState } from 'react';
+import { IAlternativeUom, IPOMaterial } from '@/types';
+import { useCallback, useMemo, useState } from 'react';
 
-export default function AddPrtoPo({ p_vendor, p_plant, p_created_name, p_doc_date, addToPO }) {
-  const [prMaterialSelected, setPrMaterialSelected] = useState([]);
-  const [prMaterialList, setPrMaterialList] = useState([]);
+const filterInputLabel = {
+  pr_number: 'PR Number',
+  mat_code: 'Material',
+  short_text: 'Short Text',
+  mat_grp: 'Material Group',
+  del_date: 'Delivery Date',
+  purch_grp: 'Buyer Group',
+};
+
+export default function AddPrtoPo({ p_vendor, p_plant, p_doc_date, addToPO }) {
+  const [prMaterialSelected, setPrMaterialSelected] = useState<IPOMaterial[]>([]);
+  const [prMaterialList, setPrMaterialList] = useState<IPOMaterial[]>([]);
+  const { computeConversion } = usePOMaterial();
 
   const [filterInputs, setFilterInputs] = useState({
     pr_number: '',
-    material: '',
-    mat_grp: '',
-    purch_grp: '',
+    mat_code: '',
     short_text: '',
     del_date: '',
+    mat_grp: '',
+    purch_grp: '',
   });
 
-  const handleAddPrToPo = async () => {
+  const fetchPrMaterials = useCallback(async () => {
     try {
       const response = await window.axios.get(route('po.plant'), {
         params: { plant: p_plant, vendor: p_vendor, doc_date: p_doc_date },
@@ -36,68 +47,29 @@ export default function AddPrtoPo({ p_vendor, p_plant, p_created_name, p_doc_dat
     } catch (error) {
       console.error('Error fetching material info:', error);
     }
-  };
+  }, [p_vendor, p_plant, p_doc_date]);
 
-  const handleCheckboxChange = (event, pr_material) => {
-    if (event.target.checked) {
-      setPrMaterialSelected([...prMaterialSelected, pr_material]);
-    } else {
-      setPrMaterialSelected(prMaterialSelected.filter((pr) => pr.id !== pr_material.id));
-    }
-  };
+  const handleCheckboxChange = useCallback((event, pr_material) => {
+    setPrMaterialSelected((prevSelected) =>
+      event.target.checked ? [...prevSelected, pr_material] : prevSelected.filter((pr) => pr.id !== pr_material.id)
+    );
+  }, []);
 
   const handleAddtoPO = () => {
-    const updateSelectedMaterial = prMaterialSelected.map((item) => {
-      let qty = undefined;
-      let unit = item.unit;
-      let per_unit = item.per_unit;
-      let qty_open = item.qty_open;
-      let net_price = undefined;
-      let total_value = undefined;
-      let min_order_qty = undefined;
-      let conversion = 1;
-      let denominator = 1;
-
-      if (item.material_net_price[0]) {
-        const altuom = item.alt_uom.find((uom) => uom.alt_uom == item.material_net_price[0].uom);
-        qty = item.qty_open / (altuom.counter / altuom.denominator);
-        qty_open = qty;
-        conversion = altuom.counter;
-        denominator = altuom.denominator;
-        unit = item.material_net_price[0].uom;
-        per_unit = item.material_net_price[0].per_unit;
-        net_price = item.material_net_price[0].price;
-        total_value = (item.material_net_price[0].price / item.material_net_price[0].per_unit) * qty;
-        min_order_qty = item.material_net_price[0].min_order_qty;
-      }
-
+    const updateSelectedMaterial = prMaterialSelected?.map((item) => {
+      const altUomSelect = [...new Set([item.ord_unit, ...item?.alt_uom?.map((uom: IAlternativeUom) => uom.alt_uom)])];
       return {
         ...item,
+        ...computeConversion(item, item.ord_unit ?? ''),
         del_date: new Date(item.del_date || ''),
         pr_material_id: item.id,
         pr_item: item.item_no,
-        // po_qty: qty,
-        qty_open: qty_open,
-        unit: unit,
-        per_unit: per_unit,
-        net_price: net_price,
-        total_value: total_value,
-        item_no: undefined,
-        id: undefined,
-        min_order_qty: min_order_qty,
-        conversion: conversion,
-        denominator: denominator,
-        converted_qty: item.qty_open,
         pr_unit: item.unit,
-        purch_grp: item.purch_grp,
+        altUomSelect: altUomSelect,
+        item_no: undefined,
       };
     });
-
     addToPO(updateSelectedMaterial);
-
-    // console.log('updateSelectedMaterial', updateSelectedMaterial);
-    // console.log('prMaterialSelected', prMaterialSelected);
-
     setPrMaterialSelected([]);
   };
 
@@ -106,31 +78,18 @@ export default function AddPrtoPo({ p_vendor, p_plant, p_created_name, p_doc_dat
     setFilterInputs({ ...filterInputs, [id]: value });
   };
 
-  const filteredPrMaterialList = prMaterialList.filter((pr) => {
-    return (
-      (filterInputs.pr_number === '' ||
-        (pr.pr_number || '').toLowerCase().includes(filterInputs.pr_number.toLowerCase())) &&
-      (filterInputs.material === '' ||
-        (pr.mat_code || '').toLowerCase().includes(filterInputs.material.toLowerCase())) &&
-      (filterInputs.mat_grp === '' || (pr.mat_grp || '').toLowerCase().includes(filterInputs.mat_grp.toLowerCase())) &&
-      (filterInputs.purch_grp === '' ||
-        (pr.purch_grp || '').toLowerCase().includes(filterInputs.purch_grp.toLowerCase())) &&
-      (filterInputs.short_text === '' ||
-        (pr.short_text || '').toLowerCase().includes(filterInputs.short_text.toLowerCase())) &&
-      (filterInputs.del_date === '' || (pr.del_date || '').toLowerCase().includes(filterInputs.del_date.toLowerCase()))
+  const filteredPrMaterialList = useMemo(() => {
+    return prMaterialList.filter((pr) =>
+      Object.entries(filterInputs).every(([key, value]) => value === '' || (pr[key]?.toLowerCase() || '').includes(value.toLowerCase()))
     );
-  });
+  }, [prMaterialList, filterInputs]);
 
   return (
     <Dialog>
-      <DialogTrigger>
-        <Button
-          type="button"
-          variant="outline"
-          className="bg-blue-400 hover:bg-blue-500 hover:text-accent-foreground hover:border-gray-500"
-          onClick={handleAddPrToPo}>
-          Add PR to PO
-        </Button>
+      <DialogTrigger
+        onClick={fetchPrMaterials}
+        className="bg-blue-400 hover:bg-blue-500 hover:text-accent-foreground hover:border-gray-500 border border-input bg-background hover:bg-accent inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+        Add PR to PO
       </DialogTrigger>
       <DialogContent className="min-w-full sm:max-w-md">
         <DialogHeader>
@@ -139,35 +98,9 @@ export default function AddPrtoPo({ p_vendor, p_plant, p_created_name, p_doc_dat
         <DialogDescription>
           <div className="flex items-center space-x-2 w-full">
             <div className="p-2 flex flex-wrap gap-4">
-              <div className="flex-auto">
-                <Label>PR Number</Label>
-                <Input type="text" id="pr_number" value={filterInputs.pr_number} onChange={handleInputChange} />
-              </div>
-
-              <div className="flex-auto">
-                <Label>Material</Label>
-                <Input type="text" id="material" value={filterInputs.material} onChange={handleInputChange} />
-              </div>
-
-              <div className="flex-auto">
-                <Label>Short Text</Label>
-                <Input type="text" id="short_text" value={filterInputs.short_text} onChange={handleInputChange} />
-              </div>
-
-              <div className="flex-auto">
-                <Label>Delivery Date</Label>
-                <Input type="text" id="del_date" value={filterInputs.del_date} onChange={handleInputChange} />
-              </div>
-
-              <div className="flex-auto">
-                <Label>Material Group</Label>
-                <Input type="text" id="mat_grp" value={filterInputs.mat_grp} onChange={handleInputChange} />
-              </div>
-
-              <div className="flex-auto">
-                <Label>Buyer Group</Label>
-                <Input type="text" id="purch_grp" value={filterInputs.purch_grp} onChange={handleInputChange} />
-              </div>
+              {Object.keys(filterInputs).map((key) => (
+                <InputField key={key} label={filterInputLabel[key]} id={key} value={filterInputs[key]} onChange={handleInputChange} />
+              ))}
             </div>
           </div>
 
@@ -177,16 +110,15 @@ export default function AddPrtoPo({ p_vendor, p_plant, p_created_name, p_doc_dat
                 <tr className="text-nowrap ">
                   <th className="px-3 py-1"> Sel</th>
                   <th className="px-3 py-1"> Pr</th>
-                  <th className="px-3 py-1"> ItmNo</th>
                   <th className="px-3 py-1"> Material</th>
                   <th className="px-3 py-1"> Short</th>
                   <th className="px-3 py-1"> Open Qty</th>
-                  <th className="px-3 py-1"> Price</th>
-                  <th className="px-3 py-1"> Per</th>
                   <th className="px-3 py-1"> Unit</th>
+                  <th className="px-3 py-1"> Per</th>
+                  <th className="px-3 py-1"> Price</th>
                   <th className="px-3 py-1"> Total Value</th>
                   <th className="px-3 py-1"> Curr</th>
-                  <th className="px-3 py-1"> Del</th>
+                  <th className="px-3 py-1"> Del Date</th>
                   <th className="px-3 py-1"> MatGrp</th>
                   <th className="px-3 py-1"> Buyer Grp</th>
                   <th className="px-3 py-1"> Requested</th>
@@ -200,16 +132,15 @@ export default function AddPrtoPo({ p_vendor, p_plant, p_created_name, p_doc_dat
                         <input type="checkbox" name="sel" onClick={() => handleCheckboxChange(event, pr)} />
                       </td>
                       <td className="px-3 py-1">{pr.pr_number}</td>
-                      <td className="px-3 py-1">{pr.item_no}</td>
                       <td className="px-3 py-1">{pr.mat_code}</td>
                       <td className="px-3 py-1">{pr.short_text}</td>
                       <td className="px-3 py-1">{pr.qty_open}</td>
-                      <td className="px-3 py-1 text-right">{formatNumber(pr.price)}</td>
+                      <td className="px-3 py-1">{pr.ord_unit}</td>
                       <td className="px-3 py-1">{pr.per_unit}</td>
-                      <td className="px-3 py-1">{pr.unit}</td>
-                      <td className="px-3 py-1 text-right">{formatNumber(pr.total_value)}</td>
+                      <td className="px-3 py-1 text-right">{formatNumber(pr.price ?? 0)}</td>
+                      <td className="px-3 py-1 text-right">{formatNumber(pr.total_value ?? 0)}</td>
                       <td className="px-3 py-1">{pr.currency}</td>
-                      <td className="px-3 py-1">{pr.del_date}</td>
+                      <td className="px-3 py-1">{pr.del_date ?? ''}</td>
                       <td className="px-3 py-1">{pr.mat_grp}</td>
                       <td className="px-3 py-1">{pr.purch_grp}</td>
                       <td className="px-3 py-1">{pr.requested_by}</td>

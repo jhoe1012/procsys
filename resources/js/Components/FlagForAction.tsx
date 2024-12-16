@@ -1,15 +1,7 @@
-import { useRef, useState, FormEventHandler } from 'react';
-import PrimaryButton from '@/Components/PrimaryButton';
-import DangerButton from '@/Components/DangerButton';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import Modal from '@/Components/Modal';
-import SecondaryButton from '@/Components/SecondaryButton';
-import TextInput from '@/Components/TextInput';
-
-import { ButtonProps, Button } from '@/Components/ui/button';
-import { Textarea } from '@/Components/ui/textarea';
-import { Head, router, useForm, Link } from '@inertiajs/react';
+import { useState } from 'react';
+import { Link } from '@inertiajs/react';
+import { SecondaryButton, Modal } from '@/Components';
+import { Button } from '@/Components/ui';
 
 export default function FlagForAction({
   p_title,
@@ -27,22 +19,9 @@ export default function FlagForAction({
 }) {
   const [confirmDiscard, setConfirmDiscard] = useState(false);
 
-  // const { data, setData, post, processing, reset, errors } = useForm({
-  //   pr_number: p_pr_number,
-  // });
-
   const confirmUserDiscard = () => {
     setConfirmDiscard(true);
   };
-
-  // const approvePr: FormEventHandler = (e) => {
-  //   e.preventDefault();
-
-  //   post(route('pr.discard'), {
-  //     preserveScroll: true,
-  //     onSuccess: () => closeModal(),
-  //   });
-  // };
 
   const closeModal = () => {
     setConfirmDiscard(false);
@@ -68,13 +47,8 @@ export default function FlagForAction({
               No
             </SecondaryButton>
 
-            {/* <PrimaryButton className="ms-3" disabled={processing}>
-              Discard
-            </PrimaryButton> */}
-
             <Link
-              href={ p_url}
-              // method="post"
+              href={p_url}
               data={p_items}
               preserveScroll
               as="button"

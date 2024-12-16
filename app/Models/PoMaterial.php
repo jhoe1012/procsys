@@ -6,6 +6,7 @@ use App\Trait\CreatedUpdatedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PoMaterial extends Model
@@ -67,5 +68,13 @@ class PoMaterial extends Model
     public function taxClass(): HasOne
     {
         return $this->hasOne(TaxClassification::class, 'mat_code', 'mat_code');
+    }
+    public function materialNetPrices(): HasMany
+    {
+        return $this->hasMany(MaterialNetPrice::class, 'mat_code', 'mat_code');
+    }
+    public function altUoms(): HasMany
+    {
+        return $this->hasMany(AlternativeUom::class, 'mat_code', 'mat_code');
     }
 }

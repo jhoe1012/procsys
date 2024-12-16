@@ -11,9 +11,11 @@ use App\Mail\PoRejectedReworkEmail;
 use App\Mail\PrForApprovalEmail;
 use App\Models\Approvers;
 use App\Models\ApproveStatus;
+use App\Models\DeliveryAddress;
 use App\Models\PoHeader;
 use App\Models\PoMaterial;
 use App\Models\PrMaterial;
+use App\Models\SupplierNote;
 use App\Models\Vendor;
 use App\Services\AttachmentService;
 use Carbon\Carbon;
@@ -92,14 +94,33 @@ class POController extends Controller
     }
     public function create(): Response
     {
+
+        $user_plants = auth()->user()->plants->map(function ($items) {
+            return $items->plant;
+        })->toArray();
+
         return Inertia::render('PO/Create', [
-            'vendors' => Vendor::selectRaw('supplier as value , supplier || \' - \'||name_1 as label')->orderBy('name_1')->get()->toArray()
+            'vendors' => Vendor::selectRaw('supplier as value , supplier || \' - \'||name_1 as label')
+                ->orderBy('name_1')
+                ->get()
+                ->toArray(),
+            'deliveryAddress' => DeliveryAddress::selectRaw('address as value, address as label')
+                ->whereIn('plant', $user_plants)
+                ->where('is_active', 'true')
+                ->orderBy('address')
+                ->get()
+                ->toArray(),
+            'supplierNotes' => SupplierNote::selectRaw('note as value, note as label')
+                ->whereIn('plant', $user_plants)
+                ->where('is_active', 'true')
+                ->orderBy('note')
+                ->get()
+                ->toArray()
         ]);
     }
 
     public function store(Request $request)
     {
-
         try {
             return DB::transaction(function () use ($request) {
                 $po_materials = collect($request->input('pomaterials'))
@@ -128,8 +149,9 @@ class POController extends Controller
                 ));
 
                 $po_header->pomaterials()->saveMany($po_materials->all());
-                $this->_updatePrMaterial($po_materials->all());
-
+                foreach ($po_materials->all() as $pomaterial) {
+                    $this->_updatePrMaterial($pomaterial);
+                }
                 if ($attachments = AttachmentService::handleAttachments($request)) {
                     $po_header->attachments()->saveMany($attachments);
                 }
@@ -145,13 +167,32 @@ class POController extends Controller
     }
     public function edit(Request $request, $ponumber)
     {
-        $po_header = PoHeader::with(['workflows', 'attachments', 'pomaterials', 'pomaterials.prmaterials', 'plants', 'vendors'])
+        $po_header = PoHeader::with(['workflows', 'attachments', 'pomaterials', 'pomaterials.prmaterials', 'pomaterials.materialNetPrices', 'pomaterials.altUoms', 'plants', 'vendors'])
             ->where('po_number', $ponumber)
             ->firstOrFail();
+        $user_plants = auth()->user()->plants->map(function ($items) {
+            return $items->plant;
+        })->toArray();
+
+
         return Inertia::render('PO/Edit', [
-            'vendors' => Vendor::selectRaw('supplier as value , supplier || \' - \'||name_1 as label')->orderBy('name_1')->get()->toArray(),
+            'vendors' => Vendor::selectRaw('supplier as value , supplier || \' - \'||name_1 as label')
+                ->where('supplier', $po_header->vendor_id)
+                ->orderBy('name_1')->get()->toArray(),
             'poheader' => new POHeaderResource($po_header),
-            'message' => ['success' => session('success'), 'error' => session('error')]
+            'message' => ['success' => session('success'), 'error' => session('error')],
+            'deliveryAddress' => DeliveryAddress::selectRaw('address as value, address as label')
+                ->whereIn('plant', $user_plants)
+                ->where('is_active', 'true')
+                ->orderBy('address')
+                ->get()
+                ->toArray(),
+            'supplierNotes' => SupplierNote::selectRaw('note as value, note as label')
+                ->whereIn('plant', $user_plants)
+                ->where('is_active', 'true')
+                ->orderBy('note')
+                ->get()
+                ->toArray()
         ]);
     }
     public function update(Request $request, $id)
@@ -196,11 +237,12 @@ class POController extends Controller
                         $po_material->purch_grp = $item['purch_grp'];
                         $po_material->save();
 
-                        if ($po_material->prmaterials instanceof PrMaterial) {
-                            $po_material->prmaterials->qty_open  = ($converted_qty_old_value + $po_material->prmaterials->qty_open) - $po_material->converted_qty;
-                            $po_material->prmaterials->qty_ordered = ($converted_qty_old_value - $po_material->prmaterials->qty_ordered) + $po_material->converted_qty;
-                            $po_material->prmaterials->save();
-                        }
+                        $this->_updatePrMaterial($po_material, $converted_qty_old_value);
+                        // if ($po_material->prmaterials instanceof PrMaterial) {
+                        //     $po_material->prmaterials->qty_open  = ($converted_qty_old_value + $po_material->prmaterials->qty_open) - $po_material->converted_qty;
+                        //     $po_material->prmaterials->qty_ordered = ($converted_qty_old_value - $po_material->prmaterials->qty_ordered) + $po_material->converted_qty;
+                        //     $po_material->prmaterials->save();
+                        // }
                         return $item;
                     })->values();
 
@@ -255,7 +297,7 @@ class POController extends Controller
         // delete approve status where user id is null to keep the status clean
         ApproveStatus::where('po_number', $po_header->po_number)->whereNull('user_id')->delete();
 
-        $approvers->each(function ($approver) use ($po_header) {       
+        $approvers->each(function ($approver) use ($po_header) {
             ApproveStatus::create([
                 'po_number' => $po_header->po_number,
                 'status'    => $approver->desc,
@@ -375,7 +417,6 @@ class POController extends Controller
                     ));
                 break;
             default:
-                # code...
                 break;
         }
 
@@ -463,15 +504,18 @@ class POController extends Controller
             sprintf("PO %s control has been updated to %s.", $po_header->po_number,  $po_header->control_no)
         );
     }
-    private function _updatePrMaterial($pomaterials): void
+    private function _updatePrMaterial($pomaterial, $converted_qty_old_value = 0): void
     {
+        if ($pomaterial->prmaterials instanceof PrMaterial) {
+            $qty_open = ($pomaterial->prmaterials->qty_open * $pomaterial->prmaterials->conversion)  + $converted_qty_old_value - $pomaterial->converted_qty;
+            $qty_open =  $qty_open / $pomaterial->prmaterials->conversion;
 
-        foreach ($pomaterials as $pomaterial) {
-            if ($pomaterial->prmaterials instanceof PrMaterial) {
-                $pomaterial->prmaterials->qty_open -= $pomaterial->converted_qty;
-                $pomaterial->prmaterials->qty_ordered += $pomaterial->converted_qty;
-                $pomaterial->prmaterials->save();
-            }
+            $qty_ordered = ($pomaterial->prmaterials->qty_ordered * $pomaterial->prmaterials->conversion) - $converted_qty_old_value + $pomaterial->converted_qty;
+            $qty_ordered = $qty_ordered / $pomaterial->prmaterials->conversion;
+
+            $pomaterial->prmaterials->qty_open = $qty_open;
+            $pomaterial->prmaterials->qty_ordered = $qty_ordered;
+            $pomaterial->prmaterials->save();
         }
     }
     private function _mapPoMaterialData(array $item, int $index)
@@ -495,9 +539,9 @@ class POController extends Controller
             'pr_number' => $item['pr_number'],
             'pr_item' => $item['pr_item'],
             'item_text' => $item['item_text'] ?? '',
-            'conversion' => $item['conversion'],
-            'denominator' => $item['denominator'],
-            'converted_qty' => $item['converted_qty'],
+            'conversion' => $item['conversion_po'],
+            'denominator' => 1,
+            'converted_qty' => $item['converted_qty_po'],
             'pr_unit' => $item['pr_unit'],
             'purch_grp' => $item['purch_grp'] ?? '',
             'status' => $item['status'] ?? '',

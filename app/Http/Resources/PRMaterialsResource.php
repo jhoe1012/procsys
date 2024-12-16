@@ -45,7 +45,7 @@ class PRMaterialsResource extends JsonResource
             'updated_at' => $this->updated_at->format('Y-m-d H:m:i'),
             'requested_by' =>  $this->whenLoaded('prheader', fn() => $this->prheader->requested_by),
             'pr_number' =>  $this->whenLoaded('prheader', fn() =>  (string)$this->prheader->pr_number),
-            'material_net_price' =>  MaterialNetPriceResource::collection($this->whenLoaded('materialNetPrices')),
+            'materialNetPrices' =>  MaterialNetPriceResource::collection($this->whenLoaded('materialNetPrices')),
             'alt_uom' =>  AlternativeUomResource::collection($this->whenLoaded('altUoms')),
         ];
     }

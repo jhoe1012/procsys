@@ -1,32 +1,20 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { PageProps, IPRMaterial, IPRHeader, TabItem } from '@/types';
+import { PageProps, IPRMaterial, IPRHeader, Choice } from '@/types';
 import { Button, Textarea, Input, Label, Toaster, useToast } from '@/Components/ui/';
-import {
-  DataSheetGrid,
-  checkboxColumn,
-  textColumn,
-  intColumn,
-  keyColumn,
-  floatColumn,
-  dateColumn,
-} from 'react-datasheet-grid';
+import { DataSheetGrid, checkboxColumn, textColumn, intColumn, keyColumn, floatColumn, dateColumn } from 'react-datasheet-grid';
 import 'react-datasheet-grid/dist/style.css';
 import { useState, useEffect, useMemo, FormEventHandler } from 'react';
 import { Operation } from 'react-datasheet-grid/dist/types';
 import { formatNumber } from '@/lib/utils';
-import { Loading, Dropzone, selectColumn, Choice, InputField, SelectField, TabFields } from '@/Components';
-import { useMaterial, usePRMaterialValidation } from '@/Hooks';
+import { Loading, Dropzone, selectColumn, InputField, SelectField, TabFields } from '@/Components';
+import { usePRMaterial, usePRMaterialValidation } from '@/Hooks';
 import { CUSTOM_DATA_SHEET_STYLE, DATE_TODAY, DEFAULT_PR_MATERIAL } from '@/lib/constants';
 
-const Create = ({
-  auth,
-  mat_code,
-  mat_desc,
-}: PageProps<{ mat_code: Choice[] }> & PageProps<{ mat_desc: Choice[] }>) => {
+const Create = ({ auth, mat_code, mat_desc }: PageProps<{ mat_code: Choice[] }> & PageProps<{ mat_desc: Choice[] }>) => {
   const { toast } = useToast();
   const [files, setFiles] = useState([]);
-  const { updateMaterialPR, computeConversion, isLoading } = useMaterial();
+  const { updateMaterialPR, computeConversion, isLoading } = usePRMaterial();
   const { validateMaterials } = usePRMaterialValidation();
   const [material, setMaterial] = useState<IPRMaterial[]>(Array(10).fill({ ...DEFAULT_PR_MATERIAL }));
 
@@ -82,8 +70,8 @@ const Create = ({
         title: 'Alt UOM',
         minWidth: 100,
       },
-      { ...keyColumn('ord_unit', textColumn), title: 'Ord Unit', minWidth: 55 },
-      { ...keyColumn('price', floatColumn), title: 'Price', minWidth: 90, disabled: true },
+      { ...keyColumn('ord_unit', textColumn), title: 'Ord Unit', minWidth: 55, disabled: true },
+      +{ ...keyColumn('price', floatColumn), title: 'Price', minWidth: 90, disabled: true },
       { ...keyColumn('unit', textColumn), title: 'B.Unit', minWidth: 50, disabled: true },
       { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 90, disabled: true },
       { ...keyColumn('currency', textColumn), title: 'Curr', minWidth: 50, disabled: true },
@@ -99,9 +87,7 @@ const Create = ({
       value: 'reasonForPr',
       label: 'Reason for PR',
       visible: true,
-      content: (
-        <Textarea value={data.reason_pr} onChange={(e) => setData('reason_pr', e.target.value)} required={true} />
-      ),
+      content: <Textarea value={data.reason_pr} onChange={(e) => setData('reason_pr', e.target.value)} required={true} />,
     },
     {
       value: 'headerText',
@@ -210,10 +196,7 @@ const Create = ({
                 <div className="p-5 justify-end grid grid-cols-8 gap-4">
                   {auth.permissions.pr.create && (
                     <>
-                      <Button
-                        variant="outline"
-                        disabled={processing}
-                        className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] ">
+                      <Button variant="outline" disabled={processing} className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] ">
                         Save
                       </Button>
                       <Link

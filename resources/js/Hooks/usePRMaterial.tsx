@@ -4,7 +4,7 @@ import { Operation } from 'react-datasheet-grid/dist/types';
 
 const materialCache: { [key: string]: any } = {}; // Cache for getMaterialInfo results
 
-export default function useMaterial() {
+export default function usePRMaterial() {
   const [isLoading, setIsLoading] = useState(false);
 
   const getMaterialInfo = async (material: string, plant: string) => {

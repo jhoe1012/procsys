@@ -245,7 +245,7 @@ export interface IWorkflow {
 
 export interface IPOHeader {
   id: number;
-  po_number?: number;
+  po_number?: string;
   control_no?: string;
   vendor_id?: string;
   vendor_name?: string;
@@ -285,6 +285,7 @@ export interface IPOMaterial {
   short_text?: string;
   po_qty?: number;
   qty_open?: number;
+  qty_open_po?: number;
   net_price?: number;
   per_unit?: number;
   unit?: string;
@@ -303,10 +304,17 @@ export interface IPOMaterial {
   updated_at?: string;
   min_order_qty?: number;
   conversion?: number;
+  conversion_po?: number;
   converted_qty?: number;
+  converted_qty_po?: number;
   purch_grp?: string;
   pr_unit?: string;
   denominator?: number;
+  altUomSelect?: Array<string>;
+  alt_uom?: IAlternativeUom[];
+  materialNetPrices: IMaterialNetPrice[];
+  qty?: number; // qty from PR
+  origPOQty?: number; // qty from PO DB
 }
 
 export interface IVendor {
@@ -439,11 +447,12 @@ export interface FormFieldProps {
   defaultValue?: string;
   required?: boolean;
   disabled?: boolean;
+  className?: string | undefined;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export interface GenericSelectProps<T> {
-  label: string;
+  label?: string;
   items: T[] | undefined;
   valueKey: keyof T;
   displayKey: keyof T;

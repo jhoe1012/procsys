@@ -1,6 +1,5 @@
 import {
   AttachmentList,
-  Choice,
   Discard,
   Dropzone,
   FlagForAction,
@@ -12,39 +11,14 @@ import {
   TabFields,
 } from '@/Components';
 import { Button, Input, Label, Textarea, Toaster, useToast } from '@/Components/ui';
-import { useMaterial, usePRMaterialValidation } from '@/Hooks';
+import { usePRMaterial, usePRMaterialValidation } from '@/Hooks';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import {
-  CUSTOM_DATA_SHEET_STYLE,
-  DEFAULT_PR_MATERIAL,
-  SEQ_DRAFT,
-  STATUS_APPROVED,
-  STATUS_REJECTED,
-  STATUS_REWORK,
-} from '@/lib/constants';
+import { CUSTOM_DATA_SHEET_STYLE, DEFAULT_PR_MATERIAL, SEQ_DRAFT, STATUS_APPROVED, STATUS_REJECTED, STATUS_REWORK } from '@/lib/constants';
 import { formatNumber } from '@/lib/utils';
-import {
-  IAlternativeUom,
-  IApprover,
-  IitemDetails,
-  IMessage,
-  IPRHeader,
-  IPRMaterial,
-  IWorkflow,
-  PageProps,
-  TabItem,
-} from '@/types';
+import { Choice, IAlternativeUom, IApprover, IitemDetails, IMessage, IPRHeader, IPRMaterial, IWorkflow, PageProps } from '@/types';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useMemo, useState } from 'react';
-import {
-  checkboxColumn,
-  DataSheetGrid,
-  dateColumn,
-  floatColumn,
-  intColumn,
-  keyColumn,
-  textColumn,
-} from 'react-datasheet-grid';
+import { checkboxColumn, DataSheetGrid, dateColumn, floatColumn, intColumn, keyColumn, textColumn } from 'react-datasheet-grid';
 import 'react-datasheet-grid/dist/style.css';
 import { Operation } from 'react-datasheet-grid/dist/types';
 import Approval from './Partial/Approval';
@@ -69,17 +43,14 @@ const Edit = ({
       ...prmaterial,
       del_date: new Date(prmaterial.del_date || ''),
       altUomSelect: [
-        ...new Set([
-          prmaterial.ord_unit,
-          ...(prmaterial.alt_uom ? prmaterial.alt_uom.map((item: IAlternativeUom) => item.alt_uom) : []),
-        ]),
+        ...new Set([prmaterial.ord_unit, ...(prmaterial.alt_uom ? prmaterial.alt_uom.map((item: IAlternativeUom) => item.alt_uom) : [])]),
       ],
     }))
   );
   const [itemDetails, setItemDetails] = useState([]);
   const [files, setFiles] = useState([]);
   const [apprSeq, setApprSeq] = useState<IApprover>();
-  const { updateMaterialPR, computeConversion, isLoading } = useMaterial();
+  const { updateMaterialPR, computeConversion, isLoading } = usePRMaterial();
   const { validateMaterials } = usePRMaterialValidation();
   const { data, setData, post, errors, reset, processing } = useForm<IPRHeader>({
     id: prheader.id,
@@ -135,7 +106,7 @@ const Edit = ({
         title: 'Alt UOM',
         minWidth: 100,
       },
-      { ...keyColumn('ord_unit', textColumn), title: 'Ord Unit', minWidth: 55 },
+      { ...keyColumn('ord_unit', textColumn), title: 'Ord Unit', minWidth: 55, disabled: true },
       { ...keyColumn('qty_ordered', floatColumn), title: 'Qty Ordered', minWidth: 70, disabled: true },
       { ...keyColumn('qty_open', floatColumn), title: 'Qty Open', minWidth: 70, disabled: true },
       { ...keyColumn('price', floatColumn), title: 'Price', minWidth: 70, disabled: true },
@@ -166,9 +137,7 @@ const Edit = ({
       value: 'reasonForPr',
       label: 'Reason for PR',
       visible: true,
-      content: (
-        <Textarea value={data.reason_pr} onChange={(e) => setData('reason_pr', e.target.value)} required={true} />
-      ),
+      content: <Textarea value={data.reason_pr} onChange={(e) => setData('reason_pr', e.target.value)} required={true} />,
     },
     {
       value: 'headerText',
@@ -412,8 +381,6 @@ const Edit = ({
                     prheader.status == STATUS_REWORK ||
                     prheader.status == STATUS_REJECTED ||
                     apprSeq?.seq != prheader.appr_seq
-                      ? true
-                      : false
                   }
                 />
                 <Approval
@@ -425,8 +392,6 @@ const Edit = ({
                     prheader.status == STATUS_REWORK ||
                     prheader.status == STATUS_REJECTED ||
                     apprSeq?.seq != prheader.appr_seq
-                      ? true
-                      : false
                   }
                 />
                 <Approval
@@ -438,8 +403,6 @@ const Edit = ({
                     prheader.status == STATUS_REWORK ||
                     prheader.status == STATUS_REJECTED ||
                     apprSeq?.seq != prheader.appr_seq
-                      ? true
-                      : false
                   }
                 />
               </div>

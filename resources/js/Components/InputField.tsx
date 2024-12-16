@@ -1,5 +1,6 @@
 import { FormFieldProps } from '@/types';
-  import { Input, Label } from './ui';
+import { Input, Label } from './ui';
+import { cn } from '@/lib/utils';
 
 export default function InputField({
   label,
@@ -10,19 +11,12 @@ export default function InputField({
   required = false,
   disabled = false,
   onChange,
+  className,
 }: FormFieldProps) {
   return (
-    <div className="flex-auto">
+    <div className={cn('flex-auto', className)}>
       <Label htmlFor={id}>{label}</Label>
-      <Input
-        type={type}
-        id={id}
-        value={value}
-        defaultValue={defaultValue}
-        required={required}
-        disabled={disabled}
-        onChange={onChange}
-      />
+      <Input type={type} id={id} value={value} defaultValue={defaultValue} required={required} disabled={disabled} onChange={onChange} />
     </div>
   );
 }

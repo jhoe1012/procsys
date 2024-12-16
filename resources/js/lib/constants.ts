@@ -1,4 +1,4 @@
-import { CSSObjectWithLabel } from "react-select";
+import { CSSObjectWithLabel } from 'react-select';
 
 export const SEQ_DRAFT = 0;
 export const SEQ_REJECT = -1;
@@ -29,7 +29,7 @@ export const DEFAULT_PR_MATERIAL = {
   purch_grp: undefined,
 };
 
-// Custom style for react select
+// Custom style for react select for index
 export const REACT_SELECT_STYLES = {
   control: (provided: CSSObjectWithLabel) => ({
     ...provided,
@@ -48,6 +48,34 @@ export const REACT_SELECT_STYLES = {
   input: (provided: CSSObjectWithLabel) => ({
     ...provided,
     margin: '0px',
+  }),
+  indicatorSeparator: () => ({
+    display: 'none',
+  }),
+  indicatorsContainer: (provided: CSSObjectWithLabel) => ({
+    ...provided,
+    height: '1.75rem',
+  }),
+};
+
+// Custom style for react select for PO
+export const REACT_SELECT_STYLE = {
+  control: (provided: CSSObjectWithLabel) => ({
+    ...provided,
+    minHeight: '1.75rem',
+    height: '1.75rem',
+    fontSize: '0.875rem',
+    borderColor: 'hsl(var(--input))',
+  }),
+  valueContainer: (provided: CSSObjectWithLabel) => ({
+    ...provided,
+    height: '1.75rem',
+    padding: '0 6px',
+  }),
+  input: (provided: CSSObjectWithLabel) => ({
+    ...provided,
+    margin: '0px',
+    opacity: '100%',
   }),
   indicatorSeparator: () => ({
     display: 'none',
