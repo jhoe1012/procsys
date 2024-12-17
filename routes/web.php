@@ -34,6 +34,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/pr-flag-delete', [PRController::class, 'flagDelete'])->name('pr.flag.delete');
     Route::get('/pr-flag-close', [PRController::class, 'flagComplete'])->name('pr.flag.close');
     Route::get('/pr-recall/{id}', [PRController::class, 'recall'])->name('pr.recall');
+    Route::get('/pr-copy/{prnumber}', [PRController::class, 'copy'])->name('pr.copy');
+
 
     Route::get('/po', [POController::class, 'index'])->name('po.index');
     Route::get('/po-create', [POController::class, 'create'])->name('po.create');
@@ -48,7 +50,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/po-print/{id}', [POController::class, 'printPo'])->name('po.print');
     Route::get('/po-recall/{id}', [POController::class, 'recall'])->name('po.recall');
     Route::get('/po-control', [POController::class, 'updateControlNo'])->name('po.update-controlno');
-    
+
     Route::get('/gr', [GRController::class, 'index'])->name('gr.index');
     Route::get('/gr-create', [GRController::class, 'create'])->name('gr.create');
     Route::get('/gr-show/{grnumber}', [GRController::class, 'show'])->name('gr.show');
@@ -62,17 +64,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/net-price', [MaterialNetPriceController::class, "index"])->name("net_price.index");
     Route::post('/net-price-store', [MaterialNetPriceController::class, "store"])->name("net_price.store");
     Route::patch('/net-price-update/{materialNetPrice}', [MaterialNetPriceController::class, "update"])->name("net_price.update");
-    
+
 
     Route::get('/val-price', [MaterialValuationController::class, "index"])->name("val_price.index");
     Route::post('/val-price-store', [MaterialValuationController::class, "store"])->name("val_price.store");
     Route::patch('/val-price-update/{materialValuation}', [MaterialValuationController::class, "update"])->name("val_price.update");
-    
+
 
     Route::get('/vendor-index', [VendorController::class, "index"])->name("vendor.index");
     Route::post('/vendor-store', [VendorController::class, "store"])->name("vendor.store");
     Route::patch('/vendor-update/{materialValuation}', [VendorController::class, "update"])->name("vendor.update");
-    
+
 
     Route::get('/approver', [ApproverController::class, "index"])->name("approver.index");
     Route::post('/approver-store', [ApproverController::class, "store"])->name("approver.store");
@@ -87,8 +89,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/report-gr-download', [ReportController::class, "downloadGrReport"])->name("download.report.gr");
     Route::get('/report-material', [ReportController::class, "materialReport"])->name("report.material");
     Route::get('/report-material-download', [ReportController::class, "downloadMaterialReport"])->name("download.report.material");
-    
-
 });
 
 require __DIR__ . '/auth.php';

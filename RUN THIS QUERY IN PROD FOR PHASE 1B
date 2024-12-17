@@ -1,0 +1,3 @@
+UPDATE pr_materials SET "conversion" = qty , converted_qty =qty , valuation_price=price WHERE id =937
+
+UPDATE po_materials SET "conversion" = "conversion"/denominator WHERE "conversion" > 0 

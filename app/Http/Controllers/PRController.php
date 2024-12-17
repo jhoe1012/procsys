@@ -94,6 +94,20 @@ class PRController extends Controller
         ]);
     }
 
+    public function copy(Request $request, $prnumber): Response
+    {
+
+        $pr_header = PrHeader::with('plants', 'prmaterials', 'prmaterials.altUoms', 'workflows', 'attachments')
+            ->where('pr_number', $prnumber)
+            ->firstOrFail();
+
+        return Inertia::render('PR/Create', [
+            'mat_code' => Material::select('mat_code as value', 'mat_code as label')->orderBy('mat_code')->get()->toArray(),
+            'mat_desc' => Material::select('mat_desc as value', 'mat_desc as label')->orderBy('mat_desc')->get()->toArray(),
+            'prheader' => new PRHeaderResource($pr_header),
+        ]);
+    }
+
     public function store(Request $request)
     {
         try {
