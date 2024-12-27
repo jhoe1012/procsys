@@ -32,7 +32,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/pr-approve',  [PRController::class, 'approve'])->name('pr.approve');
     Route::get('/pr-discard/{id}',  [PRController::class, 'discard'])->name('pr.discard');
     Route::get('/pr-flag-delete', [PRController::class, 'flagDelete'])->name('pr.flag.delete');
-    Route::get('/pr-flag-close', [PRController::class, 'flagComplete'])->name('pr.flag.close');
+    Route::get('/pr-flag-close', [PRController::class, 'flagClose'])->name('pr.flag.close');
+    Route::get('/pr-flag-remove', [PRController::class, 'flagRemove'])->name('pr.flag.remove');
     Route::get('/pr-recall/{id}', [PRController::class, 'recall'])->name('pr.recall');
     Route::get('/pr-copy/{prnumber}', [PRController::class, 'copy'])->name('pr.copy');
 

@@ -29,52 +29,51 @@ class PRController extends Controller
 {
     public function index(Request $request)
     {
-        $query = PrHeader::query();
+        $user = $request->user();
 
-        $query = $query->with(['prmaterials', 'plants']);
+        // Fetch user plants and approver sequence
+        $userPlants = $user->plants->pluck('plant')->toArray();
+        $approverSeq = $user->approvers
+            ->firstWhere('type', 'pr')['seq'] ?? 0;
 
-        $user_plants = $request->user()->plants->map(function ($items) {
-            return $items->plant;
-        })->toArray();
+        // Initialize query with relationships
+        $query = PrHeader::with(['prmaterials', 'plants'])
+            ->whereIn('plant', $userPlants);
 
-        $query->whereIn('plant', $user_plants);
-
+        // Check approval permission and filter
         if (Gate::allows('approve.pr')) {
-            $seq = auth()->user()->approvers->filter(fn($item) => $item['type'] == 'pr')->values()[0]->seq;
-            $query->where('appr_seq', '>=', $seq);
-        }
-        if (request('pr_number_from') && !request('pr_number_to')) {
-            $query->where('pr_number', 'like', "%" . request('pr_number_from') . "%");
-        }
-        if (request('pr_number_from') &&  request('pr_number_to')) {
-            $query->whereBetween('pr_number', [request('pr_number_from'), request('pr_number_to')]);
-        }
-        if (request('plant')) {
-            $query->where('plant', 'ilike', "%" . request('plant') . "%");
-        }
-        if (request('requested_by')) {
-            $query->where('requested_by', 'ilike', "%" . request('requested_by') . "%");
-        }
-        if (request('doc_date_from') && !request('doc_date_to')) {
-            $query->whereDate('doc_date', request('doc_date_from'));
-        }
-        if (request('doc_date_from') && request('doc_date_to')) {
-            $query->whereBetween('doc_date', [request('doc_date_from'), request('doc_date_to')]);
-        }
-        if (request('updated_at_from') && !request('updated_at_to')) {
-            $query->whereDate('updated_at', request('updated_at_from'));
-        }
-        if (request('updated_at_from') && request('updated_at_to')) {
-            $query->whereDate('updated_at',  '>=', request('updated_at_from'))
-                ->whereDate('updated_at', '<=', request('updated_at_to'));
-        }
-        if (request('status')) {
-            $query->where('status', 'ilike', "%" . request('status') . "%");
+            $query->where('appr_seq', '>=', $approverSeq);
         }
 
-        $pr_header = $query->orderBy('status', 'asc')
+        $filters = [
+            'pr_number_from' => fn($value) => request('pr_number_to')
+                ? $query->whereBetween('pr_number', [
+                    $value,
+                    request('pr_number_to')
+                ])
+                : $query->where('pr_number', 'like', "%{$value}%"),
+            'plant' => fn($value) => $query->where('plant', 'ilike', "%{$value}%"),
+            'created_name' => fn($value) => $query->where('created_name', 'ilike', "%{$value}%"),
+            'requested_by' => fn($value) => $query->where('requested_by', 'ilike', "%{$value}%"),
+            'doc_date_from' => fn($value) => request('doc_date_to')
+                ? $query->whereBetween('doc_date', [$value, request('doc_date_to')])
+                : $query->whereDate('doc_date', $value),
+            'updated_at_from' => fn($value) => request('updated_at_to')
+                ? $query->whereBetween('updated_at', [$value, request('updated_at_to')])
+                : $query->whereDate('updated_at', $value),
+            'status' => fn($value) => $query->where('status', 'ilike', "%{$value}%"),
+
+        ];
+
+        // Apply filters dynamically
+        foreach (request()->only(array_keys($filters)) as $field => $value) {
+            if (!empty($value)) {
+                $filters[$field]($value);
+            }
+        }
+
+        $pr_header = $query->orderBy('status', 'desc')
             ->orderBy('doc_date', 'desc')
-            ->orderBy('pr_number', 'desc')
             ->paginate(50)
             ->onEachSide(5);
 
@@ -246,9 +245,11 @@ class PRController extends Controller
             return  DB::transaction(function () use ($request, $id) {
                 $pr_header = PrHeader::findOrFail($id);
                 $pr_materials = collect($request->input('prmaterials'))
-                    ->filter(fn($item) => !empty($item['mat_code']))
+                    ->filter(fn($item) => !empty($item['mat_code'])
+                        && ($item['qty_ordered'] === null || $item['qty_ordered'] === 0))
                     ->map(fn($item, $index) => $this->_mapOrUpdatePrMaterial($item, $index, $pr_header->id))
                     ->map(function ($item) {
+
                         if (isset($item['id'])) {
                             $pr_material = PrMaterial::find($item['id']);
                         } else {
@@ -420,29 +421,58 @@ class PRController extends Controller
     }
     public function flagDelete(Request $request)
     {
-        foreach ($request->input('ids') as $id) {
-            $pr_material = PrMaterial::findOrFail($id);
-            $pr_material->status = PrMaterial::FLAG_DELETE;
-            $pr_material->save();
+        $prMaterials = PrMaterial::whereIn('id', $request->input('ids'))->get();
+
+        $toFlag = $prMaterials->filter(fn($material) => $material->qty_ordered === null || $material->qty_ordered === 0);
+        $withOpenQty = $prMaterials->filter(fn($material) => $material->qty_ordered !== null && $material->qty_ordered > 0);
+
+        DB::transaction(function () use ($toFlag) {
+            foreach ($toFlag as $material) {
+                $material->status = PrMaterial::FLAG_DELETE;
+                $material->save();
+            }
+
+            if ($toFlag->isNotEmpty()) {
+                $prHeader = $toFlag->first()->prheader;
+                $prHeader->total_pr_value = PrMaterial::where('pr_headers_id', $prHeader->id)
+                    ->where('status', '<>', 'X')
+                    ->sum('total_value');
+                $prHeader->save();
+            }
+        });
+
+        if ($withOpenQty->isNotEmpty()) {
+            return to_route("pr.edit", $prMaterials->first()->prheader->pr_number)
+                ->with('error', "Item(s) with open quantities cannot be flagged for deletion.");
         }
 
-        $pr_header = PrHeader::findOrFail($pr_material->prheader->id);
-        $pr_header->total_pr_value = PrMaterial::where('pr_headers_id', $pr_header->id)->where('status', '<>', 'X')->sum('total_value');
-        $pr_header->save();
-
-        // dd($pr_material->prheader->pr_number);
-        return to_route("pr.edit", $pr_material->prheader->pr_number)->with('success', "Mark item(s) for deletion.");
+        return to_route("pr.edit", $prMaterials->first()->prheader->pr_number)
+            ->with('success', "Flagged item(s) for deletion.");
     }
-    public function flagComplete(Request $request)
+    public function flagClose(Request $request)
     {
-
-        foreach ($request->input('ids') as $id) {
-            $pr_material = PrMaterial::findOrFail($id);
-            $pr_material->status = PrMaterial::FLAG_CLOSE;
-            $pr_material->save();
+        $prMaterials = PrMaterial::whereIn('id', $request->input('ids'))->get();
+        if ($prMaterials->isEmpty()) {
+            return back()->with('error', 'No valid materials found to update.');
         }
-        // dd($pr_material->prheader->pr_number);
-        return to_route("pr.edit", $pr_material->prheader->pr_number)->with('success', "Mark item(s) for close.");
+        PrMaterial::whereIn('id', $prMaterials->pluck('id'))->update(['status' => PrMaterial::FLAG_CLOSE]);
+        $prHeader = $prMaterials->first()->prheader;
+
+        return to_route("pr.edit", $prHeader->pr_number)
+            ->with('success', "Flagged item(s) for close.");
+    }
+
+    public function flagRemove(Request $request)
+    {
+        $prMaterials = PrMaterial::whereIn('id', $request->input('ids'))->get();
+        if ($prMaterials->isEmpty()) {
+            return back()->with('error', 'No valid materials found to update.');
+        }
+        PrMaterial::whereIn('id', $prMaterials->pluck('id'))->update(['status' => null]);
+        $prHeader = $prMaterials->first()->prheader;
+
+        return to_route("pr.edit", $prHeader->pr_number)
+            ->with('success', "Cancelled flag for item(s).");
     }
 
     public function recall($id)

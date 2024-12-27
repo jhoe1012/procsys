@@ -77,7 +77,7 @@ const Edit = ({
       { ...keyColumn('item_no', intColumn), title: 'ItmNo', disabled: true, minWidth: 55 },
       { ...keyColumn('mat_code', selectColumn({ choices: mat_code })), title: 'Material', minWidth: 120 },
       { ...keyColumn('short_text', selectColumn({ choices: mat_desc })), title: 'Short Text', minWidth: 300 },
-      { ...keyColumn('qty', floatColumn), title: 'Qty', minWidth: 70 },
+      { ...keyColumn('qty', floatColumn), title: 'Qty', minWidth: 70, disabled: ({ rowData }: any) => rowData.qty_ordered > 0 },
       {
         ...keyColumn('altUomSelect', {
           component: ({ rowData, rowIndex }) =>
@@ -112,7 +112,7 @@ const Edit = ({
       { ...keyColumn('price', floatColumn), title: 'Price', minWidth: 70, disabled: true },
       { ...keyColumn('per_unit', floatColumn), title: 'Per Unit', minWidth: 40, disabled: true },
       { ...keyColumn('unit', textColumn), title: 'Unit', minWidth: 40, disabled: true },
-      { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 90, disabled: true },
+      { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 120, disabled: true },
       { ...keyColumn('currency', textColumn), title: 'Curr', minWidth: 40, disabled: true },
       { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 130 },
       { ...keyColumn('mat_grp', textColumn), title: 'Mat Grp', minWidth: 100, disabled: true },
@@ -186,18 +186,26 @@ const Edit = ({
       content: (
         <div>
           <FlagForAction
-            p_description="Are you sure you want to flag delete this item(s)?"
-            p_title="Flag for Delete"
-            p_url={route('pr.flag.delete')}
-            p_disable={material.filter((mat) => mat.sel == true).length == 0 || prheader.appr_seq != SEQ_DRAFT}
+            p_description="Remove flag for this item(s)?"
+            p_title="Remove Flag"
+            p_url={route('pr.flag.remove')}
+            p_disable={material.filter((mat) => mat.sel == true).length == 0}
             p_items={{ ids: material.filter((mat) => mat.sel == true).map((mat) => mat.id) }}
           />
 
           <FlagForAction
-            p_description="Are you sure you want to flag close this item(s)?"
+            p_description="Flag delete this item(s)?"
+            p_title="Flag Delete"
+            p_url={route('pr.flag.delete')}
+            p_disable={material.filter((mat) => mat.sel == true).length == 0}
+            p_items={{ ids: material.filter((mat) => mat.sel == true).map((mat) => mat.id) }}
+          />
+
+          <FlagForAction
+            p_description="Flag close this item(s)?"
             p_title="Flag Close"
             p_url={route('pr.flag.close')}
-            p_disable={material.filter((mat) => mat.sel == true).length == 0 || prheader.appr_seq != SEQ_DRAFT}
+            p_disable={material.filter((mat) => mat.sel == true).length == 0}
             p_items={{ ids: material.filter((mat) => mat.sel == true).map((mat) => mat.id) }}
           />
         </div>
@@ -357,7 +365,7 @@ const Edit = ({
                       />
 
                       <Link
-                        disabled={prheader.status == STATUS_APPROVED}
+                        // disabled={prheader.status == STATUS_APPROVED}
                         preserveScroll
                         href={route('pr.recall', prheader.id)}
                         as="button"

@@ -5,7 +5,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useMemo, useState } from 'react';
 import 'react-datasheet-grid/dist/style.css';
 import { checkboxColumn, DataSheetGrid, dateColumn, floatColumn, intColumn, keyColumn, textColumn } from 'react-datasheet-grid';
-import { CUSTOM_DATA_SHEET_STYLE, SEQ_DRAFT, STATUS_APPROVED, STATUS_REJECTED, STATUS_REWORK } from '@/lib/constants';
+import { CUSTOM_DATA_SHEET_STYLE, SEQ_DRAFT, SEQ_REJECT, STATUS_APPROVED, STATUS_REJECTED, STATUS_REWORK } from '@/lib/constants';
 import { usePOMaterial, usePOMaterialValidation } from '@/Hooks';
 import {
   AttachmentList,
@@ -78,7 +78,12 @@ const Edit = ({
       { ...keyColumn('item_no', intColumn), title: 'ItmNo', minWidth: 55, disabled: true },
       { ...keyColumn('mat_code', textColumn), title: 'Material', minWidth: 120, disabled: true },
       { ...keyColumn('short_text', textColumn), title: 'Short Text', minWidth: 300, disabled: true },
-      { ...keyColumn('po_qty', floatColumn), title: 'PO Qty', minWidth: 70 },
+      {
+        ...keyColumn('po_qty', floatColumn),
+        title: 'PO Qty',
+        minWidth: 70,
+        disabled: ({ rowData }: any) => rowData.po_gr_qty != rowData.po_qty,
+      },
       { ...keyColumn('qty_open_po', floatColumn), title: 'Open Qty', minWidth: 100, disabled: true },
       {
         ...keyColumn('altUomSelect', {
@@ -402,8 +407,7 @@ const Edit = ({
                       <Button
                         variant="outline"
                         className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] disabled:cursor-not-allowed disabled:opacity-100 disabled:bg-gray-100"
-                        // disabled={poheader.appr_seq != SEQ_DRAFT || processing}>
-                        disabled={processing}>
+                        disabled={poheader.appr_seq == SEQ_REJECT || processing}>
                         Save
                       </Button>
                       <Link
@@ -422,7 +426,12 @@ const Edit = ({
                         Submit
                       </Link>
 
-                      <Discard p_id={poheader.id} p_title="Discard this Purchase Order ?" p_url="po.discard" />
+                      <Discard
+                        p_id={poheader.id}
+                        p_title="Discard this Purchase Order ?"
+                        p_url="po.discard"
+                        p_disable={poheader.appr_seq == SEQ_REJECT}
+                      />
 
                       <AddPrtoPo p_vendor={data.vendor_id} p_plant={data.plant} p_doc_date={data.doc_date} addToPO={handleAddtoPo} />
                     </>

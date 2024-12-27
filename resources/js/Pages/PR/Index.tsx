@@ -133,9 +133,9 @@ export default function Index({
                       <th className="px-1 py-2">
                         <TextInput
                           className="h-7 text-xs p-1 m-0"
-                          defaultValue={queryParams.create_name}
-                          onBlur={(e) => searchFieldChanged('create_name', e.target.value)}
-                          onKeyDown={(e) => handleKeyPress('create_name', e)}
+                          defaultValue={queryParams.created_name}
+                          onBlur={(e) => searchFieldChanged('created_name', e.target.value)}
+                          onKeyDown={(e) => handleKeyPress('created_name', e)}
                           placeholder="Created By"
                         />
                       </th>
