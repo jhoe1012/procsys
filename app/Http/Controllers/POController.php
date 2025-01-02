@@ -13,6 +13,7 @@ use App\Mail\PrForApprovalEmail;
 use App\Models\Approvers;
 use App\Models\ApproveStatus;
 use App\Models\DeliveryAddress;
+use App\Models\MaterialNetPrice;
 use App\Models\PoHeader;
 use App\Models\PoMaterial;
 use App\Models\PrMaterial;
@@ -244,6 +245,7 @@ class POController extends Controller
                         //     $po_material->prmaterials->qty_ordered = ($converted_qty_old_value - $po_material->prmaterials->qty_ordered) + $po_material->converted_qty;
                         //     $po_material->prmaterials->save();
                         // }
+                        // $this->_updateNetPrice($po_material);
                         return $item;
                     })->values();
 
@@ -371,13 +373,15 @@ class POController extends Controller
             ) {
                 $po_header->status = Str::ucfirst(ApproveStatus::APPROVED);
                 $po_header->release_date = Carbon::now()->format('Y-m-d H:i:s');
+                $this->_updateNetPrice($po_header);
+                // $this->_updateValuation($po_header);
                 $email_status = 2;
             }
         } else {
             $po_header->status = Str::ucfirst($request->input('type'));
             $po_header->appr_seq = $request->input('type') == ApproveStatus::REWORKED ? 0 : -1;
             $approver_status =  ApproveStatus::where('seq', '!=',  $approver->seq)
-                ->where('po_number',  $po_header->po_number)
+                ->where('po_number',  operator: $po_header->po_number)
                 ->whereNull('user_id')
                 ->delete();
             $email_status = 3;
@@ -583,4 +587,29 @@ class POController extends Controller
             ['po_header_id' => $po_header_id, 'id' => $item['id'] ?? null]
         );
     }
+
+    private function _updateNetPrice($poHeader)
+    {
+        foreach ($poHeader->pomaterials as $poMaterial) {
+            MaterialNetPrice::updateOrCreate(
+                [
+                    'vendor' => $poHeader->vendor_id,
+                    'plant' => $poHeader->plant,
+                    'mat_code' => $poMaterial->mat_code,
+                    'currency' => $poMaterial->currency,
+                    'uom' => $poMaterial->unit,
+                    'per_unit' => $poMaterial->per_unit,
+                    'valid_from' => $poHeader->doc_date->format('Y-m-d'),
+                    'min_order_qty' => 0,
+                ],
+                [
+                    'price' => $poMaterial->net_price,
+                    'valid_to' =>  Carbon::parse($poHeader->doc_date)->addMonths(5)->format('Y-m-d'),
+
+                ]
+            );
+        };
+    }
+
+    private function _updateValuation($poHeader) {}
 }

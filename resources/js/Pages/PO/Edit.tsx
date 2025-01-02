@@ -44,7 +44,7 @@ const Edit = ({
   const [material, setMaterial] = useState<IPOMaterial[]>(
     poheader.pomaterials.map((pomaterial) => ({
       ...pomaterial,
-      ...computeConversion(pomaterial, pomaterial.unit ?? '', poheader.vendors),
+      ...computeConversion(pomaterial, pomaterial.unit ?? '', poheader.vendor_id),
       altUomSelect: [...new Set([pomaterial.unit, ...pomaterial?.alt_uom?.map((uom: IAlternativeUom) => uom.alt_uom)])],
       del_date: new Date(pomaterial.del_date || ''),
       origPOQty: pomaterial.po_qty ?? 0,
