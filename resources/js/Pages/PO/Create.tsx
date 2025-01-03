@@ -33,7 +33,7 @@ const Create = ({
     vendor_name: '',
     created_name: auth.user.name,
     doc_date: DATE_TODAY,
-    deliv_date: undefined,
+    deliv_date: '',
     notes: '',
     plant: auth.user.plants !== undefined ? auth.user.plants[0]?.plant : '',
     header_text: '',
@@ -53,6 +53,7 @@ const Create = ({
       { ...keyColumn('item_no', intColumn), title: 'ItmNo', minWidth: 55, disabled: true },
       { ...keyColumn('mat_code', textColumn), title: 'Material', minWidth: 120, disabled: true },
       { ...keyColumn('short_text', textColumn), title: 'Short Text', minWidth: 300, disabled: true },
+      { ...keyColumn('item_text', textColumn), title: 'Item Text', minWidth: 300 },
       { ...keyColumn('po_qty', floatColumn), title: 'PO Qty', minWidth: 70 },
       { ...keyColumn('qty_open_po', floatColumn), title: 'Open Qty', minWidth: 100, disabled: true },
       {
@@ -81,8 +82,8 @@ const Create = ({
         }),
         title: 'Alt UOM',
       },
-      { ...keyColumn('unit', textColumn), title: 'Ord. Unit', minWidth: 55, disabled: true },
-      { ...keyColumn('pr_unit', textColumn), title: 'B. Unit', minWidth: 55, disabled: true },
+      { ...keyColumn('unit', textColumn), title: 'Ord. UOM', minWidth: 55, disabled: true },
+      { ...keyColumn('pr_unit', textColumn), title: 'B. UOM', minWidth: 55, disabled: true },
       {
         ...keyColumn('net_price', floatColumn),
         title: 'Net Price',
@@ -104,10 +105,9 @@ const Create = ({
       { ...keyColumn('item_free', checkboxColumn), title: 'Free', minWidth: 70 },
       { ...keyColumn('currency', textColumn), title: 'Curr', minWidth: 55, disabled: true },
       { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 120 },
-      { ...keyColumn('mat_grp', textColumn), title: 'Mat Grp', minWidth: 200, disabled: true },
+      { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 200, disabled: true },
       { ...keyColumn('requested_by', textColumn), title: 'Requested By', minWidth: 150 },
       { ...keyColumn('pr_number', textColumn), title: 'PR Number', minWidth: 120, disabled: true },
-      { ...keyColumn('item_text', textColumn), title: 'Item Text', minWidth: 300 },
     ],
     []
   );

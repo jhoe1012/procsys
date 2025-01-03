@@ -169,7 +169,17 @@ class POController extends Controller
     }
     public function edit(Request $request, $ponumber)
     {
-        $po_header = PoHeader::with(['workflows', 'attachments', 'pomaterials', 'pomaterials.prmaterials', 'pomaterials.materialNetPrices', 'pomaterials.altUoms', 'plants', 'vendors'])
+        $po_header = PoHeader::with([
+            'workflows',
+            'attachments',
+            'pomaterials',
+            'pomaterials.prmaterials',
+            'pomaterials.materialNetPrices',
+            'pomaterials.altUoms',
+            'pomaterials.materialGroups',
+            'plants',
+            'vendors'
+        ])
             ->where('po_number', $ponumber)
             ->firstOrFail();
         $user_plants = auth()->user()->plants->map(function ($items) {
@@ -442,6 +452,7 @@ class POController extends Controller
         $doc_date = date('Y-m-d', strtotime($request->input('doc_date')));
 
         $pr_material = PrMaterial::with([
+            'materialGroups',
             'prheader',
             'altUoms',
             'materialNetPrices' => fn($query) =>
@@ -571,7 +582,7 @@ class POController extends Controller
             'requested_by' => $item['requested_by'],
             'pr_number' => $item['pr_number'],
             'pr_item' => $item['pr_item'],
-            'item_text' => $item['item_text'] ?? '',
+            'item_text' => strtoupper($item['item_text']) ?? '',
             'conversion' => $item['conversion_po'],
             'denominator' => 1,
             'converted_qty' => $item['converted_qty_po'],

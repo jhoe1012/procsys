@@ -31,9 +31,9 @@ class MaterialResource extends JsonResource
             "created_at" => $this->created_at,
             "updated_at" => $this->updated_at,
             "valuations" => MaterialValuationResource::collection($this->whenLoaded('valuations')),
-            "materialGroups" => MaterialGroupResource::collection($this->whenLoaded('materialGroups')),
+            "materialGroups" => new MaterialGroupResource($this->whenLoaded('materialGroups')),
             "altUoms" => AlternativeUomResource::collection($this->whenLoaded('altUoms')),
-            "purchasingGroups" => PurchasingGroupResource::collection($this->whenLoaded('purchasingGroups')),
+            "purchasingGroups" => new PurchasingGroupResource($this->whenLoaded('purchasingGroups')),
         ];
     }
 }

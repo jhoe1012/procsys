@@ -31,7 +31,7 @@ export default function usePOMaterial() {
       min_order_qty = materialNetPriceUom.min_order_qty;
       total_value = ((net_price ?? 0) / (per_unit ?? 0)) * (po_qty ?? 0);
     } else {
-      net_price = material.net_price ?? 0;
+      net_price = material.net_price ?? material.price;
       total_value = ((net_price ?? 0) / (per_unit ?? 0)) * (po_qty ?? 0);
     }
 

@@ -24,7 +24,7 @@ const filterInputLabel = {
   purch_grp: 'Buyer Group',
 };
 
-export default function AddPrtoPo({ p_vendor, p_plant, p_doc_date, addToPO }) {
+export default function AddPrtoPo({ p_plant, p_doc_date, addToPO }) {
   const [prMaterialSelected, setPrMaterialSelected] = useState<IPOMaterial[]>([]);
   const [prMaterialList, setPrMaterialList] = useState<IPOMaterial[]>([]);
   const { computeConversion } = usePOMaterial();
@@ -41,13 +41,13 @@ export default function AddPrtoPo({ p_vendor, p_plant, p_doc_date, addToPO }) {
   const fetchPrMaterials = useCallback(async () => {
     try {
       const response = await window.axios.get(route('po.plant'), {
-        params: { plant: p_plant, vendor: p_vendor, doc_date: p_doc_date },
+        params: { plant: p_plant, doc_date: p_doc_date },
       });
       setPrMaterialList(response.data.data);
     } catch (error) {
       console.error('Error fetching material info:', error);
     }
-  }, [p_vendor, p_plant, p_doc_date]);
+  }, [p_plant, p_doc_date]);
 
   const handleCheckboxChange = useCallback((event, pr_material) => {
     setPrMaterialSelected((prevSelected) =>
@@ -66,6 +66,7 @@ export default function AddPrtoPo({ p_vendor, p_plant, p_doc_date, addToPO }) {
         pr_item: item.item_no,
         pr_unit: item.unit,
         altUomSelect: altUomSelect,
+        mat_grp_desc: item.materialGroups?.mat_grp_desc || '',
         item_no: undefined,
       };
     });
@@ -73,7 +74,7 @@ export default function AddPrtoPo({ p_vendor, p_plant, p_doc_date, addToPO }) {
     setPrMaterialSelected([]);
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFilterInputs({ ...filterInputs, [id]: value });
   };

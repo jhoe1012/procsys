@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PrMaterial extends Model
 {
@@ -19,6 +20,7 @@ class PrMaterial extends Model
         'item_no',
         'mat_code',
         'short_text',
+        'item_text',
         'qty',
         'ord_unit',
         'qty_ordered',
@@ -67,5 +69,9 @@ class PrMaterial extends Model
     public function altUoms(): HasMany
     {
         return $this->hasMany(AlternativeUom::class, 'mat_code', 'mat_code');
+    }
+    public function materialGroups(): HasOne
+    {
+        return $this->hasOne(MaterialGroup::class, 'mat_grp_code', 'mat_grp');
     }
 }

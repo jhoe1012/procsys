@@ -96,7 +96,7 @@ class PRController extends Controller
     public function copy(Request $request, $prnumber): Response
     {
 
-        $pr_header = PrHeader::with('plants', 'prmaterials', 'prmaterials.altUoms', 'workflows', 'attachments')
+        $pr_header = PrHeader::with('plants', 'prmaterials', 'prmaterials.altUoms', 'prmaterials.materialGroups', 'workflows', 'attachments')
             ->where('pr_number', $prnumber)
             ->firstOrFail();
 
@@ -190,8 +190,14 @@ class PRController extends Controller
     public function edit(Request $request, $prnumber)
     {
 
-        $pr_header = PrHeader::with('plants', 'prmaterials', 'prmaterials.altUoms', 'workflows', 'attachments')
-            ->where('pr_number', $prnumber)
+        $pr_header = PrHeader::with(
+            'plants',
+            'prmaterials',
+            'prmaterials.altUoms',
+            'prmaterials.materialGroups',
+            'workflows',
+            'attachments'
+        )->where('pr_number', $prnumber)
             ->firstOrFail();
 
         $item_details = DB::select("SELECT b.mat_code , d.po_number AS doc , c.po_qty AS qty , c.unit AS unit, 'Ordered' AS sts, c.item_no AS itm
@@ -273,6 +279,7 @@ class PRController extends Controller
                         $pr_material->valuation_price = $item['valuation_price'];
                         $pr_material->conversion = $item['conversion'];
                         $pr_material->converted_qty = $item['converted_qty'];
+                        $pr_material->item_text = $item['item_text'];
                         $pr_material->save();
 
                         return $item;
@@ -491,6 +498,7 @@ class PRController extends Controller
             'item_no' => ($index + 1) * 10,
             'mat_code' => $item['mat_code'],
             'short_text' => $item['short_text'],
+            'item_text' => strtoupper($item['item_text'])  ?? '',
             'qty' => $item['qty'],
             'qty_open' => $item['qty'],
             'price' => $item['price'],

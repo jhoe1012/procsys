@@ -15,6 +15,7 @@ const Create = ({ auth, mat_code, mat_desc, prheader }: PageProps<{ mat_code: Ch
   const initialMaterial = prheader
     ? prheader.prmaterials.map((prmaterial) => ({
         ...prmaterial,
+        mat_grp_desc: prmaterial.materialGroups?.mat_grp_desc ?? '',
         del_date: undefined,
         qty: undefined,
         altUomSelect: [
@@ -51,6 +52,7 @@ const Create = ({ auth, mat_code, mat_desc, prheader }: PageProps<{ mat_code: Ch
       { ...keyColumn('item_no', intColumn), title: 'ItmNo', disabled: true, minWidth: 55 },
       { ...keyColumn('mat_code', selectColumn({ choices: mat_code })), title: 'Material', minWidth: 120 },
       { ...keyColumn('short_text', selectColumn({ choices: mat_desc })), title: 'Short Text', minWidth: 300 },
+      { ...keyColumn('item_text', textColumn), title: 'Item Text', minWidth: 300 },
       { ...keyColumn('qty', floatColumn), title: 'Qty', minWidth: 70 },
       {
         ...keyColumn('altUomSelect', {
@@ -80,13 +82,29 @@ const Create = ({ auth, mat_code, mat_desc, prheader }: PageProps<{ mat_code: Ch
         title: 'Alt UOM',
         minWidth: 100,
       },
-      { ...keyColumn('ord_unit', textColumn), title: 'Ord Unit', minWidth: 55, disabled: true },
-      { ...keyColumn('price', floatColumn), title: 'Price', minWidth: 90, disabled: true },
-      { ...keyColumn('unit', textColumn), title: 'B.Unit', minWidth: 50, disabled: true },
+      {
+        ...keyColumn('ord_unit', textColumn),
+        title: 'Ord UOM',
+        minWidth: 55,
+        disabled: ({ rowData }: any) => rowData.mat_code && rowData.mat_code[0].toUpperCase() !== 'S',
+      },
+      {
+        ...keyColumn('price', floatColumn),
+        title: 'Price',
+        minWidth: 90,
+        disabled: ({ rowData }: any) => rowData.mat_code && rowData.mat_code[0].toUpperCase() !== 'S',
+      },
+      {
+        ...keyColumn('per_unit', floatColumn),
+        title: 'Per Unit',
+        minWidth: 50,
+        disabled: ({ rowData }: any) => rowData.mat_code && rowData.mat_code[0].toUpperCase() !== 'S',
+      },
+      { ...keyColumn('unit', textColumn), title: 'B.UOM', minWidth: 60, disabled: true },
       { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 90, disabled: true },
       { ...keyColumn('currency', textColumn), title: 'Curr', minWidth: 50, disabled: true },
       { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 130 },
-      { ...keyColumn('mat_grp', textColumn), title: 'Mat Grp', minWidth: 90, disabled: true },
+      { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 90, disabled: true },
       { ...keyColumn('purch_grp', textColumn), title: 'Purch Grp', minWidth: 90, disabled: true },
     ],
     []

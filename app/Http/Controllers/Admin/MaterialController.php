@@ -40,11 +40,12 @@ class MaterialController extends Controller
      */
     public function show(Request $request)
     {
-        // $material = request('material');
-        
-        $material = Material::with([ 'materialGroups', 'altUoms',
-        'valuations'   => fn($query) => $query->where('plant', $request->input('plant')), 
-        'purchasingGroups' => fn($query) => $query->where('plant', $request->input('plant')) ])
+        $material = Material::with([
+            'materialGroups',
+            'altUoms',
+            'valuations'   => fn($query) => $query->where('plant', $request->input('plant')),
+            'purchasingGroups' => fn($query) => $query->where('plant', $request->input('plant'))
+        ])
             ->where('mat_code', $request->input('material'))
             ->orWhere('mat_desc', $request->input('material'))
             ->firstOrFail();
@@ -85,7 +86,7 @@ class MaterialController extends Controller
     {
         if (!$request->input('search'))
             return;
-        
+
         $material = Material::where('mat_code', 'ilike', "%{$request->input('search')}%")
             ->orWhere('mat_desc', 'ilike', "%{$request->input('search')}%")
             ->orWhere('old_mat_code', 'ilike', "%{$request->input('search')}%")

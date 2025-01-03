@@ -131,20 +131,23 @@
                         <td width='40%' class="align-top">{{ $pomaterial->short_text }}
                             {{-- <br> Delivery Date: {{ date('m/d/Y', strtotime($pomaterial->del_date)) }} --}}
                             @if ($pomaterial->item_text)
-                                <br> Remarks: {{ $pomaterial->item_text }}
+                                <br> {{ $pomaterial->item_text }}
                             @endif
                         </td>
                         <td width='15%' class="align-top">{{ $pomaterial->po_qty }} {{ $pomaterial->unit }}</td>
                         <td width='15%' class="align-top">
                             {{ $pomaterial->taxClass?->tax_class == 1
                                 ? Number::currency($pomaterial->net_price * ($pomaterial->taxClass?->tax_value * 0.01 + 1), 'PHP')
-                                : Number::currency($pomaterial->net_price, 'PHP') }} 
+                                : Number::currency($pomaterial->net_price, 'PHP') }}
                         </td>
                         @php
                             $totalValue =
                                 $pomaterial->taxClass?->tax_class == 1
-                                    ? round($pomaterial->net_price  * ($pomaterial->taxClass?->tax_value * 0.01 + 1), 2)  * $pomaterial->po_qty  
-                                    : round($pomaterial->net_price  * $pomaterial->po_qty );
+                                    ? round(
+                                            $pomaterial->net_price * ($pomaterial->taxClass?->tax_value * 0.01 + 1),
+                                            2,
+                                        ) * $pomaterial->po_qty
+                                    : round($pomaterial->net_price * $pomaterial->po_qty);
                             $grandTotal += $totalValue;
                         @endphp
                         <td width='15%' class="align-top">
@@ -177,8 +180,8 @@
 
 </body>
 
-    <script>
-        window.print();
-    </script>
+<script>
+    window.print();
+</script>
 
 </html>

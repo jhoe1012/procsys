@@ -16,11 +16,23 @@ const usePRMaterialValidation = () => {
     }
 
     for (const updatedMaterial of updatedMaterials) {
-      const { mat_code, qty, ord_unit, del_date, item_no } = updatedMaterial;
+      const { mat_code, qty, ord_unit, unit, del_date, item_no, price, per_unit } = updatedMaterial;
 
       if (mat_code) {
         if (!qty || qty <= 0) {
           newErrors.push(`Please enter quantity for item no ${item_no}`);
+          isValid = false;
+          break;
+        }
+
+        if (!price || price <= 0) {
+          newErrors.push(`Please enter price for item no ${item_no}`);
+          isValid = false;
+          break;
+        }
+
+        if (!per_unit || per_unit <= 0) {
+          newErrors.push(`Please enter per unit for item no ${item_no}`);
           isValid = false;
           break;
         }

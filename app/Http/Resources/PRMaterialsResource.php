@@ -24,6 +24,7 @@ class PRMaterialsResource extends JsonResource
             'item_no' => $this->item_no,
             'mat_code' => $this->mat_code,
             'short_text' => $this->short_text,
+            'item_text' => $this->item_text,
             'qty' => $this->qty,
             'ord_unit' => $this->ord_unit,
             'qty_ordered' => $this->qty_ordered,
@@ -47,6 +48,7 @@ class PRMaterialsResource extends JsonResource
             'pr_number' =>  $this->whenLoaded('prheader', fn() =>  (string)$this->prheader->pr_number),
             'materialNetPrices' =>  MaterialNetPriceResource::collection($this->whenLoaded('materialNetPrices')),
             'alt_uom' =>  AlternativeUomResource::collection($this->whenLoaded('altUoms')),
+            "materialGroups" => new MaterialGroupResource($this->whenLoaded('materialGroups')),
         ];
     }
 }

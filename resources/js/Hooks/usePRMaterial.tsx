@@ -70,13 +70,10 @@ export default function usePRMaterial() {
           //   }
           // }
 
-          if (
-            (value.mat_code && value.mat_code !== oldValue.mat_code) ||
-            (value.short_text && value.short_text !== oldValue.short_text)
-          ) {
+          if ((value.mat_code && value.mat_code !== oldValue.mat_code) || (value.short_text && value.short_text !== oldValue.short_text)) {
             const materialInfo = await fetchMaterialInfo(value.short_text ?? value.mat_code);
             if (materialInfo) {
-              const { altUoms = [], valuations = [{}], materialGroups = [{}], purchasingGroups = [{}] } = materialInfo;
+              const { altUoms = [], valuations = [{}], materialGroups = [], purchasingGroups = [] } = materialInfo;
               const ord_unit = materialInfo.order_uom || materialInfo.base_uom;
               const altUomSelect = [...new Set([ord_unit, ...altUoms.map((item: IAlternativeUom) => item.alt_uom)])];
 
@@ -88,17 +85,32 @@ export default function usePRMaterial() {
                 ord_unit: ord_unit,
                 unit: materialInfo.base_uom,
                 valuation_price: parseFloat(valuations[0]?.valuation_price || '0'),
-                currency: valuations[0]?.currency || '',
-                per_unit: parseFloat(valuations[0]?.per_unit || '0'),
-                mat_grp: materialGroups[0]?.mat_grp_code || '',
-                purch_grp: purchasingGroups[0]?.purch_grp || '',
+                currency: valuations[0]?.currency || 'PHP',
+                per_unit: parseFloat(valuations[0]?.per_unit || '1'),
+                mat_grp: materialGroups?.mat_grp_code || '',
+                mat_grp_desc: materialGroups?.mat_grp_desc || '',
+                purch_grp: purchasingGroups?.purch_grp || '',
+                qty_ordered: null,
               });
             }
           }
-
-          if (value.qty && value.qty !== oldValue.qty) {
-            Object.assign(value, { ...computeConversion(value, value.ord_unit ?? '') });
+          if (value.mat_code && value.mat_code[0].toUpperCase() === 'S') {
+            value.unit = value.ord_unit;
           }
+
+          if ((value.qty && value.qty !== oldValue.qty) || (value.price && value.price > 0)) {
+            if (value.mat_code[0].toUpperCase() === 'S') {
+              const suppliesMaterial = {
+                total_value: value.qty * (value.price / value.per_unit) || 0,
+                conversion: 1,
+                converted_qty: value.qty,
+              };
+              Object.assign(value, { ...suppliesMaterial });
+            } else {
+              Object.assign(value, { ...computeConversion(value, value.ord_unit ?? '') });
+            }
+          }
+
           value.item_no = (i + 1) * 10;
         }
       }

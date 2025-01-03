@@ -200,6 +200,7 @@ export interface IPRMaterial {
   item_no?: number;
   mat_code?: string;
   short_text?: string;
+  item_text?: string;
   qty?: number;
   ord_unit?: string;
   qty_ordered?: number;
@@ -212,6 +213,7 @@ export interface IPRMaterial {
   currency?: number;
   del_date?: Date;
   mat_grp?: string;
+  mat_grp_desc?: string;
   purch_grp?: string;
   altUomSelect?: Array<string>;
   alt_uom?: IAlternativeUom[];
@@ -294,6 +296,7 @@ export interface IPOMaterial {
   currency?: string;
   del_date?: Date;
   mat_grp?: string;
+  mat_grp_desc?: string;
   requested_by?: string;
   pr_number?: number;
   pr_item?: number;

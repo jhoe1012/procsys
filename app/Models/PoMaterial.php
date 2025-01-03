@@ -77,4 +77,8 @@ class PoMaterial extends Model
     {
         return $this->hasMany(AlternativeUom::class, 'mat_code', 'mat_code');
     }
+    public function materialGroups(): HasOne
+    {
+        return $this->hasOne(MaterialGroup::class, 'mat_grp_code', 'mat_grp');
+    }
 }

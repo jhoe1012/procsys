@@ -6,6 +6,7 @@ use App\Trait\CreatedUpdatedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Material extends Model
 {
@@ -16,14 +17,14 @@ class Material extends Model
         return $this->hasMany(MaterialValuation::class, 'mat_code', 'mat_code');
     }
 
-    public function purchasingGroups(): HasMany
+    public function purchasingGroups(): HasOne
     {
-        return $this->hasMany(PurchasingGroup::class, 'mat_code', 'mat_code');
+        return $this->hasOne(PurchasingGroup::class, 'mat_code', 'mat_code');
     }
 
-    public function materialGroups(): HasMany
+    public function materialGroups(): HasOne
     {
-        return $this->hasMany(MaterialGroup::class, 'mat_grp_code', 'mat_grp_code');
+        return $this->hasOne(MaterialGroup::class, 'mat_grp_code', 'mat_grp_code');
     }
 
     public function altUoms(): HasMany
