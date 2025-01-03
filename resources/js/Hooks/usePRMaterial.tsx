@@ -7,17 +7,33 @@ const materialCache: { [key: string]: any } = {}; // Cache for getMaterialInfo r
 export default function usePRMaterial() {
   const [isLoading, setIsLoading] = useState(false);
 
-  const getMaterialInfo = async (material: string, plant: string) => {
-    try {
-      const { data } = await window.axios.get(route('material.details'), {
-        params: { material: material, plant: plant },
-      });
-      return data?.data;
-    } catch (error) {
-      console.error(`Error fetching material info for "${material}":`, error);
-      return null;
+  const getMaterialInfo = async (material: string, plant: string, doc_date: string) => {
+    if (!materialCache[material]) {
+      try {
+        const { data } = await window.axios.get(route('material.details'), {
+          params: { material, plant, doc_date },
+        });
+        materialCache[material] = data?.data;
+      } catch (error) {
+        console.error(`Error fetching material info for "${material}":`, error);
+        materialCache[material] = null;
+      }
     }
+
+    return materialCache[material];
   };
+
+  // const getMaterialInfo = async (material: string, plant: string, doc_date: string) => {
+  //   try {
+  //     const { data } = await window.axios.get(route('material.details'), {
+  //       params: { material: material, plant: plant, doc_date: doc_date },
+  //     });
+  //     return data?.data;
+  //   } catch (error) {
+  //     console.error(`Error fetching material info for "${material}":`, error);
+  //     return null;
+  //   }
+  // };
 
   const computeConversion = (material: IPRMaterial, _ord_unit: string) => {
     const alt_uom = material.alt_uom?.find(({ alt_uom }) => alt_uom === _ord_unit) || {};
@@ -30,11 +46,19 @@ export default function usePRMaterial() {
     return { conversion, price, converted_qty, total_value, ord_unit };
   };
 
+  // const fetchMaterialInfo = async (key: string, plant: string, doc_date: string) => {
+  //   if (!materialCache[key]) {
+  //     materialCache[key] = await getMaterialInfo(key, plant, doc_date);
+  //   }
+  //   return materialCache[key];
+  // };
+
   const updateMaterialPR = async (
     newValue: IPRMaterial[],
     operations: Operation[],
     material: IPRMaterial[],
-    plant: string
+    plant: string,
+    doc_date: string
   ): Promise<IPRMaterial[]> => {
     const updatedMaterial = [...newValue];
     setIsLoading(true);
@@ -44,14 +68,6 @@ export default function usePRMaterial() {
         for (let i = operation.fromRowIndex; i < operation.toRowIndex; i++) {
           const value = updatedMaterial[i];
           const oldValue = material[i];
-
-          const fetchMaterialInfo = async (key: string) => {
-            if (!materialCache[key]) {
-              materialCache[key] = await getMaterialInfo(key, plant);
-            }
-            return materialCache[key];
-          };
-
           // if (value.mat_code && value.mat_code !== oldValue.mat_code) {
           //   const materialInfo = await fetchMaterialInfo(value.mat_code);
           //   if (materialInfo) {
@@ -71,12 +87,12 @@ export default function usePRMaterial() {
           // }
 
           if ((value.mat_code && value.mat_code !== oldValue.mat_code) || (value.short_text && value.short_text !== oldValue.short_text)) {
-            const materialInfo = await fetchMaterialInfo(value.short_text ?? value.mat_code);
+            // const materialInfo = await fetchMaterialInfo(value.short_text ?? value.mat_code, plant, doc_date);
+            const materialInfo = await getMaterialInfo(value.short_text ?? value.mat_code, plant, doc_date);
             if (materialInfo) {
               const { altUoms = [], valuations = [{}], materialGroups = [], purchasingGroups = [] } = materialInfo;
               const ord_unit = materialInfo.order_uom || materialInfo.base_uom;
               const altUomSelect = [...new Set([ord_unit, ...altUoms.map((item: IAlternativeUom) => item.alt_uom)])];
-
               Object.assign(value, {
                 altUomSelect,
                 alt_uom: altUoms,

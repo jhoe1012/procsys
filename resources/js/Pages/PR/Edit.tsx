@@ -229,7 +229,7 @@ const Edit = ({
   ];
 
   const updateMaterial = async (newValue: IPRMaterial[], operations: Operation[]) => {
-    const updatedMaterial = await updateMaterialPR(newValue, operations, material, data.plant);
+    const updatedMaterial = await updateMaterialPR(newValue, operations, material, data.plant, data.doc_date);
     setMaterial(updatedMaterial);
   };
 
@@ -304,7 +304,7 @@ const Edit = ({
               <div className="p-5 flex flex-wrap gap-4">
                 <InputField label="PR Number" id="prnumber" defaultValue={data.pr_number} disabled={true} />
                 <InputField label="Created By" id="createdby" defaultValue={data.created_name} disabled={true} />
-                <InputField label="Date" id="date" defaultValue={data.doc_date} disabled={true} />
+                <InputField label="Date" id="date" type="date" defaultValue={data.doc_date} disabled={true} />
                 <InputField
                   label="Requested By"
                   id="requested_by"

@@ -7,7 +7,7 @@ export const STATUS_APPROVED = 'Approved';
 export const STATUS_REWORK = 'Rework';
 export const STATUS_REJECTED = 'Rejected';
 
-export const DATE_TODAY = new Date().toLocaleDateString();
+export const DATE_TODAY = new Date().toISOString().slice(0, 10); //.toLocaleDateString('en-US');
 
 export const DEFAULT_PR_MATERIAL = {
   sel: false,

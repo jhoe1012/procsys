@@ -43,7 +43,9 @@ class MaterialController extends Controller
         $material = Material::with([
             'materialGroups',
             'altUoms',
-            'valuations'   => fn($query) => $query->where('plant', $request->input('plant')),
+            'valuations'   => fn($query) => $query->where('plant', $request->input('plant'))
+                ->where('valid_from', '<=', $request->input('doc_date'))
+                ->where('valid_to', '>=', $request->input('doc_date')),
             'purchasingGroups' => fn($query) => $query->where('plant', $request->input('plant'))
         ])
             ->where('mat_code', $request->input('material'))

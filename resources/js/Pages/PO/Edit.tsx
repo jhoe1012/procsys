@@ -346,7 +346,7 @@ const Edit = ({
                   type="number"
                 />
                 <InputField label="Created By" id="created_by" defaultValue={data.created_name} disabled={true} />
-                <InputField label="Doc Date By" id="doc_date" defaultValue={data.doc_date} disabled={true} />
+                <InputField label="Doc Date By" id="doc_date" type="date" defaultValue={data.doc_date} disabled={true} />
                 <InputField
                   label="Delivery Date"
                   id="deliv_date"
