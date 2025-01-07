@@ -70,6 +70,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/val-price', [MaterialValuationController::class, "index"])->name("val_price.index");
     Route::post('/val-price-store', [MaterialValuationController::class, "store"])->name("val_price.store");
     Route::patch('/val-price-update/{materialValuation}', [MaterialValuationController::class, "update"])->name("val_price.update");
+    Route::post('/val-price-import', [MaterialValuationController::class, "import"])->name("val_price.import");
+    Route::get('/val-price-download-error', [MaterialValuationController::class, "export"])->name("val_price.download.error");
 
 
     Route::get('/vendor-index', [VendorController::class, "index"])->name("vendor.index");

@@ -2,10 +2,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { ArrowUpTrayIcon, XMarkIcon } from '@heroicons/react/24/solid';
 
-const Dropzone = ({ files, setFiles }) => {
+const Dropzone = ({ files, setFiles, multiple = true }) => {
   const onDrop = useCallback((acceptedFiles) => {
     if (acceptedFiles?.length) {
-      setFiles((previousFiles) => [...previousFiles, ...acceptedFiles]);
+      if (multiple) {
+        setFiles((previousFiles) => [...previousFiles, ...acceptedFiles]);
+      } else {
+        setFiles([acceptedFiles[0]]);
+      }
     }
   }, []);
 
@@ -20,7 +24,7 @@ const Dropzone = ({ files, setFiles }) => {
     <>
       <div {...getRootProps()}>
         <input {...getInputProps()} />
-        <div className="flex flex-col items-center justify-center gap-4 border-2 border-dashed border-blue-400 text-lg">
+        <div className="flex flex-col items-center justify-center gap-4 border-2 border-dashed border-blue-400 text-lg p-5 min-w-full">
           <ArrowUpTrayIcon className="w-5 h-5 fill-current" />
           {isDragActive ? <p> Drop Files here...</p> : <p>Drag & Drop files here, or click to select files</p>}
         </div>

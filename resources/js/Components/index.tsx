@@ -13,3 +13,6 @@ export { default as PrintButton } from '@/Components/PrintButton';
 export { default as VendorCard } from '@/Components/VendorCard';
 export { default as Modal } from '@/Components/Modal';
 export { default as SecondaryButton } from '@/Components/SecondaryButton';
+export { default as AdminUpload } from '@/Components/AdminUpload';
+export { default as TextInput } from '@/Components/TextInput';
+export { default as Pagination } from '@/Components/Pagination';

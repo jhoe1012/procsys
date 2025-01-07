@@ -1,3 +1,13 @@
-UPDATE pr_materials SET "conversion" = qty , converted_qty =qty , valuation_price=price WHERE id =937
+UPDATE pr_materials SET "conversion" = qty , converted_qty =qty , valuation_price=price 
 
 UPDATE po_materials SET "conversion" = "conversion"/denominator WHERE "conversion" > 0 
+
+INSERT INTO delivery_addresses (id,plant,address,is_active,created_by,updated_by,created_at,updated_at) VALUES
+	 (1,'P100','DOOR 2 PLUG HOLDING BLDG, DIHO ROAD CABANTIAN, DAVAO CITY',true,NULL,NULL,NULL,NULL),
+	 (2,'P100','#76 ANACONDA COMPOUND F. MARIANO AVE., DELA PAZ, PASIG CITY',true,NULL,NULL,NULL,NULL),
+	 (3,'P100','BLOCK 6 LOT 8, PSD II, DIVERSION ROAD, BUHANGIN, DAVAO CITY',true,NULL,NULL,NULL,NULL);
+
+INSERT INTO supplier_notes (id,plant,note,is_active,created_by,updated_by,created_at,updated_at) VALUES
+	 (1,'P100','*** PLEASE PROVIDE COPY OF PO REFERENCE/S DURING DELIVERIES. FOR SERVICES, PLEASE PROVIDE SERVICE REPORT AFTER THE SERVICE.',true,NULL,NULL,NULL,NULL),
+	 (2,'P100','NOTE: PLEASE PROVIDE COA/COI/LOG WITH MICROBIOLOGY & PHYSICO-CHEM ANALYSIS IN EVERY DELIVERY.  FOR MEAT PRODUCTS, PLEASE ALSO PROVIDE MEAT INSPECTION CERTIFICATE. *** PLEASE PROVIDE COPY OF PO REFERENCE/S DURING DELIVERIES',true,NULL,NULL,NULL,NULL);
+

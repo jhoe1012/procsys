@@ -32,17 +32,17 @@ class AuthServiceProvider extends ServiceProvider
      */
 
     //  CoreService $coreService 
-    public function boot( CoreService $coreService  )
+    public function boot(CoreService $coreService)
     {
         // $this->registerPolicies();
-        
+
         // Gate::define('update-post', function (User $user) {
         //     dd($user);
         // });
 
-         $coreService->registerGatePermissions();
+        $coreService->registerGatePermissions();
 
         //   Sanctum::usePersonalAccessTokenModel( PersonalAccessToken::class );
-       
+
     }
 }
