@@ -29,12 +29,7 @@ class PrHeaderController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        $pr_header = $request->all();
-
-        dd($pr_header);
-    }
+    public function store(Request $request) {}
 
     /**
      * Display the specified resource.

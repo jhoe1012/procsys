@@ -8,7 +8,7 @@ use App\Http\Controllers\POController;
 use App\Http\Controllers\VendorController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/material', [MaterialController::class, 'show'])->name('material.details');
+Route::get('/material-details', [MaterialController::class, 'show'])->name('material.details');
 
 Route::get('/po-plant', [POController::class, 'getApprovedPr'])->name('po.plant');
 Route::get('/po-details/{ponumber}', [GRController::class, 'getPoDetails'])->name('po.details');

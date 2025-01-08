@@ -28,7 +28,6 @@ export default function Create() {
     vat_reg_no: '',
   });
 
-
   const createVendor: FormEventHandler = (e) => {
     e.preventDefault();
 
@@ -52,7 +51,7 @@ export default function Create() {
 
       <Modal show={showModal} onClose={closeModal} maxWidth="3xl">
         <form onSubmit={createVendor}>
-          <div className="m-2">
+          <div className="m-2 p-5">
             <div className="flex px-2">
               <div className="p-1 w-3/12">
                 <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="supplier">
@@ -78,7 +77,8 @@ export default function Create() {
                   id="account_group"
                   defaultValue={data.account_group}
                   onChange={(e) => setData('account_group', e.target.value)}
-                  maxLength={100} />
+                  maxLength={100}
+                />
               </div>
               <div className="p-1 w-3/12">
                 <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="tax_number">
@@ -110,7 +110,7 @@ export default function Create() {
             </div>
 
             <div className="flex px-2">
-            <div className="p-1 w-6/12">
+              <div className="p-1 w-6/12">
                 <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="name_1">
                   Name
                 </Label>
@@ -138,7 +138,7 @@ export default function Create() {
                   required={true}
                 />
               </div>
-              </div>
+            </div>
 
             <div className="flex px-2">
               <div className="p-1 w-6/12">
@@ -171,7 +171,7 @@ export default function Create() {
               </div>
               <div className="p-1 w-3/12">
                 <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="district">
-                 District
+                  District
                 </Label>
                 <Input
                   className="m-2 w-full border-gray-300 h-10 "
@@ -227,7 +227,7 @@ export default function Create() {
               </div>
               <div className="p-1 w-3/12">
                 <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="vat_reg_no">
-                 Vat Reg No
+                  Vat Reg No
                 </Label>
                 <Input
                   className="m-2 w-full border-gray-300 h-10 "
@@ -241,10 +241,7 @@ export default function Create() {
             </div>
 
             <div className="grid justify-items-center m-3">
-              <Button
-                variant="outline"
-                disabled={processing}
-                className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-60">
+              <Button variant="outline" disabled={processing} className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-60">
                 Save
               </Button>
             </div>

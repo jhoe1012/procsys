@@ -16,7 +16,7 @@ class MenuService
 
     private function buildMenus()
     {
-        // dd(Auth::user()->can('approve.po'));
+
         $this->menus = [
             [
                 'label' => 'Purchase Requisition',
@@ -75,22 +75,22 @@ class MenuService
                 'childrens' => [
                     [
                         'label' => 'PR Report',
-                        'permissions' =>true,
+                        'permissions' => true,
                         'href' => route('report.pr'),
                     ],
                     [
                         'label' => 'PO Report',
-                        'permissions' =>true,
+                        'permissions' => true,
                         'href' => route('report.po'),
                     ],
                     [
                         'label' => 'GR Report',
-                        'permissions' =>true,
+                        'permissions' => true,
                         'href' => route('report.gr'),
                     ],
                     [
                         'label' => 'Material Report',
-                        'permissions' =>true,
+                        'permissions' => true,
                         'href' => route('report.material'),
                     ]
                 ]
@@ -106,6 +106,11 @@ class MenuService
                     ],
                     [
                         'label' => 'Material',
+                        'permissions' => Auth::user()->can('admin'),
+                        'href' => route('material.index'),
+                    ],
+                    [
+                        'label' => 'Plant',
                         'permissions' => Auth::user()->can('admin'),
                         'href' => '',
                     ],

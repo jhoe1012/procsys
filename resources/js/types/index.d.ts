@@ -60,19 +60,16 @@ export interface IApprover {
   amount_to: number;
   seq: number;
   desc: string;
-  created_by: string;
-  updated_by: string;
-  created_at: string;
-  updated_at: string;
+  created_by?: string;
+  updated_by?: string;
+  created_at?: string;
+  updated_at?: string;
   plants?: IPlants;
   user?: User;
-  _method: string;
+  _method?: string;
 }
 export interface IMaterial {
-  base_uom: string;
-  created_at: string;
-  created_by: string;
-  id: number;
+  id?: number;
   mat_code: string;
   mat_desc: string;
   mat_grp_code: string;
@@ -80,10 +77,24 @@ export interface IMaterial {
   min_rem_shelf_life: number;
   old_mat_code: string;
   order_uom: string;
+  base_uom: string;
   total_shelf_life: number;
-  updated_at: string;
-  updated_by: string;
-  valuations: IMaterialValuation;
+  updated_at?: string;
+  updated_by?: User;
+  created_at?: string;
+  created_by?: User;
+  valuations?: IMaterialValuation;
+  materialGroups?: IMaterialGroups;
+  altUoms?: IAlternativeUom[];
+  _method?: string;
+  mat_groupChoice?: Choice;
+}
+
+export interface IMaterialGroups {
+  id: number;
+  mat_grp_code: string;
+  mat_grp_desc: string;
+  mat_grp_desc2: string;
 }
 
 export interface IMaterialValuation {
@@ -151,6 +162,9 @@ export interface IVendorPage extends IPagination {
 
 export interface IApproverPage extends IPagination {
   data: IApprover[];
+}
+export interface IMaterialPage extends IPagination {
+  data: IMaterial[];
 }
 
 export interface ILink {

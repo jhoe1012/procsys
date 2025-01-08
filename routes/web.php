@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\MaterialValuationController;
 use App\Http\Controllers\ApproverController;
 use App\Http\Controllers\AttachmentController;
@@ -82,6 +83,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/approver', [ApproverController::class, "index"])->name("approver.index");
     Route::post('/approver-store', [ApproverController::class, "store"])->name("approver.store");
     Route::patch('/approver-update/{approver}', [ApproverController::class, "update"])->name("approver.update");
+
+    Route::resource('material', MaterialController::class);
+    //('/material', [MaterialController::class, "index"])->name("material.index");
 
 
     Route::get('/report-pr', [ReportController::class, "prReport"])->name("report.pr");

@@ -12,6 +12,18 @@ class Material extends Model
 {
     use CreatedUpdatedBy, HasFactory;
 
+    protected $fillable = [
+        'mat_code',
+        'mat_desc',
+        'mat_grp_code',
+        'mat_type',
+        'base_uom',
+        'min_rem_shelf_life',
+        'old_mat_code',
+        'order_uom',
+        'total_shelf_life',
+    ];
+
     public function valuations(): HasMany
     {
         return $this->hasMany(MaterialValuation::class, 'mat_code', 'mat_code');
@@ -30,5 +42,14 @@ class Material extends Model
     public function altUoms(): HasMany
     {
         return $this->hasMany(AlternativeUom::class,  'mat_code', 'mat_code');
+    }
+
+    public function createdBy(): HasOne
+    {
+        return $this->hasOne(User::class, 'id', 'created_by');
+    }
+    public function updatedBy(): HasOne
+    {
+        return $this->hasOne(User::class, 'id', 'updated_by');
     }
 }

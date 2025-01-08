@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Exports\MaterialReportExport;
 use App\Exports\MaterialValuationErrorExport;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MaterialValuationResource;
@@ -31,6 +30,7 @@ class MaterialValuationController extends Controller
         if (request('plant')) {
             $query->where('plant', 'like', "%" . request('plant') . "%");
         }
+
         if (request('material')) {
             $query->where('mat_code', 'like', "%" . request('material') . "%");
         }
@@ -44,7 +44,6 @@ class MaterialValuationController extends Controller
             ->orderBy('plant')
             ->get()
             ->map(fn($item) =>  [
-
                 'value' => $item->plant,
                 'label' => $item->plant . '-' . $item->name1
             ])->toArray();
@@ -185,7 +184,6 @@ class MaterialValuationController extends Controller
             INSERT INTO material_valuations(mat_code,plant,currency,valuation_price,per_unit,valid_from,valid_to,created_by, created_at)
             SELECT mat_code,plant,currency,valuation_price,per_unit,valid_from,valid_to,created_by,created_at FROM temp_material_valuations WHERE stat IN ('X','S');
             ");
-
 
             return to_route("val_price.index")->with('success', "Valuation uploaded.");
         } catch (\Exception $exception) {
