@@ -48,7 +48,7 @@ export default function GrReport({ auth, grReport, queryParams }: PageProps) {
                     <th className="px-1 py-2">Header Text</th>
                     <th className="px-1 py-2">Item No</th>
                     <th className="px-1 py-2">Mat Code</th>
-                    <th className="px-1 py-2">Short Text</th>
+                    <th className="px-1 py-2">Material Description</th>
                     <th className="px-1 py-2">Qty</th>
                     <th className="px-1 py-2">Unit</th>
                     <th className="px-1 py-2">Open PO</th>

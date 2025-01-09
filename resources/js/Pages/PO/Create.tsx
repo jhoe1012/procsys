@@ -52,7 +52,7 @@ const Create = ({
       { ...keyColumn('status', textColumn), title: 'Sts', minWidth: 35, disabled: true },
       { ...keyColumn('item_no', intColumn), title: 'ItmNo', minWidth: 55, disabled: true },
       { ...keyColumn('mat_code', textColumn), title: 'Material', minWidth: 120, disabled: true },
-      { ...keyColumn('short_text', textColumn), title: 'Short Text', minWidth: 300, disabled: true },
+      { ...keyColumn('short_text', textColumn), title: 'Material Description', minWidth: 300, disabled: true },
       { ...keyColumn('item_text', textColumn), title: 'Item Text', minWidth: 300 },
       { ...keyColumn('po_qty', floatColumn), title: 'PO Qty', minWidth: 70 },
       { ...keyColumn('qty_open_po', floatColumn), title: 'Open Qty', minWidth: 100, disabled: true },

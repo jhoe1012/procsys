@@ -247,7 +247,7 @@ export default function Index({
                         <th className="px-3 py-2">Stat </th>
                         <th className="px-3 py-2">itemNo</th>
                         <th className="px-3 py-2">Material</th>
-                        <th className="px-3 py-2">Short Text</th>
+                        <th className="px-3 py-2">Material Description</th>
                         <th className="px-3 py-2">Del Date</th>
                         <th className="px-3 py-2">Quantity</th>
                         <th className="px-3 py-2">Open Qty</th>

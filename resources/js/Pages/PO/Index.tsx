@@ -161,9 +161,7 @@ export default function Index({
                           cacheOptions
                           defaultOptions
                           loadOptions={fetchVendor}
-                          value={
-                            queryParams.vendor ? { label: `${queryParams.vendor} `, value: queryParams.vendor } : null
-                          }
+                          value={queryParams.vendor ? { label: `${queryParams.vendor} `, value: queryParams.vendor } : null}
                           onChange={(option: any) => searchFieldChanged('vendor', option?.value)}
                           placeholder="Vendor"
                           styles={REACT_SELECT_STYLES}
@@ -225,7 +223,7 @@ export default function Index({
                     {po_header.data.length > 0 ? (
                       po_header.data.map((po, index) => (
                         // <tr className="bg-white border-b" key={po.id}>
-                        <tr className={'border-b ' + (index % 2 === 0 ? 'bg-gray-100' : 'bg-white')}  key={po.id}>
+                        <tr className={'border-b ' + (index % 2 === 0 ? 'bg-gray-100' : 'bg-white')} key={po.id}>
                           <td className="px-3 py-2">
                             <input
                               type="radio"
@@ -273,7 +271,7 @@ export default function Index({
                         <th className="px-3 py-2">Stat</th>
                         <th className="px-3 py-2">itemNo</th>
                         <th className="px-3 py-2">Material </th>
-                        <th className="px-3 py-2">Short Text</th>
+                        <th className="px-3 py-2">Material Description</th>
                         <th className="px-3 py-2">Del Date</th>
                         <th className="px-3 py-2">Qty</th>
                         <th className="px-3 py-2">Unit</th>

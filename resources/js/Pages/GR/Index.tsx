@@ -15,7 +15,6 @@ const Index = ({
   queryParams = {},
   message,
 }: PageProps<{ gr_header: IGRHeaderPage }> & PageProps<{ queryParams: any }> & PageProps<{ message: IMessage }>) => {
-  
   const [selectedGr, setSelectedGr] = useState<IGRHeader | null>(null);
   const [grmaterials, setGrmaterials] = useState<IGRMaterials[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -81,7 +80,7 @@ const Index = ({
                           defaultValue={queryParams.gr_number_from}
                           onBlur={(e) => searchFieldChanged('gr_number_from', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('gr_number_from', e)}
-                          placeholder='GR No. From'
+                          placeholder="GR No. From"
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -90,7 +89,7 @@ const Index = ({
                           defaultValue={queryParams.po_number_from}
                           onBlur={(e) => searchFieldChanged('po_number_from', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('po_number_from', e)}
-                          placeholder='PO No. From'
+                          placeholder="PO No. From"
                         />
                       </th>
                       <th className="px-1 py-2"></th>
@@ -132,7 +131,7 @@ const Index = ({
                           defaultValue={queryParams.gr_number_to}
                           onBlur={(e) => searchFieldChanged('gr_number_to', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('gr_number_to', e)}
-                          placeholder='GR No. To'
+                          placeholder="GR No. To"
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -141,7 +140,7 @@ const Index = ({
                           defaultValue={queryParams.po_number_to}
                           onBlur={(e) => searchFieldChanged('po_number_to', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('po_number_to', e)}
-                          placeholder='PO No. To'
+                          placeholder="PO No. To"
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -150,7 +149,7 @@ const Index = ({
                           defaultValue={queryParams.plant}
                           onBlur={(e) => searchFieldChanged('plant', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('plant', e)}
-                          placeholder='Plant'
+                          placeholder="Plant"
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -159,7 +158,7 @@ const Index = ({
                           defaultValue={queryParams.vendor}
                           onBlur={(e) => searchFieldChanged('vendor', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('vendor', e)}
-                          placeholder='Vendor'
+                          placeholder="Vendor"
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -168,7 +167,7 @@ const Index = ({
                           defaultValue={queryParams.entered_by}
                           onBlur={(e) => searchFieldChanged('entered_by', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('entered_by', e)}
-                          placeholder='Entered By'
+                          placeholder="Entered By"
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -218,7 +217,7 @@ const Index = ({
                     {gr_header.data.length > 0 ? (
                       gr_header.data.map((gr, index) => (
                         // <tr className="bg-white border-b" key={gr.id}>
-                        <tr className={'border-b ' + (index % 2 === 0 ? 'bg-gray-100' : 'bg-white')}  key={gr.id}>
+                        <tr className={'border-b ' + (index % 2 === 0 ? 'bg-gray-100' : 'bg-white')} key={gr.id}>
                           <td className="px-3 py-2">
                             <input
                               type="radio"
@@ -270,7 +269,7 @@ const Index = ({
                         <th className="px-3 py-2">Stat</th>
                         <th className="px-3 py-2">ItemNo</th>
                         <th className="px-3 py-2">Material</th>
-                        <th className="px-3 py-2">Short Text</th>
+                        <th className="px-3 py-2">Material Description</th>
                         <th className="px-3 py-2">Qty</th>
                         <th className="px-3 py-2">Unit</th>
                         <th className="px-3 py-2">PO Del Date</th>

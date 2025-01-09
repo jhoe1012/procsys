@@ -46,7 +46,7 @@ export default function PoReport({ auth, poReport, queryParams }: PageProps) {
                     <th className="px-3 py-2">Supplier</th>
                     <th className="px-3 py-2">Supplier Name</th>
                     <th className="px-3 py-2">Material</th>
-                    <th className="px-3 py-2">Short Text</th>
+                    <th className="px-3 py-2">Material Description</th>
                     <th className="px-3 py-2">Matl Grp</th>
                     <th className="px-3 py-2">PO Qty</th>
                     <th className="px-3 py-2">PO Unit</th>

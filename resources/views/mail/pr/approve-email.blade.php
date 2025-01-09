@@ -91,7 +91,7 @@
                     <tr>
                         <td>Item No</td>
                         <td>Material</td>
-                        <td>Short Text</td>
+                        <td>Material Description</td>
                         <td>Qty</td>
                         <td>Ord Unit</td>
                         <td>Price</td>

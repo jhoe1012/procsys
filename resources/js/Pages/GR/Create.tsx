@@ -1,14 +1,6 @@
 import 'react-datasheet-grid/dist/style.css';
 import { FormEventHandler, useState } from 'react';
-import {
-  checkboxColumn,
-  DataSheetGrid,
-  dateColumn,
-  floatColumn,
-  intColumn,
-  keyColumn,
-  textColumn,
-} from 'react-datasheet-grid';
+import { checkboxColumn, DataSheetGrid, dateColumn, floatColumn, intColumn, keyColumn, textColumn } from 'react-datasheet-grid';
 import { Operation } from 'react-datasheet-grid/dist/types';
 import { CSSObjectWithLabel } from 'react-select';
 import AsyncSelect from 'react-select/async';
@@ -24,7 +16,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { IGRHeader, IGRMaterials, PageProps } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 
-const Create = ({ auth }: PageProps ) => {
+const Create = ({ auth }: PageProps) => {
   const dateToday = new Date().toISOString().substring(0, 10);
 
   const { toast } = useToast();
@@ -88,7 +80,7 @@ const Create = ({ auth }: PageProps ) => {
   const columns = [
     { ...keyColumn('item_no', intColumn), title: 'ItmNo', maxWidth: 50, disabled: true },
     { ...keyColumn('mat_code', textColumn), title: 'Material', maxWidth: 130, disabled: true },
-    { ...keyColumn('short_text', textColumn), title: 'Short Text', maxWidth: 350, disabled: true },
+    { ...keyColumn('short_text', textColumn), title: 'Material Description', maxWidth: 350, disabled: true },
     { ...keyColumn('po_gr_qty', floatColumn), title: 'PO Qty', maxWidth: 130, disabled: true },
     { ...keyColumn('gr_qty', floatColumn), title: 'Qty', maxWidth: 130 },
     { ...keyColumn('unit', textColumn), title: 'Unit', maxWidth: 55 },
@@ -277,9 +269,7 @@ const Create = ({ auth }: PageProps ) => {
                     cacheOptions
                     defaultOptions
                     loadOptions={fetchPoControlNo}
-                    value={
-                      data.po_number ? { label: `${data.control_no} | ${data.po_number}`, value: data.po_number } : null
-                    }
+                    value={data.po_number ? { label: `${data.control_no} | ${data.po_number}`, value: data.po_number } : null}
                     onChange={(option: any) => {
                       getPODetails(option?.value);
                     }}
@@ -380,10 +370,7 @@ const Create = ({ auth }: PageProps ) => {
                 <div className="p-5 justify-end grid grid-cols-8 gap-4">
                   {auth.permissions.gr.create && (
                     <>
-                      <Button
-                        variant="outline"
-                        disabled={processing}
-                        className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110]">
+                      <Button variant="outline" disabled={processing} className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110]">
                         Post
                       </Button>
                       <Link

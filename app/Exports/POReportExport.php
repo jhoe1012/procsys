@@ -32,7 +32,7 @@ class POReportExport implements FromArray, WithHeadings
             'Supplier',
             'Supplier Name',
             'Material',
-            'Short Text',
+            'Material Description',
             'Matl Grp',
             'PO Quantity',
             'PO Unit',

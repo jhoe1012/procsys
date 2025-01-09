@@ -18,7 +18,7 @@ import { useCallback, useMemo, useState } from 'react';
 const filterInputLabel = {
   pr_number: 'PR Number',
   mat_code: 'Material',
-  short_text: 'Short Text',
+  short_text: 'Material Description',
   mat_grp: 'Material Group',
   del_date: 'Delivery Date',
   purch_grp: 'Buyer Group',
@@ -112,7 +112,7 @@ export default function AddPrtoPo({ p_plant, p_doc_date, addToPO }) {
                   <th className="px-3 py-1"> Sel</th>
                   <th className="px-3 py-1"> Pr</th>
                   <th className="px-3 py-1"> Material</th>
-                  <th className="px-3 py-1"> Short</th>
+                  <th className="px-3 py-1"> Material Description</th>
                   <th className="px-3 py-1"> Open Qty</th>
                   <th className="px-3 py-1"> Unit</th>
                   <th className="px-3 py-1"> Per</th>

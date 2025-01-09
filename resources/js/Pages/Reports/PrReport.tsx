@@ -40,7 +40,7 @@ export default function PrReport({ auth, prReport, queryParams }: PageProps) {
                     <th className="px-3 py-2">PO</th>
                     <th className="px-3 py-2">Item</th>
                     <th className="px-3 py-2">Material</th>
-                    <th className="px-3 py-2">Short Text</th>
+                    <th className="px-3 py-2">Material Description</th>
                     <th className="px-3 py-2">PR Quantity</th>
                     <th className="px-3 py-2">PR Unit</th>
                     <th className="px-3 py-2">Open PR Qty</th>
@@ -95,7 +95,7 @@ export default function PrReport({ auth, prReport, queryParams }: PageProps) {
                 </tbody>
               </table>
             </div>
-              <Pagination links={prReport.links} />
+            <Pagination links={prReport.links} />
           </div>
         </div>
       </div>

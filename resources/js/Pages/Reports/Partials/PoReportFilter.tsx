@@ -6,13 +6,7 @@ import { Button } from '@/Components/ui/button';
 import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/solid';
 import Checkbox from '@/Components/Checkbox';
 
-export default function PoReportFilter({
-  queryParams,
-  filterReport,
-}: {
-  queryParams: any;
-  filterReport: (queryParam: any) => void;
-}) {
+export default function PoReportFilter({ queryParams, filterReport }: { queryParams: any; filterReport: (queryParam: any) => void }) {
   const [showModal, setShowModal] = useState(false);
 
   const searchFieldChanged = (name: string, value: any) => {
@@ -177,7 +171,7 @@ export default function PoReportFilter({
           </div>
           <div className="flex ">
             <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="type">
-              Short Text
+              Material Description
             </Label>
             <Input
               className="m-2 w-full border-gray-300 h-10 "
@@ -250,10 +244,7 @@ export default function PoReportFilter({
           </div>
 
           <div className="flex content-center justify-center gap-4 m-5">
-            <Button
-              onClick={handleFilter}
-              variant="outline"
-              className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-52">
+            <Button onClick={handleFilter} variant="outline" className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-52">
               Filter
             </Button>
             <Button onClick={clearFilter} variant="secondary" className=" w-52">

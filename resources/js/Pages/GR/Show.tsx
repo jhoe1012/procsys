@@ -16,7 +16,7 @@ const Show = ({ auth, grheader }: PageProps & PageProps<{ grheader: IGRHeader }>
   const columns = [
     { ...keyColumn('item_no', intColumn), title: 'ItmNo', maxWidth: 50, disabled: true },
     { ...keyColumn('mat_code', textColumn), title: 'Material', maxWidth: 130, disabled: true },
-    { ...keyColumn('short_text', textColumn), title: 'Short Text', maxWidth: 500, disabled: true },
+    { ...keyColumn('short_text', textColumn), title: 'Material Description', maxWidth: 500, disabled: true },
     { ...keyColumn('gr_qty', floatColumn), title: 'Qty', maxWidth: 130, disabled: true },
     { ...keyColumn('unit', textColumn), title: 'Unit', maxWidth: 55, disabled: true },
     { ...keyColumn('po_deliv_date', textColumn), title: 'PO Del Date', maxWidth: 130, disabled: true },
@@ -86,7 +86,7 @@ const Show = ({ auth, grheader }: PageProps & PageProps<{ grheader: IGRHeader }>
                         </div>
                         <div className="flex-none w-36">
                           <Label htmlFor="posting_date">Posting Date</Label>
-                          <Input type="date"id="posting_date" defaultValue={grheader.posting_date} disabled />
+                          <Input type="date" id="posting_date" defaultValue={grheader.posting_date} disabled />
                         </div>
                         <div className="flex-none w-36">
                           <Label htmlFor="actual_date">Actual Date of Reciept</Label>
