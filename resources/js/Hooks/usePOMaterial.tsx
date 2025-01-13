@@ -2,10 +2,8 @@ import { IPOMaterial } from '@/types';
 import { Operation } from 'react-datasheet-grid/dist/types';
 
 export default function usePOMaterial() {
-  const computeConversion = (material: IPOMaterial, _ord_unit: string, vendor: string = '') => {
-    const ord_unit = _ord_unit;
-    let unit = _ord_unit,
-      qty_open_po = material.qty_open;
+  const computeConversion = (material: IPOMaterial, ord_unit: string, vendor: string = '') => {
+    let qty_open_po = material.qty_open;
     let per_unit = material.per_unit;
     let net_price = 0,
       total_value = 0,
@@ -13,9 +11,11 @@ export default function usePOMaterial() {
       converted_qty_po = 0,
       conversion_po = 1;
     let po_qty = material.po_qty ?? material.qty_open;
-    const materialNetPriceUomVendor = material.materialNetPrices.find((netp_item) => netp_item.uom === unit && netp_item.vendor === vendor);
-    const materialNetPriceUom = material.materialNetPrices.find((netp_item) => netp_item.uom === unit);
-    const altUom = material.alt_uom?.find((uom) => uom.alt_uom === unit);
+    const materialNetPriceUomVendor = material.materialNetPrices.find(
+      (netp_item) => netp_item.uom === ord_unit && netp_item.vendor === vendor
+    );
+    const materialNetPriceUom = material.materialNetPrices.find((netp_item) => netp_item.uom === ord_unit);
+    const altUom = material.alt_uom?.find((uom) => uom.alt_uom === ord_unit);
 
     conversion_po = (altUom?.counter ?? 1) / (altUom?.denominator ?? 1);
     converted_qty_po = (po_qty ?? 0) * conversion_po;
@@ -35,7 +35,7 @@ export default function usePOMaterial() {
       total_value = ((net_price ?? 0) / (per_unit ?? 0)) * (po_qty ?? 0);
     }
 
-    return { conversion_po, ord_unit, net_price, converted_qty_po, total_value, min_order_qty, qty_open_po, unit, po_qty };
+    return { conversion_po, ord_unit, net_price, converted_qty_po, total_value, min_order_qty, qty_open_po, unit: ord_unit, po_qty };
   };
 
   const updateMaterialPO = (newValue: IPOMaterial[], operations: Operation[], is_edit: boolean = false) => {

@@ -1,4 +1,5 @@
 import {
+  AltUom,
   AttachmentList,
   Discard,
   Dropzone,
@@ -71,6 +72,17 @@ const Edit = ({
     _method: 'patch',
   });
 
+  const handleOnChange = (value: string, rowIndex: number) => {
+    setMaterial((prevMaterial) => {
+      const newMaterial = [...prevMaterial];
+      newMaterial[rowIndex] = {
+        ...newMaterial[rowIndex],
+        ...computeConversion(newMaterial[rowIndex], value),
+      };
+      return newMaterial;
+    });
+  };
+
   const columns = useMemo(
     () => [
       { ...keyColumn('sel', checkboxColumn), title: 'Sel', minWidth: 30 },
@@ -81,38 +93,18 @@ const Edit = ({
       { ...keyColumn('item_text', textColumn), title: 'Item Text', minWidth: 300 },
       { ...keyColumn('qty', floatColumn), title: 'Qty', minWidth: 70, disabled: ({ rowData }: any) => rowData.qty_ordered > 0 },
       {
-        ...keyColumn('altUomSelect', {
-          component: ({ rowData, rowIndex }) =>
-            rowData && (
-              <select
-                className="border-none w-full shadow-none bg-none px-1 py-0 active:border-none hover:border-none"
-                // defaultValue={rowData.find(({ value }) => value === material[rowIndex].ord_unit) ?? null}
-                onChange={(e) => {
-                  setMaterial((prevMaterial) => {
-                    const newMaterial = [...prevMaterial];
-                    newMaterial[rowIndex] = {
-                      ...newMaterial[rowIndex],
-                      ...computeConversion(newMaterial[rowIndex], e.target.value),
-                    };
-                    return newMaterial;
-                  });
-                }}>
-                {rowData.map((item, index) => (
-                  <option key={index} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            ),
-        }),
-        title: 'Alt UOM',
-        minWidth: 100,
-      },
-      {
         ...keyColumn('ord_unit', textColumn),
         title: 'Ord UOM',
         minWidth: 55,
         disabled: ({ rowData }: any) => rowData.mat_code && rowData.mat_code[0].toUpperCase() !== 'S',
+      },
+      {
+        ...keyColumn('altUomSelect', {
+          component: ({ rowData, rowIndex }) => rowData && <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChange} />,
+        }),
+        disabled: true,
+        title: '',
+        minWidth: 20,
       },
       {
         ...keyColumn('price', floatColumn),

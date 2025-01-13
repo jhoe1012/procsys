@@ -134,7 +134,6 @@ class GRController extends Controller
                 'dci' => $item['gr_qty'] >= $item['po_gr_qty'] ?: $item['dci'],
             ]));
 
-        $gr_header->refresh();
         $gr_header->grmaterials()->saveMany($gr_materials);
 
         foreach ($gr_materials as $gr_material) {

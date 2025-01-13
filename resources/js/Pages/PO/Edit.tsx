@@ -8,6 +8,7 @@ import { checkboxColumn, DataSheetGrid, dateColumn, floatColumn, intColumn, keyC
 import { CUSTOM_DATA_SHEET_STYLE, SEQ_DRAFT, SEQ_REJECT, STATUS_APPROVED, STATUS_REJECTED, STATUS_REWORK } from '@/lib/constants';
 import { usePOMaterial, usePOMaterialValidation } from '@/Hooks';
 import {
+  AltUom,
   AttachmentList,
   Discard,
   Dropzone,
@@ -72,6 +73,17 @@ const Edit = ({
     _method: 'patch',
   });
 
+  const handleOnChange = (value: string, rowIndex: number) => {
+    setMaterial((prevMaterial) => {
+      const newMaterial = [...prevMaterial];
+      newMaterial[rowIndex] = {
+        ...newMaterial[rowIndex],
+        ...computeConversion(newMaterial[rowIndex], value),
+      };
+      return newMaterial;
+    });
+  };
+
   const columns = useMemo(
     () => [
       { ...keyColumn('sel', checkboxColumn), title: 'Sel', minWidth: 30 },
@@ -87,33 +99,16 @@ const Edit = ({
         disabled: ({ rowData }: any) => rowData.po_gr_qty != rowData.po_qty,
       },
       { ...keyColumn('qty_open_po', floatColumn), title: 'Open Qty', minWidth: 100, disabled: true },
+      { ...keyColumn('unit', textColumn), title: 'Ord. UOM', minWidth: 55, disabled: true },
       {
         ...keyColumn('altUomSelect', {
-          component: ({ rowData, rowIndex }) =>
-            rowData && (
-              <select
-                className="border-none w-full shadow-none bg-none px-1 py-0 active:border-none hover:border-none"
-                onChange={(e) => {
-                  setMaterial((prevMaterial) => {
-                    const newMaterial = [...prevMaterial];
-                    newMaterial[rowIndex] = {
-                      ...newMaterial[rowIndex],
-                      ...computeConversion(newMaterial[rowIndex], e.target.value),
-                    };
-                    return newMaterial;
-                  });
-                }}>
-                {rowData.map((item, index) => (
-                  <option key={index} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            ),
+          component: ({ rowData, rowIndex }) => rowData && <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChange} />,
         }),
-        title: 'Alt UOM',
+        disabled: true,
+        title: '',
+        minWidth: 20,
       },
-      { ...keyColumn('unit', textColumn), title: 'Ord. UOM', minWidth: 55, disabled: true },
+      { ...keyColumn('pr_unit', textColumn), title: 'B. UOM', minWidth: 55, disabled: true },
       { ...keyColumn('pr_unit', textColumn), title: 'B. UOM', minWidth: 55, disabled: true },
       {
         ...keyColumn('net_price', floatColumn),

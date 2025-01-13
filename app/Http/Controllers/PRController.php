@@ -174,7 +174,6 @@ class PRController extends Controller
                 ->where('type', Approvers::TYPE_PR)
                 ->where('seq', 1)
                 ->first();
-            $pr_header->refresh();
             Mail::to($approvers->user->email)
                 ->send(new PrForApprovalEmail(
                     $approvers->user->name,
@@ -377,8 +376,6 @@ class PRController extends Controller
         $approver_status->approved_date = now();
         $approver_status->save();
 
-
-        $pr_header->refresh();
         /**
          * Send email notification
          */

@@ -35,13 +35,12 @@ export default function usePRMaterial() {
   //   }
   // };
 
-  const computeConversion = (material: IPRMaterial, _ord_unit: string) => {
-    const alt_uom = material.alt_uom?.find(({ alt_uom }) => alt_uom === _ord_unit) || {};
-    const conversion = (alt_uom.counter ?? 1) / (alt_uom.denominator ?? 1);
+  const computeConversion = (material: IPRMaterial, ord_unit: string) => {
+    const altUom = material.alt_uom?.find(({ alt_uom }) => alt_uom === ord_unit) || {};
+    const conversion = (altUom.counter ?? 1) / (altUom.denominator ?? 1);
     const price = material.valuation_price * conversion;
     const converted_qty = (material.qty ?? 0) * conversion;
     const total_value = ((price ?? 0) / (material.per_unit ?? 0)) * (material.qty ?? 0);
-    const ord_unit = _ord_unit;
 
     return { conversion, price, converted_qty, total_value, ord_unit };
   };
@@ -107,6 +106,7 @@ export default function usePRMaterial() {
                 mat_grp_desc: materialGroups?.mat_grp_desc || '',
                 purch_grp: purchasingGroups?.purch_grp || '',
                 qty_ordered: null,
+                item_text: null,
               });
             }
           }

@@ -106,7 +106,7 @@ export default function Index({
                       <th className="px-3 py-2">Order UOM</th>
                       <th className="px-3 py-2">Min Shelf Life</th>
                       <th className="px-3 py-2">Total Shelf Life</th>
-                      <th className="px-3 py-2">Create by</th>
+                      <th className="px-3 py-2">Created By</th>
                       <th className="px-3 py-2">Updated By</th>
                       <th className="px-3 py-2">Created At</th>
                       <th className="px-3 py-2">Updated At</th>

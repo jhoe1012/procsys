@@ -35,11 +35,12 @@ const usePOMaterialValidation = () => {
           newErrors.push(`Please enter delivery date for item no ${item_no}`);
           isValid = false;
           break;
-        } else if (new Date(del_date).getTime() <= dateToday.getTime()) {
-          newErrors.push(`Please enter a delivery date greater than today for item no ${item_no}`);
-          isValid = false;
-          break;
         }
+        // else if (new Date(del_date).getTime() <= dateToday.getTime()) {
+        //   newErrors.push(`Please enter a delivery date greater than today for item no ${item_no}`);
+        //   isValid = false;
+        //   break;
+        // }
       }
     }
 

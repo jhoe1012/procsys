@@ -296,7 +296,13 @@ class POController extends Controller
     }
     public function submit($id)
     {
-        $po_header = POHeader::with('createdBy')->findOrFail($id);
+        $po_header = POHeader::with([
+            'createdBy',
+            'plants',
+            'vendors',
+            'workflows',
+            'pomaterials' => fn($query) => $query->whereNull('status')->orWhere('status', '')
+        ])->findOrFail($id);
 
         $approvers = Approvers::where('amount_from', '<=', $po_header->total_po_value)
             ->where('plant', $po_header->plant)
@@ -362,8 +368,13 @@ class POController extends Controller
     }
     public function approve(Request $request)
     {
-        $po_header = PoHeader::with('pomaterials.prmaterials')
-            ->where('po_number', $request->input('po_number'))
+        $po_header = PoHeader::with([
+            'pomaterials.prmaterials',
+            'pomaterials' => fn($query) => $query->whereNull('status')->orWhere('status', ''),
+            'plants',
+            'vendors',
+            'workflows',
+        ])->where('po_number', $request->input('po_number'))
             ->first();
 
         $approver = Approvers::where('user_id', Auth::user()->id)
@@ -410,7 +421,6 @@ class POController extends Controller
         $approver_status->approved_date = now();
         $approver_status->save();
 
-        $po_header->refresh();
         /**
          * Send email notification
          */
@@ -542,7 +552,6 @@ class POController extends Controller
                     break;
 
                 case CrudActionEnum::UPDATE:
-
                     $qty_open += $converted_qty_old_value - $converted_qty;
                     $qty_ordered =  $qty_ordered - $converted_qty_old_value +  $converted_qty;
                     break;

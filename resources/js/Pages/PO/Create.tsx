@@ -7,7 +7,7 @@ import { FormEventHandler, useEffect, useMemo, useState } from 'react';
 import { checkboxColumn, DataSheetGrid, dateColumn, floatColumn, intColumn, keyColumn, textColumn } from 'react-datasheet-grid';
 import 'react-datasheet-grid/dist/style.css';
 import { Operation } from 'react-datasheet-grid/dist/types';
-import { Dropzone, InputField, ReactSelectField, SelectField, TabFields, VendorCard } from '@/Components';
+import { AltUom, Dropzone, InputField, ReactSelectField, SelectField, TabFields, VendorCard } from '@/Components';
 import { formatNumber } from '@/lib/utils';
 import AddPrtoPo from './Partial/AddPrtoPo';
 import { usePOMaterial, usePOMaterialValidation } from '@/Hooks';
@@ -46,6 +46,17 @@ const Create = ({
     pomaterials: [],
   });
 
+  const handleOnChange = (value: string, rowIndex: number) => {
+    setMaterial((prevMaterial) => {
+      const newMaterial = [...prevMaterial];
+      newMaterial[rowIndex] = {
+        ...newMaterial[rowIndex],
+        ...computeConversion(newMaterial[rowIndex], value),
+      };
+      return newMaterial;
+    });
+  };
+
   const columns = useMemo(
     () => [
       { ...keyColumn('sel', checkboxColumn), title: 'Sel', minWidth: 30 },
@@ -56,33 +67,15 @@ const Create = ({
       { ...keyColumn('item_text', textColumn), title: 'Item Text', minWidth: 300 },
       { ...keyColumn('po_qty', floatColumn), title: 'PO Qty', minWidth: 70 },
       { ...keyColumn('qty_open_po', floatColumn), title: 'Open Qty', minWidth: 100, disabled: true },
+      { ...keyColumn('unit', textColumn), title: 'Ord. UOM', minWidth: 55, disabled: true },
       {
         ...keyColumn('altUomSelect', {
-          component: ({ rowData, rowIndex }) =>
-            rowData && (
-              <select
-                className="border-none w-full shadow-none bg-none px-1 py-0 active:border-none hover:border-none"
-                onChange={(e) => {
-                  setMaterial((prevMaterial) => {
-                    const newMaterial = [...prevMaterial];
-                    newMaterial[rowIndex] = {
-                      ...newMaterial[rowIndex],
-                      ...computeConversion(newMaterial[rowIndex], e.target.value),
-                    };
-                    return newMaterial;
-                  });
-                }}>
-                {rowData.map((item, index) => (
-                  <option key={index} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            ),
+          component: ({ rowData, rowIndex }) => rowData && <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChange} />,
         }),
-        title: 'Alt UOM',
+        disabled: true,
+        title: '',
+        minWidth: 20,
       },
-      { ...keyColumn('unit', textColumn), title: 'Ord. UOM', minWidth: 55, disabled: true },
       { ...keyColumn('pr_unit', textColumn), title: 'B. UOM', minWidth: 55, disabled: true },
       {
         ...keyColumn('net_price', floatColumn),

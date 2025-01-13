@@ -15,6 +15,7 @@ export const DEFAULT_PR_MATERIAL = {
   status: undefined,
   mat_code: undefined,
   short_text: undefined,
+  item_text: undefined,
   qty: undefined,
   ord_unit: undefined,
   qty_ordered: undefined,

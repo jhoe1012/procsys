@@ -40,9 +40,8 @@ class MaterialController extends Controller
 
         $material = $query->orderBy('mat_desc')
             ->paginate(50)
-            ->onEachSide(5);;
+            ->onEachSide(5);
 
-        // dd(MaterialResource::collection($material));
         return Inertia::render('Admin/Material/Index', [
             'materials' => MaterialResource::collection($material),
             'materialGroups' => MaterialGroup::select('mat_grp_code as value', 'mat_grp_desc as label')->orderBy('mat_grp_desc')->get()->toArray(),
