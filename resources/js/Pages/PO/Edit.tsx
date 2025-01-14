@@ -108,8 +108,7 @@ const Edit = ({
         title: '',
         minWidth: 20,
       },
-      { ...keyColumn('pr_unit', textColumn), title: 'B. UOM', minWidth: 55, disabled: true },
-      { ...keyColumn('pr_unit', textColumn), title: 'B. UOM', minWidth: 55, disabled: true },
+      // { ...keyColumn('pr_unit', textColumn), title: 'B. UOM', minWidth: 55, disabled: true },
       {
         ...keyColumn('net_price', floatColumn),
         title: 'Net Price',

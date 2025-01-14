@@ -69,7 +69,7 @@ const Create = ({ auth, mat_code, mat_desc, prheader }: PageProps<{ mat_code: Ch
         ...keyColumn('ord_unit', textColumn),
         title: 'Ord UOM',
         minWidth: 55,
-        disabled: ({ rowData }: any) => rowData.mat_code && rowData.mat_code[0].toUpperCase() !== 'S',
+        disabled: true,
       },
       {
         ...keyColumn('altUomSelect', {
@@ -91,7 +91,7 @@ const Create = ({ auth, mat_code, mat_desc, prheader }: PageProps<{ mat_code: Ch
         minWidth: 50,
         disabled: ({ rowData }: any) => rowData.mat_code && rowData.mat_code[0].toUpperCase() !== 'S',
       },
-      { ...keyColumn('unit', textColumn), title: 'B.UOM', minWidth: 60, disabled: true },
+      // { ...keyColumn('unit', textColumn), title: 'B.UOM', minWidth: 60, disabled: true },
       { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 90, disabled: true },
       { ...keyColumn('currency', textColumn), title: 'Curr', minWidth: 50, disabled: true },
       { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 130 },
