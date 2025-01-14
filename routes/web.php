@@ -12,7 +12,6 @@ use App\Http\Controllers\PRController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\VendorController;
-use App\Models\AlternativeUom;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 

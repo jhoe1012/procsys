@@ -9,7 +9,6 @@ use App\Http\Resources\PRMaterialsResource;
 use App\Mail\PoApprovedEmail;
 use App\Mail\PoForApprovalEmail;
 use App\Mail\PoRejectedReworkEmail;
-use App\Mail\PrForApprovalEmail;
 use App\Models\Approvers;
 use App\Models\ApproveStatus;
 use App\Models\DeliveryAddress;
@@ -18,10 +17,10 @@ use App\Models\PoHeader;
 use App\Models\PoMaterial;
 use App\Models\PrMaterial;
 use App\Models\SupplierNote;
+use App\Models\User;
 use App\Models\Vendor;
 use App\Services\AttachmentService;
 use Carbon\Carbon;
-use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -409,6 +408,7 @@ class POController extends Controller
         }
 
         $po_header->save();
+
         $approver_status =  ApproveStatus::where('seq', $approver->seq)
             ->where('po_number',  $po_header->po_number)
             ->whereNull('user_id')
@@ -420,6 +420,14 @@ class POController extends Controller
         $approver_status->message = $request->message;
         $approver_status->approved_date = now();
         $approver_status->save();
+
+        $finance = User::where(
+            "cc_by_deliv_addr",
+            'like',
+            "%|" . DeliveryAddress::where('address', $po_header->deliv_addr)->pluck('id')->first() . "|%"
+        )->pluck('email')->toArray();
+
+        $approved_cc = [$approver->user->email, ...$finance];
 
         /**
          * Send email notification
@@ -436,7 +444,7 @@ class POController extends Controller
                 Mail::to($po_header->createdBy->email)
                     ->send(new PoApprovedEmail(
                         $po_header->createdBy->name,
-                        $approver->user->email,
+                        $approved_cc,
                         $po_header
                     ));
                 break;
