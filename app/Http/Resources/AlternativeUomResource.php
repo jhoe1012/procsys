@@ -24,10 +24,13 @@ class AlternativeUomResource extends JsonResource
             'ean_upc' => $this->ean_upc,
             'ean_category' => $this->ean_category,
             'unit_of_weight' => $this->unit_of_weight,
-            'created_by' => $this->created_by,
-            'updated_by' => $this->updated_by,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'created_by' => new UserResource($this->whenLoaded('createdBy')),
+            'updated_by' => new UserResource($this->whenLoaded('updatedBy')),
+            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
+            'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
+            'material' => new MaterialResource($this->whenLoaded('material')),
+            'altUomText' => new UomResource($this->whenLoaded('altUomText')),
+            'unitOfWeightText' => new UomResource($this->whenLoaded('unitOfWeightText'))
         ];
     }
 }

@@ -53,13 +53,10 @@ const SelectComponent = React.memo(
           placeholder: (provided) => ({
             ...provided,
             opacity: active ? 1 : 0,
-            
           }),
         }}
         isDisabled={columnData.disabled}
-        value={
-          columnData.choices.find(({ value }) => value === rowData) ?? null
-        }
+        value={columnData.choices.find(({ value }) => value === rowData) ?? null}
         menuPortalTarget={document.body}
         menuIsOpen={focus}
         onChange={(choice) => {

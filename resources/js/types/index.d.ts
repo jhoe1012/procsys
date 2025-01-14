@@ -167,6 +167,10 @@ export interface IMaterialPage extends IPagination {
   data: IMaterial[];
 }
 
+export interface IAlternativeUomPage extends IPagination {
+  data: IAlternativeUom[];
+}
+
 export interface ILink {
   url: string | undefined;
   label: string;
@@ -436,19 +440,26 @@ export interface IMaterialNetPrice {
 }
 
 export interface IAlternativeUom {
-  id: number;
+  id?: number;
   mat_code: string;
+  mat_codeChoice?: Choice;
+  material?: IMaterial;
   alt_uom: string;
+  alt_uomChoice?: Choice;
+  altUomText?: IUom;
   counter: number;
   denominator: number;
   ean_num: string;
   ean_upc: string;
   ean_category: string;
   unit_of_weight: string;
-  created_by: string;
-  updated_by: string;
-  created_at: string;
-  updated_at: string;
+  unit_of_weightChoice?: Choice;
+  unitOfWeightText?: IUom;
+  created_by?: User;
+  updated_by?: User;
+  created_at?: string;
+  updated_at?: string;
+  _method?: string;
 }
 
 export type Choice = {
@@ -497,4 +508,14 @@ export interface IitemDetails {
   sts: string;
   qty: number;
   unit: string;
+}
+
+export interface IUom {
+  id: number;
+  uom: string;
+  uom_text: string;
+  created_by?: User;
+  updated_by?: User;
+  created_at?: string;
+  update_at?: string;
 }

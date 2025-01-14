@@ -7,6 +7,7 @@ import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
 import { IMaterialNetPrice } from '@/types';
 import Select from 'react-select';
+import { fetchMaterial } from '@/lib/Material';
 
 export default function Create({ p_plants }) {
   const [showModal, setShowModal] = useState(false);
@@ -57,35 +58,17 @@ export default function Create({ p_plants }) {
     }
   };
 
-  const fetchMaterial = async (inputValue) => {
-    if (!inputValue) return [];
-
-    try {
-      const response = await window.axios.get(route('material.search', { search: inputValue }));
-
-      return response.data.data.map((item) => ({
-        value: item.mat_code,
-        label: `${item.mat_code} - ${item.mat_desc}`,
-      }));
-    } catch (e) {
-      console.log('Error fetching data:', e);
-      return [];
-    }
-  };
-
   const fetchAltUom = async (inputValue) => {
     if (!inputValue) return [];
 
     try {
-      const response = await window.axios.get(route('uom.search', { search: inputValue }));
-      console.log(response.data.data);
+      const response = await window.axios.get(route('altuom.search', { search: inputValue }));
 
       const m_altuom = response.data.data.map((item) => ({ value: item.alt_uom, label: item.alt_uom }));
 
       setAltUom(m_altuom);
     } catch (e) {
       console.log('Error fetching data:', e);
-      // return [];
     }
   };
 
@@ -236,10 +219,7 @@ export default function Create({ p_plants }) {
             </div>
 
             <div className="grid justify-items-center m-3">
-              <Button
-                variant="outline"
-                disabled={processing}
-                className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-60">
+              <Button variant="outline" disabled={processing} className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-60">
                 Save
               </Button>
             </div>

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\MaterialValuationController;
+use App\Http\Controllers\AlternativeUomController;
 use App\Http\Controllers\ApproverController;
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\GRController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\PRController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\VendorController;
+use App\Models\AlternativeUom;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -85,8 +87,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/approver-update/{approver}', [ApproverController::class, "update"])->name("approver.update");
 
     Route::resource('material', MaterialController::class);
-    //('/material', [MaterialController::class, "index"])->name("material.index");
 
+    Route::resource('altuom', AlternativeUomController::class);
 
     Route::get('/report-pr', [ReportController::class, "prReport"])->name("report.pr");
     Route::get('/report-pr-download', [ReportController::class, "downloadPrReport"])->name("download.report.pr");

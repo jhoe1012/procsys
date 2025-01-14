@@ -110,6 +110,11 @@ class MenuService
                         'href' => route('material.index'),
                     ],
                     [
+                        'label' => 'Material Alt UOM',
+                        'permissions' => Auth::user()->can('admin'),
+                        'href' => route('altuom.index'),
+                    ],
+                    [
                         'label' => 'Plant',
                         'permissions' => Auth::user()->can('admin'),
                         'href' => '',
