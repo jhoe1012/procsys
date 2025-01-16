@@ -159,7 +159,7 @@ const Edit = ({
       value: 'approver_text',
       label: 'Remarks',
       visible: true,
-      content: <Textarea value={data.header_text} onChange={(e) => setData('header_text', e.target.value)} />,
+      content: <Textarea value={data.approver_text} onChange={(e) => setData('approver_text', e.target.value)} />,
     },
     {
       value: 'notes',
@@ -203,7 +203,7 @@ const Edit = ({
     {
       value: 'workflow',
       label: 'Workflow',
-      visible: poheader.workflows?.length > 0,
+      visible: poheader.workflows && poheader.workflows?.length > 0,
       content: <GenericTable columns={workflowColumns} data={poheader.workflows} className="w-11/2 text-xs bg-white" />,
     },
     {
@@ -320,8 +320,8 @@ const Edit = ({
       header={
         <div className="flex flex-row justify-between">
           <h2 className="font-semibold text-xl text-gray-800 leading-tight">Edit Purchase Order</h2>
-
-          {poheader.status == STATUS_APPROVED && <PrintButton href={route('po.print', poheader.id)} />}
+          {/* Remove since we add mass prinring */}
+          {/* {poheader.status == STATUS_APPROVED && <PrintButton href={route('po.print', poheader.id)} />} */}
         </div>
       }>
       <Head title="Edit PO" />

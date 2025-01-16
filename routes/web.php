@@ -53,6 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/po-print/{id}', [POController::class, 'printPo'])->name('po.print');
     Route::get('/po-recall/{id}', [POController::class, 'recall'])->name('po.recall');
     Route::get('/po-control', [POController::class, 'updateControlNo'])->name('po.update-controlno');
+    Route::get('/po-mass-print', [POController::class, 'massPrint'])->name('po.mass-print');
 
     Route::get('/gr', [GRController::class, 'index'])->name('gr.index');
     Route::get('/gr-create', [GRController::class, 'create'])->name('gr.create');

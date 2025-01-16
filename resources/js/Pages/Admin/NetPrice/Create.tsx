@@ -8,6 +8,7 @@ import { Button } from '@/Components/ui/button';
 import { IMaterialNetPrice } from '@/types';
 import Select from 'react-select';
 import { fetchMaterial } from '@/lib/Material';
+import { fetchVendor } from '@/lib/Vendor';
 
 export default function Create({ p_plants }) {
   const [showModal, setShowModal] = useState(false);
@@ -41,21 +42,6 @@ export default function Create({ p_plants }) {
     setShowModal(false);
 
     reset();
-  };
-
-  const fetchVendor = async (inputValue) => {
-    if (!inputValue) return [];
-
-    try {
-      const response = await window.axios.get(route('vendor.search', { search: inputValue }));
-      return response.data.data.map((item) => ({
-        value: item.supplier,
-        label: `${item.supplier} - ${item.name_1}`,
-      }));
-    } catch (e) {
-      console.log('Error fetching data:', e);
-      return [];
-    }
   };
 
   const fetchAltUom = async (inputValue) => {

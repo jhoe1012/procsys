@@ -1,4 +1,4 @@
-import { InputField } from '@/Components';
+import { Checkbox, InputField } from '@/Components';
 import {
   Button,
   Dialog,
@@ -130,7 +130,8 @@ export default function AddPrtoPo({ p_plant, p_doc_date, addToPO }) {
                   filteredPrMaterialList.map((pr) => (
                     <tr className="bg-white border-b" key={pr.id}>
                       <td className="px-3 py-1">
-                        <input type="checkbox" name="sel" onClick={() => handleCheckboxChange(event, pr)} />
+                        {/* <input type="checkbox" name="sel" onChange={(event) => handleCheckboxChange(event, pr)} /> */}
+                        <Checkbox name="sel" onChange={(event) => handleCheckboxChange(event, pr)} />
                       </td>
                       <td className="px-3 py-1">{pr.pr_number}</td>
                       <td className="px-3 py-1">{pr.mat_code}</td>

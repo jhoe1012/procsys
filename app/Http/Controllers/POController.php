@@ -507,6 +507,7 @@ class POController extends Controller
         }
         return to_route("po.edit", $po_material->poheader->po_number)->with('success', "Mark item(s) for delivered.");
     }
+    /* Remove since we add mass prinring */
     public function printPo(Request $request, $id)
     {
         $poHeader = PoHeader::with([
@@ -532,7 +533,7 @@ class POController extends Controller
 
         return to_route("po.edit", $poHeader->po_number)->with('success', "PO Recalled");
     }
-    function updateControlNo(Request $request)
+    public function updateControlNo(Request $request)
     {
 
         $po_header = PoHeader::findOrFail($request->input('id'));
@@ -544,6 +545,29 @@ class POController extends Controller
             sprintf("PO %s control has been updated to %s.", $po_header->po_number,  $po_header->control_no)
         );
     }
+
+    public function massPrint(Request $request)
+    {
+        $poHeaders = PoHeader::with([
+            'plants',
+            'vendors',
+            'pomaterials.taxClass',
+            'workflows' => fn($query) => $query->where('status', Str::ucfirst(ApproveStatus::APPROVED)),
+            'pomaterials' => fn($query) => $query->whereNull('status')->orWhere('status', '')
+        ])->whereIn('id', $request->input('checkboxPo'))->orderBy("id")->get();
+
+        $controlNo = $request->input('controlNumber');
+
+        foreach ($poHeaders as $poHeader) {
+            $poHeader->control_no = $controlNo;
+            $poHeader->print_count += 1;
+            $poHeader->save();
+            $controlNo++;
+        }
+
+        return view('print.po-mass', ['poHeaders' => $poHeaders]);
+    }
+
     private function _updatePrMaterial($pomaterial, $converted_qty_old_value = 0, CrudActionEnum $action): void
     {
         if ($pomaterial->prmaterials instanceof PrMaterial) {

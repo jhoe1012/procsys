@@ -116,7 +116,7 @@ const Create = ({
       value: 'approver_text',
       label: 'Remarks',
       visible: true,
-      content: <Textarea value={data.header_text} onChange={(e) => setData('header_text', e.target.value)} />,
+      content: <Textarea value={data.approver_text} onChange={(e) => setData('approver_text', e.target.value)} />,
     },
     {
       value: 'notes',

@@ -282,6 +282,7 @@ export interface IPOHeader {
   attachments?: IPRAttachment[];
   total_po_value: number;
   status?: string;
+  print_count?: number;
   appr_seq?: number;
   deliv_addr: string;
   created_by?: string;

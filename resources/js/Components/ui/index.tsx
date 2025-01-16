@@ -20,3 +20,4 @@ export {
   DialogTitle,
   DialogDescription,
 } from '@/Components/ui/dialog';
+export { Checkbox } from '@/Components/ui/checkbox';

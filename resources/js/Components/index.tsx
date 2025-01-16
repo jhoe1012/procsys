@@ -17,3 +17,4 @@ export { default as AdminUpload } from '@/Components/AdminUpload';
 export { default as TextInput } from '@/Components/TextInput';
 export { default as Pagination } from '@/Components/Pagination';
 export { default as AltUom } from '@/Components/AltUom';
+export { default as Checkbox } from '@/Components/Checkbox';
