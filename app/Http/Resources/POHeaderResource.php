@@ -41,6 +41,7 @@ class POHeaderResource extends JsonResource
             "workflows" => ApproveStatusResource::collection($this->whenLoaded('workflows')),
             "pomaterials" => POMaterialsResource::collection($this->whenLoaded('pomaterials')),
             "attachments" => AttachmentResource::collection($this->whenLoaded('attachments')),
+            "is_mother_po" => $this->is_mother_po,
         ];
     }
 }

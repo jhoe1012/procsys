@@ -292,6 +292,7 @@ export interface IPOHeader {
   pomaterials: IPOMaterial[];
   workflows?: IWorkflow[];
   _method?: string;
+  is_mother_po: boolean;
 }
 
 export interface IPOMaterial {

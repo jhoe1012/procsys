@@ -7,7 +7,7 @@ import { FormEventHandler, useEffect, useMemo, useState } from 'react';
 import { checkboxColumn, DataSheetGrid, dateColumn, floatColumn, intColumn, keyColumn, textColumn } from 'react-datasheet-grid';
 import 'react-datasheet-grid/dist/style.css';
 import { Operation } from 'react-datasheet-grid/dist/types';
-import { AltUom, Dropzone, InputField, ReactSelectField, SelectField, TabFields, VendorCard } from '@/Components';
+import { AltUom, Checkbox, Dropzone, InputField, ReactSelectField, SelectField, TabFields, VendorCard } from '@/Components';
 import { formatNumber } from '@/lib/utils';
 import AddPrtoPo from './Partial/AddPrtoPo';
 import { usePOMaterial, usePOMaterialValidation } from '@/Hooks';
@@ -44,6 +44,7 @@ const Create = ({
     appr_seq: 0,
     deliv_addr: '',
     pomaterials: [],
+    is_mother_po: false,
   });
 
   const handleOnChange = (value: string, rowIndex: number) => {
@@ -258,6 +259,15 @@ const Create = ({
                     getVendor(value);
                   }}
                 />
+                <div className="flex-auto">
+                  <br />
+                  <Checkbox
+                    onChange={(e) => setData('is_mother_po', e.target.checked)}
+                    checked={data.is_mother_po}
+                    className="border-gray-300 text-blue-500 focus:ring-blue-500"
+                  />
+                  <span className="text-xs font-medium leading-none p-2">Mother PO</span>
+                </div>
               </div>
               <div className="p-1 pt-0">
                 <TabFields defaultValue="header_text" className="max-w-8xl" tabs={headerTabs} />

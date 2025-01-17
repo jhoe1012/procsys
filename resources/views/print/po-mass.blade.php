@@ -118,7 +118,9 @@
                     <td class="supplier_name" width='57%'>{{ $poHeader->vendors->supplier }} -
                         {{ $poHeader->vendors->name_1 }} </td>
                     <td class='date'> {{ date('m/d/Y', strtotime($poHeader->doc_date)) }} </td>
-                    <td class='date'> {{ date('m/d/Y', strtotime($poHeader->deliv_date)) }} </td>
+                    @if (!$poHeader->is_mother_po)
+                        <td class='date'> {{ date('m/d/Y', strtotime($poHeader->deliv_date)) }} </td>
+                    @endif
                 </tr>
                 <tr>
                     <td> </td>
@@ -138,10 +140,13 @@
                         <tr>
                             <td width='10%' class="align-top itemcode">{{ $pomaterial->mat_code }}</td>
                             <td width='40%' class="align-top">{{ $pomaterial->short_text }}
-                                {{-- <br> Delivery Date: {{ date('m/d/Y', strtotime($pomaterial->del_date)) }} --}}
                                 @if ($pomaterial->item_text)
                                     <br> {{ $pomaterial->item_text }}
                                 @endif
+                                @if ($poHeader->is_mother_po)
+                                    <br><b> Delivery Date: </b>{{ date('m/d/Y', strtotime($pomaterial->del_date)) }}
+                                @endif
+
                             </td>
                             <td width='15%' class="align-top">{{ $pomaterial->po_qty }} {{ $pomaterial->unit }}
                             </td>

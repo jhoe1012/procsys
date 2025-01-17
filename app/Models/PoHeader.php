@@ -26,6 +26,7 @@ class PoHeader extends Model
         'deliv_addr',
         'deliv_date',
         'notes',
+        'is_mother_po',
     ];
 
     protected function casts(): array

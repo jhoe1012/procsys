@@ -140,6 +140,7 @@ class POController extends Controller
                         'deliv_addr',
                         'deliv_date',
                         'notes',
+                        'is_mother_po'
                     ]),
                     [
                         'doc_date' => Carbon::parse($request->input('doc_date'))->format('Y-m-d'),
@@ -271,6 +272,7 @@ class POController extends Controller
                         'deliv_addr',
                         'deliv_date',
                         'notes',
+                        'is_mother_po',
                     ]),
                     [
                         'doc_date' => Carbon::parse($request->input('doc_date'))->format('Y-m-d'),

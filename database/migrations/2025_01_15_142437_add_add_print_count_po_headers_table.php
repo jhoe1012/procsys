@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('po_headers', function (Blueprint $table) {
             $table->integer("print_count")->default(0);
+            $table->boolean("is_mother_po")->default(false);
         });
     }
 
@@ -23,6 +24,7 @@ return new class extends Migration
     {
         Schema::table('po_headers', function (Blueprint $table) {
             $table->dropColumn('print_count');
+            $table->dropColumn('is_mother_po');
         });
     }
 };

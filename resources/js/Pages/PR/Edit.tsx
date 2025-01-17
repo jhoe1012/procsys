@@ -232,6 +232,7 @@ const Edit = ({
     if (isValid) {
       post(route('pr.update', prheader.id), {
         preserveScroll: true,
+        preserveState: false,
         onSuccess: (page) => {
           reset();
           setFiles([]);

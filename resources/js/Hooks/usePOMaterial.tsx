@@ -1,4 +1,4 @@
-import { IPOMaterial } from '@/types';
+import { IPOMaterial, IVendor } from '@/types';
 import { Operation } from 'react-datasheet-grid/dist/types';
 
 export default function usePOMaterial() {
@@ -44,21 +44,25 @@ export default function usePOMaterial() {
       if (operation.type === 'UPDATE') {
         for (let i = operation.fromRowIndex; i < operation.toRowIndex; i++) {
           const value = updatedMaterial[i];
-          const { converted_qty_po, total_value } = computeConversion(value, value.unit ?? '');
 
-          value.net_price = value.item_free ? 0 : value.net_price;
-          value.item_no = (operation.fromRowIndex + 1) * 10;
-          value.po_qty = value.po_qty < value.min_order_qty ? value.min_order_qty : value.po_qty;
+          let { converted_qty_po, total_value, net_price } = computeConversion(value, value.unit ?? '');
+
+          value.po_qty =
+            value.min_order_qty && value.min_order_qty > 0 && value.po_qty < value.min_order_qty ? value.min_order_qty : value.po_qty;
 
           if (is_edit) {
             const _openPOWithOrigPO = value.qty_open_po + value.origPOQty;
             value.po_qty = value.po_qty > _openPOWithOrigPO ? _openPOWithOrigPO : value.po_qty;
+            // Set po_gr_qty equal to po_qty to prevent the field from being disabled during editing.
+            value.po_gr_qty = value.po_qty;
           } else {
             value.po_qty = value.po_qty > value.qty_open_po ? value.qty_open_po : value.po_qty;
           }
 
+          value.item_no = (operation.fromRowIndex + 1) * 10;
+          value.net_price = value.item_free ? 0 : net_price;
+          value.total_value = value.item_free ? 0 : total_value;
           value.converted_qty_po = converted_qty_po;
-          value.total_value = total_value;
         }
       }
     }
@@ -66,7 +70,7 @@ export default function usePOMaterial() {
     return updatedMaterial;
   };
 
-  const getVendorInfo = async (vendorId) => {
+  const getVendorInfo = async (vendorId: number) => {
     try {
       const response = await window.axios.get(route('po.vendor', vendorId));
       return response.data.data;

@@ -10,6 +10,7 @@ import { usePOMaterial, usePOMaterialValidation } from '@/Hooks';
 import {
   AltUom,
   AttachmentList,
+  Checkbox,
   Discard,
   Dropzone,
   FlagForAction,
@@ -71,6 +72,7 @@ const Edit = ({
     deliv_addr: poheader.deliv_addr,
     pomaterials: [],
     _method: 'patch',
+    is_mother_po: poheader.is_mother_po,
   });
 
   const handleOnChange = (value: string, rowIndex: number) => {
@@ -305,6 +307,7 @@ const Edit = ({
     if (isValid) {
       post(route('po.update', poheader.id), {
         preserveScroll: true,
+        preserveState: false,
         onSuccess: (page) => {
           reset();
           setFiles([]);
@@ -370,6 +373,15 @@ const Edit = ({
                     getVendor(value);
                   }}
                 />
+                <div className="flex-auto">
+                  <br />
+                  <Checkbox
+                    onChange={(e) => setData('is_mother_po', e.target.checked)}
+                    checked={data.is_mother_po}
+                    className="border-gray-300 text-blue-500 focus:ring-blue-500"
+                  />
+                  <span className="text-xs font-medium leading-none p-2">Mother PO</span>
+                </div>
               </div>
               <div className="p-1 pt-0">
                 <TabFields defaultValue="header_text" className="max-w-8xl" tabs={headerTabs} />
