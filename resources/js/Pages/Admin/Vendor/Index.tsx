@@ -1,7 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
 import { PageProps, IMessage, IVendorPage } from '@/types';
-
 import { useEffect, KeyboardEvent } from 'react';
 import Pagination from '@/Components/Pagination';
 import TextInput from '@/Components/TextInput';
@@ -163,7 +162,7 @@ export default function Index({
                           <td className="px-3 py-2">{vendor.vat_reg_no}</td>
 
                           <td className="px-3 py-2">
-                            <Edit  p_vendor={vendor} />
+                            <Edit p_vendor={vendor} />
                           </td>
                         </tr>
                       ))

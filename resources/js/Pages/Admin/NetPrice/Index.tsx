@@ -1,9 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
-import {
-  PageProps, IMessage, IMaterialNetPricePage
-} from '@/types';
-
+import { PageProps, IMessage, IMaterialNetPricePage } from '@/types';
 import { useEffect, KeyboardEvent } from 'react';
 import Pagination from '@/Components/Pagination';
 import TextInput from '@/Components/TextInput';
@@ -33,7 +30,7 @@ export default function Index({
     }
   }, []);
 
-  queryParams = queryParams || {}; 
+  queryParams = queryParams || {};
 
   const searchFieldChanged = (name: string, value: string) => {
     if (value) {
@@ -82,20 +79,21 @@ export default function Index({
                         />
                       </th>
                       <th className="px-3 py-2">
-                      <TextInput
+                        <TextInput
                           className="h-7 text-xs p-1 m-0"
                           defaultValue={queryParams.plant}
                           onBlur={(e) => searchFieldChanged('plant', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('plant', e)}
                         />
                       </th>
-                      <th className="px-3 py-2"> <TextInput
+                      <th className="px-3 py-2">
+                        <TextInput
                           className="h-7 text-xs p-1 m-0"
                           defaultValue={queryParams.material}
                           onBlur={(e) => searchFieldChanged('material', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('material', e)}
-                        /></th>
-                     
+                        />
+                      </th>
                     </tr>
                     <tr className="text-nowrap">
                       <th className="px-3 py-2">Vendor</th>
@@ -131,8 +129,7 @@ export default function Index({
                           <td className="px-3 py-2">{material.valid_from}</td>
                           <td className="px-3 py-2">{material.valid_to}</td>
                           <td className="px-3 py-2">
-                            <Edit p_plants={plant} p_material={material}/>
-                            
+                            <Edit p_plants={plant} p_material={material} />
                           </td>
                         </tr>
                       ))

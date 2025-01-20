@@ -1,10 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
-import {
-  PageProps,
-  IMessage, IApproverPage
-} from '@/types';
-
+import { PageProps, IMessage, IApproverPage } from '@/types';
 import { useEffect, KeyboardEvent } from 'react';
 import Pagination from '@/Components/Pagination';
 import TextInput from '@/Components/TextInput';
@@ -126,9 +122,7 @@ export default function Index({
                     {approvers.data.length > 0 ? (
                       approvers.data.map((approver) => (
                         <tr className="bg-white border-b" key={approver.id}>
-                          <td className="px-3 py-2">
-                           {approver.type.toUpperCase()}
-                          </td>
+                          <td className="px-3 py-2">{approver.type.toUpperCase()}</td>
                           <td className="px-3 py-2">
                             {approver.plants?.plant} - {approver.plants?.name1}
                           </td>
