@@ -31,12 +31,14 @@ const Edit = ({
   mat_desc,
   message,
   item_details,
+  materialGroupsSupplies,
 }: PageProps<{
   prheader: IPRHeader;
   mat_code: Choice[];
   mat_desc: Choice[];
   message: IMessage;
   item_details: IitemDetails;
+  materialGroupsSupplies: string[];
 }>) => {
   const { toast } = useToast();
   const [material, setMaterial] = useState<IPRMaterial[]>(
@@ -105,18 +107,19 @@ const Edit = ({
         disabled: true,
         title: '',
         minWidth: 20,
+        maxWidth: 20,
       },
       {
         ...keyColumn('price', floatColumn),
         title: 'Price',
         minWidth: 90,
-        disabled: ({ rowData }: any) => rowData.mat_code && rowData.mat_code[0].toUpperCase() !== 'S',
+        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
       },
       {
         ...keyColumn('per_unit', floatColumn),
         title: 'Per Unit',
         minWidth: 50,
-        disabled: ({ rowData }: any) => rowData.mat_code && rowData.mat_code[0].toUpperCase() !== 'S',
+        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
       },
       // { ...keyColumn('unit', textColumn), title: 'B.UOM', minWidth: 60, disabled: true },
       { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 120, disabled: true },
@@ -221,7 +224,7 @@ const Edit = ({
   ];
 
   const updateMaterial = async (newValue: IPRMaterial[], operations: Operation[]) => {
-    const updatedMaterial = await updateMaterialPR(newValue, operations, material, data.plant, data.doc_date);
+    const updatedMaterial = await updateMaterialPR(newValue, operations, material, data.plant, data.doc_date, materialGroupsSupplies);
     setMaterial(updatedMaterial);
   };
 

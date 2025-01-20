@@ -109,6 +109,7 @@ const Edit = ({
         disabled: true,
         title: '',
         minWidth: 20,
+        maxWidth: 20,
       },
       // { ...keyColumn('pr_unit', textColumn), title: 'B. UOM', minWidth: 55, disabled: true },
       {

@@ -57,7 +57,8 @@ export default function usePRMaterial() {
     operations: Operation[],
     material: IPRMaterial[],
     plant: string,
-    doc_date: string
+    doc_date: string,
+    materialGroupsSupplies: string[]
   ): Promise<IPRMaterial[]> => {
     const updatedMaterial = [...newValue];
     setIsLoading(true);
@@ -110,12 +111,12 @@ export default function usePRMaterial() {
               });
             }
           }
-          if (value.mat_code && value.mat_code[0].toUpperCase() === 'S') {
+          if (value.mat_code && value.mat_grp && materialGroupsSupplies.includes(value.mat_grp)) {
             value.unit = value.ord_unit;
           }
 
           if ((value.qty && value.qty !== oldValue.qty) || (value.price && value.price > 0)) {
-            if (value.mat_code[0].toUpperCase() === 'S') {
+            if (value.mat_grp && materialGroupsSupplies.includes(value.mat_grp)) {
               const suppliesMaterial = {
                 total_value: value.qty * (value.price / value.per_unit) || 0,
                 conversion: 1,

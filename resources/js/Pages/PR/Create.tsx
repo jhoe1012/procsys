@@ -7,11 +7,17 @@ import 'react-datasheet-grid/dist/style.css';
 import { useState, useEffect, useMemo, FormEventHandler } from 'react';
 import { Operation } from 'react-datasheet-grid/dist/types';
 import { formatNumber } from '@/lib/utils';
-import { Loading, Dropzone, selectColumn, InputField, SelectField, TabFields, FlagForAction, AltUom } from '@/Components';
+import { Loading, Dropzone, selectColumn, InputField, SelectField, TabFields, AltUom } from '@/Components';
 import { usePRMaterial, usePRMaterialValidation } from '@/Hooks';
 import { CUSTOM_DATA_SHEET_STYLE, DATE_TODAY, DEFAULT_PR_MATERIAL } from '@/lib/constants';
 
-const Create = ({ auth, mat_code, mat_desc, prheader }: PageProps<{ mat_code: Choice[]; mat_desc: Choice[]; prheader: IPRHeader }>) => {
+const Create = ({
+  auth,
+  mat_code,
+  mat_desc,
+  prheader,
+  materialGroupsSupplies,
+}: PageProps<{ mat_code: Choice[]; mat_desc: Choice[]; prheader: IPRHeader; materialGroupsSupplies: string[] }>) => {
   const initialMaterial = prheader
     ? prheader.prmaterials.map((prmaterial) => ({
         ...prmaterial,
@@ -78,18 +84,19 @@ const Create = ({ auth, mat_code, mat_desc, prheader }: PageProps<{ mat_code: Ch
         disabled: true,
         title: '',
         minWidth: 20,
+        maxWidth: 20,
       },
       {
         ...keyColumn('price', floatColumn),
         title: 'Price',
         minWidth: 90,
-        disabled: ({ rowData }: any) => rowData.mat_code && rowData.mat_code[0].toUpperCase() !== 'S',
+        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
       },
       {
         ...keyColumn('per_unit', floatColumn),
         title: 'Per Unit',
         minWidth: 50,
-        disabled: ({ rowData }: any) => rowData.mat_code && rowData.mat_code[0].toUpperCase() !== 'S',
+        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
       },
       // { ...keyColumn('unit', textColumn), title: 'B.UOM', minWidth: 60, disabled: true },
       { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 90, disabled: true },
@@ -123,7 +130,7 @@ const Create = ({ auth, mat_code, mat_desc, prheader }: PageProps<{ mat_code: Ch
   ];
 
   const updateMaterial = async (newValue: IPRMaterial[], operations: Operation[]) => {
-    const updatedMaterial = await updateMaterialPR(newValue, operations, material, data.plant, data.doc_date);
+    const updatedMaterial = await updateMaterialPR(newValue, operations, material, data.plant, data.doc_date, materialGroupsSupplies);
     setMaterial(updatedMaterial);
   };
 

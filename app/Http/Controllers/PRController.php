@@ -10,6 +10,7 @@ use App\Mail\PrRejectedReworkEmail;
 use App\Models\Approvers;
 use App\Models\ApproveStatus;
 use App\Models\Material;
+use App\Models\MaterialGroup;
 use App\Models\PrHeader;
 use App\Models\PrMaterial;
 use App\Services\AttachmentService;
@@ -90,6 +91,7 @@ class PRController extends Controller
         return Inertia::render('PR/Create', [
             'mat_code' => Material::select('mat_code as value', 'mat_code as label')->orderBy('mat_code')->get()->toArray(),
             'mat_desc' => Material::select('mat_desc as value', 'mat_desc as label')->orderBy('mat_desc')->get()->toArray(),
+            'materialGroupsSupplies' => MaterialGroup::select('mat_grp_code')->where('is_supplies', true)->pluck('mat_grp_code')->toArray(),
         ]);
     }
 
@@ -241,6 +243,7 @@ class PRController extends Controller
             'mat_desc' => Material::select('mat_desc as value', 'mat_desc as label')->get()->toArray(),
             'message' => ['success' => session('success'), 'error' => session('error')],
             'item_details' => $item_details,
+            'materialGroupsSupplies' => MaterialGroup::select('mat_grp_code')->where('is_supplies', true)->pluck('mat_grp_code')->toArray(),
         ]);
     }
 
