@@ -14,7 +14,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use  HasApiTokens, HasFactory, Notifiable; 
+    use  HasApiTokens, HasFactory, Notifiable;
     /**
      * The attributes that are mass assignable.
      *
@@ -24,6 +24,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'position',
     ];
 
     /**
@@ -48,16 +49,20 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    public function plants() : BelongsToMany {
+    public function plants(): BelongsToMany
+    {
         return $this->belongsToMany(Plant::class);
     }
-    public function approvers() : HasMany {
+    public function approvers(): HasMany
+    {
         return $this->hasMany(Approvers::class);
     }
-    public function prHeaderCreatedBy() : BelongsTo {
+    public function prHeaderCreatedBy(): BelongsTo
+    {
         return $this->belongsTo(PrHeader::class, 'created_by', 'id');
     }
-    public function poHeaderCreatedBy() : BelongsTo {
+    public function poHeaderCreatedBy(): BelongsTo
+    {
         return $this->belongsTo(POHeader::class, 'created_by', 'id');
     }
     public function roles(): HasManyThrough
@@ -72,35 +77,24 @@ class User extends Authenticatable
         );
     }
 
-    public function assignRole( $roleName )
+    public function assignRole($roleName)
     {
-        if ( $role = Roles::namespace( $roleName ) ) {
-            $combinaison = UserRoleRelation::combinaison( $this, $role )->first();
+        if ($role = Roles::namespace($roleName)) {
+            UserRoleRelation::where('user_id', $this->id)->delete();
 
-            if ( ! $combinaison instanceof UserRoleRelation ) {
-                $combinaison = new UserRoleRelation;
-            }
-
+            $combinaison = new UserRoleRelation;
             $combinaison->user_id = $this->id;
             $combinaison->role_id = $role->id;
             $combinaison->save();
 
             return [
                 'status' => 'success',
-                'message' => __( 'The role was successfully assigned.' ),
-            ];
-        } elseif ( is_array( $roleName ) ) {
-            collect( $roleName )->each( fn( $role ) => $this->assignRole( $role ) );
-
-            return [
-                'status' => 'success',
-                'message' => __( 'The role were successfully assigned.' ),
+                'message' => __('The role was successfully assigned.'),
             ];
         }
-
         return [
             'status' => 'error',
-            'message' => __( 'Unable to identifier the provided role.' ),
+            'message' => __('Unable to identifier the provided role.'),
         ];
     }
 }

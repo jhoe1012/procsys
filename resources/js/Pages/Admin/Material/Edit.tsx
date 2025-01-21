@@ -59,7 +59,7 @@ export default function Edit({ material, materialGroups }: { material: IMaterial
             </div>
             <div className="flex ">
               <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="mat_desc">
-                Desctription
+                Description
               </Label>
               <Input
                 className="m-2 w-full border-gray-300 h-10 "

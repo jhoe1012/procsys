@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\MaterialValuationController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AlternativeUomController;
 use App\Http\Controllers\ApproverController;
 use App\Http\Controllers\AttachmentController;
@@ -86,9 +87,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/approver-store', [ApproverController::class, "store"])->name("approver.store");
     Route::patch('/approver-update/{approver}', [ApproverController::class, "update"])->name("approver.update");
 
-    Route::resource('material', MaterialController::class);
+    Route::resource('material', MaterialController::class)->only(['index', 'store', 'update']);
 
-    Route::resource('altuom', AlternativeUomController::class);
+    Route::resource('altuom', AlternativeUomController::class)->only(['index', 'store', 'update']);
+
+    Route::resource('user', UserController::class)->only(['index', 'store', 'update']);
 
     Route::get('/report-pr', [ReportController::class, "prReport"])->name("report.pr");
     Route::get('/report-pr-download', [ReportController::class, "downloadPrReport"])->name("download.report.pr");

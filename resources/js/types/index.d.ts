@@ -2,10 +2,12 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  email_verified_at: string;
+  email_verified_at?: string;
+  password?: string;
   position: string;
-  plants: IPlants[] | undefined;
-  approvers: IApprover[] | undefined;
+  plants?: IPlants[];
+  approvers?: IApprover[];
+  roles?: IRoles[];
 }
 
 export interface Crud {
@@ -169,6 +171,10 @@ export interface IMaterialPage extends IPagination {
 
 export interface IAlternativeUomPage extends IPagination {
   data: IAlternativeUom[];
+}
+
+export interface IUserPage extends IPagination {
+  data: User[];
 }
 
 export interface ILink {
@@ -520,4 +526,13 @@ export interface IUom {
   updated_by?: User;
   created_at?: string;
   update_at?: string;
+}
+
+export interface IRoles {
+  id: number;
+  name: string;
+  namespace: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
 }

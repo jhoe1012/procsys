@@ -230,7 +230,7 @@ const Edit = ({
 
   const handleSubmit: FormEventHandler = async (e) => {
     e.preventDefault();
-    const { isValid, updatedMaterials } = validateMaterials(material);
+    const { isValid, updatedMaterials } = validateMaterials(material, materialGroupsSupplies);
     setMaterial(updatedMaterials);
     if (isValid) {
       post(route('pr.update', prheader.id), {

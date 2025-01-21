@@ -37,7 +37,6 @@ class MaterialController extends Controller
             }
         }
 
-
         $material = $query->orderBy('mat_desc')
             ->paginate(50)
             ->onEachSide(5);

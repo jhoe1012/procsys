@@ -100,12 +100,12 @@ class MenuService
                 'permissions' => Auth::user()->can('admin'),
                 'childrens' => [
                     [
-                        'label' => 'Vendor',
+                        'label' => 'Vendors',
                         'permissions' => Auth::user()->can('admin'),
                         'href' => route('vendor.index'),
                     ],
                     [
-                        'label' => 'Material',
+                        'label' => 'Materials',
                         'permissions' => Auth::user()->can('admin'),
                         'href' => route('material.index'),
                     ],
@@ -115,24 +115,24 @@ class MenuService
                         'href' => route('altuom.index'),
                     ],
                     [
-                        'label' => 'Plant',
+                        'label' => 'Plants',
                         'permissions' => Auth::user()->can('admin'),
                         'href' => '',
                     ],
                     [
-                        'label' => 'Valuation Price',
+                        'label' => 'Valuation Prices',
                         'permissions' => Auth::user()->can('admin'),
                         'href' => route('val_price.index'),
                     ],
                     [
-                        'label' => 'Net Price',
+                        'label' => 'Net Prices',
                         'permissions' => Auth::user()->can('admin'),
                         'href' => route('net_price.index'),
                     ],
                     [
-                        'label' => 'User and Access',
+                        'label' => 'Users',
                         'permissions' => Auth::user()->can('admin'),
-                        'href' => '',
+                        'href' => route('user.index'),
                     ],
                     [
                         'label' => 'Approvers',
