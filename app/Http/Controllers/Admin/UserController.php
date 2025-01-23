@@ -7,8 +7,10 @@ use App\Http\Resources\UserResource;
 use App\Models\Plant;
 use App\Models\Roles;
 use App\Models\User;
+use App\Models\UserRoleRelation;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
@@ -77,7 +79,6 @@ class UserController extends Controller
             'password' => ['required', Rules\Password::defaults()],
             'roles' => ['required'],
             'plants' => ['required'],
-            'position' => ['required', 'string', 'max:255'],
         ]);
 
         $user = User::create([
@@ -120,17 +121,16 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'roles' => ['required'],
             'plants' => ['required'],
-            'position' => ['required', 'string', 'max:255'],
         ]);
 
         $user->update([
             'name' => $request->name,
             'position' => $request->position,
         ]);
-
+        UserRoleRelation::where('user_id', $user->id)->delete();
         collect($request->roles)->each(fn($role) => $user->assignRole($role));
         $user->plants()->sync($request->plants);
-
+        Cache::forget('all-permissions-' . $user->id);
         return back()->with('success', 'User Updated Successfully');
     }
 

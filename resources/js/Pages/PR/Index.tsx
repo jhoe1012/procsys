@@ -280,13 +280,15 @@ export default function Index({
                   </table>
                   <div className="flex flex-row-reverse pt-2">
                     <div>
+                      {selectedPR?.id && auth.permissions.pr.create && (
+                        <Link
+                          href={route('pr.copy', selectedPR.pr_number)}
+                          className=" p-3 m-3 bg-blue-500 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input  hover:bg-blue-400 hover:text-accent-foreground hover:border-gray-500">
+                          Copy PR
+                        </Link>
+                      )}
                       {selectedPR?.id && (
                         <>
-                          <Link
-                            href={route('pr.copy', selectedPR.pr_number)}
-                            className=" p-3 m-3 bg-blue-500 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input  hover:bg-blue-400 hover:text-accent-foreground hover:border-gray-500">
-                            Copy PR
-                          </Link>
                           <Link
                             href={route('pr.edit', selectedPR.pr_number)}
                             className=" p-3 m-3 bg-yellow-500 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input  hover:bg-yellow-400 hover:text-accent-foreground hover:border-gray-500">

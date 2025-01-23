@@ -80,8 +80,6 @@ class User extends Authenticatable
     public function assignRole($roleName)
     {
         if ($role = Roles::namespace($roleName)) {
-            UserRoleRelation::where('user_id', $this->id)->delete();
-
             $combinaison = new UserRoleRelation;
             $combinaison->user_id = $this->id;
             $combinaison->role_id = $role->id;

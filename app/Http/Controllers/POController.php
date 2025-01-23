@@ -12,6 +12,7 @@ use App\Mail\PoRejectedReworkEmail;
 use App\Models\Approvers;
 use App\Models\ApproveStatus;
 use App\Models\DeliveryAddress;
+use App\Models\MaterialGroup;
 use App\Models\MaterialNetPrice;
 use App\Models\PoHeader;
 use App\Models\PoMaterial;
@@ -485,6 +486,7 @@ class POController extends Controller
                 ->where('status', Str::ucfirst(ApproveStatus::APPROVED)))
             ->where('qty_open', '>', 0)
             ->whereNull('status')
+            ->orderBy('pr_headers_id', 'desc')
             ->get();
 
         return PRMaterialsResource::collection($pr_material);
@@ -644,7 +646,12 @@ class POController extends Controller
 
     private function _updateNetPrice($poHeader)
     {
+        $matGroupSupplies = MaterialGroup::supplies()->pluck('mat_grp_code')->toArray();
+
         foreach ($poHeader->pomaterials as $poMaterial) {
+            if (in_array($poMaterial->mat_grp, $matGroupSupplies)) {
+                continue;
+            }
             MaterialNetPrice::updateOrCreate(
                 [
                     'vendor' => $poHeader->vendor_id,

@@ -184,7 +184,8 @@ class ReportController extends Controller
             'gr_headers.actual_date',
             'po_materials.item_no',
             'po_headers.doc_date',
-            'po_headers.deliv_date',
+            // 'po_headers.deliv_date',
+            DB::raw("CASE WHEN po_headers.is_mother_po = true THEN po_materials.del_date ELSE po_headers.deliv_date END AS deliv_date"),
             'po_materials.purch_grp',
             'vendors.supplier',
             'vendors.name_1',
@@ -202,7 +203,7 @@ class ReportController extends Controller
             'po_materials.currency',
             'po_headers.plant',
             'po_headers.release_date',
-            'po_materials.status',
+            DB::raw("CASE WHEN po_materials.status ='X' THEN 'Deleted' ELSE po_materials.status END AS status"),
             'po_headers.created_name',
             'po_headers.deliv_addr',
         )

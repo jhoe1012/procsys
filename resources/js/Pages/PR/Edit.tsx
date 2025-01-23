@@ -14,7 +14,15 @@ import {
 import { Button, Input, Label, Textarea, Toaster, useToast } from '@/Components/ui';
 import { usePRMaterial, usePRMaterialValidation } from '@/Hooks';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { CUSTOM_DATA_SHEET_STYLE, DEFAULT_PR_MATERIAL, SEQ_DRAFT, STATUS_APPROVED, STATUS_REJECTED, STATUS_REWORK } from '@/lib/constants';
+import {
+  CUSTOM_DATA_SHEET_STYLE,
+  DEFAULT_PR_MATERIAL,
+  SEQ_DRAFT,
+  SEQ_REJECT,
+  STATUS_APPROVED,
+  STATUS_REJECTED,
+  STATUS_REWORK,
+} from '@/lib/constants';
 import { formatNumber } from '@/lib/utils';
 import { Choice, IAlternativeUom, IApprover, IitemDetails, IMessage, IPRHeader, IPRMaterial, IWorkflow, PageProps } from '@/types';
 import { Head, useForm, Link } from '@inertiajs/react';
@@ -349,7 +357,7 @@ const Edit = ({
                         type="submit"
                         variant="outline"
                         className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] disabled:cursor-not-allowed disabled:opacity-100 disabled:bg-gray-100"
-                        disabled={prheader.appr_seq != SEQ_DRAFT || processing}>
+                        disabled={prheader.appr_seq == SEQ_REJECT || processing}>
                         Save
                       </Button>
                       <Link

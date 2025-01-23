@@ -91,7 +91,7 @@ class PRController extends Controller
         return Inertia::render('PR/Create', [
             'mat_code' => Material::select('mat_code as value', 'mat_code as label')->orderBy('mat_code')->get()->toArray(),
             'mat_desc' => Material::select('mat_desc as value', 'mat_desc as label')->orderBy('mat_desc')->get()->toArray(),
-            'materialGroupsSupplies' => MaterialGroup::select('mat_grp_code')->where('is_supplies', true)->pluck('mat_grp_code')->toArray(),
+            'materialGroupsSupplies' => MaterialGroup::supplies()->pluck('mat_grp_code')->toArray(),
         ]);
     }
 
@@ -105,6 +105,7 @@ class PRController extends Controller
         return Inertia::render('PR/Create', [
             'mat_code' => Material::select('mat_code as value', 'mat_code as label')->orderBy('mat_code')->get()->toArray(),
             'mat_desc' => Material::select('mat_desc as value', 'mat_desc as label')->orderBy('mat_desc')->get()->toArray(),
+            'materialGroupsSupplies' =>  MaterialGroup::supplies()->pluck('mat_grp_code')->toArray(),
             'prheader' => new PRHeaderResource($pr_header),
         ]);
     }
@@ -156,36 +157,37 @@ class PRController extends Controller
 
         $approvers = Approvers::where('amount_from', '<=', $pr_header->total_pr_value)
             ->where('plant', $pr_header->plant)
-            ->where('type', Approvers::TYPE_PR)->orderBy('seq')->get();
-        if ($approvers->count() > 0) {
-            foreach ($approvers as $approver) {
-                $approver_status = new ApproveStatus();
-                $approver_status->pr_number = $pr_header->pr_number;
-                $approver_status->status = $approver->desc;
-                $approver_status->position = $approver->position;
-                $approver_status->seq = $approver->seq;
-                $approver_status->save();
-            }
+            ->where('type', operator: Approvers::TYPE_PR)->orderBy('seq')->get();
 
-            $pr_header->status = $approvers[0]->desc;
-            $pr_header->appr_seq = $approvers[0]->seq;
-            $pr_header->save();
-
-            $approvers = Approvers::with('user')
-                ->where('plant', $pr_header->plant)
-                ->where('type', Approvers::TYPE_PR)
-                ->where('seq', 1)
-                ->first();
-            Mail::to($approvers->user->email)
-                ->send(new PrForApprovalEmail(
-                    $approvers->user->name,
-                    $pr_header
-                ));
-
-            return to_route("pr.index")->with('success', "PR {$pr_header->pr_number} sent for approval.");
+        if ($approvers->isEmpty()) {
+            return to_route("pr.edit", $pr_header->pr_number)->with('error', "No Approver Found.");
         }
 
-        return to_route("pr.edit", $pr_header->pr_number)->with('error', "No Approver Found.");
+        // delete approve status where user id is null to keep the status clean
+        ApproveStatus::where('pr_number', $pr_header->pr_number)->whereNull('user_id')->delete();
+
+        $approvers->each(function ($approver) use ($pr_header) {
+            ApproveStatus::create([
+                'pr_number' => $pr_header->pr_number,
+                'status'    => $approver->desc,
+                'position'  => $approver->position,
+                'seq'       => $approver->seq,
+            ]);
+        });
+
+        $firstApprover = $approvers->first();
+        $pr_header->update([
+            'status'   => $firstApprover->desc,
+            'appr_seq' => $firstApprover->seq,
+        ]);
+
+        Mail::to($firstApprover->user->email)
+            ->send(new PrForApprovalEmail(
+                $firstApprover->user->name,
+                $pr_header
+            ));
+
+        return to_route("pr.index")->with('success', "PR {$pr_header->pr_number} sent for approval.");
     }
 
     public function edit(Request $request, $prnumber)
@@ -421,9 +423,12 @@ class PRController extends Controller
     public function discard($id)
     {
         $pr_header = PrHeader::findOrFail($id);
-        $pr_material = PrMaterial::where('pr_headers_id', $id)->update(['status' => PrMaterial::FLAG_DELETE]);
+        $pr_material = PrMaterial::where('pr_headers_id', $id)
+            ->where('qty_ordered', '<=', 0)
+            ->update(['status' => PrMaterial::FLAG_DELETE]);
         $pr_header->status = Str::ucfirst(ApproveStatus::CANCELLED);
         $pr_header->appr_seq = -1;
+        $pr_header->save();
         return to_route("pr.edit", $pr_header->pr_number)->with('success', "{$pr_material} items discarded.");
     }
     public function flagDelete(Request $request)
@@ -450,7 +455,7 @@ class PRController extends Controller
 
         if ($withOpenQty->isNotEmpty()) {
             return to_route("pr.edit", $prMaterials->first()->prheader->pr_number)
-                ->with('error', "Item(s) with open quantities cannot be flagged for deletion.");
+                ->with('error', "Item(s) with ordered quantities cannot be flagged for deletion.");
         }
 
         return to_route("pr.edit", $prMaterials->first()->prheader->pr_number)

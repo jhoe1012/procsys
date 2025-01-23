@@ -167,7 +167,7 @@ const Create = ({
   };
 
   const updateMaterial = (newValue: IPOMaterial[], operations: Operation[]) => {
-    const updateMaterial = updateMaterialPO(newValue, operations);
+    const updateMaterial = updateMaterialPO(newValue, operations, material);
     setMaterial(updateMaterial);
   };
 
@@ -236,7 +236,7 @@ const Create = ({
                   id="deliv_date"
                   defaultValue={data.deliv_date}
                   onChange={(e) => setData('deliv_date', e.target.value)}
-                  required={true}
+                  required={!data.is_mother_po}
                   type="date"
                   className="w-40"
                 />

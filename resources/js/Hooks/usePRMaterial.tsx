@@ -88,7 +88,7 @@ export default function usePRMaterial() {
 
           if ((value.mat_code && value.mat_code !== oldValue.mat_code) || (value.short_text && value.short_text !== oldValue.short_text)) {
             // const materialInfo = await fetchMaterialInfo(value.short_text ?? value.mat_code, plant, doc_date);
-            const materialInfo = await getMaterialInfo(value.short_text ?? value.mat_code, plant, doc_date);
+            const materialInfo = await getMaterialInfo(value.short_text ?? value.mat_code ?? '', plant, doc_date);
             if (materialInfo) {
               const { altUoms = [], valuations = [{}], materialGroups = [], purchasingGroups = [] } = materialInfo;
               const ord_unit = materialInfo.order_uom || materialInfo.base_uom;
@@ -118,7 +118,8 @@ export default function usePRMaterial() {
           if ((value.qty && value.qty !== oldValue.qty) || (value.price && value.price > 0)) {
             if (value.mat_grp && materialGroupsSupplies.includes(value.mat_grp)) {
               const suppliesMaterial = {
-                total_value: value.qty * (value.price / value.per_unit) || 0,
+                price: value.price ?? value.valuation_price,
+                total_value: value.qty * ((value.price ?? value.valuation_price) / value.per_unit) || 0,
                 conversion: 1,
                 converted_qty: value.qty,
               };

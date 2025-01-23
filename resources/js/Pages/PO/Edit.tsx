@@ -46,7 +46,7 @@ const Edit = ({
   const [material, setMaterial] = useState<IPOMaterial[]>(
     poheader.pomaterials.map((pomaterial) => ({
       ...pomaterial,
-      ...computeConversion(pomaterial, pomaterial.unit ?? '', poheader.vendor_id),
+      ...computeConversion(pomaterial, pomaterial.unit ?? '', poheader.vendor_id, true),
       altUomSelect: [...new Set([pomaterial.unit, ...pomaterial?.alt_uom?.map((uom: IAlternativeUom) => uom.alt_uom)])],
       del_date: new Date(pomaterial.del_date || ''),
       origPOQty: pomaterial.po_qty ?? 0,
@@ -80,7 +80,7 @@ const Edit = ({
       const newMaterial = [...prevMaterial];
       newMaterial[rowIndex] = {
         ...newMaterial[rowIndex],
-        ...computeConversion(newMaterial[rowIndex], value),
+        ...computeConversion(newMaterial[rowIndex], value, '', true),
       };
       return newMaterial;
     });
@@ -259,7 +259,7 @@ const Edit = ({
   };
 
   const updateMaterial = (newValue: IPOMaterial[], operations: Operation[]) => {
-    const updateMaterial = updateMaterialPO(newValue, operations, true);
+    const updateMaterial = updateMaterialPO(newValue, operations, material, true);
     setMaterial(updateMaterial);
   };
 
@@ -350,7 +350,7 @@ const Edit = ({
                   id="deliv_date"
                   defaultValue={data.deliv_date}
                   onChange={(e) => setData('deliv_date', e.target.value)}
-                  required={true}
+                  required={!data.is_mother_po}
                   type="date"
                   className="w-40"
                 />
