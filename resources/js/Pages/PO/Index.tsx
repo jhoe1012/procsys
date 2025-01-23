@@ -67,7 +67,7 @@ export default function Index({
         <div className="flex flex-row justify-between">
           <h2 className="font-semibold text-xl text-gray-800 leading-tight">Purchase Order List</h2>
           <Button onClick={() => setControlNumberModal(true)} className="h-8" disabled={checkboxPo.length <= 0}>
-            <PrinterIcon></PrinterIcon>
+            <PrinterIcon />
           </Button>
         </div>
       }>

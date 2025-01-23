@@ -352,7 +352,6 @@ const Edit = ({
                   onChange={(e) => setData('deliv_date', e.target.value)}
                   required={!data.is_mother_po}
                   type="date"
-                  className="w-40"
                 />
 
                 <SelectField

@@ -14,7 +14,7 @@ export default function InputField({
   className,
 }: FormFieldProps) {
   return (
-    <div className={cn('flex-auto', className)}>
+    <div className={cn('flex-auto w-28', className)}>
       <Label htmlFor={id}>{label}</Label>
       <Input type={type} id={id} value={value} defaultValue={defaultValue} required={required} disabled={disabled} onChange={onChange} />
     </div>
