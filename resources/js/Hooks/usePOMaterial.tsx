@@ -79,8 +79,10 @@ export default function usePOMaterial() {
             value.po_qty = value.po_qty > value.qty_open_po ? value.qty_open_po : value.po_qty;
           }
           // compare old and new net price if not same will prioritize new net price
-          if (oldValue.net_price !== value.net_price) {
+          // recompute total value if net price and qty changes
+          if (oldValue.net_price !== value.net_price || oldValue.po_qty !== value.po_qty) {
             net_price = value.net_price ?? 0;
+            total_value = ((net_price ?? 0) / (value.per_unit ?? 0)) * (value.po_qty ?? 0);
           }
 
           value.item_no = (operation.fromRowIndex + 1) * 10;
