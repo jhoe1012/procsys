@@ -39,20 +39,16 @@ export default function usePOMaterial() {
       net_price = materialNetPriceUomVendor.price;
       min_order_qty = materialNetPriceUomVendor.min_order_qty;
       total_value = ((net_price ?? 0) / (per_unit ?? 0)) * (po_qty ?? 0);
-      console.log('materialNetPriceUomVendor');
     } else if (materialNetPriceUom) {
       net_price = materialNetPriceUom.price;
       min_order_qty = materialNetPriceUom.min_order_qty;
       total_value = ((net_price ?? 0) / (per_unit ?? 0)) * (po_qty ?? 0);
-      console.log('materialNetPriceUom', po_qty);
     } else if (materialNetPriceUomFirst) {
       net_price = materialNetPriceUomFirst;
       total_value = ((net_price ?? 0) / (per_unit ?? 0)) * (po_qty ?? 0);
-      console.log('materialNetPriceUomFirst');
     } else {
       net_price = material.net_price ?? material.price;
       total_value = ((net_price ?? 0) / (per_unit ?? 0)) * (po_qty ?? 0);
-      console.log('else');
     }
 
     // set net price based on DB net price
@@ -70,7 +66,6 @@ export default function usePOMaterial() {
           const oldValue = material[i];
 
           let { total_value, net_price } = computeConversion(value, value.unit ?? '');
-          console.log('total_value', total_value);
 
           value.po_qty =
             value.min_order_qty && value.min_order_qty > 0 && value.po_qty < value.min_order_qty ? value.min_order_qty : value.po_qty;
@@ -84,10 +79,8 @@ export default function usePOMaterial() {
             value.po_qty = value.po_qty > value.qty_open_po ? value.qty_open_po : value.po_qty;
           }
           // compare old and new net price if not same will prioritize new net price
-          // recompute total value if net price and qty changes
-          if (oldValue.net_price !== value.net_price || oldValue.po_qty !== value.po_qty) {
+          if (oldValue.net_price !== value.net_price) {
             net_price = value.net_price ?? 0;
-            total_value = ((net_price ?? 0) / (value.per_unit ?? 0)) * (value.po_qty ?? 0);
           }
 
           value.item_no = (operation.fromRowIndex + 1) * 10;
