@@ -356,15 +356,15 @@ class POController extends Controller
             $pomaterial->save();
             //update open and order qty in pr
             $this->_updatePrMaterial($pomaterial, 0, CrudActionEnum::DELETE);
-
-            // $pomaterial->prmaterials->qty_open +=  $pomaterial->converted_qty;
-            // $pomaterial->prmaterials->qty_ordered -= $pomaterial->converted_qty;
-            // $pomaterial->prmaterials->save();
         }
 
-        $po_header->status = Str::ucfirst(ApproveStatus::CANCELLED);
-        $po_header->appr_seq = -1;
-        $po_header->save();
+        $po_header = PoHeader::with(['pomaterials' => fn($query) => $query->whereNull('status')
+            ->orWhere('status', '')])->findOrFail($id);
+        if ($po_header->pomaterials->isEmpty()) {
+            $po_header->status = Str::ucfirst(ApproveStatus::CANCELLED);
+            $po_header->appr_seq = -1;
+            $po_header->save();
+        }
 
         return to_route("po.edit", $po_header->po_number)->with('success', "Purchase order Cancelled.");
     }
