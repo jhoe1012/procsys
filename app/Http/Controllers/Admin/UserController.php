@@ -49,7 +49,8 @@ class UserController extends Controller
 
         $users =  $query->orderBy('name')
             ->paginate(50)
-            ->onEachSide(5);
+            ->onEachSide(5)
+            ->appends($request->query() ?: null);
 
         return Inertia::render('Admin/Users/Index', [
             'users' =>  UserResource::collection($users),

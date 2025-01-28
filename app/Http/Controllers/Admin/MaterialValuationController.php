@@ -38,7 +38,8 @@ class MaterialValuationController extends Controller
         $materialValuation = $query->orderBy('mat_code')
             ->orderBy('valid_from', 'desc')
             ->paginate(50)
-            ->onEachSide(5);
+            ->onEachSide(5)
+            ->appends($request->query() ?: null);
 
         $plant =  Plant::select('plant', "name1")
             ->orderBy('plant')

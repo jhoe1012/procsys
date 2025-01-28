@@ -33,7 +33,7 @@ export default function Modal({
       <Dialog
         as="div"
         id="modal"
-        className="fixed inset-0 flex overflow-y-auto px-4 py-6 sm:px-0 items-center z-50 transform transition-all h-"
+        className=" backdrop-blur-sm fixed inset-0 flex overflow-y-auto px-4 py-6 sm:px-0 items-center z-50 transform transition-all h-"
         onClose={close}>
         <TransitionChild
           enter="ease-out duration-300"

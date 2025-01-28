@@ -16,7 +16,10 @@ class ReportController extends Controller
     public function prReport(Request $request)
     {
         return Inertia::render('Reports/PrReport', [
-            'prReport' => $this->_getPrReport($request)->paginate(50)->onEachSide(5),
+            'prReport' => $this->_getPrReport($request)
+                ->paginate(50)
+                ->onEachSide(5)
+                ->appends($request->query() ?: null),
             'queryParams' => $request->query() ?: null,
 
         ]);
@@ -34,7 +37,10 @@ class ReportController extends Controller
     public function poReport(Request $request)
     {
         return Inertia::render('Reports/PoReport', [
-            'poReport' => $this->_getPoReport($request)->paginate(50)->onEachSide(5),
+            'poReport' => $this->_getPoReport($request)
+                ->paginate(50)
+                ->onEachSide(5)
+                ->appends($request->query() ?: null),
             'queryParams' => $request->query() ?: null,
 
         ]);
@@ -50,7 +56,10 @@ class ReportController extends Controller
     public function grReport(Request $request)
     {
         return Inertia::render('Reports/GrReport', [
-            'grReport' => $this->_getGrReport($request)->paginate(50)->onEachSide(5),
+            'grReport' => $this->_getGrReport($request)
+                ->paginate(50)
+                ->onEachSide(5)
+                ->appends($request->query() ?: null),
             'queryParams' => $request->query() ?: null,
 
         ]);
@@ -67,9 +76,11 @@ class ReportController extends Controller
 
     public function materialReport(Request $request)
     {
-        // dd($this->_getMaterialReport($request)->get());
         return Inertia::render('Reports/MaterialReport', [
-            'materialReport' => $this->_getMaterialReport($request)->paginate(50)->onEachSide(5),
+            'materialReport' => $this->_getMaterialReport($request)
+                ->paginate(50)
+                ->onEachSide(5)
+                ->appends($request->query() ?: null),
             'queryParams' => $request->query() ?: null,
 
         ]);

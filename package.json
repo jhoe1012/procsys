@@ -42,7 +42,7 @@
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.1",
         "date-fns": "^3.6.0",
-        "lucide-react": "^0.397.0",
+        "lucide-react": "^0.446.0",
         "moment": "^2.30.1",
         "react-datasheet-grid": "^4.11.4",
         "react-day-picker": "^8.10.1",

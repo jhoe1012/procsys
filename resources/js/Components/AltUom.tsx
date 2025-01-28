@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { Link } from '@inertiajs/react';
-import { SecondaryButton, Modal } from '@/Components';
-import { Button } from '@/Components/ui';
+import { Modal } from '@/Components';
 import { Square2StackIcon } from '@heroicons/react/24/solid';
 
 export default function AltUom({

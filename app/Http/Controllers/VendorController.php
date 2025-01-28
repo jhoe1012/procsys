@@ -36,7 +36,8 @@ class VendorController extends Controller
 
         $vendor = $query->orderBy('name_1', 'desc')
             ->paginate(50)
-            ->onEachSide(5);
+            ->onEachSide(5)
+            ->appends($request->query() ?: null);
 
         return Inertia::render('Admin/Vendor/Index', [
             'vendors' => VendorResource::collection($vendor),
@@ -74,7 +75,6 @@ class VendorController extends Controller
         $vendor->telephone_2 = $request->input('telephone_2');
         $vendor->vat_reg_no = $request->input('vat_reg_no');
         $vendor->save();
-
     }
 
     /**

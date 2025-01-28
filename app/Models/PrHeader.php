@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Trait\CreatedUpdatedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -59,6 +60,20 @@ class PrHeader extends Model
     {
         return $this->hasOne(User::class, 'id', 'created_by');
     }
+    public function scopeApproved(Builder $query, $userPlants): Builder
+    {
+        return $query->where('status', 'Approved')->whereIn('plant', $userPlants);
+    }
+    public function scopeCancelled(Builder $query, $userPlants): Builder
+    {
+        return $query->where('status', 'Cancelled')->whereIn('plant', $userPlants);
+    }
+
+    public function scopeApproval(Builder $query, $userPlants): Builder
+    {
+        return $query->where('status', 'ilike', '%approval%')->whereIn('plant', $userPlants);
+    }
+
     protected static function booted()
     {
         parent::boot();
