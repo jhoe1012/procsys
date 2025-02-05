@@ -17,6 +17,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import {
   CUSTOM_DATA_SHEET_STYLE,
   DEFAULT_PR_MATERIAL,
+  PermissionsEnum,
   SEQ_DRAFT,
   SEQ_REJECT,
   STATUS_APPROVED,
@@ -31,6 +32,7 @@ import { checkboxColumn, DataSheetGrid, dateColumn, floatColumn, intColumn, keyC
 import 'react-datasheet-grid/dist/style.css';
 import { Operation } from 'react-datasheet-grid/dist/types';
 import Approval from './Partial/Approval';
+import { can } from '@/lib/helper';
 
 const Edit = ({
   auth,
@@ -166,7 +168,7 @@ const Edit = ({
     {
       value: 'workflow',
       label: 'Workflow',
-      visible: prheader.workflows?.length > 0,
+      visible: prheader.workflows && prheader.workflows?.length > 0,
       content: <GenericTable columns={workflowColumns} data={prheader.workflows} className="w-11/2 text-xs bg-white" />,
     },
     {
@@ -175,7 +177,10 @@ const Edit = ({
       visible: true,
       content: (
         <>
-          <AttachmentList attachments={prheader.attachments} canEdit={auth.permissions.pr.edit} />
+          <AttachmentList
+            attachments={prheader.attachments}
+            canDelete={can(auth.user, PermissionsEnum.EditPR) /* auth.permissions.pr.edit */}
+          />
           <Dropzone files={files} setFiles={setFiles} />
         </>
       ),
@@ -200,7 +205,7 @@ const Edit = ({
     {
       value: 'action',
       label: 'Action',
-      visible: auth.permissions.pr.edit,
+      visible: can(auth.user, PermissionsEnum.EditPR), //auth.permissions.pr.edit,
       content: (
         <div>
           <FlagForAction
@@ -351,7 +356,7 @@ const Edit = ({
               <div className="p-2 pt-0">
                 <TabFields defaultValue="itemDetails" className="max-w-8xl" tabs={footerTabs} />
                 <div className="p-5 justify-end grid grid-cols-8 gap-4">
-                  {auth.permissions.pr.edit && (
+                  {can(auth.user, PermissionsEnum.EditPR) && ( //auth.permissions.pr.edit && (
                     <>
                       <Button
                         type="submit"
@@ -397,7 +402,7 @@ const Edit = ({
                 </div>
               </div>
             </form>
-            {auth.permissions.pr.approver && (
+            {can(auth.user, PermissionsEnum.ApproverPR) && ( //auth.permissions.pr.approver && (
               <div className="px-5 pb-5">
                 <Approval
                   p_pr_number={data.pr_number}

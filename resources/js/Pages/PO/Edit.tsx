@@ -5,7 +5,15 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useMemo, useState } from 'react';
 import 'react-datasheet-grid/dist/style.css';
 import { checkboxColumn, DataSheetGrid, dateColumn, floatColumn, intColumn, keyColumn, textColumn } from 'react-datasheet-grid';
-import { CUSTOM_DATA_SHEET_STYLE, SEQ_DRAFT, SEQ_REJECT, STATUS_APPROVED, STATUS_REJECTED, STATUS_REWORK } from '@/lib/constants';
+import {
+  CUSTOM_DATA_SHEET_STYLE,
+  PermissionsEnum,
+  SEQ_DRAFT,
+  SEQ_REJECT,
+  STATUS_APPROVED,
+  STATUS_REJECTED,
+  STATUS_REWORK,
+} from '@/lib/constants';
 import { usePOMaterial, usePOMaterialValidation } from '@/Hooks';
 import {
   AltUom,
@@ -26,6 +34,7 @@ import { formatNumber } from '@/lib/utils';
 import Approval from './Partial/Approval';
 import AddPrtoPo from './Partial/AddPrtoPo';
 import { Operation } from 'react-datasheet-grid/dist/types';
+import { can } from '@/lib/helper';
 
 const Edit = ({
   auth,
@@ -198,7 +207,10 @@ const Edit = ({
       visible: true,
       content: (
         <>
-          <AttachmentList attachments={poheader.attachments} canEdit={auth.permissions.po.edit} />
+          <AttachmentList
+            attachments={poheader.attachments}
+            canDelete={can(auth.user, PermissionsEnum.EditPO) /* auth.permissions.po.edit */}
+          />
           <Dropzone files={files} setFiles={setFiles} />,
         </>
       ),
@@ -221,7 +233,7 @@ const Edit = ({
     {
       value: 'action',
       label: 'Action',
-      visible: auth.permissions.po.edit,
+      visible: can(auth.user, PermissionsEnum.EditPO), //auth.permissions.po.edit,
       content: (
         <>
           <Link
@@ -409,7 +421,7 @@ const Edit = ({
                 <TabFields defaultValue="action" className="max-w-8xl" tabs={footerTabs} />
 
                 <div className="p-5 justify-end grid grid-cols-8 gap-4">
-                  {auth.permissions.po.edit && (
+                  {can(auth.user, PermissionsEnum.EditPO) && ( //auth.permissions.po.edit && (
                     <>
                       <Button
                         variant="outline"
@@ -446,7 +458,7 @@ const Edit = ({
                 </div>
               </div>
             </form>
-            {auth.permissions.po.approver && (
+            {can(auth.user, PermissionsEnum.ApproverPO) && ( //auth.permissions.po.approver && (
               <div className="px-5 pb-5">
                 <Approval
                   p_po_number={data.po_number}

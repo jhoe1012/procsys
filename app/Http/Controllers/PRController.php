@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enum\PermissionsEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PRHeaderResource;
 use App\Mail\PrApprovedEmail;
@@ -32,17 +33,18 @@ class PRController extends Controller
     {
         $user = $request->user();
 
-        // Fetch user plants and approver sequence
+        // Fetch user plants 
         $userPlants = $user->plants->pluck('plant')->toArray();
-        $approverSeq = $user->approvers
-            ->firstWhere('type', 'pr')['seq'] ?? 0;
+
 
         // Initialize query with relationships
         $query = PrHeader::with(['prmaterials', 'plants'])
             ->whereIn('plant', $userPlants);
 
         // Check approval permission and filter
-        if (Gate::allows('approve.pr')) {
+        if ($user->can(PermissionsEnum::ApproverPR)) {
+            $approverSeq = $user->approvers
+                ->firstWhere('type', 'pr')['seq'] ?? 0;
             $query->where('appr_seq', '>=', $approverSeq);
         }
 

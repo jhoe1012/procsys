@@ -27,6 +27,6 @@ class AuthServiceProvider extends ServiceProvider
     //  CoreService $coreService 
     public function boot(CoreService $coreService)
     {
-        $coreService->registerGatePermissions();
+        // $coreService->registerGatePermissions();
     }
 }

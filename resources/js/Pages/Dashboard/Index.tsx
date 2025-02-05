@@ -4,8 +4,17 @@ import { PageProps } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui';
 import { FileCheck, FileStack, FileUser, FileX2 } from 'lucide-react';
 import { DashboardCard } from '@/Components';
+import { can } from '@/lib/helper';
+import { PermissionsEnum } from '@/lib/constants';
 
-export default function Index({ auth, prHeader, poHeader }: PageProps) {
+interface DashboardProps {
+  approval: number;
+  approved: number;
+  cancelled: number;
+  total: number;
+}
+
+export default function Index({ auth, prHeader, poHeader }: PageProps<{ prHeader: DashboardProps; poHeader: DashboardProps }>) {
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -15,7 +24,7 @@ export default function Index({ auth, prHeader, poHeader }: PageProps) {
 
       <div className="py-5">
         <div className="max-w-full mx-auto sm:px-6 lg:px-8">
-          {auth.permissions.pr.read && (
+          {can(auth.user, PermissionsEnum.ReadPR) && (
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xl font-medium">Purchase Request</CardTitle>
@@ -50,7 +59,7 @@ export default function Index({ auth, prHeader, poHeader }: PageProps) {
               </CardContent>
             </Card>
           )}
-          {auth.permissions.po.read && (
+          {can(auth.user, PermissionsEnum.ReadPO) && (
             <Card className="mt-2">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xl font-medium">Purchase Order</CardTitle>

@@ -15,6 +15,8 @@ import { useToast } from '@/Components/ui/use-toast';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { IGRHeader, IGRMaterials, PageProps } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { can } from '@/lib/helper';
+import { PermissionsEnum } from '@/lib/constants';
 
 const Create = ({ auth }: PageProps) => {
   const dateToday = new Date().toISOString().substring(0, 10);
@@ -368,7 +370,7 @@ const Create = ({ auth }: PageProps) => {
 
               <div className="p-2 pt-0">
                 <div className="p-5 justify-end grid grid-cols-8 gap-4">
-                  {auth.permissions.gr.create && (
+                  {can(auth.user, PermissionsEnum.CreateGR) && ( //auth.permissions.gr.create && (
                     <>
                       <Button variant="outline" disabled={processing} className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110]">
                         Post

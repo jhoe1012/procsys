@@ -8,6 +8,8 @@ import { useToast } from '@/Components/ui/use-toast';
 import { Toaster } from '@/Components/ui/toaster';
 import Modal from '@/Components/Modal';
 import { PrinterIcon } from '@heroicons/react/24/solid';
+import { can } from '@/lib/helper';
+import { PermissionsEnum } from '@/lib/constants';
 
 const Index = ({
   auth,
@@ -311,7 +313,7 @@ const Index = ({
                   <div>
                     {selectedGr?.id && (
                       <>
-                        {auth.permissions.gr.cancel && (
+                        {can(auth.user, PermissionsEnum.CancelGR) && ( //auth.permissions.gr.cancel && (
                           <Link
                             href={route('gr.edit', selectedGr.gr_number)}
                             className=" p-3 m-3 bg-gray-100 inline-flex items-center justify-center whitespace-nowrap rounded-md text-xs font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input  hover:bg-gray-400 hover:text-accent-foreground hover:border-gray-500">

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enum\PermissionsEnum;
 use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\MaterialValuationController;
 use App\Http\Controllers\Admin\UserController;
@@ -38,7 +39,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/pr-recall/{id}', [PRController::class, 'recall'])->name('pr.recall');
     Route::get('/pr-copy/{prnumber}', [PRController::class, 'copy'])->name('pr.copy');
 
-
     Route::get('/po', [POController::class, 'index'])->name('po.index');
     Route::get('/po-create', [POController::class, 'create'])->name('po.create');
     Route::post('/po-store', [POController::class, 'store'])->name('po.store');
@@ -76,7 +76,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/val-price-download-error', [MaterialValuationController::class, "export"])->name("val_price.download.error");
 
 
-    Route::get('/vendor-index', [VendorController::class, "index"])->name("vendor.index");
+    Route::get('/vendors', [VendorController::class, "index"])->name("vendor.index");
     Route::post('/vendor-store', [VendorController::class, "store"])->name("vendor.store");
     Route::patch('/vendor-update/{materialValuation}', [VendorController::class, "update"])->name("vendor.update");
 

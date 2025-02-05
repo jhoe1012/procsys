@@ -4,11 +4,12 @@ import { PageProps, IMessage, IPOHeaderPage, IPOHeader, IPOMaterial } from '@/ty
 import { useState, useEffect, KeyboardEvent } from 'react';
 import { formatNumber } from '@/lib/utils';
 import AsyncSelect from 'react-select/async';
-import { REACT_SELECT_STYLES, STATUS_APPROVED } from '@/lib/constants';
+import { PermissionsEnum, REACT_SELECT_STYLES, STATUS_APPROVED } from '@/lib/constants';
 import { Button, Toaster, useToast } from '@/Components/ui';
 import { Checkbox, InputField, Modal, Pagination, TextInput } from '@/Components';
 import { fetchVendor } from '@/lib/Vendor';
 import { PrinterIcon } from 'lucide-react';
+import { can } from '@/lib/helper';
 
 export default function Index({
   auth,
@@ -66,9 +67,11 @@ export default function Index({
       header={
         <div className="flex flex-row justify-between">
           <h2 className="font-semibold text-xl text-gray-800 leading-tight">Purchase Order List</h2>
-          <Button onClick={() => setControlNumberModal(true)} className="h-8" disabled={checkboxPo.length <= 0}>
-            <PrinterIcon />
-          </Button>
+          {can(auth.user, PermissionsEnum.EditPR) && (
+            <Button onClick={() => setControlNumberModal(true)} className="h-8" disabled={checkboxPo.length <= 0}>
+              <PrinterIcon />
+            </Button>
+          )}
         </div>
       }>
       <Head title="View PO " />
@@ -240,7 +243,7 @@ export default function Index({
                           <td className="px-3 py-2">{po.status}</td>
                           <td className="px-3 py-2 text-center">{po.print_count}</td>
                           <td className="px-3 py-2">
-                            {po.status === STATUS_APPROVED && (
+                            {can(auth.user, PermissionsEnum.EditPO) && po.status === STATUS_APPROVED && (
                               <Checkbox
                                 className="border-blue-500"
                                 onChange={(e) =>
@@ -340,6 +343,7 @@ export default function Index({
                   <a
                     target="_blank"
                     href={route('po.mass-print', { controlNumber: controlNumber, checkboxPo: checkboxPo })}
+                    onClick={() => setControlNumberModal(false)}
                     className="flex items-center justify-center text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1 text-center  mt-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800">
                     <PrinterIcon /> Print
                   </a>

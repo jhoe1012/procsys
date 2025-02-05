@@ -11,10 +11,11 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use  HasApiTokens, HasFactory, Notifiable;
+    use  HasApiTokens, HasFactory, Notifiable, HasRoles;
     /**
      * The attributes that are mass assignable.
      *
@@ -65,34 +66,34 @@ class User extends Authenticatable
     {
         return $this->belongsTo(POHeader::class, 'created_by', 'id');
     }
-    public function roles(): HasManyThrough
-    {
-        return $this->hasManyThrough(
-            Roles::class,
-            UserRoleRelation::class,
-            'user_id',
-            'id',
-            'id',
-            'role_id'
-        );
-    }
+    // public function roles(): HasManyThrough
+    // {
+    //     return $this->hasManyThrough(
+    //         Roles::class,
+    //         UserRoleRelation::class,
+    //         'user_id',
+    //         'id',
+    //         'id',
+    //         'role_id'
+    //     );
+    // }
 
-    public function assignRole($roleName)
-    {
-        if ($role = Roles::namespace($roleName)) {
-            $combinaison = new UserRoleRelation;
-            $combinaison->user_id = $this->id;
-            $combinaison->role_id = $role->id;
-            $combinaison->save();
+    // public function assignRole($roleName)
+    // {
+    //     if ($role = Roles::namespace($roleName)) {
+    //         $combinaison = new UserRoleRelation;
+    //         $combinaison->user_id = $this->id;
+    //         $combinaison->role_id = $role->id;
+    //         $combinaison->save();
 
-            return [
-                'status' => 'success',
-                'message' => __('The role was successfully assigned.'),
-            ];
-        }
-        return [
-            'status' => 'error',
-            'message' => __('Unable to identifier the provided role.'),
-        ];
-    }
+    //         return [
+    //             'status' => 'success',
+    //             'message' => __('The role was successfully assigned.'),
+    //         ];
+    //     }
+    //     return [
+    //         'status' => 'error',
+    //         'message' => __('Unable to identifier the provided role.'),
+    //     ];
+    // }
 }

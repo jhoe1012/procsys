@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enum\CrudActionEnum;
+use App\Enum\PermissionsEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\POHeaderResource;
 use App\Http\Resources\PRMaterialsResource;
@@ -40,17 +41,17 @@ class POController extends Controller
     {
         $user = $request->user();
 
-        // Fetch user plants and approver sequence
+        // Fetch user plants 
         $userPlants = $user->plants->pluck('plant')->toArray();
-        $approverSeq = $user->approvers
-            ->firstWhere('type', 'po')['seq'] ?? 0;
 
         // Initialize query with relationships
         $query = PoHeader::with(['pomaterials', 'plants', 'vendors'])
             ->whereIn('plant', $userPlants);
 
         // Check approval permission and filter
-        if (Gate::allows('approve.po')) {
+        if ($user->can(PermissionsEnum::ApproverPO)) {
+            $approverSeq = $user->approvers
+                ->firstWhere('type', 'po')['seq'] ?? 0;
             $query->where('appr_seq', '>=', $approverSeq);
         }
         // Define filterable fields and conditions
@@ -83,8 +84,8 @@ class POController extends Controller
             }
         }
 
-        $poHeader = $query->orderByDesc('doc_date')
-            ->orderByDesc('po_number')
+        $poHeader =  $query->orderBy('status', 'desc')
+            ->orderBy('doc_date', 'desc')
             ->paginate(50)
             ->onEachSide(5);
 

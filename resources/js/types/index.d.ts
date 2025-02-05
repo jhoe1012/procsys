@@ -10,6 +10,16 @@ export interface User {
   roles?: IRoles[];
 }
 
+export interface AuthUser {
+  id: number;
+  name: string;
+  email: string;
+  plants: string[];
+  approvers: IApprover[];
+  roles: string[];
+  permissions: string[];
+}
+
 export interface Crud {
   create: boolean;
   read: boolean;
@@ -21,13 +31,7 @@ export interface Crud {
 
 export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
   auth: {
-    user: User;
-    permissions: {
-      pr: Crud;
-      po: Crud;
-      gr: Crud;
-      admin: Crud;
-    };
+    user: AuthUser;
     menu: any;
   };
 };

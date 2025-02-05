@@ -10,16 +10,16 @@ interface Attachment {
 
 interface AttachmentListProps {
   attachments: Attachment[] | undefined; // List of attachments
-  canEdit: boolean; // Permission to edit attachments
+  canDelete: boolean; // Permission to edit attachments
 }
 
-const AttachmentList: React.FC<AttachmentListProps> = ({ attachments, canEdit }) => {
+const AttachmentList: React.FC<AttachmentListProps> = ({ attachments, canDelete }) => {
   return (
     <ul className="mt-3 mb-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
       {attachments &&
         attachments.map((attachment) => (
           <li key={attachment.id} className="relative h-12 rounded-md shadow-lg p-2 bg-white">
-            {canEdit && (
+            {canDelete && (
               <Link
                 preserveScroll
                 href={route('attachment.delete', attachment.id)}

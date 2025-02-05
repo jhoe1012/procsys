@@ -1,7 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Button, Input, Label, Textarea, Toaster, useToast } from '@/Components/ui';
-import { CUSTOM_DATA_SHEET_STYLE, DATE_TODAY } from '@/lib/constants';
+import { CUSTOM_DATA_SHEET_STYLE, DATE_TODAY, PermissionsEnum } from '@/lib/constants';
 import { Choice, IPOHeader, IPOMaterial, IVendor, PageProps } from '@/types';
 import { FormEventHandler, useEffect, useMemo, useState } from 'react';
 import { checkboxColumn, DataSheetGrid, dateColumn, floatColumn, intColumn, keyColumn, textColumn } from 'react-datasheet-grid';
@@ -11,6 +11,7 @@ import { AltUom, Checkbox, Dropzone, InputField, ReactSelectField, SelectField, 
 import { formatNumber } from '@/lib/utils';
 import AddPrtoPo from './Partial/AddPrtoPo';
 import { usePOMaterial, usePOMaterialValidation } from '@/Hooks';
+import { can } from '@/lib/helper';
 
 const Create = ({
   auth,
@@ -293,7 +294,7 @@ const Create = ({
               </div>
               <div className="p-2 pt-0">
                 <div className="p-5 justify-end grid grid-cols-8 gap-4">
-                  {auth.permissions.po.create && (
+                  {can(auth.user, PermissionsEnum.CreatePO) && ( //auth.permissions.po.create && (
                     <>
                       <Button variant="outline" disabled={processing} className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110]">
                         Save

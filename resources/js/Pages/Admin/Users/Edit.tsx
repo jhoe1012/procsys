@@ -10,7 +10,7 @@ export default function Edit({ user, roles, plants }: { user: User; roles: IRole
   const [showModal, setShowModal] = useState(false);
   const [rolesSelected, setrolesSelected] = useState([]);
   const [plantsSelected, setPlantsSelected] = useState([]);
-  const rolesChoice = roles.map((role) => ({ label: role.name, value: role.namespace }));
+  const rolesChoice = roles.map((role) => ({ label: role.name, value: role.name }));
   const plantsChoice = plants.map((plant) => ({ label: plant.name1, value: plant.id }));
 
   const { data, setData, put, processing, reset, errors } = useForm({
@@ -32,13 +32,11 @@ export default function Edit({ user, roles, plants }: { user: User; roles: IRole
 
   const closeModal = () => {
     setShowModal(false);
-    setrolesSelected([]);
-    setPlantsSelected([]);
     reset();
   };
 
   useEffect(() => {
-    setrolesSelected(user.roles.map((role) => ({ label: role.name, value: role.namespace })));
+    setrolesSelected(user.roles.map((role) => ({ label: role.name, value: role.name })));
     setPlantsSelected(user.plants.map((plant) => ({ label: plant.name1, value: plant.id })));
   }, []);
 

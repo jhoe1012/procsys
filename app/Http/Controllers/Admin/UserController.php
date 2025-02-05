@@ -11,6 +11,7 @@ use App\Models\UserRoleRelation;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
@@ -90,7 +91,7 @@ class UserController extends Controller
 
         ]);
 
-        collect($request->roles)->each(fn($role) => $user->assignRole($role));
+        $user->assignRole([$request->roles]);
         $user->plants()->sync($request->plants);
         event(new Registered($user));
 
@@ -128,10 +129,11 @@ class UserController extends Controller
             'name' => $request->name,
             'position' => $request->position,
         ]);
-        UserRoleRelation::where('user_id', $user->id)->delete();
-        collect($request->roles)->each(fn($role) => $user->assignRole($role));
+        // UserRoleRelation::where('user_id', $user->id)->delete();
+        DB::table('model_has_roles')->where('model_id', $user->id)->delete();
+        $user->assignRole($request->roles);
         $user->plants()->sync($request->plants);
-        Cache::forget('all-permissions-' . $user->id);
+        // Cache::forget('all-permissions-' . $user->id);
         return back()->with('success', 'User Updated Successfully');
     }
 

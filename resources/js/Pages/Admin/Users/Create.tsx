@@ -9,7 +9,7 @@ export default function Create({ roles, plants }: { roles: IRoles[]; plants: IPl
   const [showModal, setShowModal] = useState(false);
   const [rolesSelected, setrolesSelected] = useState([]);
   const [plantsSelected, setPlantsSelected] = useState([]);
-  const rolesChoice = roles.map((role) => ({ label: role.name, value: role.namespace }));
+  const rolesChoice = roles.map((role) => ({ label: role.name, value: role.name }));
   const plantsChoice = plants.map((plant) => ({ label: plant.name1, value: plant.id }));
 
   const { data, setData, post, processing, reset, errors } = useForm({

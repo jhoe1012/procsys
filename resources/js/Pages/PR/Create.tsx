@@ -9,7 +9,8 @@ import { Operation } from 'react-datasheet-grid/dist/types';
 import { formatNumber } from '@/lib/utils';
 import { Loading, Dropzone, selectColumn, InputField, SelectField, TabFields, AltUom } from '@/Components';
 import { usePRMaterial, usePRMaterialValidation } from '@/Hooks';
-import { CUSTOM_DATA_SHEET_STYLE, DATE_TODAY, DEFAULT_PR_MATERIAL } from '@/lib/constants';
+import { CUSTOM_DATA_SHEET_STYLE, DATE_TODAY, DEFAULT_PR_MATERIAL, PermissionsEnum } from '@/lib/constants';
+import { can } from '@/lib/helper';
 
 const Create = ({
   auth,
@@ -220,7 +221,7 @@ const Create = ({
               </div>
               <div className="p-2 pt-0">
                 <div className="p-5 justify-end grid grid-cols-8 gap-4">
-                  {auth.permissions.pr.create && (
+                  {can(auth.user, PermissionsEnum.CreatePR) && ( //auth.permissions.pr.create && (
                     <>
                       <Button variant="outline" disabled={processing} className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] ">
                         Save

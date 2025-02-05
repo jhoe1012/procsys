@@ -8,7 +8,7 @@ interface DashboardCardProps {
   href: string;
   className?: string;
   title: string;
-  data: string;
+  data: number;
   children?: ReactNode;
 }
 
