@@ -25,14 +25,14 @@ class MaterialValuationController extends Controller
     {
         $query = MaterialValuation::query();
 
-        $query =  $query->with(['plants', 'material']);
+        $query = $query->with(['plants', 'material']);
 
         if (request('plant')) {
-            $query->where('plant', 'like', "%" . request('plant') . "%");
+            $query->where('plant', 'like', '%'.request('plant').'%');
         }
 
         if (request('material')) {
-            $query->where('mat_code', 'like', "%" . request('material') . "%");
+            $query->where('mat_code', 'like', '%'.request('material').'%');
         }
 
         $materialValuation = $query->orderBy('mat_code')
@@ -41,12 +41,12 @@ class MaterialValuationController extends Controller
             ->onEachSide(5)
             ->appends($request->query() ?: null);
 
-        $plant =  Plant::select('plant', "name1")
+        $plant = Plant::select('plant', 'name1')
             ->orderBy('plant')
             ->get()
-            ->map(fn($item) =>  [
+            ->map(fn ($item) => [
                 'value' => $item->plant,
-                'label' => $item->plant . '-' . $item->name1
+                'label' => $item->plant.'-'.$item->name1,
             ])->toArray();
 
         return Inertia::render('Admin/ValuationPrice/Index', [
@@ -70,17 +70,17 @@ class MaterialValuationController extends Controller
      */
     public function store(Request $request)
     {
-        $materialValuation = new MaterialValuation();
-        $materialValuation->plant =  $request->input('plant');
-        $materialValuation->mat_code =  $request->input('mat_code');
-        $materialValuation->currency =  $request->input('currency');
-        $materialValuation->valuation_price =  $request->input('valuation_price');
-        $materialValuation->per_unit =  $request->input('per_unit');
-        $materialValuation->valid_from =  $request->input('valid_from');
-        $materialValuation->valid_to =  $request->input('valid_to');
+        $materialValuation = new MaterialValuation;
+        $materialValuation->plant = $request->input('plant');
+        $materialValuation->mat_code = $request->input('mat_code');
+        $materialValuation->currency = $request->input('currency');
+        $materialValuation->valuation_price = $request->input('valuation_price');
+        $materialValuation->per_unit = $request->input('per_unit');
+        $materialValuation->valid_from = $request->input('valid_from');
+        $materialValuation->valid_to = $request->input('valid_to');
         $materialValuation->save();
 
-        return to_route("val_price.index")->with('success', "Net price created.");
+        return to_route('val_price.index')->with('success', 'Net price created.');
     }
 
     /**
@@ -104,16 +104,16 @@ class MaterialValuationController extends Controller
      */
     public function update(Request $request, MaterialValuation $materialValuation)
     {
-        $materialValuation->plant =  $request->input('plant');
-        $materialValuation->mat_code =  $request->input('mat_code');
-        $materialValuation->currency =  $request->input('currency');
-        $materialValuation->valuation_price =  $request->input('valuation_price');
-        $materialValuation->per_unit =  $request->input('per_unit');
-        $materialValuation->valid_from =  $request->input('valid_from');
-        $materialValuation->valid_to =  $request->input('valid_to');
+        $materialValuation->plant = $request->input('plant');
+        $materialValuation->mat_code = $request->input('mat_code');
+        $materialValuation->currency = $request->input('currency');
+        $materialValuation->valuation_price = $request->input('valuation_price');
+        $materialValuation->per_unit = $request->input('per_unit');
+        $materialValuation->valid_from = $request->input('valid_from');
+        $materialValuation->valid_to = $request->input('valid_to');
         $materialValuation->save();
 
-        return to_route("val_price.index")->with('success', "Net price created.");
+        return to_route('val_price.index')->with('success', 'Net price created.');
     }
 
     /**
@@ -129,10 +129,10 @@ class MaterialValuationController extends Controller
         $files = AttachmentService::handleImport($request);
         $materialValuation = new MaterialValuationImport;
 
-        Excel::import($materialValuation, storage_path("app/" . $files[0]['filepath']));
+        Excel::import($materialValuation, storage_path('app/'.$files[0]['filepath']));
 
         try {
-            DB::statement("TRUNCATE  temp_material_valuations");
+            DB::statement('TRUNCATE  temp_material_valuations');
 
             DB::table('temp_material_valuations')->insert($materialValuation->getMaterialValuation());
 
@@ -186,11 +186,11 @@ class MaterialValuationController extends Controller
             SELECT mat_code,plant,currency,valuation_price,per_unit,valid_from,valid_to,created_by,created_at FROM temp_material_valuations WHERE stat IN ('X','S');
             ");
 
-            return to_route("val_price.index")->with('success', "Valuation uploaded.");
+            return to_route('val_price.index')->with('success', 'Valuation uploaded.');
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
             throw ValidationException::withMessages([
-                'error' => 'An error occurred. Please contact administrator'
+                'error' => 'An error occurred. Please contact administrator',
             ]);
         }
     }
@@ -204,7 +204,7 @@ class MaterialValuationController extends Controller
             ->get()
             ->toArray();
 
-        return  Excel::download(
+        return Excel::download(
             new MaterialValuationErrorExport($result),
             'IMPORT ERROR LOG.xlsx',
             \Maatwebsite\Excel\Excel::XLSX

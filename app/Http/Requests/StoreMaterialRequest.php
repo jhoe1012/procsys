@@ -22,11 +22,11 @@ class StoreMaterialRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'mat_code' => "required",
-            'mat_desc' => "required",
-            'mat_grp_code' => "required",
-            'mat_type' => "required",
-            'base_uom' => "required",
+            'mat_code' => 'required',
+            'mat_desc' => 'required',
+            'mat_grp_code' => 'required',
+            'mat_type' => 'required',
+            'base_uom' => 'required',
             'min_rem_shelf_life' => 'nullable',
             'old_mat_code' => 'nullable',
             'order_uom' => 'nullable',

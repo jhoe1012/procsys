@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PoHeader extends Model
 {
-    use HasFactory, CreatedUpdatedBy;
+    use CreatedUpdatedBy, HasFactory;
 
     protected $fillable = [
         'control_no',
@@ -45,42 +45,50 @@ class PoHeader extends Model
     {
         return $this->hasOne(Plant::class, 'plant', 'plant');
     }
+
     public function vendors(): HasOne
     {
         return $this->hasOne(Vendor::class, 'supplier', 'vendor_id');
     }
+
     public function pomaterials(): HasMany
     {
         // return $this->hasMany(PoMaterial::class, 'po_header_id', 'id');
         return $this->hasMany(PoMaterial::class)->orderBy('item_no', 'asc');
     }
+
     public function workflows(): HasMany
     {
         return $this->hasMany(ApproveStatus::class, 'po_number', 'po_number')
             ->oldest('approved_date')
-            ->orderBy('seq');;
+            ->orderBy('seq');
     }
+
     public function attachments(): HasMany
     {
         return $this->hasMany(Attachment::class);
     }
+
     public function createdBy(): HasOne
     {
         return $this->hasOne(User::class, 'id', 'created_by');
     }
+
     public function scopeApproved(Builder $query, $userPlants): Builder
     {
-        return $query->where('status', 'Approved')->whereIn('plant', $userPlants);;
+        return $query->where('status', 'Approved')->whereIn('plant', $userPlants);
     }
+
     public function scopeCancelled(Builder $query, $userPlants): Builder
     {
-        return $query->where('status', 'Cancelled')->whereIn('plant', $userPlants);;
+        return $query->where('status', 'Cancelled')->whereIn('plant', $userPlants);
     }
 
     public function scopeApproval(Builder $query, $userPlants): Builder
     {
-        return $query->where('status', 'ilike', '%approval%')->whereIn('plant', $userPlants);;
+        return $query->where('status', 'ilike', '%approval%')->whereIn('plant', $userPlants);
     }
+
     protected static function booted()
     {
         parent::boot();

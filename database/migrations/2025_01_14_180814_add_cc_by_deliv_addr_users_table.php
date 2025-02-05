@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string("cc_by_deliv_addr")->nullable()->comment("
-The column of  delivery address ID, used to specify which user will be CC in the email.");
+            $table->string('cc_by_deliv_addr')->nullable()->comment('
+The column of  delivery address ID, used to specify which user will be CC in the email.');
         });
     }
 

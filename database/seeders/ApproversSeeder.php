@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Approvers;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class ApproversSeeder extends Seeder
@@ -44,7 +43,7 @@ class ApproversSeeder extends Seeder
                 'amount_to' => 10000000,
                 'desc' => 'For DepHd/AVP Approval',
                 'seq' => 3,
-            ], 
+            ],
             [
                 'type' => 'po',
                 'plant' => 'P100',
@@ -84,7 +83,7 @@ class ApproversSeeder extends Seeder
                 'amount_to' => 100000000,
                 'desc' => 'For Chairman Approval',
                 'seq' => 4,
-            ]
+            ],
         ]);
     }
 }

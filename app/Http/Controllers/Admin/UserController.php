@@ -16,10 +16,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 
-
 class UserController extends Controller
 {
-
     /**
      * Display a listing of the resource.
      */
@@ -29,33 +27,33 @@ class UserController extends Controller
         $query->with(['roles', 'plants']);
 
         $filters = [
-            'name' => fn($value) => $query->where('name', 'ilike', "%{$value}%"),
-            'email' => fn($value) => $query->where('email', 'ilike', "%{$value}%"),
-            'position' => fn($value) => $query->where('position', 'ilike', "%{$value}%"),
-            'role' => fn($value) => $query->whereHas(
+            'name' => fn ($value) => $query->where('name', 'ilike', "%{$value}%"),
+            'email' => fn ($value) => $query->where('email', 'ilike', "%{$value}%"),
+            'position' => fn ($value) => $query->where('position', 'ilike', "%{$value}%"),
+            'role' => fn ($value) => $query->whereHas(
                 'roles',
-                fn($q) => $q->where('roles.name', $value)
+                fn ($q) => $q->where('roles.name', $value)
             ),
-            'plant' => fn($value) => $query->whereHas(
+            'plant' => fn ($value) => $query->whereHas(
                 'plants',
-                fn($q) => $q->where('plants.plant', $value)
+                fn ($q) => $q->where('plants.plant', $value)
             ),
         ];
 
         foreach ($request->only(array_keys($filters)) as $field => $value) {
-            if (!empty($value)) {
+            if (! empty($value)) {
                 $filters[$field]($value);
             }
         }
 
-        $users =  $query->orderBy('name')
+        $users = $query->orderBy('name')
             ->paginate(50)
             ->onEachSide(5)
             ->appends($request->query() ?: null);
 
         return Inertia::render('Admin/Users/Index', [
-            'users' =>  UserResource::collection($users),
-            'roles' =>  Roles::all()->toArray(),
+            'users' => UserResource::collection($users),
+            'roles' => Roles::all()->toArray(),
             'plants' => Plant::all()->toArray(),
             'queryParams' => $request->query() ?: null,
             'message' => ['success' => session('success'), 'error' => session('error')],
@@ -77,7 +75,7 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', Rules\Password::defaults()],
             'roles' => ['required'],
             'plants' => ['required'],
@@ -133,6 +131,7 @@ class UserController extends Controller
         DB::table('model_has_roles')->where('model_id', $user->id)->delete();
         $user->assignRole($request->roles);
         $user->plants()->sync($request->plants);
+
         // Cache::forget('all-permissions-' . $user->id);
         return back()->with('success', 'User Updated Successfully');
     }

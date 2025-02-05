@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreAlternativeUomRequest;
-use App\Http\Requests\UpdateAlternativeUomRequest;
 use App\Http\Resources\AlternativeUomResource;
 use App\Models\AlternativeUom;
 use Illuminate\Http\Request;
@@ -13,8 +12,9 @@ class AlternativeUomController extends Controller
 {
     public function search(Request $request)
     {
-        if (!$request->input('search'))
+        if (! $request->input('search')) {
             return;
+        }
 
         $alt_uom = AlternativeUom::where('mat_code', "{$request->input('search')}")->get();
 
@@ -30,15 +30,15 @@ class AlternativeUomController extends Controller
         $query->with(['material', 'altUomText', 'unitOfWeightText', 'createdBy', 'updatedBy']);
 
         $filters = [
-            'mat_code' => fn($value) => $query->where('mat_code', 'ilike', "%{$value}%"),
-            'mat_desc' => fn($value) => $query->whereHas(
+            'mat_code' => fn ($value) => $query->where('mat_code', 'ilike', "%{$value}%"),
+            'mat_desc' => fn ($value) => $query->whereHas(
                 'material',
-                fn($q) => $q->where('mat_desc', 'ilike', "%{$value}%")
+                fn ($q) => $q->where('mat_desc', 'ilike', "%{$value}%")
             ),
         ];
 
         foreach (request()->only(array_keys($filters)) as $field => $value) {
-            if (!empty($value)) {
+            if (! empty($value)) {
                 $filters[$field]($value);
             }
         }
@@ -67,6 +67,7 @@ class AlternativeUomController extends Controller
     public function store(StoreAlternativeUomRequest $request)
     {
         AlternativeUom::create($request->validated());
+
         return back()->with('success', 'Alternative UOM is created successfully');
     }
 
@@ -92,6 +93,7 @@ class AlternativeUomController extends Controller
     public function update(StoreAlternativeUomRequest $request, AlternativeUom $altuom)
     {
         $altuom->update($request->validated());
+
         return back()->with('success', 'Material updated successfully');
     }
 

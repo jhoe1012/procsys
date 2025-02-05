@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PrMaterialDetails;
 use App\Http\Requests\StorePrMaterialDetailsRequest;
 use App\Http\Requests\UpdatePrMaterialDetailsRequest;
+use App\Models\PrMaterialDetails;
 
 class PrMaterialDetailsController extends Controller
 {

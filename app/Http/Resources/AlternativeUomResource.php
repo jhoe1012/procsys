@@ -30,7 +30,7 @@ class AlternativeUomResource extends JsonResource
             'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
             'material' => new MaterialResource($this->whenLoaded('material')),
             'altUomText' => new UomResource($this->whenLoaded('altUomText')),
-            'unitOfWeightText' => new UomResource($this->whenLoaded('unitOfWeightText'))
+            'unitOfWeightText' => new UomResource($this->whenLoaded('unitOfWeightText')),
         ];
     }
 }

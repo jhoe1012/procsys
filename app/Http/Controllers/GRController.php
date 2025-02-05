@@ -31,40 +31,40 @@ class GRController extends Controller
 
         $query->whereIn('plant', $user_plants);
 
-        if (request('gr_number_from') && !request('gr_number_to')) {
-            $query->where('gr_number', 'like', "%" . request('gr_number_from') . "%");
+        if (request('gr_number_from') && ! request('gr_number_to')) {
+            $query->where('gr_number', 'like', '%'.request('gr_number_from').'%');
         }
-        if (request('gr_number_from') &&  request('gr_number_to')) {
+        if (request('gr_number_from') && request('gr_number_to')) {
             $query->whereBetween('gr_number', [request('gr_number_from'), request('gr_number_to')]);
         }
-        if (request('po_number_from') && !request('po_number_to')) {
-            $query->where('po_number', 'like', "%" . request('po_number_from') . "%");
+        if (request('po_number_from') && ! request('po_number_to')) {
+            $query->where('po_number', 'like', '%'.request('po_number_from').'%');
         }
-        if (request('po_number_from') &&  request('po_number_to')) {
+        if (request('po_number_from') && request('po_number_to')) {
             $query->whereBetween('po_number', [request('po_number_from'), request('po_number_to')]);
         }
         if (request('plant')) {
-            $query->where('plant', 'ilike', "%" . request('plant') . "%");
+            $query->where('plant', 'ilike', '%'.request('plant').'%');
         }
         if (request('vendor')) {
-            $query->where('vendor_id', 'ilike', "%" . request('vendor') . "%");
+            $query->where('vendor_id', 'ilike', '%'.request('vendor').'%');
         }
         if (request('entered_by')) {
-            $query->where('created_name', 'ilike', "%" . request('entered_by') . "%");
+            $query->where('created_name', 'ilike', '%'.request('entered_by').'%');
         }
-        if (request('entry_date_from') && !request('entry_date_to')) {
+        if (request('entry_date_from') && ! request('entry_date_to')) {
             $query->whereDate('entry_date', request('entry_date_from'));
         }
         if (request('entry_date_from') && request('entry_date_to')) {
             $query->whereBetween('entry_date', [request('entry_date_from'), request('entry_date_to')]);
         }
-        if (request('posting_date_from') && !request('posting_date_to')) {
+        if (request('posting_date_from') && ! request('posting_date_to')) {
             $query->whereDate('posting_date', request('posting_date_from'));
         }
         if (request('posting_date_from') && request('posting_date_to')) {
             $query->whereBetween('posting_date', [request('posting_date_from'), request('posting_date_to')]);
         }
-        if (request('actual_date_from') && !request('actual_date_to')) {
+        if (request('actual_date_from') && ! request('actual_date_to')) {
             $query->whereDate('actual_date', request('actual_date_from'));
         }
         if (request('actual_date_from') && request('actual_date_to')) {
@@ -102,7 +102,7 @@ class GRController extends Controller
      */
     public function store(Request $request)
     {
-        $gr_header = new GrHeader();
+        $gr_header = new GrHeader;
         $gr_header->po_number = $request->input('po_number');
         $gr_header->created_name = $request->input('created_name');
         $gr_header->vendor_id = $request->input('vendor_id');
@@ -116,9 +116,9 @@ class GRController extends Controller
         $gr_header->save();
 
         $gr_materials = collect($request->input('grmaterials'))
-            ->filter(fn($item) => ! empty($item['mat_code']))
+            ->filter(fn ($item) => ! empty($item['mat_code']))
             ->values()
-            ->map(fn($item, $index) => new GrMaterial([
+            ->map(fn ($item, $index) => new GrMaterial([
                 'po_material_id' => $item['po_material_id'],
                 'item_no' => ($index + 1) * 10,
                 'mat_code' => $item['mat_code'],
@@ -144,7 +144,7 @@ class GRController extends Controller
             $gr_material->pomaterials->save();
         }
 
-        return to_route("gr.index")->with('success', "GR {$gr_header->gr_number} created.");
+        return to_route('gr.index')->with('success', "GR {$gr_header->gr_number} created.");
     }
 
     /**
@@ -155,6 +155,7 @@ class GRController extends Controller
         $gr_header = GrHeader::with(['grmaterials', 'vendors', 'plants'])
             ->where('gr_number', $grnumber)
             ->firstOrFail();
+
         return Inertia::render('GR/Show', [
             'grheader' => new GRHeaderResource($gr_header),
         ]);
@@ -175,25 +176,29 @@ class GRController extends Controller
             'grheader' => new GRHeaderResource($gr_header),
         ]);
     }
+
     public function getPoDetails($ponumber)
     {
 
         $gr_header = PoHeader::with([
             'plants',
             'vendors',
-            'pomaterials' => fn($query) => $query->where('po_gr_qty', '>', 0)
+            'pomaterials' => fn ($query) => $query->where('po_gr_qty', '>', 0),
         ])->where('po_number', $ponumber)
             ->first();
 
-        return  new POHeaderResource($gr_header);
+        return new POHeaderResource($gr_header);
     }
+
     public function cancel(Request $request, $id)
     {
 
         foreach ($request->input('grmaterials') as $grmaterial) {
             if ($grmaterial['id']) {
                 $gr_material = GrMaterial::with('pomaterials')->findOrFail($grmaterial['id']);
-                if ($gr_material->is_cancel) continue;
+                if ($gr_material->is_cancel) {
+                    continue;
+                }
                 $gr_material->cancel_by = auth()?->user()?->id;
                 $gr_material->is_cancel = true;
                 $gr_material->cancel_datetime = date('Y-m-d H:i:s');
@@ -206,12 +211,13 @@ class GRController extends Controller
             }
         }
 
-        return to_route("gr.index")->with('success', "GR item(s) cancelled.");
+        return to_route('gr.index')->with('success', 'GR item(s) cancelled.');
     }
 
     public function printGr(Request $request, $id)
     {
         $grHeader = GrHeader::with(['grmaterials', 'plants', 'vendors'])->findOrFail($id);
+
         return view('print.gr', ['grHeader' => $grHeader]);
     }
 
@@ -221,7 +227,7 @@ class GRController extends Controller
         $poHeader = PoHeader::select('po_number', 'control_no')
             ->where('status', Str::ucfirst(ApproveStatus::APPROVED))
             ->whereNotNull('control_no')
-            ->where(fn($query) => $query->where('po_number', 'ilike', "%{$request->input('search')}%")
+            ->where(fn ($query) => $query->where('po_number', 'ilike', "%{$request->input('search')}%")
                 ->orWhere('control_no', 'ilike', "%{$request->input('search')}%"))
             ->get()
             ->toArray();

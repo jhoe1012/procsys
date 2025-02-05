@@ -24,8 +24,6 @@ class AlternativeUom extends Model
 
     /**
      * Get the material associated with the AlternativeUom
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function material(): HasOne
     {
@@ -34,8 +32,6 @@ class AlternativeUom extends Model
 
     /**
      * Get the uom associated with the AlternativeUom
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function altUomText(): HasOne
     {
@@ -44,8 +40,6 @@ class AlternativeUom extends Model
 
     /**
      * Get the unitOfWeight associated with the AlternativeUom
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function unitOfWeightText(): HasOne
     {
@@ -54,8 +48,6 @@ class AlternativeUom extends Model
 
     /**
      * Get the createdBy associated with the AlternativeUom
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function createdBy(): HasOne
     {
@@ -64,8 +56,6 @@ class AlternativeUom extends Model
 
     /**
      * Get the updatedBy associated with the AlternativeUom
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function updatedBy(): HasOne
     {

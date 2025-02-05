@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PurchasingGroup;
 use App\Http\Requests\StorePurchasingGroupRequest;
 use App\Http\Requests\UpdatePurchasingGroupRequest;
+use App\Models\PurchasingGroup;
 
 class PurchasingGroupController extends Controller
 {

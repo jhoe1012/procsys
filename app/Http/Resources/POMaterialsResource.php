@@ -44,10 +44,10 @@ class POMaterialsResource extends JsonResource
             'pr_unit' => $this->pr_unit,
             'created_at' => $this->created_at->format('Y-m-d H:m:i'),
             'updated_at' => $this->updated_at->format('Y-m-d H:m:i'),
-            'qty_open' => $this->whenLoaded('prmaterials', fn() => $this->prmaterials->qty_open),
-            'materialNetPrices' =>  MaterialNetPriceResource::collection($this->whenLoaded('materialNetPrices')),
-            'alt_uom' =>  AlternativeUomResource::collection($this->whenLoaded('altUoms')),
-            'materialGroups' =>  new MaterialGroupResource($this->whenLoaded('materialGroups')),
+            'qty_open' => $this->whenLoaded('prmaterials', fn () => $this->prmaterials->qty_open),
+            'materialNetPrices' => MaterialNetPriceResource::collection($this->whenLoaded('materialNetPrices')),
+            'alt_uom' => AlternativeUomResource::collection($this->whenLoaded('altUoms')),
+            'materialGroups' => new MaterialGroupResource($this->whenLoaded('materialGroups')),
         ];
     }
 }

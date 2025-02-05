@@ -11,10 +11,12 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PrMaterial extends Model
 {
-    use HasFactory, CreatedUpdatedBy;
+    use CreatedUpdatedBy, HasFactory;
 
-    const FLAG_DELETE = "X";
-    const FLAG_CLOSE = "C";
+    const FLAG_DELETE = 'X';
+
+    const FLAG_CLOSE = 'C';
+
     protected $fillable = [
         'status',
         'item_no',
@@ -38,7 +40,6 @@ class PrMaterial extends Model
         'valuation_price',
     ];
 
-
     protected function casts(): array
     {
         return [
@@ -54,22 +55,27 @@ class PrMaterial extends Model
             'valuation_price' => 'float',
         ];
     }
+
     public function prheader(): BelongsTo
     {
         return $this->belongsTo(PrHeader::class, 'pr_headers_id', 'id');
     }
+
     public function pomaterials(): HasMany
     {
         return $this->hasMany(PoMaterial::class, 'po_material_id', 'id');
     }
+
     public function materialNetPrices(): HasMany
     {
         return $this->hasMany(MaterialNetPrice::class, 'mat_code', 'mat_code');
     }
+
     public function altUoms(): HasMany
     {
         return $this->hasMany(AlternativeUom::class, 'mat_code', 'mat_code');
     }
+
     public function materialGroups(): HasOne
     {
         return $this->hasOne(MaterialGroup::class, 'mat_grp_code', 'mat_grp');

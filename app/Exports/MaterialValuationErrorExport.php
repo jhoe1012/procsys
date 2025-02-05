@@ -17,15 +17,15 @@ class MaterialValuationErrorExport implements FromArray, WithHeadings
     public function headings(): array
     {
         return [
-            "Material",
-            "Plant",
-            "Currency",
-            "Valuation Price",
-            "Per Unit",
-            "Valid From",
-            "Valid To",
-            "Remarks",
-            "Created At",
+            'Material',
+            'Plant',
+            'Currency',
+            'Valuation Price',
+            'Per Unit',
+            'Valid From',
+            'Valid To',
+            'Remarks',
+            'Created At',
         ];
     }
 }

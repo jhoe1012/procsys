@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('currency')->default('PHP');
             $table->decimal('valuation_price', 15, 2);
             $table->integer('per_unit')->default(1);
-            $table->date("valid_from");
-            $table->date("valid_to");
+            $table->date('valid_from');
+            $table->date('valid_to');
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();
             $table->timestamp('trasfer_date')->default(DB::raw('CURRENT_TIMESTAMP(0)'));

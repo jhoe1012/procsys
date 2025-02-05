@@ -5,12 +5,10 @@ namespace App\Services;
 use App\Exceptions\NotEnoughPermissionException;
 use App\Models\Permission;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 
-// @deprecated version 
+// @deprecated version
 class CoreService
 {
     public function registerGatePermissions(): void
@@ -63,6 +61,7 @@ class CoreService
         //     );
         // }
     }
+
     public function allowedTo(array|string $permissions): bool
     {
         // if (is_array($permissions)) {

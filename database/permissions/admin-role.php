@@ -8,6 +8,5 @@ $admin->namespace = 'admin';
 $admin->description = __('Has control in Admin Maintenance');
 $admin->save();
 $admin->addPermissions([
-    'admin', 
+    'admin',
 ]);
-

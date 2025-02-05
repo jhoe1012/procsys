@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SupplierNote;
 use App\Http\Requests\StoreSupplierNoteRequest;
 use App\Http\Requests\UpdateSupplierNoteRequest;
+use App\Models\SupplierNote;
 
 class SupplierNoteController extends Controller
 {

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DeliveryAddress;
 use App\Http\Requests\StoreDeliveryAddressRequest;
 use App\Http\Requests\UpdateDeliveryAddressRequest;
+use App\Models\DeliveryAddress;
 
 class DeliveryAddressController extends Controller
 {

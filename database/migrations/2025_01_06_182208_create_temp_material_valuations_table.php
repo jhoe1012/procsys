@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('currency')->default('PHP');
             $table->decimal('valuation_price', 15, 2);
             $table->integer('per_unit')->default(1);
-            $table->date("valid_from");
-            $table->date("valid_to");
+            $table->date('valid_from');
+            $table->date('valid_to');
             $table->integer('created_by')->nullable();
             $table->timestamp('created_at')->nullable();
             $table->string('stat', 10)->nullable();

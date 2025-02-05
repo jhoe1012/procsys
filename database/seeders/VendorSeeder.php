@@ -13,10 +13,10 @@ class VendorSeeder extends Seeder
     public function run(): void
     {
         Vendor::truncate();
-        $csv = fopen(base_path("database/csv/vendor.csv"), "r");
+        $csv = fopen(base_path('database/csv/vendor.csv'), 'r');
         $firstline = true;
-        while (($data = fgetcsv($csv, 2000, ",")) !== false) {
-            if (!$firstline) {
+        while (($data = fgetcsv($csv, 2000, ',')) !== false) {
+            if (! $firstline) {
                 Vendor::create([
                     'supplier' => $data[0],
                     'account_group' => $data[1],

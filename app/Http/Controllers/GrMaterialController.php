@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\GrMaterial;
 use App\Http\Requests\StoreGrMaterialRequest;
 use App\Http\Requests\UpdateGrMaterialRequest;
+use App\Models\GrMaterial;
 
 class GrMaterialController extends Controller
 {

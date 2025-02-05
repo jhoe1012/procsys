@@ -12,6 +12,7 @@ class MenuService
     public function getMenus()
     {
         $this->buildMenus();
+
         return $this->menus;
     }
 
@@ -35,7 +36,7 @@ class MenuService
                         'href' => route('pr.create'),
                     ],
 
-                ]
+                ],
             ],
             [
                 'label' => 'Purchase Order',
@@ -52,7 +53,7 @@ class MenuService
                         'href' => route('po.create'),
                     ],
 
-                ]
+                ],
             ],
             [
                 'label' => 'Goods Receipt',
@@ -69,7 +70,7 @@ class MenuService
                         'href' => route('gr.create'),
                     ],
 
-                ]
+                ],
             ],
             [
                 'label' => 'Reports',
@@ -94,8 +95,8 @@ class MenuService
                         'label' => 'Material Report',
                         'permissions' => true,
                         'href' => route('report.material'),
-                    ]
-                ]
+                    ],
+                ],
             ],
             [
                 'label' => 'Administration',
@@ -141,7 +142,7 @@ class MenuService
                         'permissions' => $user->can(PermissionsEnum::Admin),
                         'href' => route('approver.index'),
                     ],
-                ]
+                ],
             ],
         ];
     }

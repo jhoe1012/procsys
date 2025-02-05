@@ -15,6 +15,7 @@ class POHeaderResource extends JsonResource
     public function toArray(Request $request): array
     {
         parent::wrap(null);
+
         return [
             'id' => $this->id,
             'po_number' => $this->po_number,
@@ -36,12 +37,12 @@ class POHeaderResource extends JsonResource
             'updated_by' => $this->updated_by,
             'created_at' => $this->created_at->format('Y-m-d H:m:i'),
             'updated_at' => $this->updated_at->format('Y-m-d H:m:i'),
-            "plants" => new PlantResource($this->whenLoaded('plants')),
-            "vendors" => new VendorResource($this->whenLoaded('vendors')),
-            "workflows" => ApproveStatusResource::collection($this->whenLoaded('workflows')),
-            "pomaterials" => POMaterialsResource::collection($this->whenLoaded('pomaterials')),
-            "attachments" => AttachmentResource::collection($this->whenLoaded('attachments')),
-            "is_mother_po" => $this->is_mother_po,
+            'plants' => new PlantResource($this->whenLoaded('plants')),
+            'vendors' => new VendorResource($this->whenLoaded('vendors')),
+            'workflows' => ApproveStatusResource::collection($this->whenLoaded('workflows')),
+            'pomaterials' => POMaterialsResource::collection($this->whenLoaded('pomaterials')),
+            'attachments' => AttachmentResource::collection($this->whenLoaded('attachments')),
+            'is_mother_po' => $this->is_mother_po,
         ];
     }
 }

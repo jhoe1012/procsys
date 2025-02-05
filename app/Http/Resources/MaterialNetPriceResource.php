@@ -33,7 +33,7 @@ class MaterialNetPriceResource extends JsonResource
             'materials' => new MaterialResource($this->whenLoaded('materials')),
             'plants' => new PlantResource($this->whenLoaded('plants')),
             'vendors' => new VendorResource($this->whenLoaded('vendors')),
-            'materialUoms' =>  AlternativeUomResource::collection($this->whenLoaded('materialUoms')),
+            'materialUoms' => AlternativeUomResource::collection($this->whenLoaded('materialUoms')),
         ];
     }
 }

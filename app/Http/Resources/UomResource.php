@@ -17,11 +17,11 @@ class UomResource extends JsonResource
         return [
             'id' => $this->id,
             'uom' => $this->uom,
-            "uom_text" => $this->uom_text,
+            'uom_text' => $this->uom_text,
             'created_by' => new UserResource($this->whenLoaded('createdBy')),
             'updated_by' => new UserResource($this->whenLoaded('updatedBy')),
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
-            'updated_at' => $this->updated_at->format('Y-m-d H:i:s')
+            'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
         ];
     }
 }

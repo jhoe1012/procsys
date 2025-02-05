@@ -19,19 +19,19 @@ class VendorController extends Controller
         // $query =  $query->with(['plants', 'material']);
 
         if (request('supplier')) {
-            $query->where('supplier', 'ilike', "%" . request('supplier') . "%");
+            $query->where('supplier', 'ilike', '%'.request('supplier').'%');
         }
         if (request('name_1')) {
-            $query->where('name_1', 'ilike', "%" . request('name_1') . "%");
+            $query->where('name_1', 'ilike', '%'.request('name_1').'%');
         }
         if (request('city')) {
-            $query->where('city', 'ilike', "%" . request('city') . "%");
+            $query->where('city', 'ilike', '%'.request('city').'%');
         }
         if (request('postal_code')) {
-            $query->where('postal_code', 'ilike', "%" . request('postal_code') . "%");
+            $query->where('postal_code', 'ilike', '%'.request('postal_code').'%');
         }
         if (request('street')) {
-            $query->where('street', 'ilike', "%" . request('street') . "%");
+            $query->where('street', 'ilike', '%'.request('street').'%');
         }
 
         $vendor = $query->orderBy('name_1', 'desc')
@@ -59,7 +59,7 @@ class VendorController extends Controller
      */
     public function store(Request $request)
     {
-        $vendor = new Vendor();
+        $vendor = new Vendor;
         $vendor->supplier = $request->input('supplier');
         $vendor->account_group = $request->input('account_group');
         $vendor->tax_number = $request->input('tax_number');

@@ -47,7 +47,7 @@ class DashboardController extends Controller
 
         return Inertia::render('Dashboard/Index', [
             'prHeader' => $prHeader,
-            'poHeader' => $poHeader
+            'poHeader' => $poHeader,
         ]);
     }
 }

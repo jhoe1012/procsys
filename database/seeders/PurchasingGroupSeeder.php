@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\PurchasingGroup;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class PurchasingGroupSeeder extends Seeder
@@ -14,10 +13,10 @@ class PurchasingGroupSeeder extends Seeder
     public function run(): void
     {
         PurchasingGroup::truncate();
-        $csv = fopen(base_path("database/csv/purch_group.csv"), "r");
+        $csv = fopen(base_path('database/csv/purch_group.csv'), 'r');
         $firstline = true;
-        while (($data = fgetcsv($csv, 1000, ",")) !== false) {
-            if (!$firstline) {
+        while (($data = fgetcsv($csv, 1000, ',')) !== false) {
+            if (! $firstline) {
                 PurchasingGroup::create([
                     'mat_code' => $data[0],
                     'plant' => $data[1],

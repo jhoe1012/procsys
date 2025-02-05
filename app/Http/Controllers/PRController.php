@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Enum\PermissionsEnum;
-use App\Http\Controllers\Controller;
 use App\Http\Resources\PRHeaderResource;
 use App\Mail\PrApprovedEmail;
 use App\Mail\PrForApprovalEmail;
@@ -19,7 +18,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -33,9 +31,8 @@ class PRController extends Controller
     {
         $user = $request->user();
 
-        // Fetch user plants 
+        // Fetch user plants
         $userPlants = $user->plants->pluck('plant')->toArray();
-
 
         // Initialize query with relationships
         $query = PrHeader::with(['prmaterials', 'plants'])
@@ -49,28 +46,28 @@ class PRController extends Controller
         }
 
         $filters = [
-            'pr_number_from' => fn($value) => request('pr_number_to')
+            'pr_number_from' => fn ($value) => request('pr_number_to')
                 ? $query->whereBetween('pr_number', [
                     $value,
-                    request('pr_number_to')
+                    request('pr_number_to'),
                 ])
                 : $query->where('pr_number', 'like', "%{$value}%"),
-            'plant' => fn($value) => $query->where('plant', 'ilike', "%{$value}%"),
-            'created_name' => fn($value) => $query->where('created_name', 'ilike', "%{$value}%"),
-            'requested_by' => fn($value) => $query->where('requested_by', 'ilike', "%{$value}%"),
-            'doc_date_from' => fn($value) => request('doc_date_to')
+            'plant' => fn ($value) => $query->where('plant', 'ilike', "%{$value}%"),
+            'created_name' => fn ($value) => $query->where('created_name', 'ilike', "%{$value}%"),
+            'requested_by' => fn ($value) => $query->where('requested_by', 'ilike', "%{$value}%"),
+            'doc_date_from' => fn ($value) => request('doc_date_to')
                 ? $query->whereBetween('doc_date', [$value, request('doc_date_to')])
                 : $query->whereDate('doc_date', $value),
-            'updated_at_from' => fn($value) => request('updated_at_to')
+            'updated_at_from' => fn ($value) => request('updated_at_to')
                 ? $query->whereBetween('updated_at', [$value, request('updated_at_to')])
                 : $query->whereDate('updated_at', $value),
-            'status' => fn($value) => $query->where('status', 'ilike', "%{$value}%"),
+            'status' => fn ($value) => $query->where('status', 'ilike', "%{$value}%"),
 
         ];
 
         // Apply filters dynamically
         foreach (request()->only(array_keys($filters)) as $field => $value) {
-            if (!empty($value)) {
+            if (! empty($value)) {
                 $filters[$field]($value);
             }
         }
@@ -107,7 +104,7 @@ class PRController extends Controller
         return Inertia::render('PR/Create', [
             'mat_code' => Material::select('mat_code as value', 'mat_code as label')->orderBy('mat_code')->get()->toArray(),
             'mat_desc' => Material::select('mat_desc as value', 'mat_desc as label')->orderBy('mat_desc')->get()->toArray(),
-            'materialGroupsSupplies' =>  MaterialGroup::supplies()->pluck('mat_grp_code')->toArray(),
+            'materialGroupsSupplies' => MaterialGroup::supplies()->pluck('mat_grp_code')->toArray(),
             'prheader' => new PRHeaderResource($pr_header),
         ]);
     }
@@ -117,8 +114,8 @@ class PRController extends Controller
         try {
             return DB::transaction(function () use ($request) {
                 $pr_materials = collect($request->input('prmaterials'))
-                    ->filter(fn($item) => !empty($item['mat_code']))
-                    ->map(fn($item, $index) => new PrMaterial($this->_mapPrMaterialData($item, $index)))
+                    ->filter(fn ($item) => ! empty($item['mat_code']))
+                    ->map(fn ($item, $index) => new PrMaterial($this->_mapPrMaterialData($item, $index)))
                     ->values();
                 $total_pr_value = $pr_materials->sum('total_value');
                 $pr_header = PrHeader::create(array_merge(
@@ -128,7 +125,7 @@ class PRController extends Controller
                         'plant',
                         'reason_pr',
                         'header_text',
-                        'deliv_addr'
+                        'deliv_addr',
                     ]),
                     [
                         'doc_date' => Carbon::parse($request->input('doc_date'))->format('Y-m-d'),
@@ -143,12 +140,12 @@ class PRController extends Controller
                     $pr_header->attachments()->saveMany($attachments);
                 }
 
-                return to_route("pr.edit", $pr_header->pr_number)->with('success', "PR {$pr_header->pr_number} created.");
+                return to_route('pr.edit', $pr_header->pr_number)->with('success', "PR {$pr_header->pr_number} created.");
             }, 2);
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
             throw ValidationException::withMessages([
-                'error' => 'An error occurred while creating the PR. Please try again.'
+                'error' => 'An error occurred while creating the PR. Please try again.',
             ]);
         }
     }
@@ -159,8 +156,8 @@ class PRController extends Controller
             'createdBy',
             'workflows',
             'attachments',
-            'prmaterials' => fn($query) => $query->whereNull('status')->orWhere('status', ''),
-            'plants'
+            'prmaterials' => fn ($query) => $query->whereNull('status')->orWhere('status', ''),
+            'plants',
         ])->findOrFail($id);
 
         $approvers = Approvers::where('amount_from', '<=', $pr_header->total_pr_value)
@@ -168,7 +165,7 @@ class PRController extends Controller
             ->where('type', operator: Approvers::TYPE_PR)->orderBy('seq')->get();
 
         if ($approvers->isEmpty()) {
-            return to_route("pr.edit", $pr_header->pr_number)->with('error', "No Approver Found.");
+            return to_route('pr.edit', $pr_header->pr_number)->with('error', 'No Approver Found.');
         }
 
         // delete approve status where user id is null to keep the status clean
@@ -177,15 +174,15 @@ class PRController extends Controller
         $approvers->each(function ($approver) use ($pr_header) {
             ApproveStatus::create([
                 'pr_number' => $pr_header->pr_number,
-                'status'    => $approver->desc,
-                'position'  => $approver->position,
-                'seq'       => $approver->seq,
+                'status' => $approver->desc,
+                'position' => $approver->position,
+                'seq' => $approver->seq,
             ]);
         });
 
         $firstApprover = $approvers->first();
         $pr_header->update([
-            'status'   => $firstApprover->desc,
+            'status' => $firstApprover->desc,
             'appr_seq' => $firstApprover->seq,
         ]);
 
@@ -195,7 +192,7 @@ class PRController extends Controller
                 $pr_header
             ));
 
-        return to_route("pr.index")->with('success', "PR {$pr_header->pr_number} sent for approval.");
+        return to_route('pr.index')->with('success', "PR {$pr_header->pr_number} sent for approval.");
     }
 
     public function edit(Request $request, $prnumber)
@@ -245,7 +242,7 @@ class PRController extends Controller
                                     ORDER BY
                                         doc, itm");
         $item_details = collect($item_details)
-            ->filter(fn($item) => ! empty($item->doc))->values();
+            ->filter(fn ($item) => ! empty($item->doc))->values();
 
         return Inertia::render('PR/Edit', [
             'prheader' => new PRHeaderResource($pr_header),
@@ -260,17 +257,17 @@ class PRController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            return  DB::transaction(function () use ($request, $id) {
+            return DB::transaction(function () use ($request, $id) {
                 $pr_header = PrHeader::findOrFail($id);
                 $pr_materials = collect($request->input('prmaterials'))
-                    ->filter(fn($item) => !empty($item['mat_code']))
-                    ->map(fn($item, $index) => $this->_mapOrUpdatePrMaterial($item, $index, $pr_header->id))
+                    ->filter(fn ($item) => ! empty($item['mat_code']))
+                    ->map(fn ($item, $index) => $this->_mapOrUpdatePrMaterial($item, $index, $pr_header->id))
                     ->map(function ($item) {
 
                         if (isset($item['id'])) {
                             $pr_material = PrMaterial::find($item['id']);
                         } else {
-                            $pr_material = new PrMaterial();
+                            $pr_material = new PrMaterial;
                             $pr_material->pr_headers_id = $item['pr_headers_id'];
                         }
                         $pr_material->item_no = $item['item_no'];
@@ -298,8 +295,8 @@ class PRController extends Controller
                         return $item;
                     })->values();
 
-                $total_pr_value = $pr_materials->filter(fn($item) => $item['status'] != 'X')->sum('total_value');
-                $total_pr_value  = $total_pr_value != 0 ? $total_pr_value : $pr_header->total_pr_value;
+                $total_pr_value = $pr_materials->filter(fn ($item) => $item['status'] != 'X')->sum('total_value');
+                $total_pr_value = $total_pr_value != 0 ? $total_pr_value : $pr_header->total_pr_value;
                 $pr_header->update(
                     array_merge(
                         $request->only([
@@ -308,11 +305,11 @@ class PRController extends Controller
                             'plant',
                             'reason_pr',
                             'header_text',
-                            'deliv_addr'
+                            'deliv_addr',
                         ]),
                         [
                             'doc_date' => Carbon::parse($request->input('doc_date'))->format('Y-m-d'),
-                            'total_pr_value' =>  $total_pr_value,
+                            'total_pr_value' => $total_pr_value,
                             'appr_seq' => 0,
                             'status' => Str::ucfirst(ApproveStatus::DRAFT),
                         ]
@@ -323,12 +320,12 @@ class PRController extends Controller
                     $pr_header->attachments()->saveMany($attachments);
                 }
 
-                return to_route("pr.edit", $pr_header->pr_number)->with('success', 'PR updated successfully');
+                return to_route('pr.edit', $pr_header->pr_number)->with('success', 'PR updated successfully');
             });
         } catch (\Exception $exception) {
             Log::error($exception->getMessage());
             throw ValidationException::withMessages([
-                'error' => 'An error occurred while creating the PR. Please try again.'
+                'error' => 'An error occurred while creating the PR. Please try again.',
             ]);
         }
     }
@@ -339,8 +336,8 @@ class PRController extends Controller
             'createdBy',
             'workflows',
             'attachments',
-            'prmaterials' => fn($query) => $query->whereNull('status')->orWhere('status', ''),
-            'plants'
+            'prmaterials' => fn ($query) => $query->whereNull('status')->orWhere('status', ''),
+            'plants',
         ])
             ->where('pr_number', $request->pr_number)
             ->first();
@@ -363,11 +360,10 @@ class PRController extends Controller
                     ->first();
                 $pr_header->status = $approver_2nd->desc;
 
-
                 $email_status = 1;
             } elseif (
-                $pr_header->total_pr_value  >= $approver->amount_from
-                && $pr_header->total_pr_value  <= $approver->amount_to
+                $pr_header->total_pr_value >= $approver->amount_from
+                && $pr_header->total_pr_value <= $approver->amount_to
             ) {
                 $pr_header->status = Str::ucfirst(ApproveStatus::APPROVED);
                 $pr_header->release_date = Carbon::now()->format('Y-m-d H:i:s');
@@ -376,16 +372,16 @@ class PRController extends Controller
         } else {
             $pr_header->status = Str::ucfirst($request->input('type'));
             $pr_header->appr_seq = $request->input('type') == ApproveStatus::REWORKED ? 0 : -1;
-            $approver_status =  ApproveStatus::where('seq', '!=',  $approver->seq)
-                ->where('pr_number',  $pr_header->pr_number)
+            $approver_status = ApproveStatus::where('seq', '!=', $approver->seq)
+                ->where('pr_number', $pr_header->pr_number)
                 ->whereNull('user_id')
                 ->delete();
             $email_status = 3;
         }
 
         $pr_header->save();
-        $approver_status =  ApproveStatus::where('seq', $approver->seq)
-            ->where('pr_number',  $pr_header->pr_number)
+        $approver_status = ApproveStatus::where('seq', $approver->seq)
+            ->where('pr_number', $pr_header->pr_number)
             ->whereNull('user_id')
             ->first();
         $approver_status->status = Str::ucfirst($request->input('type'));
@@ -423,14 +419,13 @@ class PRController extends Controller
                     ));
                 break;
             default:
-                # code...
+                // code...
                 break;
         }
 
-
-        return to_route("pr.index")->with(
+        return to_route('pr.index')->with(
             'success',
-            sprintf("PR %s is %s", $pr_header->pr_number, Str::ucfirst($request->input('type')))
+            sprintf('PR %s is %s', $pr_header->pr_number, Str::ucfirst($request->input('type')))
         );
     }
 
@@ -438,11 +433,11 @@ class PRController extends Controller
     {
 
         $pr_material = PrMaterial::where('pr_headers_id', $id)
-            ->where(fn($query) => $query->where('qty_ordered', '<=', 0)
+            ->where(fn ($query) => $query->where('qty_ordered', '<=', 0)
                 ->orWhereNull('qty_ordered'))
             ->update(['status' => PrMaterial::FLAG_DELETE]);
 
-        $pr_header = PrHeader::with(['prmaterials' => fn($query) => $query->whereNull('status')->orWhere('status', '')])
+        $pr_header = PrHeader::with(['prmaterials' => fn ($query) => $query->whereNull('status')->orWhere('status', '')])
             ->findOrFail($id);
         if ($pr_header->prmaterials->isEmpty()) {
             $pr_header->status = Str::ucfirst(ApproveStatus::CANCELLED);
@@ -450,14 +445,15 @@ class PRController extends Controller
             $pr_header->save();
         }
 
-        return to_route("pr.edit", $pr_header->pr_number)->with('success', "{$pr_material} items discarded.");
+        return to_route('pr.edit', $pr_header->pr_number)->with('success', "{$pr_material} items discarded.");
     }
+
     public function flagDelete(Request $request)
     {
         $prMaterials = PrMaterial::whereIn('id', $request->input('ids'))->get();
 
-        $toFlag = $prMaterials->filter(fn($material) => $material->qty_ordered === null || $material->qty_ordered === 0);
-        $withOpenQty = $prMaterials->filter(fn($material) => $material->qty_ordered !== null && $material->qty_ordered > 0);
+        $toFlag = $prMaterials->filter(fn ($material) => $material->qty_ordered === null || $material->qty_ordered === 0);
+        $withOpenQty = $prMaterials->filter(fn ($material) => $material->qty_ordered !== null && $material->qty_ordered > 0);
 
         DB::transaction(function () use ($toFlag) {
             foreach ($toFlag as $material) {
@@ -468,20 +464,21 @@ class PRController extends Controller
             if ($toFlag->isNotEmpty()) {
                 $prHeader = $toFlag->first()->prheader;
                 $prHeader->total_pr_value = PrMaterial::where('pr_headers_id', $prHeader->id)
-                    ->where(fn($query) => $query->where('status', '<>', 'X')->orWhereNull('status'))
+                    ->where(fn ($query) => $query->where('status', '<>', 'X')->orWhereNull('status'))
                     ->sum('total_value');
                 $prHeader->save();
             }
         });
 
         if ($withOpenQty->isNotEmpty()) {
-            return to_route("pr.edit", $prMaterials->first()->prheader->pr_number)
-                ->with('error', "Item(s) with ordered quantities cannot be flagged for deletion.");
+            return to_route('pr.edit', $prMaterials->first()->prheader->pr_number)
+                ->with('error', 'Item(s) with ordered quantities cannot be flagged for deletion.');
         }
 
-        return to_route("pr.edit", $prMaterials->first()->prheader->pr_number)
-            ->with('success', "Flagged item(s) for deletion.");
+        return to_route('pr.edit', $prMaterials->first()->prheader->pr_number)
+            ->with('success', 'Flagged item(s) for deletion.');
     }
+
     public function flagClose(Request $request)
     {
         $prMaterials = PrMaterial::whereIn('id', $request->input('ids'))->get();
@@ -491,8 +488,8 @@ class PRController extends Controller
         PrMaterial::whereIn('id', $prMaterials->pluck('id'))->update(['status' => PrMaterial::FLAG_CLOSE]);
         $prHeader = $prMaterials->first()->prheader;
 
-        return to_route("pr.edit", $prHeader->pr_number)
-            ->with('success', "Flagged item(s) for close.");
+        return to_route('pr.edit', $prHeader->pr_number)
+            ->with('success', 'Flagged item(s) for close.');
     }
 
     public function flagRemove(Request $request)
@@ -504,8 +501,8 @@ class PRController extends Controller
         PrMaterial::whereIn('id', $prMaterials->pluck('id'))->update(['status' => null]);
         $prHeader = $prMaterials->first()->prheader;
 
-        return to_route("pr.edit", $prHeader->pr_number)
-            ->with('success', "Cancelled flag for item(s).");
+        return to_route('pr.edit', $prHeader->pr_number)
+            ->with('success', 'Cancelled flag for item(s).');
     }
 
     public function recall($id)
@@ -515,7 +512,7 @@ class PRController extends Controller
         $prHeader->appr_seq = 0;
         $prHeader->save();
 
-        return to_route("pr.edit", $prHeader->pr_number)->with('success', "PR Recalled");
+        return to_route('pr.edit', $prHeader->pr_number)->with('success', 'PR Recalled');
     }
 
     private function _mapPrMaterialData(array $item, int $index)
@@ -524,7 +521,7 @@ class PRController extends Controller
             'item_no' => ($index + 1) * 10,
             'mat_code' => $item['mat_code'],
             'short_text' => $item['short_text'],
-            'item_text' => strtoupper($item['item_text'])  ?? '',
+            'item_text' => strtoupper($item['item_text']) ?? '',
             'qty' => $item['qty'],
             'qty_open' => $item['qty'],
             'price' => $item['price'],

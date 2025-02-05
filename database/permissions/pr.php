@@ -37,5 +37,3 @@ $pr->name = __('Approve PR');
 $pr->namespace = 'approve.pr';
 $pr->description = __('Let the user approve PR');
 $pr->save();
-
-

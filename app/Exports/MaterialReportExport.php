@@ -5,7 +5,6 @@ namespace App\Exports;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-
 class MaterialReportExport implements FromArray, WithHeadings
 {
     public function __construct(private array $data) {}

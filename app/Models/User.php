@@ -15,7 +15,8 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use  HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -50,18 +51,22 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
     public function plants(): BelongsToMany
     {
         return $this->belongsToMany(Plant::class);
     }
+
     public function approvers(): HasMany
     {
         return $this->hasMany(Approvers::class);
     }
+
     public function prHeaderCreatedBy(): BelongsTo
     {
         return $this->belongsTo(PrHeader::class, 'created_by', 'id');
     }
+
     public function poHeaderCreatedBy(): BelongsTo
     {
         return $this->belongsTo(POHeader::class, 'created_by', 'id');

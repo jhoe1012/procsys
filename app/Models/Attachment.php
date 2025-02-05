@@ -11,7 +11,8 @@ class Attachment extends Model
     use HasFactory;
 
     const ALLOWED_FILES = ['pdf', 'jpeg', 'jpg', 'png', 'docx', 'xlsx', 'txt', 'eml'];
-    protected $fillable = ["filename", "filepath"];
+
+    protected $fillable = ['filename', 'filepath'];
 
     public function prheader(): BelongsTo
     {

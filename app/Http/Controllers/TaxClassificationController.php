@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\TaxClassification;
 use App\Http\Requests\StoreTaxClassificationRequest;
 use App\Http\Requests\UpdateTaxClassificationRequest;
+use App\Models\TaxClassification;
 
 class TaxClassificationController extends Controller
 {

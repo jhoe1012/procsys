@@ -11,6 +11,7 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
 class MaterialValuationImport implements ToCollection
 {
     private $materialValuation;
+
     public function collection(Collection $rows)
     {
         $rows->shift(); // remove the header row
@@ -21,8 +22,8 @@ class MaterialValuationImport implements ToCollection
                 'currency' => $row[2],
                 'valuation_price' => $row[3],
                 'per_unit' => $row[4],
-                'valid_from' => Carbon::parse(Date::excelToTimestamp((int)$row[5]))->format('Y-m-d'),
-                'valid_to' => Carbon::parse(Date::excelToTimestamp((int)$row[6]))->format('Y-m-d'),
+                'valid_from' => Carbon::parse(Date::excelToTimestamp((int) $row[5]))->format('Y-m-d'),
+                'valid_to' => Carbon::parse(Date::excelToTimestamp((int) $row[6]))->format('Y-m-d'),
                 'created_by' => Auth::id(),
                 'created_at' => now(),
             ];

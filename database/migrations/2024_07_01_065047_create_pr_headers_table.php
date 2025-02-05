@@ -20,9 +20,9 @@ return new class extends Migration
             $table->string('plant');
             $table->text('reason_pr')->nullable();
             $table->text('header_text')->nullable();
-            $table->decimal('total_pr_value',15,2);
+            $table->decimal('total_pr_value', 15, 2);
             $table->string('status')->nullable();
-            $table->integer("appr_seq")->nullable();
+            $table->integer('appr_seq')->nullable();
             $table->dateTime('release_date')->nullable();
             $table->string('deliv_addr')->nullable();
             $table->integer('created_by')->nullable();

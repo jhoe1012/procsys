@@ -11,13 +11,18 @@ class ApproveStatus extends Model
 {
     use HasFactory;
 
-
     const SAVED = 'saved';
+
     const DRAFT = 'draft';
+
     const SUBMITTED = 'submitted';
+
     const APPROVED = 'approved';
+
     const REWORKED = 'rework';
+
     const REJECTED = 'rejected';
+
     const CANCELLED = 'cancelled';
 
     protected $fillable = [

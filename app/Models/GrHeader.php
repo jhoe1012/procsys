@@ -10,20 +10,23 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class GrHeader extends Model
 {
-    use HasFactory, CreatedUpdatedBy;
+    use CreatedUpdatedBy, HasFactory;
 
     public function grmaterials(): HasMany
     {
         return $this->hasMany(GrMaterial::class)->orderBy('item_no', 'asc');
     }
+
     public function plants(): HasOne
     {
         return $this->hasOne(Plant::class, 'plant', 'plant');
     }
+
     public function vendors(): HasOne
     {
         return $this->hasOne(Vendor::class, 'supplier', 'vendor_id');
     }
+
     protected static function booted()
     {
         parent::boot();

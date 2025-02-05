@@ -41,13 +41,14 @@ class Material extends Model
 
     public function altUoms(): HasMany
     {
-        return $this->hasMany(AlternativeUom::class,  'mat_code', 'mat_code');
+        return $this->hasMany(AlternativeUom::class, 'mat_code', 'mat_code');
     }
 
     public function createdBy(): HasOne
     {
         return $this->hasOne(User::class, 'id', 'created_by');
     }
+
     public function updatedBy(): HasOne
     {
         return $this->hasOne(User::class, 'id', 'updated_by');

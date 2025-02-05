@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PurchasingGroup extends Model
 {
-    use HasFactory, CreatedUpdatedBy;
+    use CreatedUpdatedBy, HasFactory;
 
     protected $fillable = [
         'mat_code',

@@ -2,10 +2,8 @@
 
 namespace App\Http\Resources;
 
-
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-
 
 class PRMaterialsResource extends JsonResource
 {
@@ -44,11 +42,11 @@ class PRMaterialsResource extends JsonResource
             'updated_by' => $this->updated_by,
             'created_at' => $this->created_at->format('Y-m-d H:m:i'),
             'updated_at' => $this->updated_at->format('Y-m-d H:m:i'),
-            'requested_by' =>  $this->whenLoaded('prheader', fn() => $this->prheader->requested_by),
-            'pr_number' =>  $this->whenLoaded('prheader', fn() =>  (string)$this->prheader->pr_number),
-            'materialNetPrices' =>  MaterialNetPriceResource::collection($this->whenLoaded('materialNetPrices')),
-            'alt_uom' =>  AlternativeUomResource::collection($this->whenLoaded('altUoms')),
-            "materialGroups" => new MaterialGroupResource($this->whenLoaded('materialGroups')),
+            'requested_by' => $this->whenLoaded('prheader', fn () => $this->prheader->requested_by),
+            'pr_number' => $this->whenLoaded('prheader', fn () => (string) $this->prheader->pr_number),
+            'materialNetPrices' => MaterialNetPriceResource::collection($this->whenLoaded('materialNetPrices')),
+            'alt_uom' => AlternativeUomResource::collection($this->whenLoaded('altUoms')),
+            'materialGroups' => new MaterialGroupResource($this->whenLoaded('materialGroups')),
         ];
     }
 }

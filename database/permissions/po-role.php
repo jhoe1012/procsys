@@ -12,7 +12,7 @@ $requestor->addPermissions([
     'edit.po',
     'update.po',
     'delete.po',
-    'read.po'
+    'read.po',
 ]);
 
 $approver = Roles::firstOrNew(['namespace' => 'po-approver']);

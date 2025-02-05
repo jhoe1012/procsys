@@ -22,14 +22,14 @@ class StoreAlternativeUomRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "mat_code" => "required",
-            "alt_uom" => "required",
-            "counter" => "required",
-            "denominator" => "required",
-            "ean_num" => "nullable",
-            "ean_upc" => "nullable",
-            "ean_category" => "nullable",
-            "unit_of_weight" => "nullable",
+            'mat_code' => 'required',
+            'alt_uom' => 'required',
+            'counter' => 'required',
+            'denominator' => 'required',
+            'ean_num' => 'nullable',
+            'ean_upc' => 'nullable',
+            'ean_category' => 'nullable',
+            'unit_of_weight' => 'nullable',
         ];
     }
 }

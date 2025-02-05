@@ -2,9 +2,9 @@
 
 namespace App\Exceptions;
 
-
 use Exception;
 
+// @deprecated version
 class NotEnoughPermissionException extends Exception
 {
     public function getStatusCode()
@@ -12,12 +12,12 @@ class NotEnoughPermissionException extends Exception
         return 403;
     }
 
-    public function __construct( $message = null )
+    public function __construct($message = null)
     {
-        $this->message = $message ?: __( 'You\'re not allowed to see that page.' );
+        $this->message = $message ?: __('You\'re not allowed to see that page.');
     }
 
-    public function render( $request )
+    public function render($request)
     {
         // if ( ! $request->expectsJson() ) {
         //     return response()->view( 'pages.errors.not-enough-permissions', [
@@ -27,9 +27,9 @@ class NotEnoughPermissionException extends Exception
         //     ], 403 );
         // }
 
-        return response()->json( [
+        return response()->json([
             'status' => 'error',
             'message' => $this->getMessage(),
-        ], 403 );
+        ], 403);
     }
 }

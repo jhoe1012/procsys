@@ -15,6 +15,7 @@ class GRHeaderResource extends JsonResource
     public function toArray(Request $request): array
     {
         parent::wrap(null);
+
         return [
             'id' => $this->id,
             'gr_number' => $this->gr_number,
@@ -34,7 +35,7 @@ class GRHeaderResource extends JsonResource
             'updated_at' => $this->updated_at,
             'plants' => new PlantResource($this->whenLoaded('plants')),
             'vendors' => new VendorResource($this->whenLoaded('vendors')),
-            'grmaterials' =>  GRMaterialsResource::collection($this->whenLoaded('grmaterials')),
+            'grmaterials' => GRMaterialsResource::collection($this->whenLoaded('grmaterials')),
         ];
     }
 }

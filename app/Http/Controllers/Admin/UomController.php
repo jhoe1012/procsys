@@ -13,8 +13,9 @@ class UomController extends Controller
 {
     public function search(Request $request)
     {
-        if (!$request->input('search'))
+        if (! $request->input('search')) {
             return;
+        }
 
         $uom = Uom::where('uom', 'ilike', "%{$request->input('search')}%")
             ->orWhere('uom_text', 'ilike', "%{$request->input('search')}%")
@@ -22,6 +23,7 @@ class UomController extends Controller
 
         return UomResource::collection($uom);
     }
+
     /**
      * Display a listing of the resource.
      */

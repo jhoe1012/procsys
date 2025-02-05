@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PrHeader extends Model
 {
-    use HasFactory, CreatedUpdatedBy;
+    use CreatedUpdatedBy, HasFactory;
 
     protected $fillable = [
         'created_name',
@@ -32,8 +32,8 @@ class PrHeader extends Model
             'doc_date' => 'date',
             'release_date' => 'date',
             'total_pr_value' => 'float',
-            "created_at" => 'datetime',
-            "updated_at" => 'datetime',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ];
     }
 
@@ -41,29 +41,35 @@ class PrHeader extends Model
     {
         return $this->hasMany(PrMaterial::class, 'pr_headers_id', 'id')->orderBy('item_no');
     }
+
     public function workflows(): HasMany
     {
         return $this->hasMany(ApproveStatus::class, 'pr_number', 'pr_number')
             ->oldest('approved_date')
             ->orderBy('seq');
     }
+
     public function plants(): HasOne
     {
         return $this->hasOne(Plant::class, 'plant', 'plant');
     }
+
     public function attachments(): HasMany
     {
         // return $this->hasMany(Attachment::class, 'pr_header_id', 'id');
         return $this->hasMany(Attachment::class);
     }
+
     public function createdBy(): HasOne
     {
         return $this->hasOne(User::class, 'id', 'created_by');
     }
+
     public function scopeApproved(Builder $query, $userPlants): Builder
     {
         return $query->where('status', 'Approved')->whereIn('plant', $userPlants);
     }
+
     public function scopeCancelled(Builder $query, $userPlants): Builder
     {
         return $query->where('status', 'Cancelled')->whereIn('plant', $userPlants);

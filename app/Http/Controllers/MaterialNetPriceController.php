@@ -17,16 +17,16 @@ class MaterialNetPriceController extends Controller
     {
         $query = MaterialNetPrice::query();
 
-        $query =  $query->with(['vendors', 'plants', 'materials']);
+        $query = $query->with(['vendors', 'plants', 'materials']);
 
         if (request('vendor')) {
-            $query->where('vendor', 'like', "%" . request('vendor') . "%");
+            $query->where('vendor', 'like', '%'.request('vendor').'%');
         }
         if (request('plant')) {
-            $query->where('plant', 'like', "%" . request('plant') . "%");
+            $query->where('plant', 'like', '%'.request('plant').'%');
         }
         if (request('material')) {
-            $query->where('mat_code', 'like', "%" . request('material') . "%");
+            $query->where('mat_code', 'like', '%'.request('material').'%');
         }
 
         $materialNetPrice = $query->orderBy('mat_code', 'desc')
@@ -35,12 +35,12 @@ class MaterialNetPriceController extends Controller
             ->onEachSide(5);
 
         //   dd($materialNetPrice_price);
-        $plant =  Plant::select('plant', "name1")
+        $plant = Plant::select('plant', 'name1')
             ->orderBy('plant')
             ->get()
-            ->map(fn($item) =>  [
+            ->map(fn ($item) => [
                 'value' => $item->plant,
-                'label' => $item->plant . '-' . $item->name1
+                'label' => $item->plant.'-'.$item->name1,
             ])->toArray();
 
         return Inertia::render('Admin/NetPrice/Index', [
@@ -64,20 +64,20 @@ class MaterialNetPriceController extends Controller
      */
     public function store(Request $request)
     {
-        $materialNetPrice = new MaterialNetPrice();
-        $materialNetPrice->vendor =  $request->input('vendor');
-        $materialNetPrice->plant =  $request->input('plant');
-        $materialNetPrice->mat_code =  $request->input('mat_code');
-        $materialNetPrice->currency =  $request->input('currency');
-        $materialNetPrice->price =  $request->input('price');
-        $materialNetPrice->per_unit =  $request->input('per_unit');
-        $materialNetPrice->uom =  $request->input('uom');
-        $materialNetPrice->valid_from =  $request->input('valid_from');
-        $materialNetPrice->valid_to =  $request->input('valid_to');
-        $materialNetPrice->min_order_qty =  $request->input('min_order_qty');
+        $materialNetPrice = new MaterialNetPrice;
+        $materialNetPrice->vendor = $request->input('vendor');
+        $materialNetPrice->plant = $request->input('plant');
+        $materialNetPrice->mat_code = $request->input('mat_code');
+        $materialNetPrice->currency = $request->input('currency');
+        $materialNetPrice->price = $request->input('price');
+        $materialNetPrice->per_unit = $request->input('per_unit');
+        $materialNetPrice->uom = $request->input('uom');
+        $materialNetPrice->valid_from = $request->input('valid_from');
+        $materialNetPrice->valid_to = $request->input('valid_to');
+        $materialNetPrice->min_order_qty = $request->input('min_order_qty');
         $materialNetPrice->save();
 
-        return to_route("net_price.index")->with('success', "Net price created.");
+        return to_route('net_price.index')->with('success', 'Net price created.');
     }
 
     /**
@@ -101,20 +101,20 @@ class MaterialNetPriceController extends Controller
      */
     public function update(Request $request, MaterialNetPrice $materialNetPrice)
     {
-       
-        $materialNetPrice->vendor =  $request->input('vendor');
-        $materialNetPrice->plant =  $request->input('plant');
-        $materialNetPrice->mat_code =  $request->input('mat_code');
-        $materialNetPrice->currency =  $request->input('currency');
-        $materialNetPrice->price =  $request->input('price');
-        $materialNetPrice->per_unit =  $request->input('per_unit');
-        $materialNetPrice->uom =  $request->input('uom');
-        $materialNetPrice->valid_from =  $request->input('valid_from');
-        $materialNetPrice->valid_to =  $request->input('valid_to');
-        $materialNetPrice->min_order_qty =  $request->input('min_order_qty');
+
+        $materialNetPrice->vendor = $request->input('vendor');
+        $materialNetPrice->plant = $request->input('plant');
+        $materialNetPrice->mat_code = $request->input('mat_code');
+        $materialNetPrice->currency = $request->input('currency');
+        $materialNetPrice->price = $request->input('price');
+        $materialNetPrice->per_unit = $request->input('per_unit');
+        $materialNetPrice->uom = $request->input('uom');
+        $materialNetPrice->valid_from = $request->input('valid_from');
+        $materialNetPrice->valid_to = $request->input('valid_to');
+        $materialNetPrice->min_order_qty = $request->input('min_order_qty');
         $materialNetPrice->save();
 
-        return to_route("net_price.index")->with('success', "Net price updated.");
+        return to_route('net_price.index')->with('success', 'Net price updated.');
     }
 
     /**

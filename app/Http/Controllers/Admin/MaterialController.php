@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMaterialRequest;
-use App\Http\Requests\UpdateMaterialRequest;
 use App\Http\Resources\MaterialResource;
 use App\Models\Material;
 use App\Models\MaterialGroup;
@@ -23,16 +22,16 @@ class MaterialController extends Controller
         $query->with(['createdBy', 'updatedBy', 'altUoms', 'materialGroups', 'purchasingGroups']);
 
         $filters = [
-            'mat_code' => fn($value) => $query->where('mat_code', 'ilike', "%{$value}%"),
-            'mat_desc' => fn($value) => $query->where('mat_desc', 'ilike', "%{$value}%"),
-            'mat_grp_desc' => fn($value) => $query->whereHas(
+            'mat_code' => fn ($value) => $query->where('mat_code', 'ilike', "%{$value}%"),
+            'mat_desc' => fn ($value) => $query->where('mat_desc', 'ilike', "%{$value}%"),
+            'mat_grp_desc' => fn ($value) => $query->whereHas(
                 'materialGroups',
-                fn($q) => $q->where('mat_grp_desc', 'ilike', "%{$value}%")
+                fn ($q) => $q->where('mat_grp_desc', 'ilike', "%{$value}%")
             ),
         ];
 
         foreach (request()->only(array_keys($filters)) as $field => $value) {
-            if (!empty($value)) {
+            if (! empty($value)) {
                 $filters[$field]($value);
             }
         }
@@ -64,6 +63,7 @@ class MaterialController extends Controller
     public function store(StoreMaterialRequest $request)
     {
         Material::create($request->validated());
+
         return back()->with('success', 'Material created successfully');
     }
 
@@ -75,10 +75,10 @@ class MaterialController extends Controller
         $material = Material::with([
             'materialGroups',
             'altUoms',
-            'valuations'   => fn($query) => $query->where('plant', $request->input('plant'))
+            'valuations' => fn ($query) => $query->where('plant', $request->input('plant'))
                 ->where('valid_from', '<=', $request->input('doc_date'))
                 ->where('valid_to', '>=', $request->input('doc_date')),
-            'purchasingGroups' => fn($query) => $query->where('plant', $request->input('plant'))
+            'purchasingGroups' => fn ($query) => $query->where('plant', $request->input('plant')),
         ])
             ->where('mat_code', $request->input('material'))
             ->orWhere('mat_desc', $request->input('material'))
@@ -101,6 +101,7 @@ class MaterialController extends Controller
     public function update(StoreMaterialRequest $request, Material $material)
     {
         $material->update($request->validated());
+
         return back()->with('success', 'Material updated successfully');
     }
 
@@ -111,10 +112,12 @@ class MaterialController extends Controller
     {
         //
     }
+
     public function search(Request $request)
     {
-        if (!$request->input('search'))
+        if (! $request->input('search')) {
             return;
+        }
 
         $material = Material::where('mat_code', 'ilike', "%{$request->input('search')}%")
             ->orWhere('mat_desc', 'ilike', "%{$request->input('search')}%")

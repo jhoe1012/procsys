@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('po_headers', function (Blueprint $table) {
-            $table->integer("print_count")->default(0);
-            $table->boolean("is_mother_po")->default(false);
+            $table->integer('print_count')->default(0);
+            $table->boolean('is_mother_po')->default(false);
         });
     }
 

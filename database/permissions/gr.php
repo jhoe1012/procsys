@@ -38,7 +38,6 @@ $po->namespace = 'approve.gr';
 $po->description = __('Let the user approve GR');
 $po->save();
 
-
 $po = Permission::firstOrNew(['namespace' => 'cancel.gr']);
 $po->name = __('Cancel GR');
 $po->namespace = 'cancel.gr';

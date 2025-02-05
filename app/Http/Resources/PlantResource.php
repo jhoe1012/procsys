@@ -14,7 +14,7 @@ class PlantResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return  [
+        return [
             'id' => $this->id,
             'plant' => $this->plant,
             'name1' => $this->name1,
