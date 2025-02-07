@@ -19,3 +19,6 @@ export { default as Pagination } from '@/Components/Pagination';
 export { default as AltUom } from '@/Components/AltUom';
 export { default as Checkbox } from '@/Components/Checkbox';
 export { default as DashboardCard } from '@/Components/DashboardCard';
+export { default as InputLabel } from '@/Components/InputLabel';
+export { default as InputError } from '@/Components/InputError';
+export { default as PrimaryButton } from '@/Components/PrimaryButton';
