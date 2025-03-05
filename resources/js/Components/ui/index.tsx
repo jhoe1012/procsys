@@ -21,3 +21,7 @@ export {
   DialogDescription,
 } from '@/Components/ui/dialog';
 export { Checkbox } from '@/Components/ui/checkbox';
+export { Badge, badgeVariants } from '@/Components/ui/badge';
+export { DataTable, setDataTableColumns } from '@/Components/ui/data-table';
+export { DataTableColumnHeader } from '@/Components/ui/data-table-header';
+export { ScrollArea, ScrollBar } from '@/Components/ui/scroll-area';

@@ -5,16 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Models\Plant;
-use App\Models\Roles;
 use App\Models\User;
-use App\Models\UserRoleRelation;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -53,7 +51,7 @@ class UserController extends Controller
 
         return Inertia::render('Admin/Users/Index', [
             'users' => UserResource::collection($users),
-            'roles' => Roles::all()->toArray(),
+            'roles' => Role::all()->toArray(),
             'plants' => Plant::all()->toArray(),
             'queryParams' => $request->query() ?: null,
             'message' => ['success' => session('success'), 'error' => session('error')],

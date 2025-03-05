@@ -19,3 +19,12 @@ DELETE FROM alternative_uoms WHERE mat_code NOT IN (SELECT mat_code FROM materia
 
 
 php artisan db:seed --class=RolesSeeder
+
+
+update po_headers set seq = 2 where status='Approved'
+update po_headers set seq =1  where status ilike '%Approval%'
+update po_headers set seq = 3 where status ilike '%Cancelled%' or status ilike '%Rejected%'
+
+update pr_headers set seq = 2 where status='Approved'
+update pr_headers set seq =1  where status ilike '%Approval%'
+update pr_headers set seq = 3 where status ilike '%Cancelled%' or status ilike '%Rejected%'

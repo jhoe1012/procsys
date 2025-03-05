@@ -27,7 +27,7 @@ class GRController extends Controller
         $userPlants = $user->plants->pluck('plant')->toArray();
 
         $query = GrHeader::with(['grmaterials', 'plants', 'vendors'])
-        ->whereIn('plant', $userPlants);
+            ->whereIn('plant', $userPlants);
 
         $filters = [
             'gr_number_from' => fn ($value) => request('gr_number_to')
@@ -57,11 +57,10 @@ class GRController extends Controller
             'plant' => fn ($value) => $query->where('plant', 'ilike', "%{$value}%"),
             'vendor' => fn ($value) => $query->where('vendor_id', 'ilike', "%{$value}%"),
             'entered_by' => fn ($value) => $query->where('created_name', 'ilike', "%{$value}%"),
-            
         ];
 
-         // Apply filters dynamically
-         foreach (request()->only(array_keys($filters)) as $field => $value) {
+        // Apply filters dynamically
+        foreach (request()->only(array_keys($filters)) as $field => $value) {
             if (! empty($value)) {
                 $filters[$field]($value);
             }
@@ -112,9 +111,9 @@ class GRController extends Controller
         $gr_header->save();
 
         $gr_materials = collect($request->input('grmaterials'))
-            ->filter(fn($item) => !empty($item['mat_code']))
+            ->filter(fn ($item) => ! empty($item['mat_code']))
             ->values()
-            ->map(fn($item, $index) => new GrMaterial([
+            ->map(fn ($item, $index) => new GrMaterial([
                 'po_material_id' => $item['po_material_id'],
                 'item_no' => ($index + 1) * 10,
                 'mat_code' => $item['mat_code'],
@@ -180,7 +179,7 @@ class GRController extends Controller
         $gr_header = PoHeader::with([
             'plants',
             'vendors',
-            'pomaterials' => fn($query) => $query->where('po_gr_qty', '>', 0)
+            'pomaterials' => fn ($query) => $query->where('po_gr_qty', '>', 0)
                 ->where('status', '!=', PoMaterial::FLAG_DELETE),
         ])->where('po_number', $ponumber)
             ->first();
@@ -225,9 +224,9 @@ class GRController extends Controller
         $poHeader = PoHeader::select('po_number', 'control_no')
             ->where('status', Str::ucfirst(ApproveStatus::APPROVED))
             ->whereNotNull('control_no')
-            ->where(fn($query) => $query->where('po_number', 'ilike', "%{$request->input('search')}%")
+            ->where(fn ($query) => $query->where('po_number', 'ilike', "%{$request->input('search')}%")
                 ->orWhere('control_no', 'ilike', "%{$request->input('search')}%"))
-            ->whereHas('pomaterials', fn($query) => $query->where('po_gr_qty', '>', 0))
+            ->whereHas('pomaterials', fn ($query) => $query->where('po_gr_qty', '>', 0))
             ->get()
             ->toArray();
 

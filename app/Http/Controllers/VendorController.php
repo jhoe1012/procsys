@@ -35,7 +35,7 @@ class VendorController extends Controller
         }
 
         $vendor = $query->orderBy('name_1', 'desc')
-            ->paginate(50)
+            ->paginate(15)
             ->onEachSide(5)
             ->appends($request->query() ?: null);
 

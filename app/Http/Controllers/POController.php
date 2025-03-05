@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enum\CrudActionEnum;
+use App\Enum\HeaderSeq;
 use App\Enum\PermissionsEnum;
 use App\Http\Resources\POHeaderResource;
 use App\Http\Resources\PRMaterialsResource;
@@ -81,8 +82,9 @@ class POController extends Controller
             }
         }
 
-        $poHeader = $query->orderBy('status', 'desc')
-            ->orderBy('doc_date', 'desc')
+        $poHeader = $query->orderBy('seq', 'asc')
+            ->orderBy('status', 'asc')
+            ->orderBy('po_number', 'desc')
             ->paginate(50)
             ->onEachSide(5);
 
@@ -280,6 +282,7 @@ class POController extends Controller
                         'doc_date' => Carbon::parse($request->input('doc_date'))->format('Y-m-d'),
                         'total_po_value' => $total_po_value,
                         'appr_seq' => 0,
+                        'seq' => HeaderSeq::Draft->value,
                         'status' => Str::ucfirst(ApproveStatus::DRAFT),
                     ]
                 ));
@@ -333,8 +336,10 @@ class POController extends Controller
         $po_header->update([
             'status' => $firstApprover->desc,
             'appr_seq' => $firstApprover->seq,
+            'seq' => HeaderSeq::ForApproval->value,
         ]);
 
+        $po_header->refresh();
         if ($firstApprover->user) {
             Mail::to($firstApprover->user->email)
                 ->send(new PoForApprovalEmail(
@@ -366,6 +371,7 @@ class POController extends Controller
         if ($po_header->pomaterials->isEmpty()) {
             $po_header->status = Str::ucfirst(ApproveStatus::CANCELLED);
             $po_header->appr_seq = -1;
+            $po_header->seq = HeaderSeq::Cancelled->value;
             $po_header->save();
         }
 
@@ -394,12 +400,14 @@ class POController extends Controller
                     ->where('plant', $po_header->plant)
                     ->where('type', Approvers::TYPE_PO)->first();
                 $po_header->status = $approver_2nd->desc;
+                $po_header->seq = HeaderSeq::ForApproval->value;
                 $email_status = 1;
             } elseif (
                 $po_header->total_po_value <= $approver->amount_to
             ) {
                 $po_header->status = Str::ucfirst(ApproveStatus::APPROVED);
                 $po_header->release_date = Carbon::now()->format('Y-m-d H:i:s');
+                $po_header->seq = HeaderSeq::Approved->value;
                 $this->_updateNetPrice($po_header);
                 // $this->_updateValuation($po_header);
                 $email_status = 2;
@@ -407,6 +415,7 @@ class POController extends Controller
         } else {
             $po_header->status = Str::ucfirst($request->input('type'));
             $po_header->appr_seq = $request->input('type') == ApproveStatus::REWORKED ? 0 : -1;
+            $po_header->seq = $request->input('type') == ApproveStatus::REWORKED ? HeaderSeq::Draft->value : HeaderSeq::Cancelled->value;
             $approver_status = ApproveStatus::where('seq', '!=', $approver->seq)
                 ->where('po_number', operator: $po_header->po_number)
                 ->whereNull('user_id')
@@ -436,6 +445,7 @@ class POController extends Controller
 
         $approved_cc = [$approver->user->email, ...$finance];
 
+        $po_header->refresh();
         /**
          * Send email notification
          */
@@ -541,6 +551,7 @@ class POController extends Controller
         $poHeader = PoHeader::findOrFail($id);
         $poHeader->status = Str::ucfirst(ApproveStatus::DRAFT);
         $poHeader->appr_seq = 0;
+        $poHeader->seq = HeaderSeq::Draft->value;
         $poHeader->save();
 
         return to_route('po.edit', $poHeader->po_number)->with('success', 'PO Recalled');

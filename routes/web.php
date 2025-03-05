@@ -1,5 +1,6 @@
 <?php
 
+use App\Enum\PermissionsEnum;
 use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\MaterialValuationController;
 use App\Http\Controllers\Admin\UserController;
@@ -72,9 +73,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/val-price-import', [MaterialValuationController::class, 'import'])->name('val_price.import');
     Route::get('/val-price-download-error', [MaterialValuationController::class, 'export'])->name('val_price.download.error');
 
+    // Route::middleware(['can:'.PermissionsEnum::Admin->value])->group(function () {
     Route::get('/vendors', [VendorController::class, 'index'])->name('vendor.index');
     Route::post('/vendor-store', [VendorController::class, 'store'])->name('vendor.store');
     Route::patch('/vendor-update/{materialValuation}', [VendorController::class, 'update'])->name('vendor.update');
+    // });
 
     Route::get('/approver', [ApproverController::class, 'index'])->name('approver.index');
     Route::post('/approver-store', [ApproverController::class, 'store'])->name('approver.store');
@@ -94,6 +97,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/report-gr-download', [ReportController::class, 'downloadGrReport'])->name('download.report.gr');
     Route::get('/report-material', [ReportController::class, 'materialReport'])->name('report.material');
     Route::get('/report-material-download', [ReportController::class, 'downloadMaterialReport'])->name('download.report.material');
+
+    Route::get('/report-pohistory', [ReportController::class, 'poHistoryReport'])->name('report.pohistory');
+    Route::get('/report-pohistory-download', [ReportController::class, 'downloadPoHistoryReport'])->name('download.report.pohistory');
 });
 
 require __DIR__.'/auth.php';

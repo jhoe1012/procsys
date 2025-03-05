@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enum\HeaderSeq;
 use App\Enum\PermissionsEnum;
 use App\Http\Resources\PRHeaderResource;
 use App\Mail\PrApprovedEmail;
@@ -72,8 +73,9 @@ class PRController extends Controller
             }
         }
 
-        $pr_header = $query->orderBy('status', 'desc')
-            ->orderBy('doc_date', 'desc')
+        $pr_header = $query->orderBy('seq', 'asc')
+            ->orderBy('status', 'asc')
+            ->orderBy('pr_number', 'desc')
             ->paginate(50)
             ->onEachSide(5);
 
@@ -184,8 +186,10 @@ class PRController extends Controller
         $pr_header->update([
             'status' => $firstApprover->desc,
             'appr_seq' => $firstApprover->seq,
+            'seq' => HeaderSeq::ForApproval->value,
         ]);
 
+        $pr_header->refresh();
         Mail::to($firstApprover->user->email)
             ->send(new PrForApprovalEmail(
                 $firstApprover->user->name,
@@ -311,6 +315,7 @@ class PRController extends Controller
                             'doc_date' => Carbon::parse($request->input('doc_date'))->format('Y-m-d'),
                             'total_pr_value' => $total_pr_value,
                             'appr_seq' => 0,
+                            'seq' => HeaderSeq::Draft->value,
                             'status' => Str::ucfirst(ApproveStatus::DRAFT),
                         ]
                     )
@@ -359,7 +364,7 @@ class PRController extends Controller
                     ->where('type', Approvers::TYPE_PR)
                     ->first();
                 $pr_header->status = $approver_2nd->desc;
-
+                $pr_header->seq = HeaderSeq::ForApproval->value;
                 $email_status = 1;
             } elseif (
                 $pr_header->total_pr_value >= $approver->amount_from
@@ -367,11 +372,13 @@ class PRController extends Controller
             ) {
                 $pr_header->status = Str::ucfirst(ApproveStatus::APPROVED);
                 $pr_header->release_date = Carbon::now()->format('Y-m-d H:i:s');
+                $pr_header->seq = HeaderSeq::Approved->value;
                 $email_status = 2;
             }
         } else {
             $pr_header->status = Str::ucfirst($request->input('type'));
             $pr_header->appr_seq = $request->input('type') == ApproveStatus::REWORKED ? 0 : -1;
+            $pr_header->seq = $request->input('type') == ApproveStatus::REWORKED ? HeaderSeq::Draft->value : HeaderSeq::Cancelled->value;
             $approver_status = ApproveStatus::where('seq', '!=', $approver->seq)
                 ->where('pr_number', $pr_header->pr_number)
                 ->whereNull('user_id')
@@ -391,6 +398,7 @@ class PRController extends Controller
         $approver_status->approved_date = now();
         $approver_status->save();
 
+        $pr_header->refresh();
         /**
          * Send email notification
          */
@@ -442,6 +450,7 @@ class PRController extends Controller
         if ($pr_header->prmaterials->isEmpty()) {
             $pr_header->status = Str::ucfirst(ApproveStatus::CANCELLED);
             $pr_header->appr_seq = -1;
+            $pr_header->seq = HeaderSeq::Cancelled->value;
             $pr_header->save();
         }
 
@@ -510,6 +519,7 @@ class PRController extends Controller
         $prHeader = PrHeader::findOrFail($id);
         $prHeader->status = Str::ucfirst(ApproveStatus::DRAFT);
         $prHeader->appr_seq = 0;
+        $prHeader->seq = HeaderSeq::Draft->value;
         $prHeader->save();
 
         return to_route('pr.edit', $prHeader->pr_number)->with('success', 'PR Recalled');
