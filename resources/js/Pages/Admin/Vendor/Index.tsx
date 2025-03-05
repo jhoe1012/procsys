@@ -2,6 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
 import { PageProps, IMessage, IVendorPage } from '@/types';
 import { useEffect, KeyboardEvent } from 'react';
+import { AdminUpload } from '@/Components';
 import Pagination from '@/Components/Pagination';
 import TextInput from '@/Components/TextInput';
 import { useToast } from '@/Components/ui/use-toast';
@@ -22,13 +23,15 @@ export default function Index({
   PageProps<{ message: IMessage }>) {
   const { toast } = useToast();
 
+
   useEffect(() => {
     if (message?.success) {
       toast({
         title: message.success,
       });
     }
-  }, []);
+  }, [message]);
+  
 
   queryParams = queryParams || {};
 
@@ -55,7 +58,10 @@ export default function Index({
       header={
         <div className="flex flex-row justify-between">
           <h2 className="font-semibold text-xl text-gray-800 leading-tight">Vendor List</h2>
-          <Create />
+          <div className="flex gap-2">
+            <Create />
+            <AdminUpload url={route('vendor.import')} pageName={'Vendor'} />
+          </div>
         </div>
       }>
       <Head title="View Vendor" />

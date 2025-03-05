@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\MaterialValuationController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\VendorImportController;
+
 use App\Http\Controllers\AlternativeUomController;
 use App\Http\Controllers\ApproverController;
 use App\Http\Controllers\AttachmentController;
@@ -72,17 +74,22 @@ Route::middleware('auth')->group(function () {
     Route::post('/val-price-import', [MaterialValuationController::class, 'import'])->name('val_price.import');
     Route::get('/val-price-download-error', [MaterialValuationController::class, 'export'])->name('val_price.download.error');
 
+    // Route::resource('supplier', MaterialController::class)->only(['index', 'store', 'update', 'import']);
+
     Route::get('/vendors', [VendorController::class, 'index'])->name('vendor.index');
     Route::post('/vendor-store', [VendorController::class, 'store'])->name('vendor.store');
-    Route::patch('/vendor-update/{materialValuation}', [VendorController::class, 'update'])->name('vendor.update');
+    Route::patch('/vendor-update/{vendor}', [VendorController::class, 'update'])->name('vendor.update');
+    Route::post('/vendor-import', [VendorController::class, 'import'])->name('vendor.import');
 
     Route::get('/approver', [ApproverController::class, 'index'])->name('approver.index');
     Route::post('/approver-store', [ApproverController::class, 'store'])->name('approver.store');
     Route::patch('/approver-update/{approver}', [ApproverController::class, 'update'])->name('approver.update');
 
     Route::resource('material', MaterialController::class)->only(['index', 'store', 'update']);
+    Route::post('/material-import', [MaterialController::class, 'import'])->name('material.import');
 
     Route::resource('altuom', AlternativeUomController::class)->only(['index', 'store', 'update']);
+    Route::post('/altuom-import', [AlternativeUomController::class, 'import'])->name('altuom.import');
 
     Route::resource('user', UserController::class)->only(['index', 'store', 'update']);
 

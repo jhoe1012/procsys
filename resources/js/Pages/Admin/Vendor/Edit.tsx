@@ -32,7 +32,7 @@ export default function Edit({ p_vendor }: { p_vendor: IVendor }) {
   const updateVendor: FormEventHandler = (e) => {
     e.preventDefault();
 
-    post(route('vendor.store'), {
+    post(route('Supplier.update', p_vendor.id), {
       preserveScroll: true,
       onSuccess: () => closeModal(),
       onFinish: () => reset(),

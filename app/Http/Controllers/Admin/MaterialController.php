@@ -5,10 +5,17 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMaterialRequest;
 use App\Http\Resources\MaterialResource;
+use App\Import\MaterialImport;
 use App\Models\Material;
 use App\Models\MaterialGroup;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+
+use App\Services\AttachmentService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MaterialController extends Controller
 {
@@ -45,7 +52,7 @@ class MaterialController extends Controller
             'materials' => MaterialResource::collection($material),
             'materialGroups' => MaterialGroup::select('mat_grp_code as value', 'mat_grp_desc as label')->orderBy('mat_grp_desc')->get()->toArray(),
             'queryParams' => $request->query() ?: null,
-            'message' => ['success' => session('success'), 'error' => session('error')],
+            'message' => ['success' => session('success'), 'error' => session('error') , 'missing' => session('missing', [])],
         ]);
     }
 
@@ -125,5 +132,63 @@ class MaterialController extends Controller
             ->get();
 
         return MaterialResource::collection($material);
+    }
+
+    public function import(Request $request)
+    {
+        try {
+            $files = AttachmentService::handleImport($request);
+            if (empty($files)) {
+                throw ValidationException::withMessages(['error' => ['No valid files were uploaded ']]);
+            }
+
+            $importData = new MaterialImport; 
+            Excel::import($importData, storage_path('app/' . $files[0]['filepath']));
+            $getData = $importData->getMaterialImport();
+            
+            if (empty($getData)) {
+                throw ValidationException::withMessages([
+                    'error' => ['No valid material records found.']
+                ]);
+            }
+         
+            $emptyData = [];
+            DB::transaction(function () use ($getData, &$emptyData) {
+
+                $validData = collect($getData)
+                ->filter(fn($row) => !empty($row['mat_code'] ?? null))
+                ->all();
+            
+                $emptyData = collect($getData)
+                ->filter(fn($row) => empty($row['mat_code'] ?? null))
+                ->map(fn($row) => $row['row_id'] ?? null)
+                ->values() 
+                ->all(); 
+            
+            
+                foreach ($validData as $data) {
+                    Material::updateOrCreate(
+                        ['mat_code' => $data['mat_code']],
+                        $data
+                    );
+                 }
+            });
+
+            
+            $route = to_route('material.index')->with('success', 'Materials uploaded.');
+            if (!empty($emptyData)) {
+                $route->with('missing', array_values($emptyData));
+            }
+            
+            return $route;
+
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        }  catch (\Exception $e) {
+            Log::error($e->getMessage());
+            // dd('Error:', $e->getMessage(), $e->getTraceAsString()); // Shows error details
+            return back()->withErrors(['error' => 'An error occurred. Please contact administrator.'])->withInput();
+        }
+        
     }
 }

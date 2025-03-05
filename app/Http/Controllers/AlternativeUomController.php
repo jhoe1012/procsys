@@ -4,9 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreAlternativeUomRequest;
 use App\Http\Resources\AlternativeUomResource;
+use App\Import\AlternativeUomImport;
 use App\Models\AlternativeUom;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+
+use App\Services\AttachmentService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AlternativeUomController extends Controller
 {
@@ -49,7 +56,7 @@ class AlternativeUomController extends Controller
         return Inertia::render('Admin/AltUom/Index', [
             'altUoms' => AlternativeUomResource::collection($altuom),
             'queryParams' => $request->query() ?: null,
-            'message' => ['success' => session('success'), 'error' => session('error')],
+            'message' => ['success' => session('success'), 'error' => session('error'),'missing' => session('missing', [])],
         ]);
     }
 
@@ -103,5 +110,61 @@ class AlternativeUomController extends Controller
     public function destroy(AlternativeUom $alternativeUom)
     {
         //
+    }
+
+    public function import(Request $request)
+    {
+        try {
+            $files = AttachmentService::handleImport($request);
+            if (empty($files)) {
+                throw ValidationException::withMessages(['error' => ['No valid files were uploaded ']]);
+            }
+
+            $importData = new AlternativeUomImport; 
+            Excel::import($importData, storage_path('app/' . $files[0]['filepath']));
+            $getData = $importData->getaltUomImport();
+            
+            if (empty($getData)) {
+                throw ValidationException::withMessages([
+                    'error' => ['No valid vendor records found.']
+                ]);
+            }
+         
+            $emptyData = [];
+            DB::transaction(function () use ($getData, &$emptyData) {
+
+                $validData = collect($getData)
+                ->filter(fn($row) => !empty($row['mat_code'] ?? null))
+                ->all();
+            
+                $emptyData = collect($getData)
+                ->filter(fn($row) => empty($row['mat_code'] ?? null))
+                ->map(fn($row) => $row['row_id'] ?? null)
+                ->values() 
+                ->all(); 
+            
+                foreach ($validData as $data) {
+                    AlternativeUom::updateOrCreate(
+                        ['mat_code' => $data['mat_code']],
+                        $data
+                    );
+                 }
+            });
+
+            $route = to_route('altuom.index')->with('success', 'Alternative UOM uploaded.');
+            if (!empty($emptyData)) {
+                $route->with('missing', array_values($emptyData));
+            }
+            
+            return $route;
+
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        }  catch (\Exception $e) {
+            Log::error($e->getMessage());
+            // dd('Error:', $e->getMessage(), $e->getTraceAsString()); // Shows error details
+            return back()->withErrors(['error' => 'An error occurred. Please contact administrator.'])->withInput();
+        }
+        
     }
 }

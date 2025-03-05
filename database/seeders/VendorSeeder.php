@@ -34,9 +34,15 @@ class VendorSeeder extends Seeder
                     'street' => $data[13],
                     'address' => $data[14],
                     'city_2' => $data[15],
-                    'telephone_1' => $data[16],
-                    'telephone_2' => $data[17],
-                    'vat_reg_no' => $data[18],
+                    'int_loc_1'=> $data[16],
+                    'int_loc_2'=> $data[17],
+                    'auth_group'=> $data[18],
+                    'lang_key'=> $data[19],
+                    'telephone_1' => $data[21],
+                    'telephone_2' => $data[22],
+                    'vat_reg_no' => $data[23],
+                    'currency' => $data[24],
+                    'payment_terms' => $data[25],
                 ]);
             }
             $firstline = false;

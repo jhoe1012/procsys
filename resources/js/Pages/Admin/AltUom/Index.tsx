@@ -4,7 +4,7 @@ import { IAlternativeUomPage, IMessage, PageProps } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { KeyboardEvent, useEffect } from 'react';
 import Create from './Create';
-import { Pagination, TextInput } from '@/Components';
+import { Pagination, TextInput, AdminUpload } from '@/Components';
 import Edit from './Edit';
 
 export default function Index({
@@ -47,7 +47,10 @@ export default function Index({
       header={
         <div className="flex flex-row justify-between">
           <h2 className="font-semibold text-xl text-gray-800 leading-tight">Alternative UOM List</h2>
-          <Create />
+          <div className="flex gap-2">
+            <Create />
+            <AdminUpload url={route('altuom.import')} pageName={'Alternative UOM'} />
+          </div>
         </div>
       }>
       <Head title="View altUom" />

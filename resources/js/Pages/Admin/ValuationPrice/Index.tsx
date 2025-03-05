@@ -51,7 +51,7 @@ export default function Index({
           <h2 className="font-semibold text-xl text-gray-800 leading-tight">Valuation Price List</h2>
           <div className="flex gap-2">
             <Create p_plants={plant} />
-            <AdminUpload url={route('val_price.import')} />
+            <AdminUpload url={route('val_price.import')} pageName={'Valuation Price List'} />
           </div>
         </div>
       }>

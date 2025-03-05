@@ -1,15 +1,20 @@
 import { useState, FormEventHandler, useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
 import Dropzone from './Dropzone';
-import { Button, useToast } from './ui';
+import { Button, useToast, Label, Input } from './ui';
 import Modal from './Modal';
+import Select from 'react-select';
 
-export default function AdminUpload({ url }: { url: string }) {
+export default function AdminUpload({ url, pageName }: { url: string; pageName: string }) {
   const [showModal, setShowModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showMissing, setMissing] = useState([]);
+  const [showLoading, setLoading] = useState(false); // Add loading state
   const [files, setFiles] = useState([]);
+  const [tranType, setTranType] = useState('both');
   const { data, setData, post, processing, reset, errors } = useForm({
     file: files,
+    tran_type: tranType,
   });
   const { toast } = useToast();
 
@@ -24,24 +29,35 @@ export default function AdminUpload({ url }: { url: string }) {
 
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault();
+    setLoading(true);
     post(url, {
       preserveScroll: true,
-      onSuccess: () => {
+      onSuccess: (page) => {
+        const errorData = page.props.message?.missing ?? {};
+        setMissing(errorData);
         setShowSuccess(true);
         closeModal();
       },
-      onFinish: () => closeModal(),
+      onFinish: () => {
+        setLoading(false);
+        // closeModal();
+      },
     });
   };
 
+  // useEffect(() => {
+  //   setData('file', files);
+  // }, [files]);
   useEffect(() => {
     setData('file', files);
-  }, [files]);
+    setData('tran_type', tranType); // Update transaction type in form data
+  }, [files, tranType]);
 
   const closeModal = () => {
     setShowModal(false);
     reset();
     setFiles([]);
+    setTranType([]); // Reset transaction type
   };
 
   const closeSuccessModal = () => setShowSuccess(false);
@@ -49,36 +65,118 @@ export default function AdminUpload({ url }: { url: string }) {
   return (
     <section className={`space-y-6`}>
       {/* Modal for Success message */}
-      <Modal show={showSuccess} onClose={closeSuccessModal} maxWidth="md">
+      <Modal show={showSuccess} onClose={closeSuccessModal} maxWidth="2xl">
         <div className="flex flex-col p-5">
-          <h1 className="font-bold border-b-2 mb-2 p-1">Import Prices</h1>
+          <h1 className="font-bold border-b-2 mb-2 p-1">Import {pageName} </h1>
           <div className="flex flex-col text-center p-2">
             <p>Processing complete</p>
-            <p>
-              Please check
-              <a href={route('val_price.download.error')} target="_blank" className="text-blue-500 p-2 underline">
-                IMPORT ERROR LOG.xlsx
-              </a>
-              for errors.
-            </p>
+            {pageName == 'Valuation Price List' && (
+              <p>
+                Please check
+                <a href={route('val_price.download.error')} target="_blank" className="text-blue-500 p-2 underline">
+                  IMPORT ERROR LOG.xlsx
+                </a>
+                for errors.
+              </p>
+            )}
+          </div>
+          {/* Display errors if any */}
+          {Object.keys(showMissing).length > 0 && pageName !== 'Valuation Price List' && (
+            <>
+              <div className="flex flex-col p-2 mt-3">
+                <h1 className="font-semibold text-sm border-b text-red-600 border-gray-300 mb-2 p-1">
+                  Error Logs: (Some details are not uploaded)
+                </h1>
+                <div className="overflow-x-auto max-h-60">
+                  <table className="w-full border border-gray-300 text-sm">
+                    <thead className="bg-red-100 text-red-700">
+                      <tr>
+                        <th className="border border-gray-300 px-2 py-1">Error Type</th>
+                        {pageName === 'Vendor' && <th className="border border-gray-300 px-2 py-1">Sheet Name</th>}
+                        <th className="border border-gray-300 px-2 py-1">Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.entries(showMissing).map(([key, errorDetails]) => (
+                        <tr key={key} className="bg-white text-center">
+                          <td className="border border-gray-300 px-2 py-2 font-semibold">Incomplete Details</td>
+                          {pageName === 'Vendor' && (
+                            <td className="border border-gray-300 px-2 py-2 font-semibold">{errorDetails.sheet}</td>
+                          )}
+                          <td className="border border-gray-300 px-2 py-2 text-sm font-bold text-red-600">
+                            <span className="inline-flex items-center bg-gray-200 text-red-600  font-semibold px-2 py-2 rounded-md">
+                              {pageName === 'Vendor' && errorDetails.row_id ? `Row: ${errorDetails.row_id}` : `Row: ${errorDetails}` }
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={closeSuccessModal}
+              className="px-4 py-2 bg-yellow-500 font-medium text-black rounded-lg shadow-md hover:bg-yellow-600 transition duration-200">
+              Close
+            </button>
           </div>
         </div>
       </Modal>
 
-      <Button onClick={() => setShowModal(true)}>Upload Price</Button>
+      <Button onClick={() => setShowModal(true)}>Upload {pageName}</Button>
       {/* Modal Upload */}
       <Modal show={showModal} onClose={closeModal} maxWidth="2xl">
-        <form onSubmit={handleSubmit}>
-          <div className=" p-5 w-full">
-            <h3 className="mb-5 font-semibold text-lg">Upload Valuation Price</h3>
+        <form onSubmit={handleSubmit} className="p-6">
+          {/* Header */}
+          <div className="flex justify-between items-center border-b pb-4 mb-4">
+            <h3 className="font-semibold text-lg">{`Upload ${pageName}`}</h3>
+            <div className="flex items-center text-sm text-gray-600">
+              <span className="mr-2">Supported file types:</span>
+              <div className="flex gap-1">
+                <span className="px-2 py-0.5 text-xs font-semibold text-white bg-green-500 rounded-md">XLSX</span>
+                <span className="px-2 py-0.5 text-xs font-semibold text-white bg-green-500 rounded-md">CSV</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Transaction Type Selection */}
+
+          {/* {pageName == 'Vendor' && (
+            <div className="grid grid-cols-12 items-center gap-3 mb-4">
+              <Label className="col-span-3 text-right text-sm font-medium" htmlFor="tran_type">
+                Transaction Type
+              </Label>
+              <div className="col-span-9">
+                <Select
+                  id="tran_type"
+                  className="w-full border-gray-300 rounded-md shadow-sm"
+                  options={[
+                    { value: 'both', label: 'Both'  },
+                    { value: 'add', label: 'Add to List' },
+                    { value: 'transaction', label: 'Update Payment Transaction' },
+                  ]}
+                  value={tranType}
+                  onChange={(selectedOption) => setTranType(selectedOption)}
+                />
+              </div>
+            </div>
+          )} */}
+
+          {/* File Upload */}
+          <div className="mb-4">
             <Dropzone files={files} setFiles={setFiles} multiple={false} />
           </div>
-          <div className="grid justify-items-center m-3">
+
+          {/* Submit Button */}
+          <div className="flex justify-center">
             <Button
               variant="outline"
               disabled={processing || files.length === 0}
-              className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-40 mb-2">
-              Save
+              className="w-40 bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-2 rounded-lg shadow-sm transition">
+              {processing ? 'Processing...' : 'Save'}
             </Button>
           </div>
         </form>
