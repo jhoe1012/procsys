@@ -5,13 +5,7 @@ import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
 import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/solid';
 
-export default function MaterialReportFilter({
-  queryParams,
-  filterReport,
-}: {
-  queryParams: any;
-  filterReport: (queryParam: any) => void;
-}) {
+export default function MaterialReportFilter({ queryParams, filterReport }: { queryParams: any; filterReport: (queryParam: any) => void }) {
   const [showModal, setShowModal] = useState(false);
 
   const searchFieldChanged = (name: string, value: string) => {
@@ -26,12 +20,7 @@ export default function MaterialReportFilter({
     if (e.key !== 'Enter') return;
 
     searchFieldChanged(name, (e.target as HTMLInputElement).value);
-  };
-
-  const handleFilter = () => filterReport(queryParams);
-
-  const clearFilter = () => {
-    filterReport({});
+    filterReport(queryParams);
   };
 
   const closeModal = () => {
@@ -86,12 +75,12 @@ export default function MaterialReportFilter({
 
           <div className="flex content-center justify-center gap-4 mb-5">
             <Button
-              onClick={handleFilter}
+              onClick={() => filterReport(queryParams)}
               variant="outline"
               className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-52">
               Filter
             </Button>
-            <Button onClick={clearFilter} variant="secondary" className=" w-52">
+            <Button onClick={() => filterReport({})} variant="secondary" className=" w-52">
               Clear
             </Button>
           </div>

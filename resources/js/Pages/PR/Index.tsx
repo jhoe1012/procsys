@@ -11,6 +11,7 @@ import { Toaster } from '@/Components/ui/toaster';
 import { formatLongDate, formatNumber, formatShortDate } from '@/lib/utils';
 import { can } from '@/lib/helper';
 import { PermissionsEnum } from '@/lib/constants';
+import { badgeVariants } from '@/Components/ui';
 
 export default function Index({
   auth,
@@ -215,8 +216,12 @@ export default function Index({
                           <td className="px-3 py-2">{pr.created_name}</td>
                           <td className="px-3 py-2">{pr.requested_by}</td>
                           <td className="px-3 py-2">{formatShortDate(pr.doc_date)}</td>
-                          <td className="px-3 py-2">{formatLongDate(pr.updated_at)}</td>
-                          <td className="px-3 py-2">{pr.status}</td>
+                          <td className="px-3 py-2">{formatLongDate(pr.updated_at!)}</td>
+                          <td className="px-3 py-2">
+                            <span className={badgeVariants({ variant: pr.status.includes('Approval') ? 'Approval' : pr.status })}>
+                              {pr.status}
+                            </span>
+                          </td>
                           {/* <td className="px-3 py-2">{pr?.plants?.name1}</td> */}
                         </tr>
                       ))
