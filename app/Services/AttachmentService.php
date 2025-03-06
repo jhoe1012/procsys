@@ -3,7 +3,8 @@
 namespace App\Services;
 
 use App\Models\Attachment;
-use Illuminate\Http\Request;
+use Illuminate\Http\Request; 
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AttachmentService
@@ -33,19 +34,24 @@ class AttachmentService
     public static function handleImport(Request $request): array
     {
         if (! $request->hasFile('file')) {
-            throw ValidationException::withMessages(['file' => ['file is required']]);
+            throw ValidationException::withMessages(['error' => ['File is required']]);
         }
 
-        return collect($request->file('file'))
-            ->filter(fn ($file) => in_array(strtolower($file->getClientOriginalExtension()), Attachment::ALLOWED_FILES))
-            ->map(function ($file) {
-                $originalName = $file->getClientOriginalName();
-                $timestampedName = time().'_'.preg_replace('/[^A-Za-z0-9.]/', '', $originalName);
-                $filepath = $file->storeAs('imports', $timestampedName);
+        $files = is_array($request->file('file')) ? $request->file('file') : [$request->file('file')];
 
-                return ['filepath' => $filepath];
-            })
-            ->values()
-            ->all();
+        $validFiles = collect($files)
+            ->filter(fn($file) => in_array(strtolower($file->getClientOriginalExtension()), Attachment::ALLOWED_FILES_EXCEL_ONLY));
+
+        if ($validFiles->isEmpty()) {
+            throw ValidationException::withMessages(['error' => ['File type not supported']]);
+        }
+
+        return $validFiles->map(function ($file) {
+            $originalName = $file->getClientOriginalName();
+            $timestampedName = time().'_'.Str::slug(pathinfo($originalName, PATHINFO_FILENAME), '_').'.'.$file->getClientOriginalExtension();
+            $filepath = $file->storeAs('imports', $timestampedName);
+
+            return ['filepath' => $filepath];
+        })->values()->all();
     }
 }

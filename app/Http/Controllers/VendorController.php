@@ -2,10 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Http\Resources\VendorResource;
+use App\Import\VendorImport;
 use App\Models\Vendor;
+use App\Services\AttachmentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 class VendorController extends Controller
 {
@@ -42,7 +50,7 @@ class VendorController extends Controller
         return Inertia::render('Admin/Vendor/Index', [
             'vendors' => VendorResource::collection($vendor),
             'queryParams' => $request->query() ?: null,
-            'message' => ['success' => session('success'), 'error' => session('error')],
+            'message' => ['success' => session('success'), 'error' => session('error') , 'missing' => session('missing', []) ],
         ]);
     }
 
@@ -99,7 +107,7 @@ class VendorController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, Vendor $vendor)
-    {
+    { 
         $vendor->supplier = $request->input('supplier');
         $vendor->account_group = $request->input('account_group');
         $vendor->tax_number = $request->input('tax_number');
@@ -133,5 +141,82 @@ class VendorController extends Controller
             ->get();
 
         return VendorResource::collection($vendor);
+    }
+
+    public function import(Request $request)
+    {   
+        try {
+            $files = AttachmentService::handleImport($request);
+            if (empty($files)) {
+                throw ValidationException::withMessages(['error' => ['No valid files were uploaded ']]);
+            }
+            $importData = new VendorImport();
+            Excel::import($importData, storage_path('app/' . $files[0]['filepath']));
+            $getData = $importData->getData();
+
+            if (empty($getData)) {
+                throw ValidationException::withMessages([
+                    'error' => ['No valid vendor records found.']
+                ]);
+            }
+        
+            $emptyData = [];
+
+            DB::transaction(function () use ($getData, &$emptyData) {
+                $validDataLFA1 = collect($getData['vendors'])
+                    ->filter(fn($row) => !empty($row['supplier'] ?? null))
+                    ->all(); 
+
+                $emptyDataLFA1 = collect($getData['vendors'])
+                    ->filter(fn($row) => empty($row['supplier'] ?? null))
+                    ->map(fn($row) => [
+                        'row_id' => $row['row_id'] ?? null, 
+                        'sheet' => 'LFA1'
+                    ])
+                    ->values() 
+                    ->all();
+
+                $validDataLFM1 = collect($getData['transactions'])
+                    ->filter(fn($row) => !empty($row['supplier'] ?? null))
+                    ->all(); 
+                
+                $emptyDataLFM1 = collect($getData['transactions'])
+                    ->filter(fn($row) => empty($row['supplier'] ?? null))
+                    ->map(fn($row) => [
+                        'row_id' => $row['row_id'] ?? null, 
+                        'sheet' => 'LFM1'
+                    ])
+                    ->values()
+                    ->all(); 
+                
+                $emptyData = array_merge($emptyDataLFA1, $emptyDataLFM1);
+
+                foreach ($validDataLFA1 as $data) {
+                    Vendor::updateOrCreate(
+                        ['supplier' => $data['supplier']],
+                        $data
+                    );
+                 }
+                 foreach ($validDataLFM1 as $data) {
+                    Vendor::updateOrCreate(
+                        ['supplier' => $data['supplier']],
+                        $data
+                    );
+                 }
+            });
+
+            $route = to_route('vendor.index')->with('success', 'Vendors uploaded.');
+            if (!empty($emptyData)) {
+                $route->with('missing', array_values($emptyData));
+            }
+            return $route;
+
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        }  catch (\Exception $e) {
+            Log::error($e->getMessage()); 
+            return back()->withErrors(['error' => 'An error occurred. Please contact administrator.'])->withInput();
+        }
+        
     }
 }

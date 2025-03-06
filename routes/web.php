@@ -3,7 +3,7 @@
 use App\Enum\PermissionsEnum;
 use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\MaterialValuationController;
-use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\UserController; 
 use App\Http\Controllers\AlternativeUomController;
 use App\Http\Controllers\ApproverController;
 use App\Http\Controllers\AttachmentController;
@@ -76,6 +76,8 @@ Route::middleware('auth')->group(function () {
     // Route::middleware(['can:'.PermissionsEnum::Admin->value])->group(function () {
     Route::get('/vendors', [VendorController::class, 'index'])->name('vendor.index');
     Route::post('/vendor-store', [VendorController::class, 'store'])->name('vendor.store');
+    Route::patch('/vendor-update/{vendor}', [VendorController::class, 'update'])->name('vendor.update');
+    Route::post('/vendor-import', [VendorController::class, 'import'])->name('vendor.import');
     Route::patch('/vendor-update/{materialValuation}', [VendorController::class, 'update'])->name('vendor.update');
     // });
 
@@ -84,8 +86,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/approver-update/{approver}', [ApproverController::class, 'update'])->name('approver.update');
 
     Route::resource('material', MaterialController::class)->only(['index', 'store', 'update']);
+    Route::post('/material-import', [MaterialController::class, 'import'])->name('material.import');
 
     Route::resource('altuom', AlternativeUomController::class)->only(['index', 'store', 'update']);
+    Route::post('/altuom-import', [AlternativeUomController::class, 'import'])->name('altuom.import');
 
     Route::resource('user', UserController::class)->only(['index', 'store', 'update']);
 

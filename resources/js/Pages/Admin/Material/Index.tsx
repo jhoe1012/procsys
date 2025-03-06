@@ -4,9 +4,8 @@ import { Choice, IMaterialPage, IMessage, PageProps } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { KeyboardEvent, useEffect } from 'react';
 import Create from './Create';
-import { Pagination, TextInput } from '@/Components';
+import { Pagination, TextInput , AdminUpload } from '@/Components';
 import Edit from './Edit';
-
 export default function Index({
   auth,
   materials,
@@ -48,7 +47,10 @@ export default function Index({
       header={
         <div className="flex flex-row justify-between">
           <h2 className="font-semibold text-xl text-gray-800 leading-tight">Material List</h2>
-          <Create materialGroups={materialGroups} />
+          <div className="flex gap-2">
+            <Create materialGroups={materialGroups} />
+            <AdminUpload url={route('material.import')} pageName={'Material'} />
+          </div>
         </div>
       }>
       <Head title="View Material" />
