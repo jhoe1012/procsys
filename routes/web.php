@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AlternativeUomController;
 use App\Http\Controllers\ApproverController;
 use App\Http\Controllers\AttachmentController;
+use App\Http\Controllers\Auth\SocialController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GRController;
 use App\Http\Controllers\MaterialNetPriceController;
@@ -18,6 +19,12 @@ use App\Http\Controllers\VendorController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/auth/{provider}/redirect', [SocialController::class, 'redirect'])
+    ->where('provider', 'azure|google')
+    ->name('oauth.microsoft');
+Route::get('/auth/{provider}/callback', [SocialController::class, 'callback'])
+    ->where('provider', 'azure|google');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
