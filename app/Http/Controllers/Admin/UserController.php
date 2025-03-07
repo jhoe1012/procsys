@@ -129,7 +129,6 @@ class UserController extends Controller
         DB::table('model_has_roles')->where('model_id', $user->id)->delete();
         $user->assignRole($request->roles);
         $user->plants()->sync($request->plants);
-
         // Cache::forget('all-permissions-' . $user->id);
         return back()->with('success', 'User Updated Successfully');
     }
