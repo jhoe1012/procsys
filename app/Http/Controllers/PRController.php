@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enum\PermissionsEnum;
+use App\Enum\RolesEnum;
 use App\Http\Resources\PRHeaderResource;
 use App\Mail\PrApprovedEmail;
 use App\Mail\PrForApprovalEmail;
@@ -11,8 +12,10 @@ use App\Models\Approvers;
 use App\Models\ApproveStatus;
 use App\Models\Material;
 use App\Models\MaterialGroup;
+use App\Models\Plant;
 use App\Models\PrHeader;
 use App\Models\PrMaterial;
+use App\Models\User;
 use App\Services\AttachmentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -403,12 +406,22 @@ class PRController extends Controller
                     ));
                 break;
             case 2:
+                $recipients = User::whereHas('plants', function ($query) use ($pr_header) { //v2
+                    $plant_id =  Plant::pluck('id')->where('plant',$pr_header->plant);
+                    $query->find($plant_id);
+                })
+                ->role(RolesEnum::PORequestor)
+                ->pluck('email')
+                ->unique()
+                ->toArray();
+                $recipients[] = $approver->user->email;
                 Mail::to($pr_header->createdBy->email)
+                    ->cc($recipients)
                     ->send(new PrApprovedEmail(
                         $pr_header->createdBy->name,
                         $approver->user->email,
                         $pr_header
-                    ));
+                    )); 
                 break;
             case 3:
                 Mail::to($pr_header->createdBy->email)

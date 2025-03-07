@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('int_loc_2')->nullable();
             $table->string('auth_group')->nullable();
             $table->string('lang_key')->nullable();
-            $table->string('currency')->nullable();
-            $table->string('payment_terms')->nullable();
+            // $table->string('currency')->nullable();
+            // $table->string('payment_terms')->nullable();
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();
         });
@@ -33,8 +33,8 @@ return new class extends Migration
             $table->dropColumn('int_loc_2')->nullable();
             $table->dropColumn('auth_group')->nullable();
             $table->dropColumn('lang_key')->nullable();
-            $table->dropColumn('currency')->nullable();
-            $table->dropColumn('payment_terms')->nullable();
+            // $table->dropColumn('currency')->nullable();
+            // $table->dropColumn('payment_terms')->nullable();
             $table->dropColumn('created_by')->nullable();
             $table->dropColumn('updated_by')->nullable();
         });
