@@ -56,22 +56,18 @@ class AttachmentService
         if (! $request->hasFile('file')) {
             throw ValidationException::withMessages(['error' => ['File is required']]);
         }
-
-        $files = is_array($request->file('file')) ? $request->file('file') : [$request->file('file')];
-
-        $validFiles = collect($files)
-            ->filter(fn($file) => in_array(strtolower($file->getClientOriginalExtension()), Attachment::ALLOWED_FILES_EXCEL_ONLY));
-
-        if ($validFiles->isEmpty()) {
+    
+        $file = $request->file('file');
+        
+        if (!in_array(strtolower($file->getClientOriginalExtension()), Attachment::ALLOWED_FILES_EXCEL_ONLY)) {
             throw ValidationException::withMessages(['error' => ['File type not supported']]);
         }
-
-        return $validFiles->map(function ($file) {
-            $originalName = $file->getClientOriginalName();
-            $timestampedName = time().'_'.Str::slug(pathinfo($originalName, PATHINFO_FILENAME), '_').'.'.$file->getClientOriginalExtension();
-            $filepath = $file->storeAs('imports', $timestampedName);
-
-            return ['filepath' => $filepath];
-        })->values()->all();
+    
+        $originalName = $file->getClientOriginalName();
+        $timestampedName = time().'_'.Str::slug(pathinfo($originalName, PATHINFO_FILENAME), '_').'.'.$file->getClientOriginalExtension();
+        $filepath = $file->storeAs('imports', $timestampedName);
+    
+        return ['filepath' => $filepath];
     }
+    
 }

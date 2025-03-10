@@ -16,6 +16,7 @@ use App\Models\Plant;
 use App\Models\PrHeader;
 use App\Models\PrMaterial;
 use App\Models\User;
+use App\Models\Attachment;
 use App\Services\AttachmentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -415,12 +416,18 @@ class PRController extends Controller
                 ->unique()
                 ->toArray();
                 $recipients[] = $approver->user->email;
+
+                $pr_attachments = Attachment::where('pr_header_id', $pr_header->id)
+                ->pluck('filepath', 'filename')
+                ->toArray();
+
+            
                 Mail::to($pr_header->createdBy->email)
-                    ->cc($recipients)
+                    ->cc($recipients) 
                     ->send(new PrApprovedEmail(
                         $pr_header->createdBy->name,
-                        $approver->user->email,
-                        $pr_header
+                        $pr_header, 
+                        $pr_attachments
                     )); 
                 break;
             case 3:

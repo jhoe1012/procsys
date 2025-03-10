@@ -20,6 +20,7 @@ use App\Models\PrMaterial;
 use App\Models\SupplierNote;
 use App\Models\User;
 use App\Models\Vendor;
+use App\Models\Attachment;
 use App\Services\AttachmentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -448,11 +449,17 @@ class POController extends Controller
                     ));
                 break;
             case 2:
+ 
+                $po_attachments = Attachment::where('po_header_id', $po_header->id)
+                ->pluck('filepath', 'filename')
+                ->toArray();
+
                 Mail::to($po_header->createdBy->email)
+                    ->cc($approved_cc)
                     ->send(new PoApprovedEmail(
-                        $po_header->createdBy->name,
-                        $approved_cc,
-                        $po_header
+                        $po_header->createdBy->name, 
+                        $po_header,
+                        $po_attachments
                     ));
                 break;
             case 3:
