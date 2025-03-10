@@ -416,19 +416,17 @@ class PRController extends Controller
                 ->unique()
                 ->toArray();
                 $recipients[] = $approver->user->email;
-
-                $pr_attachments = Attachment::where('pr_header_id', $pr_header->id)
-                ->pluck('filepath', 'filename')
-                ->toArray();
-
-            
+           
                 Mail::to($pr_header->createdBy->email)
                     ->cc($recipients) 
                     ->send(new PrApprovedEmail(
                         $pr_header->createdBy->name,
                         $pr_header, 
-                        $pr_attachments
+                        $pr_header->attachments
+                        ->pluck('filepath', 'filename')
+                        ->toArray()
                     )); 
+
                 break;
             case 3:
                 Mail::to($pr_header->createdBy->email)
