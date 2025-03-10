@@ -296,7 +296,7 @@ class PRController extends Controller
                         $pr_material->conversion = $item['conversion'];
                         $pr_material->converted_qty = $item['converted_qty'];
                         $pr_material->item_text = $item['item_text'];
-                        if (isset($item['qty_ordered']) && ($item['qty_ordered'] === null || $item['qty_ordered'] === 0)) {
+                        if ($pr_material->qty_ordered  === null || $pr_material->qty_ordered === 0) {
                             $pr_material->save();
                         }
 
@@ -551,7 +551,7 @@ class PRController extends Controller
             'item_no' => ($index + 1) * 10,
             'mat_code' => $item['mat_code'],
             'short_text' => $item['short_text'],
-            'item_text' => strtoupper($item['item_text']) ?? '',
+            'item_text' => Str::limit(strtoupper($item['item_text'] ?? ''), 40, ''),
             'qty' => $item['qty'],
             'qty_open' => $item['qty'],
             'price' => $item['price'],
