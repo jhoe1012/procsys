@@ -2,17 +2,12 @@
 
 namespace App\Import;
 
-use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\ToCollection;
-use Maatwebsite\Excel\Concerns\WithMultipleSheets;
-use Maatwebsite\Excel\Concerns\SkipsUnknownSheets;
-use Maatwebsite\Excel\Concerns\HasReferencesToOtherSheets;
-use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Events\BeforeSheet;
-use Illuminate\Support\Facades\Log;
-
 use App\Import\VendorMasterlist;
-use App\Import\VendorPaymentTerm;
+use App\Import\VendorPaymentTerm; 
+use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Concerns\HasReferencesToOtherSheets; 
+use Maatwebsite\Excel\Concerns\SkipsUnknownSheets; 
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
 class VendorImport implements WithMultipleSheets, SkipsUnknownSheets, HasReferencesToOtherSheets
 {

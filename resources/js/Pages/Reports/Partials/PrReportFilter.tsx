@@ -4,6 +4,7 @@ import { Label } from '@/Components/ui/label';
 import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
 import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/solid';
+import { Checkbox } from '@/Components';
 
 export default function PrReportFilter({ queryParams, filterReport }: { queryParams: any; filterReport: (queryParam: any) => void }) {
   const [showModal, setShowModal] = useState(false);
@@ -20,12 +21,8 @@ export default function PrReportFilter({ queryParams, filterReport }: { queryPar
     if (e.key !== 'Enter') return;
 
     searchFieldChanged(name, (e.target as HTMLInputElement).value);
-  };
 
-  const handleFilter = () => filterReport(queryParams);
-
-  const clearFilter = () => {
-    filterReport({});
+    filterReport(queryParams);
   };
 
   const closeModal = () => {
@@ -200,8 +197,8 @@ export default function PrReportFilter({ queryParams, filterReport }: { queryPar
               onKeyDown={(e) => handleKeyPress('created_name', e)}
             />
           </div>
-          <div className="flex ">
-            <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="type">
+          <div className="flex items-center space-x-4">
+            <Label className="text-sm text-right w-7/12" htmlFor="type">
               Plant
             </Label>
             <Input
@@ -211,13 +208,20 @@ export default function PrReportFilter({ queryParams, filterReport }: { queryPar
               onBlur={(e) => searchFieldChanged('plant', e.target.value)}
               onKeyDown={(e) => handleKeyPress('plant', e)}
             />
+            <Checkbox checked={queryParams.open_pr} onChange={(e) => searchFieldChanged('open_pr', e.target.checked)} />
+            <Label className="text-sm  w-full" htmlFor="type">
+              With Open PR
+            </Label>
           </div>
 
           <div className="flex content-center justify-center gap-4 mb-5">
-            <Button onClick={handleFilter} variant="outline" className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-52">
+            <Button
+              onClick={() => filterReport(queryParams)}
+              variant="outline"
+              className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-52">
               Filter
             </Button>
-            <Button onClick={clearFilter} variant="secondary" className=" w-52">
+            <Button onClick={() => filterReport({})} variant="secondary" className=" w-52">
               Clear
             </Button>
           </div>

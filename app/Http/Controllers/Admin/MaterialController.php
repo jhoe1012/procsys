@@ -8,13 +8,13 @@ use App\Http\Resources\MaterialResource;
 use App\Import\MaterialImport;
 use App\Models\Material;
 use App\Models\MaterialGroup;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-
 use App\Services\AttachmentService;
+use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 
 class MaterialController extends Controller
@@ -44,7 +44,7 @@ class MaterialController extends Controller
         }
 
         $material = $query->orderBy('mat_desc')
-            ->paginate(50)
+            ->paginate(15)
             ->onEachSide(5)
             ->appends($request->query() ?: null);
 
@@ -185,8 +185,7 @@ class MaterialController extends Controller
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         }  catch (\Exception $e) {
-            Log::error($e->getMessage());
-            // dd('Error:', $e->getMessage(), $e->getTraceAsString()); // Shows error details
+            Log::error($e->getMessage()); 
             return back()->withErrors(['error' => 'An error occurred. Please contact administrator.'])->withInput();
         }
         

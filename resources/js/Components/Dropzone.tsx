@@ -17,7 +17,7 @@ const Dropzone = ({ files, setFiles, multiple = true }) => {
     maxSize: 1024 * 10000,
     onDrop,
   });
-  
+
   const removeFile = (name) => setFiles((files) => files.filter((file) => file.name !== name));
 
   return (
@@ -29,7 +29,9 @@ const Dropzone = ({ files, setFiles, multiple = true }) => {
           {isDragActive ? <p> Drop Files here...</p> : <p>Drag & Drop files here, or click to select files</p>}
         </div>
       </div>
+
       {/* Accepted files */}
+
       <ul className="mt-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-5 ">
         {files?.map((file) => (
           <li key={file.name} className="relative h-12 rounded-md shadow-lg p-2 bg-gray-100">

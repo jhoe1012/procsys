@@ -24,6 +24,7 @@ class PrHeader extends Model
         'status',
         'appr_seq',
         'deliv_addr',
+        'seq',
     ];
 
     protected function casts(): array
