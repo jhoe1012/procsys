@@ -4,7 +4,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useMemo, useState } from 'react';
 import 'react-datasheet-grid/dist/style.css';
-import { checkboxColumn, DataSheetGrid, dateColumn, floatColumn, intColumn, keyColumn, textColumn } from 'react-datasheet-grid';
+import { checkboxColumn, DataSheetGrid, dateColumn, floatColumn, intColumn, keyColumn, textColumn, createTextColumn } from 'react-datasheet-grid';
 import {
   CUSTOM_DATA_SHEET_STYLE,
   PermissionsEnum,
@@ -102,7 +102,20 @@ const Edit = ({
       { ...keyColumn('item_no', intColumn), title: 'ItmNo', minWidth: 55, disabled: true },
       { ...keyColumn('mat_code', textColumn), title: 'Material', minWidth: 120, disabled: true },
       { ...keyColumn('short_text', textColumn), title: 'Material Description', minWidth: 300, disabled: true },
-      { ...keyColumn('item_text', textColumn), title: 'Item Text', minWidth: 300 },
+      {
+        ...keyColumn(
+          'item_text',
+          createTextColumn({
+            continuousUpdates: true,
+            parseUserInput: (value) => value?.slice(0, 40) || '',
+            formatBlurredInput: (value) => value?.slice(0, 40) || '',
+            formatInputOnFocus: (value) => value?.slice(0, 40) || '',
+            parsePastedValue: (value) => value?.slice(0, 40) || '',
+          })
+        ),
+        title: 'Item Text',
+        minWidth: 300,
+      },
       {
         ...keyColumn('po_qty', floatColumn),
         title: 'PO Qty',

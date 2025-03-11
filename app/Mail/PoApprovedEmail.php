@@ -51,7 +51,7 @@ class PoApprovedEmail extends Mailable
      */
     public function attachments(): array
     {
-        if (empty($this->pr_attachments)) {
+        if (empty($this->po_attachments)) {
             Log::info("No attachments found for PO: {$this->po_header->po_number}");
             return []; 
         }

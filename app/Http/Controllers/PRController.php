@@ -425,17 +425,14 @@ class PRController extends Controller
                 ->toArray();
                 $recipients[] = $approver->user->email;
 
-                $pr_attachments = Attachment::where('pr_header_id', $pr_header->id)
-                ->pluck('filepath', 'filename')
-                ->toArray();
-
-            
                 Mail::to($pr_header->createdBy->email)
                     ->cc($recipients) 
                     ->send(new PrApprovedEmail(
                         $pr_header->createdBy->name,
                         $pr_header, 
-                        $pr_attachments
+                        $pr_header->attachments
+                        ->pluck('filepath', 'filename')
+                        ->toArray()
                     )); 
                 break;
             case 3:
@@ -541,7 +538,6 @@ class PRController extends Controller
         $prHeader->appr_seq = 0;
         $prHeader->seq = HeaderSeq::Draft->value;
         $prHeader->save();
-
         return to_route('pr.edit', $prHeader->pr_number)->with('success', 'PR Recalled');
     }
 
