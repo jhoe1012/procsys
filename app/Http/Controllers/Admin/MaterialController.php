@@ -10,7 +10,6 @@ use App\Models\Material;
 use App\Models\MaterialGroup;
 use App\Services\AttachmentService;
 use Illuminate\Http\Request;
-
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -29,8 +28,8 @@ class MaterialController extends Controller
         $query->with(['createdBy', 'updatedBy', 'altUoms', 'materialGroups', 'purchasingGroups']);
 
         $filters = [
-            'mat_code' => fn ($value) => $query->where('mat_code', 'ilike', "%{$value}%"),
-            'mat_desc' => fn ($value) => $query->where('mat_desc', 'ilike', "%{$value}%"),
+            'mat_code'     => fn ($value) => $query->where('mat_code', 'ilike', "%{$value}%"),
+            'mat_desc'     => fn ($value) => $query->where('mat_desc', 'ilike', "%{$value}%"),
             'mat_grp_desc' => fn ($value) => $query->whereHas(
                 'materialGroups',
                 fn ($q) => $q->where('mat_grp_desc', 'ilike', "%{$value}%")
@@ -49,10 +48,10 @@ class MaterialController extends Controller
             ->appends($request->query() ?: null);
 
         return Inertia::render('Admin/Material/Index', [
-            'materials' => MaterialResource::collection($material),
+            'materials'      => MaterialResource::collection($material),
             'materialGroups' => MaterialGroup::select('mat_grp_code as value', 'mat_grp_desc as label')->orderBy('mat_grp_desc')->get()->toArray(),
-            'queryParams' => $request->query() ?: null,
-            'message' => ['success' => session('success'), 'error' => session('error') , 'missing' => session('missing', [])],
+            'queryParams'    => $request->query() ?: null,
+            'message'        => ['success' => session('success'), 'error' => session('error'), 'missing' => session('missing', [])],
         ]);
     }
 
@@ -86,12 +85,14 @@ class MaterialController extends Controller
                 ->where('valid_from', '<=', $request->input('doc_date'))
                 ->where('valid_to', '>=', $request->input('doc_date')),
             'purchasingGroups' => fn ($query) => $query->where('plant', $request->input('plant')),
+            'purchasingGroups.prCtrlGrp',
         ])
             ->where('mat_code', $request->input('material'))
             ->orWhere('mat_desc', $request->input('material'))
             ->firstOrFail();
 
         return new MaterialResource($material);
+
     }
 
     /**
@@ -142,52 +143,51 @@ class MaterialController extends Controller
                 throw ValidationException::withMessages(['error' => ['No valid files were uploaded ']]);
             }
 
-            $importData = new MaterialImport; 
-            Excel::import($importData, storage_path('app/' . $files[0]['filepath']));
+            $importData = new MaterialImport;
+            Excel::import($importData, storage_path('app/'.$files[0]['filepath']));
             $getData = $importData->getMaterialImport();
-            
+
             if (empty($getData)) {
                 throw ValidationException::withMessages([
-                    'error' => ['No valid material records found.']
+                    'error' => ['No valid material records found.'],
                 ]);
             }
-         
+
             $emptyData = [];
             DB::transaction(function () use ($getData, &$emptyData) {
 
                 $validData = collect($getData)
-                ->filter(fn($row) => !empty($row['mat_code'] ?? null))
-                ->all();
-            
+                    ->filter(fn ($row) => ! empty($row['mat_code'] ?? null))
+                    ->all();
+
                 $emptyData = collect($getData)
-                ->filter(fn($row) => empty($row['mat_code'] ?? null))
-                ->map(fn($row) => $row['row_id'] ?? null)
-                ->values() 
-                ->all(); 
-            
-            
+                    ->filter(fn ($row) => empty($row['mat_code'] ?? null))
+                    ->map(fn ($row) => $row['row_id'] ?? null)
+                    ->values()
+                    ->all();
+
                 foreach ($validData as $data) {
                     Material::updateOrCreate(
                         ['mat_code' => $data['mat_code']],
                         $data
                     );
-                 }
+                }
             });
 
-            
             $route = to_route('material.index')->with('success', 'Materials uploaded.');
-            if (!empty($emptyData)) {
+            if (! empty($emptyData)) {
                 $route->with('missing', array_values($emptyData));
             }
-            
+
             return $route;
 
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
-        }  catch (\Exception $e) {
-            Log::error($e->getMessage()); 
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+
             return back()->withErrors(['error' => 'An error occurred. Please contact administrator.'])->withInput();
         }
-        
+
     }
 }

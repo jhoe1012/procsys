@@ -18,7 +18,8 @@ const Create = ({
   mat_desc,
   prheader,
   materialGroupsSupplies,
-}: PageProps<{ mat_code: Choice[]; mat_desc: Choice[]; prheader: IPRHeader; materialGroupsSupplies: string[] }>) => {
+  prCtrlGrp,
+}: PageProps<{ mat_code: Choice[]; mat_desc: Choice[]; prheader: IPRHeader; materialGroupsSupplies: string[]; prCtrlGrp: Choice[] }>) => {
   const initialMaterial = prheader
     ? prheader.prmaterials.map((prmaterial) => ({
         ...prmaterial,
@@ -52,7 +53,7 @@ const Create = ({
     prmaterials: [],
   });
 
-  const handleOnChange = (value: string, rowIndex: number) => {
+  const handleOnChangeUom = (value: string, rowIndex: number) => {
     setMaterial((prevMaterial) => {
       const newMaterial = [...prevMaterial];
       newMaterial[rowIndex] = {
@@ -80,7 +81,8 @@ const Create = ({
       },
       {
         ...keyColumn('altUomSelect', {
-          component: ({ rowData, rowIndex }) => rowData && <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChange} />,
+          component: ({ rowData, rowIndex }) =>
+            rowData && <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChangeUom} />,
         }),
         disabled: true,
         title: '',
@@ -103,8 +105,14 @@ const Create = ({
       { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 90, disabled: true },
       { ...keyColumn('currency', textColumn), title: 'Curr', minWidth: 50, disabled: true },
       { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 130 },
-      { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 90, disabled: true },
+      { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 100, disabled: true },
       { ...keyColumn('purch_grp', textColumn), title: 'Purch Grp', minWidth: 90, disabled: true },
+      {
+        ...keyColumn('prctrl_grp_id', selectColumn({ choices: prCtrlGrp })),
+        title: 'PR Controller',
+        minWidth: 200,
+        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
+      },
     ],
     []
   );

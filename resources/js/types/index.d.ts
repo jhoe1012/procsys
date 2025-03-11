@@ -252,6 +252,7 @@ export interface IPRMaterial {
   created_at?: string;
   updated_at?: string;
   requested_by?: string;
+  prctrl_grp_id?: number;
 }
 
 export interface IMessage {

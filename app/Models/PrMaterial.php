@@ -38,20 +38,21 @@ class PrMaterial extends Model
         'conversion',
         'converted_qty',
         'valuation_price',
+        'prctrl_grp_id',
     ];
 
     protected function casts(): array
     {
         return [
-            'qty' => 'float',
-            'qty_ordered' => 'float',
-            'qty_open' => 'float',
-            'price' => 'float',
-            'per_unit' => 'integer',
-            'total_value' => 'float',
-            'del_date' => 'datetime',
-            'conversion' => 'float',
-            'converted_qty' => 'float',
+            'qty'             => 'float',
+            'qty_ordered'     => 'float',
+            'qty_open'        => 'float',
+            'price'           => 'float',
+            'per_unit'        => 'integer',
+            'total_value'     => 'float',
+            'del_date'        => 'datetime',
+            'conversion'      => 'float',
+            'converted_qty'   => 'float',
             'valuation_price' => 'float',
         ];
     }
