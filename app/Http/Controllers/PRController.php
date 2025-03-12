@@ -342,9 +342,10 @@ class PRController extends Controller
             'attachments',
             'prmaterials' => fn ($query) => $query->whereNull('status')->orWhere('status', ''),
             'plants',
+            'prmaterials.materialGroups',
         ])
-            ->where('pr_number', $request->pr_number)
-            ->first();
+        ->where('pr_number', $request->pr_number)
+        ->first();
 
         $approver = Approvers::with('user')
             ->where('user_id', Auth::user()->id)

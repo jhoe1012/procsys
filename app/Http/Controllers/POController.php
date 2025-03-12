@@ -382,6 +382,7 @@ class POController extends Controller
             'vendors',
             'workflows',
             'attachments',
+            'pomaterials.materialGroups',
         ])->where('po_number', $request->input('po_number'))
             ->first();
 
