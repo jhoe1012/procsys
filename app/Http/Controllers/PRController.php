@@ -17,6 +17,7 @@ use App\Models\Plant;
 use App\Models\PrHeader;
 use App\Models\PrMaterial;
 use App\Models\User;
+use App\Models\Attachment;
 use App\Services\AttachmentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -424,13 +425,16 @@ class PRController extends Controller
                     ->unique()
                     ->toArray();
                 $recipients[] = $approver->user->email;
+
                 Mail::to($pr_header->createdBy->email)
-                    ->cc($recipients)
+                    ->cc($recipients) 
                     ->send(new PrApprovedEmail(
                         $pr_header->createdBy->name,
-                        $approver->user->email,
-                        $pr_header
-                    ));
+                        $pr_header, 
+                        $pr_header->attachments
+                        ->pluck('filepath', 'filename')
+                        ->toArray()
+                    )); 
                 break;
             case 3:
                 Mail::to($pr_header->createdBy->email)
@@ -535,7 +539,6 @@ class PRController extends Controller
         $prHeader->appr_seq = 0;
         $prHeader->seq      = HeaderSeq::Draft->value;
         $prHeader->save();
-
         return to_route('pr.edit', $prHeader->pr_number)->with('success', 'PR Recalled');
     }
 
@@ -545,7 +548,7 @@ class PRController extends Controller
             'item_no'         => ($index + 1) * 10,
             'mat_code'        => $item['mat_code'],
             'short_text'      => $item['short_text'],
-            'item_text'       => strtoupper($item['item_text']) ?? '',
+            'item_text'       => Str::limit(strtoupper($item['item_text'] ?? ''), 40, ''),
             'qty'             => $item['qty'],
             'qty_open'        => $item['qty'],
             'price'           => $item['price'],
@@ -557,7 +560,7 @@ class PRController extends Controller
             'del_date'        => Carbon::parse($item['del_date'])->format('Y-m-d'),
             'mat_grp'         => $item['mat_grp'],
             'purch_grp'       => $item['purch_grp'],
-            'status'          => $item['status'] ?? null,
+            'status'          => $item['status'] ?? null, 
             'valuation_price' => $item['valuation_price'],
             'conversion'      => $item['conversion'],
             'converted_qty'   => $item['converted_qty'],

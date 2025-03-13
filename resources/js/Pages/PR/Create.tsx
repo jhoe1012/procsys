@@ -2,7 +2,16 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { PageProps, IPRMaterial, IPRHeader, Choice, IAlternativeUom } from '@/types';
 import { Button, Textarea, Input, Label, Toaster, useToast } from '@/Components/ui/';
-import { DataSheetGrid, checkboxColumn, textColumn, intColumn, keyColumn, floatColumn, dateColumn } from 'react-datasheet-grid';
+import {
+  DataSheetGrid,
+  checkboxColumn,
+  textColumn,
+  intColumn,
+  keyColumn,
+  floatColumn,
+  dateColumn,
+  createTextColumn,
+} from 'react-datasheet-grid';
 import 'react-datasheet-grid/dist/style.css';
 import { useState, useEffect, useMemo, FormEventHandler } from 'react';
 import { Operation } from 'react-datasheet-grid/dist/types';
@@ -11,6 +20,9 @@ import { Loading, Dropzone, selectColumn, InputField, SelectField, TabFields, Al
 import { usePRMaterial, usePRMaterialValidation } from '@/Hooks';
 import { CUSTOM_DATA_SHEET_STYLE, DATE_TODAY, DEFAULT_PR_MATERIAL, PermissionsEnum } from '@/lib/constants';
 import { can } from '@/lib/helper';
+import { Item } from '@radix-ui/react-select';
+import { text } from 'node:stream/consumers';
+import { components } from 'react-select';
 
 const Create = ({
   auth,
@@ -70,7 +82,20 @@ const Create = ({
       { ...keyColumn('item_no', intColumn), title: 'ItmNo', disabled: true, minWidth: 55 },
       { ...keyColumn('mat_code', selectColumn({ choices: mat_code })), title: 'Material', minWidth: 120 },
       { ...keyColumn('short_text', selectColumn({ choices: mat_desc })), title: 'Material Description', minWidth: 300 },
-      { ...keyColumn('item_text', textColumn), title: 'Item Text', minWidth: 300 },
+      {
+        ...keyColumn(
+          'item_text',
+          createTextColumn({
+            continuousUpdates: true,
+            parseUserInput: (value) => value?.slice(0, 40) || '',
+            formatBlurredInput: (value) => value?.slice(0, 40) || '',
+            formatInputOnFocus: (value) => value?.slice(0, 40) || '',
+            parsePastedValue: (value) => value?.slice(0, 40) || '',
+          })
+        ),
+        title: 'Item Text',
+        minWidth: 300,
+      },
       { ...keyColumn('qty', floatColumn), title: 'Qty', minWidth: 70 },
       {
         ...keyColumn('ord_unit', textColumn),

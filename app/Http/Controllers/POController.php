@@ -21,6 +21,7 @@ use App\Models\PrMaterial;
 use App\Models\SupplierNote;
 use App\Models\User;
 use App\Models\Vendor;
+use App\Models\Attachment;
 use App\Services\AttachmentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -387,6 +388,7 @@ class POController extends Controller
             'plants',
             'vendors',
             'workflows',
+            'attachments',
         ])->where('po_number', $request->input('po_number'))
             ->first();
 
@@ -461,10 +463,13 @@ class POController extends Controller
                 $approved_cc = [$approver->user->email, ...$finance];
 
                 Mail::to($po_header->createdBy->email)
+                    ->cc($approved_cc)
                     ->send(new PoApprovedEmail(
-                        $po_header->createdBy->name,
-                        $approved_cc,
-                        $po_header
+                        $po_header->createdBy->name, 
+                        $po_header,
+                        $po_header->attachments
+                        ->pluck('filepath', 'filename')
+                        ->toArray()
                     ));
                 break;
             case 3:
@@ -650,7 +655,7 @@ class POController extends Controller
             'requested_by'   => $item['requested_by'],
             'pr_number'      => $item['pr_number'],
             'pr_item'        => $item['pr_item'],
-            'item_text'      => strtoupper($item['item_text']) ?? '',
+            'item_text'      => Str::limit(strtoupper($item['item_text'] ?? ''), 40, ''),
             'conversion'     => $item['conversion_po'],
             'denominator'    => 1,
             'converted_qty'  => $item['converted_qty_po'],
