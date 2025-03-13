@@ -78,9 +78,19 @@ const Create = ({
         minWidth: 55,
         disabled: true,
       },
+      // {
+      //   ...keyColumn('altUomSelect', {
+      //     component: ({ rowData, rowIndex }) => rowData && <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChange} />,
+      //   }),
+      //   disabled: true,
+      //   title: '',
+      //   minWidth: 20,
+      //   maxWidth: 20,
+      // },
       {
-        ...keyColumn('altUomSelect', {
-          component: ({ rowData, rowIndex }) => rowData && <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChange} />,
+        ...keyColumn('alt_uom', {
+          component: ({ rowData, rowIndex }: { rowData: IAlternativeUom[]; rowIndex: number }) =>
+            rowData && rowData.length !== 0 ? <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChange} /> : <></>,
         }),
         disabled: true,
         title: '',

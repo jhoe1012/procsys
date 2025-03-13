@@ -68,23 +68,6 @@ export default function usePRMaterial() {
         for (let i = operation.fromRowIndex; i < operation.toRowIndex; i++) {
           const value = updatedMaterial[i];
           const oldValue = material[i];
-          // if (value.mat_code && value.mat_code !== oldValue.mat_code) {
-          //   const materialInfo = await fetchMaterialInfo(value.mat_code);
-          //   if (materialInfo) {
-          //     const { valuations = [{}], materialGroups = [{}], purchasingGroups = [{}] } = materialInfo;
-
-          //     Object.assign(value, {
-          //       short_text: materialInfo.mat_desc,
-          //       ord_unit: materialInfo.base_uom,
-          //       unit: materialInfo.base_uom,
-          //       valuation_price: parseFloat(valuations[0]?.valuation_price || '0'),
-          //       currency: valuations[0]?.currency || '',
-          //       per_unit: parseFloat(valuations[0]?.per_unit || '0'),
-          //       mat_grp: materialGroups[0]?.mat_grp_code || '',
-          //       purch_grp: purchasingGroups[0]?.purch_grp || '',
-          //     });
-          //   }
-          // }
 
           if ((value.mat_code && value.mat_code !== oldValue.mat_code) || (value.short_text && value.short_text !== oldValue.short_text)) {
             // const materialInfo = await fetchMaterialInfo(value.short_text ?? value.mat_code, plant, doc_date);
@@ -92,9 +75,7 @@ export default function usePRMaterial() {
             if (materialInfo) {
               const { altUoms = [], valuations = [{}], materialGroups = [], purchasingGroups = [] } = materialInfo;
               const ord_unit = materialInfo.order_uom || materialInfo.base_uom;
-              const altUomSelect = [...new Set([ord_unit, ...altUoms.map((item: IAlternativeUom) => item.alt_uom)])];
               Object.assign(value, {
-                altUomSelect,
                 alt_uom: altUoms,
                 mat_code: materialInfo.mat_code,
                 short_text: materialInfo.mat_desc,

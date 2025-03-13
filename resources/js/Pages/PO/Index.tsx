@@ -67,7 +67,7 @@ export default function Index({
       header={
         <div className="flex flex-row justify-between">
           <h2 className="font-semibold text-xl text-gray-800 leading-tight">Purchase Order List</h2>
-          {can(auth.user, PermissionsEnum.EditPR) && (
+          {can(auth.user, PermissionsEnum.EditPO) && (
             <Button onClick={() => setControlNumberModal(true)} className="h-8" disabled={checkboxPo.length <= 0}>
               <PrinterIcon />
             </Button>
