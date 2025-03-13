@@ -2,7 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Button, Input, Label, Textarea, Toaster, useToast } from '@/Components/ui';
 import { CUSTOM_DATA_SHEET_STYLE, DATE_TODAY, PermissionsEnum } from '@/lib/constants';
-import { Choice, IPOHeader, IPOMaterial, IVendor, PageProps } from '@/types';
+import { Choice, IAlternativeUom, IPOHeader, IPOMaterial, IVendor, PageProps } from '@/types';
 import { FormEventHandler, useEffect, useMemo, useState } from 'react';
 import { checkboxColumn, DataSheetGrid, dateColumn, floatColumn, intColumn, keyColumn, textColumn, createTextColumn} from 'react-datasheet-grid';
 import 'react-datasheet-grid/dist/style.css';
@@ -81,11 +81,12 @@ const Create = ({
         minWidth: 300,
       },
       { ...keyColumn('po_qty', floatColumn), title: 'PO Qty', minWidth: 70 },
-      { ...keyColumn('qty_open_po', floatColumn), title: 'Open Qty', minWidth: 100, disabled: true },
+      { ...keyColumn('qty_open_po', floatColumn), title: 'Open Qty', minWidth: 90, disabled: true },
       { ...keyColumn('unit', textColumn), title: 'Ord. UOM', minWidth: 55, disabled: true },
       {
-        ...keyColumn('altUomSelect', {
-          component: ({ rowData, rowIndex }) => rowData && <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChange} />,
+        ...keyColumn('alt_uom', {
+          component: ({ rowData, rowIndex }: { rowData: IAlternativeUom[]; rowIndex: number }) =>
+            rowData && rowData.length !== 0 ? <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChange} /> : <></>,
         }),
         disabled: true,
         title: '',
@@ -96,7 +97,7 @@ const Create = ({
       {
         ...keyColumn('net_price', floatColumn),
         title: 'Net Price',
-        minWidth: 80,
+        minWidth: 100,
         disabled: ({ rowData }: any) => !!rowData.item_free,
       },
       {

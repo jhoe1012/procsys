@@ -1,5 +1,5 @@
 import { Button, Input, Label, Textarea, Toaster, useToast } from '@/Components/ui';
-import { Choice, IApprover, IMessage, IPOHeader, IPOMaterial, IVendor, IWorkflow, PageProps } from '@/types';
+import { Choice, IAlternativeUom, IApprover, IMessage, IPOHeader, IPOMaterial, IVendor, IWorkflow, PageProps } from '@/types';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useMemo, useState } from 'react';
@@ -125,8 +125,9 @@ const Edit = ({
       { ...keyColumn('qty_open_po', floatColumn), title: 'Open Qty', minWidth: 100, disabled: true },
       { ...keyColumn('unit', textColumn), title: 'Ord. UOM', minWidth: 55, disabled: true },
       {
-        ...keyColumn('altUomSelect', {
-          component: ({ rowData, rowIndex }) => rowData && <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChange} />,
+        ...keyColumn('alt_uom', {
+          component: ({ rowData, rowIndex }: { rowData: IAlternativeUom[]; rowIndex: number }) =>
+            rowData && rowData.length !== 0 ? <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChange} /> : <></>,
         }),
         disabled: true,
         title: '',
@@ -137,7 +138,7 @@ const Edit = ({
       {
         ...keyColumn('net_price', floatColumn),
         title: 'Net Price',
-        minWidth: 80,
+        minWidth: 100,
         disabled: ({ rowData }: any) => !!rowData.item_free,
       },
       {
