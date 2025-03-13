@@ -389,6 +389,7 @@ class POController extends Controller
             'vendors',
             'workflows',
             'attachments',
+            'pomaterials.materialGroups',
         ])->where('po_number', $request->input('po_number'))
             ->first();
 
@@ -452,8 +453,7 @@ class POController extends Controller
                         $po_header
                     ));
                 break;
-            case 2:
-
+            case 2: 
                 $finance = User::where(
                     'cc_by_deliv_addr',
                     'like',
@@ -461,7 +461,6 @@ class POController extends Controller
                 )->pluck('email')->toArray();
 
                 $approved_cc = [$approver->user->email, ...$finance];
-
                 Mail::to($po_header->createdBy->email)
                     ->cc($approved_cc)
                     ->send(new PoApprovedEmail(

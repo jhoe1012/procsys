@@ -348,9 +348,10 @@ class PRController extends Controller
             'attachments',
             'prmaterials' => fn ($query) => $query->whereNull('status')->orWhere('status', ''),
             'plants',
+            'prmaterials.materialGroups',
         ])
-            ->where('pr_number', $request->pr_number)
-            ->first();
+        ->where('pr_number', $request->pr_number)
+        ->first();
 
         $approver = Approvers::with('user')
             ->where('user_id', Auth::user()->id)
@@ -424,8 +425,7 @@ class PRController extends Controller
                     ->pluck('email')
                     ->unique()
                     ->toArray();
-                $recipients[] = $approver->user->email;
-
+                $recipients[] = $approver->user->email; 
                 Mail::to($pr_header->createdBy->email)
                     ->cc($recipients) 
                     ->send(new PrApprovedEmail(
@@ -435,6 +435,7 @@ class PRController extends Controller
                         ->pluck('filepath', 'filename')
                         ->toArray()
                     )); 
+
                 break;
             case 3:
                 Mail::to($pr_header->createdBy->email)

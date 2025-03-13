@@ -122,7 +122,7 @@
                             <td>{{ Number::currency($pomaterial->total_value, 'PHP') }}</td>
                             <td>{{ $pomaterial->currency }}</td>
                             <td>{{ date('Y-m-d', strtotime($pomaterial->del_date)) }}</td>
-                            <td>{{ $pomaterial->mat_grp }}</td>
+                            <td>{{ $pomaterial->materialGroups->mat_grp_desc }}</td>
                         </tr>
                     @endforeach
                 </tbody>
