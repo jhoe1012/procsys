@@ -21,54 +21,49 @@ class GRController extends Controller
      */
     public function index(Request $request)
     {
-        $query = GrHeader::query();
+        $user = $request->user();
 
-        $query = $query->with(['grmaterials', 'plants', 'vendors']);
+        // Fetch user plants
+        $userPlants = $user->plants->pluck('plant')->toArray();
 
-        $user_plants = $request->user()->plants->map(function ($items) {
-            return $items->plant;
-        })->toArray();
+        $query = GrHeader::with(['grmaterials', 'plants', 'vendors'])
+            ->whereIn('plant', $userPlants);
 
-        $query->whereIn('plant', $user_plants);
+        $filters = [
+            'gr_number_from' => fn ($value) => request('gr_number_to')
+                ? $query->whereBetween('gr_number', [
+                    $value,
+                    request('gr_number_to'),
+                ])
+                : $query->where('gr_number', 'like', "%{$value}%"),
+            'po_number_from' => fn ($value) => request('entry_date_to')
+                ? $query->whereBetween('po_number', [
+                    $value,
+                    request('po_number_to'),
+                ])
+                : $query->where('po_number', 'like', "%{$value}%"),
+            'entry_date_from' => fn ($value) => request('entry_date_to')
+                ? $query->whereBetween('entry_date', [
+                    $value,
+                    request('entry_date_to'),
+                ])
+                : $query->where('entry_date', 'like', "%{$value}%"),
+            'actual_date_from' => fn ($value) => request('actual_date_to')
+                ? $query->whereBetween('actual_date', [
+                    $value,
+                    request('actual_date_to'),
+                ])
+                : $query->where('actual_date', 'like', "%{$value}%"),
+            'plant' => fn ($value) => $query->where('plant', 'ilike', "%{$value}%"),
+            'vendor' => fn ($value) => $query->where('vendor_id', 'ilike', "%{$value}%"),
+            'entered_by' => fn ($value) => $query->where('created_name', 'ilike', "%{$value}%"),
+        ];
 
-        if (request('gr_number_from') && ! request('gr_number_to')) {
-            $query->where('gr_number', 'like', '%'.request('gr_number_from').'%');
-        }
-        if (request('gr_number_from') && request('gr_number_to')) {
-            $query->whereBetween('gr_number', [request('gr_number_from'), request('gr_number_to')]);
-        }
-        if (request('po_number_from') && ! request('po_number_to')) {
-            $query->where('po_number', 'like', '%'.request('po_number_from').'%');
-        }
-        if (request('po_number_from') && request('po_number_to')) {
-            $query->whereBetween('po_number', [request('po_number_from'), request('po_number_to')]);
-        }
-        if (request('plant')) {
-            $query->where('plant', 'ilike', '%'.request('plant').'%');
-        }
-        if (request('vendor')) {
-            $query->where('vendor_id', 'ilike', '%'.request('vendor').'%');
-        }
-        if (request('entered_by')) {
-            $query->where('created_name', 'ilike', '%'.request('entered_by').'%');
-        }
-        if (request('entry_date_from') && ! request('entry_date_to')) {
-            $query->whereDate('entry_date', request('entry_date_from'));
-        }
-        if (request('entry_date_from') && request('entry_date_to')) {
-            $query->whereBetween('entry_date', [request('entry_date_from'), request('entry_date_to')]);
-        }
-        if (request('posting_date_from') && ! request('posting_date_to')) {
-            $query->whereDate('posting_date', request('posting_date_from'));
-        }
-        if (request('posting_date_from') && request('posting_date_to')) {
-            $query->whereBetween('posting_date', [request('posting_date_from'), request('posting_date_to')]);
-        }
-        if (request('actual_date_from') && ! request('actual_date_to')) {
-            $query->whereDate('actual_date', request('actual_date_from'));
-        }
-        if (request('actual_date_from') && request('actual_date_to')) {
-            $query->whereBetween('actual_date', [request('actual_date_from'), request('actual_date_to')]);
+        // Apply filters dynamically
+        foreach (request()->only(array_keys($filters)) as $field => $value) {
+            if (! empty($value)) {
+                $filters[$field]($value);
+            }
         }
 
         $gr_header = $query->orderBy('entry_date', 'desc')
@@ -141,6 +136,9 @@ class GRController extends Controller
             $gr_material->pomaterials->po_gr_qty = $gr_material->gr_qty <= $gr_material->pomaterials->po_gr_qty
                 ? $gr_material->pomaterials->po_gr_qty - $gr_material->gr_qty
                 : 0;
+            $gr_material->pomaterials->status = $gr_material->dci || $gr_material->pomaterials->po_gr_qty == 0
+                ? PoMaterial::FLAG_DELIVER
+                : $gr_material->pomaterials->status;
             $gr_material->pomaterials->save();
         }
 
@@ -170,8 +168,6 @@ class GRController extends Controller
             ->where('gr_number', $grnumber)
             ->firstOrFail();
 
-        // dd($gr_header);
-        // dd( new GRHeaderResource($gr_header));
         return Inertia::render('GR/Edit', [
             'grheader' => new GRHeaderResource($gr_header),
         ]);
@@ -183,7 +179,8 @@ class GRController extends Controller
         $gr_header = PoHeader::with([
             'plants',
             'vendors',
-            'pomaterials' => fn ($query) => $query->where('po_gr_qty', '>', 0),
+            'pomaterials' => fn ($query) => $query->where('po_gr_qty', '>', 0)
+                ->where('status', '!=', PoMaterial::FLAG_DELETE),
         ])->where('po_number', $ponumber)
             ->first();
 
@@ -229,6 +226,7 @@ class GRController extends Controller
             ->whereNotNull('control_no')
             ->where(fn ($query) => $query->where('po_number', 'ilike', "%{$request->input('search')}%")
                 ->orWhere('control_no', 'ilike', "%{$request->input('search')}%"))
+            ->whereHas('pomaterials', fn ($query) => $query->where('po_gr_qty', '>', 0))
             ->get()
             ->toArray();
 

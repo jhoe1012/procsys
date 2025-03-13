@@ -32,11 +32,11 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $menus = [];
-        $user = $request->user();
+        $user  = $request->user();
 
         if ($user) {
-            $menu = new MenuService;
-            $menus = $menu->getMenus();
+            $menus = (new MenuService)->getMenus();
+            // $menus = $menu;
         }
 
         return [

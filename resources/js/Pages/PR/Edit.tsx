@@ -28,7 +28,7 @@ import { formatNumber } from '@/lib/utils';
 import { Choice, IAlternativeUom, IApprover, IitemDetails, IMessage, IPRHeader, IPRMaterial, IWorkflow, PageProps } from '@/types';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useMemo, useState } from 'react';
-import { checkboxColumn, DataSheetGrid, dateColumn, floatColumn, intColumn, keyColumn, textColumn } from 'react-datasheet-grid';
+import { checkboxColumn, DataSheetGrid, dateColumn, floatColumn, intColumn, keyColumn, textColumn , createTextColumn } from 'react-datasheet-grid';
 import 'react-datasheet-grid/dist/style.css';
 import { Operation } from 'react-datasheet-grid/dist/types';
 import Approval from './Partial/Approval';
@@ -102,7 +102,20 @@ const Edit = ({
       { ...keyColumn('item_no', intColumn), title: 'ItmNo', disabled: true, minWidth: 55 },
       { ...keyColumn('mat_code', selectColumn({ choices: mat_code })), title: 'Material', minWidth: 120 },
       { ...keyColumn('short_text', selectColumn({ choices: mat_desc })), title: 'Material Description', minWidth: 300 },
-      { ...keyColumn('item_text', textColumn), title: 'Item Text', minWidth: 300 },
+      {
+        ...keyColumn(
+          'item_text',
+          createTextColumn({
+            continuousUpdates: true,
+            parseUserInput: (value) => value?.slice(0, 40) || '',
+            formatBlurredInput: (value) => value?.slice(0, 40) || '',
+            formatInputOnFocus: (value) => value?.slice(0, 40) || '',
+            parsePastedValue: (value) => value?.slice(0, 40) || '',
+          })
+        ),
+        title: 'Item Text',
+        minWidth: 300,
+      },
       { ...keyColumn('qty', floatColumn), title: 'Qty', minWidth: 70, disabled: ({ rowData }: any) => rowData.qty_ordered > 0 },
       {
         ...keyColumn('ord_unit', textColumn),
@@ -111,8 +124,9 @@ const Edit = ({
         disabled: true,
       },
       {
-        ...keyColumn('altUomSelect', {
-          component: ({ rowData, rowIndex }) => rowData && <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChange} />,
+        ...keyColumn('alt_uom', {
+          component: ({ rowData, rowIndex }: { rowData: IAlternativeUom[]; rowIndex: number }) =>
+            rowData && rowData.length !== 0 ? <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChange} /> : <></>,
         }),
         disabled: true,
         title: '',

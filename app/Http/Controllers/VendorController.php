@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Import\VendorImport;
-use App\Services\AttachmentService;
 use App\Http\Resources\VendorResource;
+use App\Import\VendorImport;
 use App\Models\Vendor;
+use App\Services\AttachmentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -43,7 +43,7 @@ class VendorController extends Controller
         }
 
         $vendor = $query->orderBy('name_1', 'desc')
-            ->paginate(50)
+            ->paginate(15)
             ->onEachSide(5)
             ->appends($request->query() ?: null);
 
@@ -214,8 +214,7 @@ class VendorController extends Controller
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         }  catch (\Exception $e) {
-            Log::error($e->getMessage());
-            // dd('Error:', $e->getMessage(), $e->getTraceAsString()); // Shows error details
+            Log::error($e->getMessage()); 
             return back()->withErrors(['error' => 'An error occurred. Please contact administrator.'])->withInput();
         }
         

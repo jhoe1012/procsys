@@ -96,6 +96,11 @@ class MenuService
                         'permissions' => true,
                         'href' => route('report.material'),
                     ],
+                    [
+                        'label' => ' PO History',
+                        'permissions' => true,
+                        'href' => route('report.pohistory'),
+                    ],
                 ],
             ],
             [

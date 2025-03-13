@@ -1,13 +1,13 @@
 <?php
 
+use App\Enum\PermissionsEnum;
 use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\MaterialValuationController;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\VendorImportController;
-
+use App\Http\Controllers\Admin\UserController; 
 use App\Http\Controllers\AlternativeUomController;
 use App\Http\Controllers\ApproverController;
 use App\Http\Controllers\AttachmentController;
+use App\Http\Controllers\Auth\SocialController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GRController;
 use App\Http\Controllers\MaterialNetPriceController;
@@ -19,6 +19,12 @@ use App\Http\Controllers\VendorController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/auth/{provider}/redirect', [SocialController::class, 'redirect'])
+    ->where('provider', 'azure|google')
+    ->name('oauth.microsoft');
+Route::get('/auth/{provider}/callback', [SocialController::class, 'callback'])
+    ->where('provider', 'azure|google');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -74,12 +80,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/val-price-import', [MaterialValuationController::class, 'import'])->name('val_price.import');
     Route::get('/val-price-download-error', [MaterialValuationController::class, 'export'])->name('val_price.download.error');
 
-    // Route::resource('supplier', MaterialController::class)->only(['index', 'store', 'update', 'import']);
-
+    // Route::middleware(['can:'.PermissionsEnum::Admin->value])->group(function () {
     Route::get('/vendors', [VendorController::class, 'index'])->name('vendor.index');
     Route::post('/vendor-store', [VendorController::class, 'store'])->name('vendor.store');
     Route::patch('/vendor-update/{vendor}', [VendorController::class, 'update'])->name('vendor.update');
     Route::post('/vendor-import', [VendorController::class, 'import'])->name('vendor.import');
+    // });
 
     Route::get('/approver', [ApproverController::class, 'index'])->name('approver.index');
     Route::post('/approver-store', [ApproverController::class, 'store'])->name('approver.store');
@@ -101,6 +107,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/report-gr-download', [ReportController::class, 'downloadGrReport'])->name('download.report.gr');
     Route::get('/report-material', [ReportController::class, 'materialReport'])->name('report.material');
     Route::get('/report-material-download', [ReportController::class, 'downloadMaterialReport'])->name('download.report.material');
+
+    Route::get('/report-pohistory', [ReportController::class, 'poHistoryReport'])->name('report.pohistory');
+    Route::get('/report-pohistory-download', [ReportController::class, 'downloadPoHistoryReport'])->name('download.report.pohistory');
 });
 
 require __DIR__.'/auth.php';

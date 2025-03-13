@@ -6,13 +6,13 @@ use App\Http\Requests\StoreAlternativeUomRequest;
 use App\Http\Resources\AlternativeUomResource;
 use App\Import\AlternativeUomImport;
 use App\Models\AlternativeUom;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-
 use App\Services\AttachmentService;
+use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 
 class AlternativeUomController extends Controller
@@ -161,8 +161,7 @@ class AlternativeUomController extends Controller
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         }  catch (\Exception $e) {
-            Log::error($e->getMessage());
-            // dd('Error:', $e->getMessage(), $e->getTraceAsString()); // Shows error details
+            Log::error($e->getMessage()); 
             return back()->withErrors(['error' => 'An error occurred. Please contact administrator.'])->withInput();
         }
         
