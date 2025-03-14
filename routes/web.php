@@ -85,7 +85,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/vendor-store', [VendorController::class, 'store'])->name('vendor.store');
     Route::patch('/vendor-update/{vendor}', [VendorController::class, 'update'])->name('vendor.update');
     Route::post('/vendor-import', [VendorController::class, 'import'])->name('vendor.import');
-    Route::patch('/vendor-update/{materialValuation}', [VendorController::class, 'update'])->name('vendor.update');
     // });
 
     Route::get('/approver', [ApproverController::class, 'index'])->name('approver.index');

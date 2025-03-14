@@ -92,6 +92,7 @@
                         <td>Item No</td>
                         <td>Material</td>
                         <td>Material Description</td>
+                        <td>Item Text</td>
                         <td>Qty</td>
                         <td>Ord Unit</td>
                         <td>Price</td>
@@ -108,6 +109,7 @@
                             <td>{{ $prmaterial->item_no }}</td>
                             <td>{{ $prmaterial->mat_code }}</td>
                             <td>{{ $prmaterial->short_text }}</td>
+                            <td>{{ $prmaterial->item_text }}</td>
                             <td>{{ $prmaterial->qty }}</td>
                             <td>{{ $prmaterial->ord_unit }}</td>
                             <td>{{ Number::currency($prmaterial->price, 'PHP') }}</td>
@@ -115,7 +117,7 @@
                             <td>{{ Number::currency($prmaterial->total_value, 'PHP') }}</td>
                             <td>{{ $prmaterial->currency }}</td>
                             <td>{{ date('Y-m-d', strtotime($prmaterial->del_date)) }}</td>
-                            <td>{{ $prmaterial->mat_grp }}</td>
+                            <td>{{ $prmaterial->materialGroups->mat_grp_desc }}</td>
                         </tr>
                     @endforeach
                 </tbody>
