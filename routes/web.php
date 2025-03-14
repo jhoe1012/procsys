@@ -3,7 +3,7 @@
 use App\Enum\PermissionsEnum;
 use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\MaterialValuationController;
-use App\Http\Controllers\Admin\UserController; 
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AlternativeUomController;
 use App\Http\Controllers\ApproverController;
 use App\Http\Controllers\AttachmentController;

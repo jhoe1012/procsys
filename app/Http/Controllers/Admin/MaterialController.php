@@ -86,12 +86,14 @@ class MaterialController extends Controller
                 ->where('valid_from', '<=', $request->input('doc_date'))
                 ->where('valid_to', '>=', $request->input('doc_date')),
             'purchasingGroups' => fn ($query) => $query->where('plant', $request->input('plant')),
+            'purchasingGroups.prCtrlGrp',
         ])
             ->where('mat_code', $request->input('material'))
             ->orWhere('mat_desc', $request->input('material'))
             ->firstOrFail();
 
         return new MaterialResource($material);
+
     }
 
     /**

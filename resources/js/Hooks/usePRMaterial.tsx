@@ -87,6 +87,7 @@ export default function usePRMaterial() {
                 mat_grp: materialGroups?.mat_grp_code || '',
                 mat_grp_desc: materialGroups?.mat_grp_desc || '',
                 purch_grp: purchasingGroups?.purch_grp || '',
+                prctrl_grp_id: purchasingGroups?.prCtrlGrp?.id || undefined,
                 qty_ordered: null,
                 item_text: null,
               });

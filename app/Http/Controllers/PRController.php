@@ -13,6 +13,7 @@ use App\Models\Approvers;
 use App\Models\ApproveStatus;
 use App\Models\Material;
 use App\Models\MaterialGroup;
+use App\Models\PrctrlGrp;
 use App\Models\Plant;
 use App\Models\PrHeader;
 use App\Models\PrMaterial;
@@ -20,6 +21,7 @@ use App\Models\User;
 use App\Models\Attachment;
 use App\Services\AttachmentService;
 use Carbon\Carbon;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -43,11 +45,14 @@ class PRController extends Controller
         $query = PrHeader::with(['prmaterials', 'plants'])
             ->whereIn('plant', $userPlants);
 
-        // Check approval permission and filter
+        // Check approval permission
         if ($user->can(PermissionsEnum::ApproverPR)) {
-            $approverSeq = $user->approvers
-                ->firstWhere('type', 'pr')['seq'] ?? 0;
-            $query->where('appr_seq', '>=', $approverSeq);
+            $approver = $user->approvers
+                ->firstWhere('type', 'pr') ?? 0;
+            $query->whereHas(
+                'prmaterials',
+                fn (Builder $q) => $q->where('prctrl_grp_id', $approver->prctrl_grp_id)
+            )->where('appr_seq', '>=', $approver->seq);
         }
 
         $filters = [
@@ -97,6 +102,13 @@ class PRController extends Controller
             'mat_code'               => Material::select('mat_code as value', 'mat_code as label')->orderBy('mat_code')->get()->toArray(),
             'mat_desc'               => Material::select('mat_desc as value', 'mat_desc as label')->orderBy('mat_desc')->get()->toArray(),
             'materialGroupsSupplies' => MaterialGroup::supplies()->pluck('mat_grp_code')->toArray(),
+            'prCtrlGrp'              => PrctrlGrp::select('id as value', DB::raw("prctrl_grp|| ' - ' || prctrl_desc  as label"))
+                ->whereHas(
+                    'user',
+                    fn (Builder $q) => $q->where('user_id', Auth::id())
+                )
+                ->get()
+                ->toArray(),
         ]);
     }
 
@@ -168,7 +180,9 @@ class PRController extends Controller
 
         $approvers = Approvers::where('amount_from', '<=', $pr_header->total_pr_value)
             ->where('plant', $pr_header->plant)
-            ->where('type', operator: Approvers::TYPE_PR)->orderBy('seq')->get();
+            ->where('type', Approvers::TYPE_PR)
+            ->where('prctrl_grp_id', $pr_header->prmaterials->first()->prctrl_grp_id)
+            ->orderBy('seq')->get();
 
         if ($approvers->isEmpty()) {
             return to_route('pr.edit', $pr_header->pr_number)->with('error', 'No Approver Found.');
@@ -260,6 +274,16 @@ class PRController extends Controller
             'message'                => ['success' => session('success'), 'error' => session('error')],
             'item_details'           => $item_details,
             'materialGroupsSupplies' => MaterialGroup::select('mat_grp_code')->where('is_supplies', true)->pluck('mat_grp_code')->toArray(),
+            'prCtrlGrp'              => PrctrlGrp::select('id as value', DB::raw("prctrl_grp|| ' - ' || prctrl_desc  as label"))
+                ->when(
+                    ! $request->user()->can(PermissionsEnum::ApproverPR),
+                    fn ($q) => $q->whereHas(
+                        'user',
+                        fn (Builder $q) => $q->where('user_id', Auth::id())
+                    )
+                )
+                ->get()
+                ->toArray(),
         ]);
     }
 
@@ -293,17 +317,16 @@ class PRController extends Controller
                         $pr_material->del_date        = $item['del_date'];
                         $pr_material->mat_grp         = $item['mat_grp'];
                         $pr_material->purch_grp       = $item['purch_grp'];
-                        $pr_material->valuation_price = $item['valuation_price'];
+                        $pr_material->valuation_price = $item['valuation_price']; 
                         $pr_material->conversion      = $item['conversion'];
                         $pr_material->converted_qty   = $item['converted_qty'];
                         $pr_material->item_text       = $item['item_text'];
-                        if (isset($item['qty_ordered']) && ($item['qty_ordered'] === null || $item['qty_ordered'] === 0)) {
+                        if ($pr_material->qty_ordered === null || $pr_material->qty_ordered === 0) {
                             $pr_material->save();
                         }
 
                         return $item;
                     })->values();
-
                 $total_pr_value = $pr_materials->filter(fn ($item) => $item['status'] != 'X')->sum('total_value');
                 $total_pr_value = $total_pr_value != 0 ? $total_pr_value : $pr_header->total_pr_value;
                 $pr_header->update(
@@ -357,6 +380,7 @@ class PRController extends Controller
             ->where('user_id', Auth::user()->id)
             ->where('plant', $pr_header->plant)
             ->where('type', Approvers::TYPE_PR)
+            ->where('prctrl_grp_id', $pr_header->prmaterials->first()->prctrl_grp_id)
             ->first();
 
         $email_status = 0;
@@ -368,6 +392,8 @@ class PRController extends Controller
                     ->where('seq', $pr_header->appr_seq)
                     ->where('plant', $pr_header->plant)
                     ->where('type', Approvers::TYPE_PR)
+                    ->where('prctrl_grp_id', $pr_header->prmaterials->first()->prctrl_grp_id)
+
                     ->first();
                 $pr_header->status = $approver_2nd->desc;
                 $pr_header->seq    = HeaderSeq::ForApproval->value;
@@ -548,7 +574,7 @@ class PRController extends Controller
         return [
             'item_no'         => ($index + 1) * 10,
             'mat_code'        => $item['mat_code'],
-            'short_text'      => $item['short_text'],
+            'short_text'      => $item['short_text']
             'item_text'       => Str::limit(strtoupper($item['item_text'] ?? ''), 40, ''),
             'qty'             => $item['qty'],
             'qty_open'        => $item['qty'],
@@ -561,10 +587,11 @@ class PRController extends Controller
             'del_date'        => Carbon::parse($item['del_date'])->format('Y-m-d'),
             'mat_grp'         => $item['mat_grp'],
             'purch_grp'       => $item['purch_grp'],
-            'status'          => $item['status'] ?? null, 
+            'status'          => $item['status'] ?? null,
             'valuation_price' => $item['valuation_price'],
             'conversion'      => $item['conversion'],
             'converted_qty'   => $item['converted_qty'],
+            'prctrl_grp_id'   => $item['prctrl_grp_id'] ?? null,
         ];
     }
 

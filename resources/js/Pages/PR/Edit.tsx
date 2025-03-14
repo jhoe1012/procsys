@@ -42,6 +42,7 @@ const Edit = ({
   message,
   item_details,
   materialGroupsSupplies,
+  prCtrlGrp,
 }: PageProps<{
   prheader: IPRHeader;
   mat_code: Choice[];
@@ -49,6 +50,7 @@ const Edit = ({
   message: IMessage;
   item_details: IitemDetails;
   materialGroupsSupplies: string[];
+  prCtrlGrp: Choice[];
 }>) => {
   const { toast } = useToast();
   const [material, setMaterial] = useState<IPRMaterial[]>(
@@ -151,6 +153,12 @@ const Edit = ({
       { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 130 },
       { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 100, disabled: true },
       { ...keyColumn('purch_grp', textColumn), title: 'Purch Grp', minWidth: 90, disabled: true },
+      {
+        ...keyColumn('prctrl_grp_id', selectColumn({ choices: prCtrlGrp })),
+        title: 'PR Controller',
+        minWidth: 200,
+        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
+      },
     ],
     []
   );

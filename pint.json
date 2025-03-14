@@ -3,9 +3,9 @@
     "rules": {
         "binary_operator_spaces": {
             "default": "single_space",
-            "operators": {
+            "operators": { 
                 "=>": "align_single_space_minimal",
-                "=": "align_single_space_minimal"
+                "=": "align_single_space_minimal",
             }
         }
     }
