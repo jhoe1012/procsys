@@ -79,9 +79,9 @@ class POHistoryExport implements FromArray, ShouldAutoSize, WithColumnFormatting
     public function columnFormats(): array
     {
         return [
-            'E' => NumberFormat::FORMAT_DATE_DDMMYYYY,
-            'I' => NumberFormat::FORMAT_DATE_DDMMYYYY,
-            'N' => NumberFormat::FORMAT_DATE_DDMMYYYY,
+            'E'  => NumberFormat::FORMAT_DATE_DDMMYYYY,
+            'I'  => NumberFormat::FORMAT_DATE_DDMMYYYY,
+            'N'  => NumberFormat::FORMAT_DATE_DDMMYYYY,
             'AB' => NumberFormat::FORMAT_DATE_DDMMYYYY,
             'AI' => NumberFormat::FORMAT_DATE_DDMMYYYY,
             'AN' => NumberFormat::FORMAT_DATE_DDMMYYYY,

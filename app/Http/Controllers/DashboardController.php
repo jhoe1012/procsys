@@ -12,11 +12,11 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $user = $request->user();
+        $user       = $request->user();
         $userPlants = $user->plants->pluck('plant')->toArray();
 
-        $prHeader['total'] = PrHeader::whereIn('plant', $userPlants)->count();
-        $prHeader['approved'] = PrHeader::approved($userPlants)->count();
+        $prHeader['total']     = PrHeader::whereIn('plant', $userPlants)->count();
+        $prHeader['approved']  = PrHeader::approved($userPlants)->count();
         $prHeader['cancelled'] = PrHeader::cancelled($userPlants)->count();
 
         if ($user->can(PermissionsEnum::ApproverPR)) {
@@ -31,8 +31,8 @@ class DashboardController extends Controller
                 ->count();
         }
 
-        $poHeader['total'] = PoHeader::whereIn('plant', $userPlants)->count();
-        $poHeader['approved'] = PoHeader::approved($userPlants)->count();
+        $poHeader['total']     = PoHeader::whereIn('plant', $userPlants)->count();
+        $poHeader['approved']  = PoHeader::approved($userPlants)->count();
         $poHeader['cancelled'] = PoHeader::cancelled($userPlants)->count();
 
         if ($user->can(PermissionsEnum::ApproverPO)) {

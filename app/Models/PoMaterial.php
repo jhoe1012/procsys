@@ -47,16 +47,16 @@ class PoMaterial extends Model
     protected function casts(): array
     {
         return [
-            'po_qty' => 'float',
-            'po_gr_qty' => 'float',
-            'net_price' => 'float',
-            'per_unit' => 'integer',
-            'total_value' => 'float',
-            'del_date' => 'datetime',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-            'conversion' => 'float',
-            'denominator' => 'float',
+            'po_qty'        => 'float',
+            'po_gr_qty'     => 'float',
+            'net_price'     => 'float',
+            'per_unit'      => 'integer',
+            'total_value'   => 'float',
+            'del_date'      => 'datetime',
+            'created_at'    => 'datetime',
+            'updated_at'    => 'datetime',
+            'conversion'    => 'float',
+            'denominator'   => 'float',
             'converted_qty' => 'float',
         ];
     }

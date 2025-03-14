@@ -25,10 +25,10 @@ class UserController extends Controller
         $query->with(['roles', 'plants']);
 
         $filters = [
-            'name' => fn ($value) => $query->where('name', 'ilike', "%{$value}%"),
-            'email' => fn ($value) => $query->where('email', 'ilike', "%{$value}%"),
+            'name'     => fn ($value) => $query->where('name', 'ilike', "%{$value}%"),
+            'email'    => fn ($value) => $query->where('email', 'ilike', "%{$value}%"),
             'position' => fn ($value) => $query->where('position', 'ilike', "%{$value}%"),
-            'role' => fn ($value) => $query->whereHas(
+            'role'     => fn ($value) => $query->whereHas(
                 'roles',
                 fn ($q) => $q->where('roles.name', $value)
             ),
@@ -50,11 +50,11 @@ class UserController extends Controller
             ->appends($request->query() ?: null);
 
         return Inertia::render('Admin/Users/Index', [
-            'users' => UserResource::collection($users),
-            'roles' => Role::all()->toArray(),
-            'plants' => Plant::all()->toArray(),
+            'users'       => UserResource::collection($users),
+            'roles'       => Role::all()->toArray(),
+            'plants'      => Plant::all()->toArray(),
             'queryParams' => $request->query() ?: null,
-            'message' => ['success' => session('success'), 'error' => session('error')],
+            'message'     => ['success' => session('success'), 'error' => session('error')],
         ]);
     }
 
@@ -72,16 +72,16 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', Rules\Password::defaults()],
-            'roles' => ['required'],
-            'plants' => ['required'],
+            'roles'    => ['required'],
+            'plants'   => ['required'],
         ]);
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
+            'name'     => $request->name,
+            'email'    => $request->email,
             'position' => $request->position,
             'password' => Hash::make($request->password),
 
@@ -116,19 +116,20 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'roles' => ['required'],
+            'name'   => ['required', 'string', 'max:255'],
+            'roles'  => ['required'],
             'plants' => ['required'],
         ]);
 
         $user->update([
-            'name' => $request->name,
+            'name'     => $request->name,
             'position' => $request->position,
         ]);
         // UserRoleRelation::where('user_id', $user->id)->delete();
         DB::table('model_has_roles')->where('model_id', $user->id)->delete();
         $user->assignRole($request->roles);
         $user->plants()->sync($request->plants);
+
         // Cache::forget('all-permissions-' . $user->id);
         return back()->with('success', 'User Updated Successfully');
     }

@@ -13,12 +13,11 @@ use App\Models\Approvers;
 use App\Models\ApproveStatus;
 use App\Models\Material;
 use App\Models\MaterialGroup;
-use App\Models\PrctrlGrp;
 use App\Models\Plant;
+use App\Models\PrctrlGrp;
 use App\Models\PrHeader;
 use App\Models\PrMaterial;
 use App\Models\User;
-use App\Models\Attachment;
 use App\Services\AttachmentService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -317,7 +316,7 @@ class PRController extends Controller
                         $pr_material->del_date        = $item['del_date'];
                         $pr_material->mat_grp         = $item['mat_grp'];
                         $pr_material->purch_grp       = $item['purch_grp'];
-                        $pr_material->valuation_price = $item['valuation_price']; 
+                        $pr_material->valuation_price = $item['valuation_price'];
                         $pr_material->conversion      = $item['conversion'];
                         $pr_material->converted_qty   = $item['converted_qty'];
                         $pr_material->item_text       = $item['item_text'];
@@ -373,8 +372,8 @@ class PRController extends Controller
             'plants',
             'prmaterials.materialGroups',
         ])
-        ->where('pr_number', $request->pr_number)
-        ->first();
+            ->where('pr_number', $request->pr_number)
+            ->first();
 
         $approver = Approvers::with('user')
             ->where('user_id', Auth::user()->id)
@@ -451,16 +450,16 @@ class PRController extends Controller
                     ->pluck('email')
                     ->unique()
                     ->toArray();
-                $recipients[] = $approver->user->email; 
+                $recipients[] = $approver->user->email;
                 Mail::to($pr_header->createdBy->email)
-                    ->cc($recipients) 
+                    ->cc($recipients)
                     ->send(new PrApprovedEmail(
                         $pr_header->createdBy->name,
-                        $pr_header, 
+                        $pr_header,
                         $pr_header->attachments
-                        ->pluck('filepath', 'filename')
-                        ->toArray()
-                    )); 
+                            ->pluck('filepath', 'filename')
+                            ->toArray()
+                    ));
 
                 break;
             case 3:
@@ -566,6 +565,7 @@ class PRController extends Controller
         $prHeader->appr_seq = 0;
         $prHeader->seq      = HeaderSeq::Draft->value;
         $prHeader->save();
+
         return to_route('pr.edit', $prHeader->pr_number)->with('success', 'PR Recalled');
     }
 
@@ -574,7 +574,7 @@ class PRController extends Controller
         return [
             'item_no'         => ($index + 1) * 10,
             'mat_code'        => $item['mat_code'],
-            'short_text'      => $item['short_text']
+            'short_text'      => $item['short_text'],
             'item_text'       => Str::limit(strtoupper($item['item_text'] ?? ''), 40, ''),
             'qty'             => $item['qty'],
             'qty_open'        => $item['qty'],

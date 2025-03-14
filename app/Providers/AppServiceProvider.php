@@ -24,10 +24,10 @@ class AppServiceProvider extends ServiceProvider
         if (env('APP_ENV') !== 'local') {
             $url->forceScheme('https');
         }
-        
+
         Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {
             $event->extendSocialite('azure', \SocialiteProviders\Azure\Provider::class);
         });
-       
+
     }
 }

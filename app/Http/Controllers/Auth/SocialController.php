@@ -26,8 +26,8 @@ class SocialController extends Controller
             $user = User::where('email', $socialuser->getEmail())->first();
             if (! $user) {
                 $user = User::create([
-                    'name' => $socialuser->getName(),
-                    'email' => $socialuser->getEmail(),
+                    'name'     => $socialuser->getName(),
+                    'email'    => $socialuser->getEmail(),
                     'password' => Hash::make(Str::random(8)),
                     'position',
                 ]);
@@ -52,9 +52,9 @@ class SocialController extends Controller
     private function _createSocials($user, $socialuser, $provider): void
     {
         $user->socials()->create([
-            'provider' => $provider,
-            'provider_id' => $socialuser->getId(),
-            'provider_token' => $socialuser->token,
+            'provider'               => $provider,
+            'provider_id'            => $socialuser->getId(),
+            'provider_token'         => $socialuser->token,
             'provider_refresh_token' => $socialuser->refreshToken,
         ]);
     }

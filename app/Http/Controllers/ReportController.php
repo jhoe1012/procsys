@@ -171,10 +171,10 @@ class ReportController extends Controller
                 ? $query->whereBetween('pr_headers.release_date', [$value, $request->input('release_date_to')])
                 : $query->where('pr_headers.release_date', 'ilike', "%{$value}%"),
             'created_name' => fn ($value) => $query->where('pr_headers.created_name', 'ilike', "%{$value}%"),
-            'short_text' => fn ($value) => $query->where('pr_materials.short_text', 'ilike', "%{$value}%"),
-            'purch_grp' => fn ($value) => $query->where('pr_materials.purch_grp', 'ilike', "%{$value}%"),
-            'plant' => fn ($value) => $query->where('pr_headers.plant', 'ilike', "%{$value}%"),
-            'open_pr' => fn ($value) => $query->where('pr_materials.qty_open', '>', 0),
+            'short_text'   => fn ($value) => $query->where('pr_materials.short_text', 'ilike', "%{$value}%"),
+            'purch_grp'    => fn ($value) => $query->where('pr_materials.purch_grp', 'ilike', "%{$value}%"),
+            'plant'        => fn ($value) => $query->where('pr_headers.plant', 'ilike', "%{$value}%"),
+            'open_pr'      => fn ($value) => $query->where('pr_materials.qty_open', '>', 0),
         ];
 
         // Apply filters dynamically
@@ -247,13 +247,13 @@ class ReportController extends Controller
             'release_date_from' => fn ($value) => $request->input('release_date_to')
                 ? $query->whereBetween('po_headers.release_date', [$value, $request->input('release_date_to')])
                 : $query->where('po_headers.release_date', 'ilike', "%{$value}%"),
-            'purch_grp' => fn ($value) => $query->where('po_materials.purch_grp', 'ilike', "%{$value}%"),
+            'purch_grp'     => fn ($value) => $query->where('po_materials.purch_grp', 'ilike', "%{$value}%"),
             'supplier_code' => fn ($value) => $query->where('po_headers.vendor_id', 'ilike', "%{$value}%"),
             'supplier_name' => fn ($value) => $query->where('vendors.name_1', 'ilike', "%{$value}%"),
-            'short_text' => fn ($value) => $query->where('po_materials.short_text', 'ilike', "%{$value}%"),
-            'created_name' => fn ($value) => $query->where('po_headers.created_name', 'ilike', "%{$value}%"),
-            'plant' => fn ($value) => $query->where('po_headers.plant', 'ilike', "%{$value}%"),
-            'open_po' => fn ($value) => $query->where('po_materials.po_gr_qty', '>', 0),
+            'short_text'    => fn ($value) => $query->where('po_materials.short_text', 'ilike', "%{$value}%"),
+            'created_name'  => fn ($value) => $query->where('po_headers.created_name', 'ilike', "%{$value}%"),
+            'plant'         => fn ($value) => $query->where('po_headers.plant', 'ilike', "%{$value}%"),
+            'open_po'       => fn ($value) => $query->where('po_materials.po_gr_qty', '>', 0),
         ];
 
         // Apply filters dynamically
@@ -327,9 +327,9 @@ class ReportController extends Controller
                 : $query->where('gr_materials.mat_code', 'ilike', "%{$value}%"),
             'supplier_code' => fn ($value) => $query->where('gr_headers.vendor_id', 'ilike', "%{$value}%"),
             'supplier_name' => fn ($value) => $query->where('vendors.name_1', 'ilike', "%{$value}%"),
-            'created_name' => fn ($value) => $query->where('gr_headers.created_name', 'ilike', "%{$value}%"),
+            'created_name'  => fn ($value) => $query->where('gr_headers.created_name', 'ilike', "%{$value}%"),
             'delivery_note' => fn ($value) => $query->where('gr_headers.delivery_note', 'ilike', "%{$value}%"),
-            'short_text' => fn ($value) => $query->where('gr_materials.short_text', 'ilike', "%{$value}%"),
+            'short_text'    => fn ($value) => $query->where('gr_materials.short_text', 'ilike', "%{$value}%"),
         ];
 
         // Apply filters dynamically
@@ -378,7 +378,7 @@ class ReportController extends Controller
     }
 
     private function _getPoHistory($request)
-    { 
+    {
         $query = DB::table('pr_headers')->select(
             'pr_headers.pr_number',
             'po_headers.po_number',
@@ -478,7 +478,7 @@ class ReportController extends Controller
 
         $query->orderBy('pr_headers.pr_number')
             ->orderBy('pr_materials.item_no')->get();
- 
+
         return $query;
 
     }

@@ -21,7 +21,6 @@ use App\Models\PrMaterial;
 use App\Models\SupplierNote;
 use App\Models\User;
 use App\Models\Vendor;
-use App\Models\Attachment;
 use App\Services\AttachmentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -453,7 +452,7 @@ class POController extends Controller
                         $po_header
                     ));
                 break;
-            case 2: 
+            case 2:
                 $finance = User::where(
                     'cc_by_deliv_addr',
                     'like',
@@ -464,11 +463,11 @@ class POController extends Controller
                 Mail::to($po_header->createdBy->email)
                     ->cc($approved_cc)
                     ->send(new PoApprovedEmail(
-                        $po_header->createdBy->name, 
+                        $po_header->createdBy->name,
                         $po_header,
                         $po_header->attachments
-                        ->pluck('filepath', 'filename')
-                        ->toArray()
+                            ->pluck('filepath', 'filename')
+                            ->toArray()
                     ));
                 break;
             case 3:

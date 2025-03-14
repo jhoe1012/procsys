@@ -15,18 +15,18 @@ class PlantResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'plant' => $this->plant,
-            'name1' => $this->name1,
-            'lot_no' => $this->lot_no,
-            'street' => $this->street,
-            'street2' => $this->street2,
-            'district' => $this->district,
-            'postal_code' => $this->postal_code,
-            'city' => $this->city,
+            'id'           => $this->id,
+            'plant'        => $this->plant,
+            'name1'        => $this->name1,
+            'lot_no'       => $this->lot_no,
+            'street'       => $this->street,
+            'street2'      => $this->street2,
+            'district'     => $this->district,
+            'postal_code'  => $this->postal_code,
+            'city'         => $this->city,
             'country_code' => $this->country_code,
-            'created_by' => $this->created_by,
-            'updated_by' => $this->updated_by,
+            'created_by'   => $this->created_by,
+            'updated_by'   => $this->updated_by,
         ];
     }
 }

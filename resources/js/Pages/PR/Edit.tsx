@@ -28,7 +28,16 @@ import { formatNumber } from '@/lib/utils';
 import { Choice, IAlternativeUom, IApprover, IitemDetails, IMessage, IPRHeader, IPRMaterial, IWorkflow, PageProps } from '@/types';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useMemo, useState } from 'react';
-import { checkboxColumn, DataSheetGrid, dateColumn, floatColumn, intColumn, keyColumn, textColumn , createTextColumn } from 'react-datasheet-grid';
+import {
+  checkboxColumn,
+  DataSheetGrid,
+  dateColumn,
+  floatColumn,
+  intColumn,
+  keyColumn,
+  textColumn,
+  createTextColumn,
+} from 'react-datasheet-grid';
 import 'react-datasheet-grid/dist/style.css';
 import { Operation } from 'react-datasheet-grid/dist/types';
 import Approval from './Partial/Approval';
@@ -86,7 +95,7 @@ const Edit = ({
     _method: 'patch',
   });
 
-  const handleOnChange = (value: string, rowIndex: number) => {
+  const handleOnChangeUom = (value: string, rowIndex: number) => {
     setMaterial((prevMaterial) => {
       const newMaterial = [...prevMaterial];
       newMaterial[rowIndex] = {
@@ -128,7 +137,7 @@ const Edit = ({
       {
         ...keyColumn('alt_uom', {
           component: ({ rowData, rowIndex }: { rowData: IAlternativeUom[]; rowIndex: number }) =>
-            rowData && rowData.length !== 0 ? <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChange} /> : <></>,
+            rowData && rowData.length !== 0 ? <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChangeUom} /> : <></>,
         }),
         disabled: true,
         title: '',

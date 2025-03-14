@@ -30,11 +30,11 @@ class PrHeader extends Model
     protected function casts(): array
     {
         return [
-            'doc_date' => 'date',
-            'release_date' => 'date',
+            'doc_date'       => 'date',
+            'release_date'   => 'date',
             'total_pr_value' => 'float',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
+            'created_at'     => 'datetime',
+            'updated_at'     => 'datetime',
         ];
     }
 

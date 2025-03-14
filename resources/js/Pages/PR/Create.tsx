@@ -116,7 +116,7 @@ const Create = ({
       {
         ...keyColumn('alt_uom', {
           component: ({ rowData, rowIndex }: { rowData: IAlternativeUom[]; rowIndex: number }) =>
-            rowData && rowData.length !== 0 ? <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChange} /> : <></>,
+            rowData && rowData.length !== 0 ? <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChangeUom} /> : <></>,
         }),
         disabled: true,
         title: '',
