@@ -114,7 +114,13 @@ class PRController extends Controller
     public function copy(Request $request, $prnumber): Response
     {
 
-        $pr_header = PrHeader::with('plants', 'prmaterials', 'prmaterials.altUoms', 'prmaterials.materialGroups', 'workflows', 'attachments')
+        $pr_header = PrHeader::with('plants',
+            'prmaterials',
+            'prmaterials.altUoms',
+            'prmaterials.altUoms.altUomText',
+            'prmaterials.materialGroups',
+            'workflows',
+            'attachments')
             ->where('pr_number', $prnumber)
             ->firstOrFail();
 
@@ -123,6 +129,13 @@ class PRController extends Controller
             'mat_desc'               => Material::select('mat_desc as value', 'mat_desc as label')->orderBy('mat_desc')->get()->toArray(),
             'materialGroupsSupplies' => MaterialGroup::supplies()->pluck('mat_grp_code')->toArray(),
             'prheader'               => new PRHeaderResource($pr_header),
+            'prCtrlGrp'              => PrctrlGrp::select('id as value', DB::raw("prctrl_grp|| ' - ' || prctrl_desc  as label"))
+            ->whereHas(
+                'user',
+                fn (Builder $q) => $q->where('user_id', Auth::id())
+            )
+            ->get()
+            ->toArray(),
         ]);
     }
 
