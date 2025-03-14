@@ -4,7 +4,16 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useMemo, useState } from 'react';
 import 'react-datasheet-grid/dist/style.css';
-import { checkboxColumn, DataSheetGrid, dateColumn, floatColumn, intColumn, keyColumn, textColumn, createTextColumn } from 'react-datasheet-grid';
+import {
+  checkboxColumn,
+  DataSheetGrid,
+  dateColumn,
+  floatColumn,
+  intColumn,
+  keyColumn,
+  textColumn,
+  createTextColumn,
+} from 'react-datasheet-grid';
 import {
   CUSTOM_DATA_SHEET_STYLE,
   PermissionsEnum,
@@ -387,6 +396,7 @@ const Edit = ({
                   displayKey="name1"
                   onValueChange={(value) => setData('plant', value)}
                   value={data.plant}
+                  displayValue={true}
                 />
                 <ReactSelectField
                   label="Vendor"

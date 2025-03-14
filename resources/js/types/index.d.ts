@@ -14,7 +14,7 @@ export interface AuthUser {
   id: number;
   name: string;
   email: string;
-  plants: string[];
+  plants: { name1: string; plant: string }[];
   approvers: IApprover[];
   roles: string[];
   permissions: string[];
@@ -500,6 +500,7 @@ export interface GenericSelectProps<T> {
   value: string;
   onValueChange: (value: string) => void;
   placeholder?: string;
+  displayValue?: boolean;
 }
 
 export interface TabItem {

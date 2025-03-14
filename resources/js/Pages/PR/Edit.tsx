@@ -359,6 +359,7 @@ const Edit = ({
                   displayKey="name1"
                   onValueChange={(value) => setData('plant', value)}
                   value={data.plant}
+                  displayValue={true}
                 />
               </div>
               <div className="p-5">

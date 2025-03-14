@@ -9,6 +9,7 @@ use App\Exports\POReportExport;
 use App\Exports\PRReportExport;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
@@ -149,6 +150,7 @@ class ReportController extends Controller
             ->join('pr_materials', 'pr_headers.id', '=', 'pr_materials.pr_headers_id')
             ->leftJoin('po_materials', 'po_materials.pr_material_id', '=', 'pr_materials.id')
             ->leftJoin('po_headers', 'po_headers.id', '=', 'po_materials.po_header_id');
+        $query->whereIn('pr_headers.plant', $this->_getUserPlant());
 
         // Define filterable fields and conditions
         $filters = [
@@ -227,6 +229,8 @@ class ReportController extends Controller
             ->leftJoin('gr_materials', 'gr_materials.po_material_id', '=', 'po_materials.id')
             ->leftJoin('gr_headers', 'gr_headers.id', '=', 'gr_materials.gr_header_id');
 
+        $query->whereIn('po_headers.plant', $this->_getUserPlant());
+
         // Define filterable fields and conditions
         $filters = [
             'doc_date_from' => fn ($value) => $request->input('doc_date_to')
@@ -304,6 +308,7 @@ class ReportController extends Controller
             ->Join('vendors', 'vendors.supplier', '=', 'gr_headers.vendor_id')
             ->leftJoin('po_materials', 'po_materials.id', '=', 'gr_materials.po_material_id')
             ->leftJoin('po_headers', 'po_headers.po_number', '=', 'gr_headers.po_number');
+        $query->whereIn('gr_headers.plant', $this->_getUserPlant());
 
         // Define filterable fields and conditions
         $filters = [
@@ -440,7 +445,8 @@ class ReportController extends Controller
             ->leftJoin('plants', 'plants.plant', '=', 'pr_headers.plant')
             ->leftJoin('material_groups', 'material_groups.mat_grp_code', '=', 'pr_materials.mat_grp');
         // REMOVE DRAFT AND CANCELLED STATUS
-        $query->where(fn ($q) => $q->where('pr_headers.appr_seq', '>', 0));
+        $query->where(fn ($q) => $q->where('pr_headers.appr_seq', '>', 0))
+            ->whereIn('pr_headers.plant', $this->_getUserPlant());
 
         // Define filterable fields and conditions
         $filters = [
@@ -480,6 +486,10 @@ class ReportController extends Controller
             ->orderBy('pr_materials.item_no')->get();
 
         return $query;
+    }
 
+    private function _getUserPlant(): array
+    {
+        return Auth::user()->plants->pluck('plant')->toArray();
     }
 }

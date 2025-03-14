@@ -82,8 +82,8 @@ class PRController extends Controller
         }
 
         $pr_header = $query->orderBy('seq', 'asc')
-            ->orderBy('status', 'asc')
             ->orderBy('pr_number', 'desc')
+            ->orderBy('status', 'asc')
             ->paginate(50)
             ->onEachSide(5);
 
@@ -130,12 +130,12 @@ class PRController extends Controller
             'materialGroupsSupplies' => MaterialGroup::supplies()->pluck('mat_grp_code')->toArray(),
             'prheader'               => new PRHeaderResource($pr_header),
             'prCtrlGrp'              => PrctrlGrp::select('id as value', DB::raw("prctrl_grp|| ' - ' || prctrl_desc  as label"))
-            ->whereHas(
-                'user',
-                fn (Builder $q) => $q->where('user_id', Auth::id())
-            )
-            ->get()
-            ->toArray(),
+                ->whereHas(
+                    'user',
+                    fn (Builder $q) => $q->where('user_id', Auth::id())
+                )
+                ->get()
+                ->toArray(),
         ]);
     }
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enum\PermissionsEnum;
 use App\Models\PoHeader;
 use App\Models\PrHeader;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -21,11 +22,15 @@ class DashboardController extends Controller
 
         if ($user->can(PermissionsEnum::ApproverPR)) {
             $prApprSeq = $user->approvers
-                ->firstWhere('type', 'pr')['seq'] ?? 0;
+                ->firstWhere('type', 'pr') ?? 0;
 
             $prHeader['approval'] = PrHeader::approval($userPlants)
-                ->where('appr_seq', '>=', $prApprSeq)
+                ->whereHas(
+                    'prmaterials',
+                    fn (Builder $q) => $q->where('prctrl_grp_id', $prApprSeq->prctrl_grp_id)
+                )->where('appr_seq', '>=', $prApprSeq->seq)
                 ->count();
+
         } else {
             $prHeader['approval'] = PrHeader::approval($userPlants)
                 ->count();

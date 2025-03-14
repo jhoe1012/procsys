@@ -4,7 +4,16 @@ import { Button, Input, Label, Textarea, Toaster, useToast } from '@/Components/
 import { CUSTOM_DATA_SHEET_STYLE, DATE_TODAY, PermissionsEnum } from '@/lib/constants';
 import { Choice, IAlternativeUom, IPOHeader, IPOMaterial, IVendor, PageProps } from '@/types';
 import { FormEventHandler, useEffect, useMemo, useState } from 'react';
-import { checkboxColumn, DataSheetGrid, dateColumn, floatColumn, intColumn, keyColumn, textColumn, createTextColumn} from 'react-datasheet-grid';
+import {
+  checkboxColumn,
+  DataSheetGrid,
+  dateColumn,
+  floatColumn,
+  intColumn,
+  keyColumn,
+  textColumn,
+  createTextColumn,
+} from 'react-datasheet-grid';
 import 'react-datasheet-grid/dist/style.css';
 import { Operation } from 'react-datasheet-grid/dist/types';
 import { AltUom, Checkbox, Dropzone, InputField, ReactSelectField, SelectField, TabFields, VendorCard } from '@/Components';
@@ -262,6 +271,7 @@ const Create = ({
                   displayKey="name1"
                   onValueChange={(value) => setData('plant', value)}
                   value={data.plant}
+                  displayValue={true}
                 />
                 <ReactSelectField
                   label="Vendor"
