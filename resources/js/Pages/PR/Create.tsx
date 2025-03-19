@@ -2,7 +2,16 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { PageProps, IPRMaterial, IPRHeader, Choice, IAlternativeUom } from '@/types';
 import { Button, Textarea, Input, Label, Toaster, useToast } from '@/Components/ui/';
-import { DataSheetGrid, checkboxColumn, textColumn, intColumn, keyColumn, floatColumn, dateColumn } from 'react-datasheet-grid';
+import {
+  DataSheetGrid,
+  checkboxColumn,
+  textColumn,
+  intColumn,
+  keyColumn,
+  floatColumn,
+  dateColumn,
+  createTextColumn,
+} from 'react-datasheet-grid';
 import 'react-datasheet-grid/dist/style.css';
 import { useState, useEffect, useMemo, FormEventHandler } from 'react';
 import { Operation } from 'react-datasheet-grid/dist/types';
@@ -11,6 +20,9 @@ import { Loading, Dropzone, selectColumn, InputField, SelectField, TabFields, Al
 import { usePRMaterial, usePRMaterialValidation } from '@/Hooks';
 import { CUSTOM_DATA_SHEET_STYLE, DATE_TODAY, DEFAULT_PR_MATERIAL, PermissionsEnum } from '@/lib/constants';
 import { can } from '@/lib/helper';
+import { Item } from '@radix-ui/react-select';
+import { text } from 'node:stream/consumers';
+import { components } from 'react-select';
 
 const Create = ({
   auth,
@@ -18,7 +30,8 @@ const Create = ({
   mat_desc,
   prheader,
   materialGroupsSupplies,
-}: PageProps<{ mat_code: Choice[]; mat_desc: Choice[]; prheader: IPRHeader; materialGroupsSupplies: string[] }>) => {
+  prCtrlGrp,
+}: PageProps<{ mat_code: Choice[]; mat_desc: Choice[]; prheader: IPRHeader; materialGroupsSupplies: string[]; prCtrlGrp: Choice[] }>) => {
   const initialMaterial = prheader
     ? prheader.prmaterials.map((prmaterial) => ({
         ...prmaterial,
@@ -52,7 +65,7 @@ const Create = ({
     prmaterials: [],
   });
 
-  const handleOnChange = (value: string, rowIndex: number) => {
+  const handleOnChangeUom = (value: string, rowIndex: number) => {
     setMaterial((prevMaterial) => {
       const newMaterial = [...prevMaterial];
       newMaterial[rowIndex] = {
@@ -70,7 +83,20 @@ const Create = ({
       { ...keyColumn('item_no', intColumn), title: 'ItmNo', disabled: true, minWidth: 55 },
       { ...keyColumn('mat_code', selectColumn({ choices: mat_code })), title: 'Material', minWidth: 120 },
       { ...keyColumn('short_text', selectColumn({ choices: mat_desc })), title: 'Material Description', minWidth: 300 },
-      { ...keyColumn('item_text', textColumn), title: 'Item Text', minWidth: 300 },
+      {
+        ...keyColumn(
+          'item_text',
+          createTextColumn({
+            continuousUpdates: true,
+            parseUserInput: (value) => value?.slice(0, 40) || '',
+            formatBlurredInput: (value) => value?.slice(0, 40) || '',
+            formatInputOnFocus: (value) => value?.slice(0, 40) || '',
+            parsePastedValue: (value) => value?.slice(0, 40) || '',
+          })
+        ),
+        title: 'Item Text',
+        minWidth: 300,
+      },
       { ...keyColumn('qty', floatColumn), title: 'Qty', minWidth: 70 },
       {
         ...keyColumn('ord_unit', textColumn),
@@ -78,9 +104,19 @@ const Create = ({
         minWidth: 55,
         disabled: true,
       },
+      // {
+      //   ...keyColumn('altUomSelect', {
+      //     component: ({ rowData, rowIndex }) => rowData && <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChange} />,
+      //   }),
+      //   disabled: true,
+      //   title: '',
+      //   minWidth: 20,
+      //   maxWidth: 20,
+      // },
       {
-        ...keyColumn('altUomSelect', {
-          component: ({ rowData, rowIndex }) => rowData && <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChange} />,
+        ...keyColumn('alt_uom', {
+          component: ({ rowData, rowIndex }: { rowData: IAlternativeUom[]; rowIndex: number }) =>
+            rowData && rowData.length !== 0 ? <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChangeUom} /> : <></>,
         }),
         disabled: true,
         title: '',
@@ -103,8 +139,14 @@ const Create = ({
       { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 90, disabled: true },
       { ...keyColumn('currency', textColumn), title: 'Curr', minWidth: 50, disabled: true },
       { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 130 },
-      { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 90, disabled: true },
+      { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 100, disabled: true },
       { ...keyColumn('purch_grp', textColumn), title: 'Purch Grp', minWidth: 90, disabled: true },
+      {
+        ...keyColumn('prctrl_grp_id', selectColumn({ choices: prCtrlGrp })),
+        title: 'PR Controller',
+        minWidth: 200,
+        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
+      },
     ],
     []
   );
@@ -193,6 +235,7 @@ const Create = ({
                   displayKey="name1"
                   onValueChange={(value) => setData('plant', value)}
                   value={data.plant}
+                  displayValue={true}
                 />
               </div>
               <div className="p-1 pt-0">

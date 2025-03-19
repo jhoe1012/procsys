@@ -13,12 +13,12 @@ class UomSeeder extends Seeder
     public function run(): void
     {
         Uom::truncate();
-        $csv = fopen(base_path('database/csv/uom.csv'), 'r');
+        $csv       = fopen(base_path('database/csv/uom.csv'), 'r');
         $firstline = true;
         while (($data = fgetcsv($csv, 1000, ',')) !== false) {
             if (! $firstline) {
                 Uom::create([
-                    'uom' => $data[0],
+                    'uom'      => $data[0],
                     'uom_text' => $data[1],
                 ]);
             }

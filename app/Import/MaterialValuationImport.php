@@ -17,15 +17,15 @@ class MaterialValuationImport implements ToCollection
         $rows->shift(); // remove the header row
         foreach ($rows as $row) {
             $this->materialValuation[] = [
-                'mat_code' => $row[0],
-                'plant' => $row[1],
-                'currency' => $row[2],
+                'mat_code'        => $row[0],
+                'plant'           => $row[1],
+                'currency'        => $row[2],
                 'valuation_price' => $row[3],
-                'per_unit' => $row[4],
-                'valid_from' => Carbon::parse(Date::excelToTimestamp((int) $row[5]))->format('Y-m-d'),
-                'valid_to' => Carbon::parse(Date::excelToTimestamp((int) $row[6]))->format('Y-m-d'),
-                'created_by' => Auth::id(),
-                'created_at' => now(),
+                'per_unit'        => $row[4],
+                'valid_from'      => Carbon::parse(Date::excelToTimestamp((int) $row[5]))->format('Y-m-d'),
+                'valid_to'        => Carbon::parse(Date::excelToTimestamp((int) $row[6]))->format('Y-m-d'),
+                'created_by'      => Auth::id(),
+                'created_at'      => now(),
             ];
         }
     }

@@ -9,6 +9,7 @@ const SelectField = <T extends Record<string, any>>({
   value,
   onValueChange,
   placeholder = 'Select an option',
+  displayValue = false,
 }: GenericSelectProps<T>) => {
   return (
     <div className="flex-auto">
@@ -21,7 +22,7 @@ const SelectField = <T extends Record<string, any>>({
           {items &&
             items.map((item) => (
               <SelectItem value={String(item[valueKey])} key={String(item[valueKey])}>
-                {String(item[valueKey])} {item[displayKey]}
+                {displayValue && String(item[valueKey])} {item[displayKey]}
               </SelectItem>
             ))}
         </SelectContent>

@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Exports\GRReportExport;
 use App\Exports\MaterialReportExport;
+use App\Exports\POHistoryExport;
 use App\Exports\POReportExport;
 use App\Exports\PRReportExport;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
@@ -17,7 +20,7 @@ class ReportController extends Controller
     {
         return Inertia::render('Reports/PrReport', [
             'prReport' => $this->_getPrReport($request)
-                ->paginate(50)
+                ->paginate(perPage: 15)
                 ->onEachSide(5)
                 ->appends($request->query() ?: null),
             'queryParams' => $request->query() ?: null,
@@ -38,7 +41,7 @@ class ReportController extends Controller
     {
         return Inertia::render('Reports/PoReport', [
             'poReport' => $this->_getPoReport($request)
-                ->paginate(50)
+                ->paginate(15)
                 ->onEachSide(5)
                 ->appends($request->query() ?: null),
             'queryParams' => $request->query() ?: null,
@@ -59,7 +62,7 @@ class ReportController extends Controller
     {
         return Inertia::render('Reports/GrReport', [
             'grReport' => $this->_getGrReport($request)
-                ->paginate(50)
+                ->paginate(15)
                 ->onEachSide(5)
                 ->appends($request->query() ?: null),
             'queryParams' => $request->query() ?: null,
@@ -80,7 +83,7 @@ class ReportController extends Controller
     {
         return Inertia::render('Reports/MaterialReport', [
             'materialReport' => $this->_getMaterialReport($request)
-                ->paginate(50)
+                ->paginate(15)
                 ->onEachSide(5)
                 ->appends($request->query() ?: null),
             'queryParams' => $request->query() ?: null,
@@ -93,6 +96,27 @@ class ReportController extends Controller
         return Excel::download(
             new MaterialReportExport($this->_getMaterialReport($request)->get()->toArray()),
             'Material Report.xlsx',
+            \Maatwebsite\Excel\Excel::XLSX
+        );
+    }
+
+    public function poHistoryReport(Request $request)
+    {
+        return Inertia::render('Reports/PoHistoryReport', [
+            'poHistories' => $this->_getPoHistory($request)
+                ->paginate(50)
+                ->onEachSide(2)
+                ->appends($request->query() ?: null),
+            'queryParams' => $request->query() ?: null,
+
+        ]);
+    }
+
+    public function downloadPoHistoryReport(Request $request)
+    {
+        return Excel::download(
+            new POHistoryExport($this->_getPoHistory($request)->get()->toArray()),
+            'PO History Report.xlsx',
             \Maatwebsite\Excel\Excel::XLSX
         );
     }
@@ -126,62 +150,40 @@ class ReportController extends Controller
             ->join('pr_materials', 'pr_headers.id', '=', 'pr_materials.pr_headers_id')
             ->leftJoin('po_materials', 'po_materials.pr_material_id', '=', 'pr_materials.id')
             ->leftJoin('po_headers', 'po_headers.id', '=', 'po_materials.po_header_id');
+        $query->whereIn('pr_headers.plant', $this->_getUserPlant());
 
-        if ($request->input('purch_grp')) {
-            $query->where('pr_materials.purch_grp', 'ilike', '%'.$request->input('purch_grp').'%');
-        }
-        if ($request->input('prnumber_from') && $request->input('prnumber_to')) {
-            $query->whereBetween('pr_headers.pr_number', [$request->input('prnumber_from'), $request->input('prnumber_to')]);
-        } elseif ($request->input('prnumber_from')) {
-            $query->where('pr_headers.pr_number', 'ilike', '%'.$request->input('prnumber_from').'%');
-        }
+        // Define filterable fields and conditions
+        $filters = [
+            'prnumber_from' => fn ($value) => $request->input('prnumber_to')
+                ? $query->whereBetween('pr_headers.pr_number', [$value, $request->input('prnumber_to')])
+                : $query->where('pr_headers.pr_number', 'ilike', "%{$value}%"),
+            'ponumber_from' => fn ($value) => $request->input('ponumber_to')
+                ? $query->whereBetween('po_headers.po_number', values: [$value, $request->input('ponumber_to')])
+                : $query->where('po_headers.po_number', 'ilike', "%{$value}%"),
+            'matcode_from' => fn ($value) => $request->input('matcode_to')
+                ? $query->whereBetween('pr_materials.mat_code', [$value, $request->input('matcode_to')])
+                : $query->where('pr_materials.mat_code', 'ilike', "%{$value}%"),
+            'request_date_from' => fn ($value) => $request->input('request_date_to')
+                ? $query->whereBetween('pr_headers.doc_date', [$value, $request->input('request_date_to')])
+                : $query->where('pr_headers.doc_date', 'ilike', "%{$value}%"),
+            'deliv_date_from' => fn ($value) => $request->input('deliv_date_to')
+                ? $query->whereBetween('pr_materials.del_date', [$value, $request->input('deliv_date_to')])
+                : $query->where('pr_materials.del_date', 'ilike', "%{$value}%"),
+            'release_date_from' => fn ($value) => $request->input('release_date_to')
+                ? $query->whereBetween('pr_headers.release_date', [$value, $request->input('release_date_to')])
+                : $query->where('pr_headers.release_date', 'ilike', "%{$value}%"),
+            'created_name' => fn ($value) => $query->where('pr_headers.created_name', 'ilike', "%{$value}%"),
+            'short_text'   => fn ($value) => $query->where('pr_materials.short_text', 'ilike', "%{$value}%"),
+            'purch_grp'    => fn ($value) => $query->where('pr_materials.purch_grp', 'ilike', "%{$value}%"),
+            'plant'        => fn ($value) => $query->where('pr_headers.plant', 'ilike', "%{$value}%"),
+            'open_pr'      => fn ($value) => $query->where('pr_materials.qty_open', '>', 0),
+        ];
 
-        if ($request->input('ponumber_from') && $request->input('ponumber_to')) {
-            $query->whereBetween('po_headers.po_number', [$request->input('ponumber_from'), $request->input('ponumber_to')]);
-        } elseif ($request->input('ponumber_from')) {
-            $query->where('po_headers.po_number', 'ilike', '%'.$request->input('ponumber_from').'%');
-        }
-
-        if ($request->input('matcode_from') && $request->input('matcode_to')) {
-            $query->whereBetween('pr_materials.mat_code', [$request->input('matcode_from'), $request->input('matcode_to')]);
-        } elseif ($request->input('matcode_from')) {
-            $query->where('pr_materials.mat_code', 'ilike', '%'.$request->input('matcode_from').'%');
-        }
-
-        if ($request->input('short_text')) {
-            $query->where('pr_materials.short_text', 'ilike', '%'.$request->input('short_text').'%');
-        }
-
-        if ($request->input('request_date_from') && $request->input('request_date_to')) {
-            $query->whereBetween('pr_headers.doc_date', [$request->input('request_date_from'), $request->input('request_date_to')]);
-        } elseif ($request->input('request_date_from')) {
-            $query->whereDate('pr_headers.doc_date', $request->input('request_date_from'));
-        }
-
-        if ($request->input('deliv_date_from') && $request->input('deliv_date_to')) {
-            $query->whereBetween('pr_materials.del_date', [$request->input('deliv_date_from'), $request->input('deliv_date_to')]);
-        } elseif ($request->input('deliv_date_from')) {
-            $query->whereDate('pr_materials.del_date', $request->input('deliv_date_from'));
-        }
-
-        if ($request->input('deliv_date_from') && $request->input('deliv_date_to')) {
-            $query->whereBetween('pr_materials.del_date', [$request->input('deliv_date_from'), $request->input('deliv_date_to')]);
-        } elseif ($request->input('deliv_date_from')) {
-            $query->whereDate('pr_materials.del_date', $request->input('deliv_date_from'));
-        }
-
-        if ($request->input('release_date_from') && $request->input('release_date_to')) {
-            $query->whereBetween('pr_headers.release_date', [$request->input('release_date_from'), $request->input('release_date_to')]);
-        } elseif ($request->input('release_date_from')) {
-            $query->whereDate('pr_headers.release_date', $request->input('release_date_from'));
-        }
-
-        if ($request->input('created_name')) {
-            $query->where('pr_headers.created_name', 'ilike', '%'.$request->input('created_name').'%');
-        }
-
-        if ($request->input('plant')) {
-            $query->where('pr_headers.plant', 'ilike', '%'.$request->input('plant').'%');
+        // Apply filters dynamically
+        foreach (request()->only(array_keys($filters)) as $field => $value) {
+            if (! empty($value)) {
+                $filters[$field]($value);
+            }
         }
 
         $query->orderBy('pr_headers.pr_number')
@@ -227,67 +229,42 @@ class ReportController extends Controller
             ->leftJoin('gr_materials', 'gr_materials.po_material_id', '=', 'po_materials.id')
             ->leftJoin('gr_headers', 'gr_headers.id', '=', 'gr_materials.gr_header_id');
 
-        if ($request->input('doc_date_from') && $request->input('doc_date_to')) {
-            $query->whereBetween('po_headers.doc_date', [$request->input('doc_date_from'), $request->input('doc_date_to')]);
-        } elseif ($request->input('doc_date_from')) {
-            $query->whereDate('po_headers.doc_date', $request->input('doc_date_from'));
-        }
+        $query->whereIn('po_headers.plant', $this->_getUserPlant());
 
-        if ($request->input('deliv_date_from') && $request->input('deliv_date_to')) {
-            $query->whereBetween('po_headers.deliv_date', [$request->input('deliv_date_from'), $request->input('deliv_date_to')]);
-        } elseif ($request->input('deliv_date_from')) {
-            $query->whereDate('po_headers.deliv_date', $request->input('deliv_date_from'));
-        }
+        // Define filterable fields and conditions
+        $filters = [
+            'doc_date_from' => fn ($value) => $request->input('doc_date_to')
+                ? $query->whereBetween('po_headers.doc_date', [$value, $request->input('doc_date_to')])
+                : $query->where('po_headers.doc_date', 'ilike', "%{$value}%"),
+            'deliv_date_from' => fn ($value) => $request->input('deliv_date_to')
+                ? $query->whereBetween('po_headers.deliv_date', [$value, $request->input('deliv_date_to')])
+                : $query->where('po_headers.deliv_date', 'ilike', "%{$value}%"),
+            'ponumber_from' => fn ($value) => $request->input('ponumber_to')
+                ? $query->whereBetween('po_headers.po_number', [$value, $request->input('ponumber_to')])
+                : $query->where('po_headers.po_number', 'ilike', "%{$value}%"),
+            'controlno_from' => fn ($value) => $request->input('controlno_to')
+                ? $query->whereBetween('po_headers.control_no', [$value, $request->input('controlno_to')])
+                : $query->where('po_headers.control_no', 'ilike', "%{$value}%"),
+            'matcode_from' => fn ($value) => $request->input('matcode_to')
+                ? $query->whereBetween('po_materials.mat_code', [$value, $request->input('matcode_to')])
+                : $query->where('po_materials.mat_code', 'ilike', "%{$value}%"),
+            'release_date_from' => fn ($value) => $request->input('release_date_to')
+                ? $query->whereBetween('po_headers.release_date', [$value, $request->input('release_date_to')])
+                : $query->where('po_headers.release_date', 'ilike', "%{$value}%"),
+            'purch_grp'     => fn ($value) => $query->where('po_materials.purch_grp', 'ilike', "%{$value}%"),
+            'supplier_code' => fn ($value) => $query->where('po_headers.vendor_id', 'ilike', "%{$value}%"),
+            'supplier_name' => fn ($value) => $query->where('vendors.name_1', 'ilike', "%{$value}%"),
+            'short_text'    => fn ($value) => $query->where('po_materials.short_text', 'ilike', "%{$value}%"),
+            'created_name'  => fn ($value) => $query->where('po_headers.created_name', 'ilike', "%{$value}%"),
+            'plant'         => fn ($value) => $query->where('po_headers.plant', 'ilike', "%{$value}%"),
+            'open_po'       => fn ($value) => $query->where('po_materials.po_gr_qty', '>', 0),
+        ];
 
-        if ($request->input('purch_grp')) {
-            $query->where('po_materials.purch_grp', 'ilike', '%'.$request->input('purch_grp').'%');
-        }
-
-        if ($request->input('supplier_code')) {
-            $query->where('po_headers.vendor_id', 'ilike', '%'.$request->input('supplier_code').'%');
-        }
-        if ($request->input('supplier_name')) {
-            $query->where('vendors.name_1', 'ilike', '%'.$request->input('supplier_name').'%');
-        }
-
-        if ($request->input('ponumber_from') && $request->input('ponumber_to')) {
-            $query->whereBetween('po_headers.po_number', [$request->input('ponumber_from'), $request->input('ponumber_to')]);
-        } elseif ($request->input('ponumber_from')) {
-            $query->where('po_headers.po_number', 'ilike', '%'.$request->input('ponumber_from').'%');
-        }
-
-        if ($request->input('controlno_from') && $request->input('controlno_to')) {
-            $query->whereBetween('po_headers.control_no', [$request->input('controlno_from'), $request->input('controlno_to')]);
-        } elseif ($request->input('controlno_from')) {
-            $query->where('po_headers.control_no', 'ilike', '%'.$request->input('controlno_from').'%');
-        }
-
-        if ($request->input('matcode_from') && $request->input('matcode_to')) {
-            $query->whereBetween('po_materials.mat_code', [$request->input('matcode_from'), $request->input('matcode_to')]);
-        } elseif ($request->input('matcode_from')) {
-            $query->where('po_materials.mat_code', 'ilike', '%'.$request->input('matcode_from').'%');
-        }
-
-        if ($request->input('short_text')) {
-            $query->where('po_materials.short_text', 'ilike', '%'.$request->input('short_text').'%');
-        }
-
-        if ($request->input('release_date_from') && $request->input('release_date_to')) {
-            $query->whereBetween('po_headers.release_date', [$request->input('release_date_from'), $request->input('release_date_to')]);
-        } elseif ($request->input('release_date_from')) {
-            $query->whereDate('po_headers.release_date', $request->input('release_date_from'));
-        }
-
-        if ($request->input('created_name')) {
-            $query->where('po_headers.created_name', 'ilike', '%'.$request->input('created_name').'%');
-        }
-
-        if ($request->input('plant')) {
-            $query->where('po_headers.plant', 'ilike', '%'.$request->input('plant').'%');
-        }
-
-        if ($request->input('open_po')) {
-            $query->where('po_materials.po_gr_qty', '>', '0');
+        // Apply filters dynamically
+        foreach (request()->only(array_keys($filters)) as $field => $value) {
+            if (! empty($value)) {
+                $filters[$field]($value);
+            }
         }
 
         $query->orderBy('po_headers.po_number')
@@ -331,55 +308,40 @@ class ReportController extends Controller
             ->Join('vendors', 'vendors.supplier', '=', 'gr_headers.vendor_id')
             ->leftJoin('po_materials', 'po_materials.id', '=', 'gr_materials.po_material_id')
             ->leftJoin('po_headers', 'po_headers.po_number', '=', 'gr_headers.po_number');
+        $query->whereIn('gr_headers.plant', $this->_getUserPlant());
 
-        if ($request->input('grnumber_from') && $request->input('grnumber_to')) {
-            $query->whereBetween('gr_headers.gr_number', [$request->input('grnumber_from'), $request->input('grnumber_to')]);
-        } elseif ($request->input('grnumber_from')) {
-            $query->where('gr_headers.gr_number', 'ilike', '%'.$request->input('grnumber_from').'%');
-        }
+        // Define filterable fields and conditions
+        $filters = [
+            'grnumber_from' => fn ($value) => $request->input('grnumber_to')
+                ? $query->whereBetween('gr_headers.gr_number', [$value, $request->input('grnumber_to')])
+                : $query->where('gr_headers.gr_number', 'ilike', "%{$value}%"),
+            'ponumber_from' => fn ($value) => $request->input('ponumber_to')
+                ? $query->whereBetween('gr_headers.po_number', [$value, $request->input('ponumber_to')])
+                : $query->where('gr_headers.po_number', 'ilike', "%{$value}%"),
+            'control_from' => fn ($value) => $request->input('control_to')
+                ? $query->whereBetween('po_headers.control_no', [$value, $request->input('control_to')])
+                : $query->where('po_headers.control_no', 'ilike', "%{$value}%"),
+            'entry_date_from' => fn ($value) => $request->input('entry_date_to')
+                ? $query->whereBetween('gr_headers.entry_date', [$value, $request->input('entry_date_to')])
+                : $query->where('gr_headers.entry_date', 'ilike', "%{$value}%"),
+            'actual_date_from' => fn ($value) => $request->input('actual_date_to')
+                ? $query->whereBetween('gr_headers.actual_date', [$value, $request->input('actual_date_to')])
+                : $query->where('gr_headers.actual_date', 'ilike', "%{$value}%"),
+            'mat_code_from' => fn ($value) => $request->input('mat_code_to')
+                ? $query->whereBetween('gr_materials.mat_code', [$value, $request->input('mat_code_to')])
+                : $query->where('gr_materials.mat_code', 'ilike', "%{$value}%"),
+            'supplier_code' => fn ($value) => $query->where('gr_headers.vendor_id', 'ilike', "%{$value}%"),
+            'supplier_name' => fn ($value) => $query->where('vendors.name_1', 'ilike', "%{$value}%"),
+            'created_name'  => fn ($value) => $query->where('gr_headers.created_name', 'ilike', "%{$value}%"),
+            'delivery_note' => fn ($value) => $query->where('gr_headers.delivery_note', 'ilike', "%{$value}%"),
+            'short_text'    => fn ($value) => $query->where('gr_materials.short_text', 'ilike', "%{$value}%"),
+        ];
 
-        if ($request->input('ponumber_from') && $request->input('ponumber_to')) {
-            $query->whereBetween('gr_headers.po_number', [$request->input('ponumber_from'), $request->input('ponumber_to')]);
-        } elseif ($request->input('ponumber_from')) {
-            $query->where('gr_headers.po_number', 'ilike', '%'.$request->input('ponumber_from').'%');
-        }
-
-        if ($request->input('control_from') && $request->input('control_to')) {
-            $query->whereBetween('po_headers.control_no', [$request->input('control_from'), $request->input('control_to')]);
-        } elseif ($request->input('control_from')) {
-            $query->where('po_headers.control_no', 'ilike', '%'.$request->input('control_from').'%');
-        }
-
-        if ($request->input('supplier_code')) {
-            $query->where('gr_headers.vendor_id', 'ilike', '%'.$request->input('supplier_code').'%');
-        }
-        if ($request->input('supplier_name')) {
-            $query->where('vendors.name_1', 'ilike', '%'.$request->input('supplier_name').'%');
-        }
-
-        if ($request->input('created_name')) {
-            $query->where('gr_headers.created_name', 'ilike', '%'.$request->input('created_name').'%');
-        }
-        if ($request->input('entry_date_from') && $request->input('entry_date_to')) {
-            $query->whereBetween('gr_headers.entry_date', [$request->input('entry_date_from'), $request->input('entry_date_to')]);
-        } elseif ($request->input('entry_date_from')) {
-            $query->whereDate('gr_headers.entry_date', $request->input('entry_date_from'));
-        }
-        if ($request->input('actual_date_from') && $request->input('actual_date_to')) {
-            $query->whereBetween('gr_headers.actual_date', [$request->input('actual_date_from'), $request->input('actual_date_to')]);
-        } elseif ($request->input('actual_date_from')) {
-            $query->whereDate('gr_headers.actual_date', $request->input('actual_date_from'));
-        }
-        if ($request->input('delivery_note')) {
-            $query->where('gr_headers.delivery_note', 'ilike', '%'.$request->input('delivery_note').'%');
-        }
-        if ($request->input('mat_code_from') && $request->input('mat_code_to')) {
-            $query->whereBetween('gr_materials.mat_code', [$request->input('mat_code_from'), $request->input('mat_code_to')]);
-        } elseif ($request->input('mat_code_from')) {
-            $query->where('gr_materials.mat_code', 'ilike', '%'.$request->input('mat_code_from').'%');
-        }
-        if ($request->input('short_text')) {
-            $query->where('gr_materials.short_text', 'ilike', '%'.$request->input('short_text').'%');
+        // Apply filters dynamically
+        foreach (request()->only(array_keys($filters)) as $field => $value) {
+            if (! empty($value)) {
+                $filters[$field]($value);
+            }
         }
 
         $query->orderBy('gr_headers.gr_number')
@@ -388,7 +350,7 @@ class ReportController extends Controller
         return $query;
     }
 
-    public function _getMaterialReport($request)
+    private function _getMaterialReport($request)
     {
         $query = DB::table('materials')->select(
             'materials.mat_code',
@@ -418,5 +380,116 @@ class ReportController extends Controller
             ->orderBy('alternative_uoms.counter');
 
         return $query;
+    }
+
+    private function _getPoHistory($request)
+    {
+        $query = DB::table('pr_headers')->select(
+            'pr_headers.pr_number',
+            'po_headers.po_number',
+            'po_headers.control_no',
+            'gr_headers.gr_number',
+            'pr_headers.doc_date AS pr_doc_date',
+            'po_headers.doc_date AS po_doc_date',
+            'pr_materials.item_no AS pr_item_no',
+            'pr_headers.status  AS pr_header_stat',
+            'pr_headers.created_name AS pr_created_name',
+            'pr_materials.del_date AS pr_deliv_date',
+            //  DB::raw("to_char(pr_materials.del_date, 'YYYY/MM/DD') AS pr_deliv_date"),
+            DB::raw("CASE WHEN pr_materials.status = 'X' THEN  pr_materials.qty * -1 ELSE pr_materials.qty END  AS pr_qty"),
+            DB::raw("CASE WHEN pr_materials.status = 'X' THEN pr_materials.qty_open * -1 ELSE pr_materials.qty_open END  AS  pr_qty_open"),
+            'pr_materials.ord_unit AS pr_unit',
+            DB::raw("CASE WHEN pr_materials.status = 'X' THEN 'Deleted' END AS pr_mat_stat"),
+            'po_materials.item_no AS po_item_no',
+            DB::raw("CASE WHEN po_materials.status = 'X' THEN po_materials.po_qty *-1 ELSE  po_materials.po_qty END AS po_qty"),
+            DB::raw("CASE WHEN po_materials.status = 'X' THEN po_materials.net_price *-1 ELSE po_materials.net_price END   AS net_price"),
+            DB::raw("CASE WHEN po_materials.status = 'X' THEN po_materials.total_value *-1 ELSE po_materials.total_value END AS total_net_price"),
+            DB::raw("CASE WHEN po_materials.status = 'X' THEN po_materials.po_gr_qty *-1 ELSE po_materials.po_gr_qty END AS po_open_qty"),
+            'po_materials.unit AS po_unit',
+            DB::raw("CASE WHEN po_materials.status = 'X' THEN 'Deleted' 
+                                 WHEN po_materials.status = 'D' THEN 'Delivery Completed' 
+                                 END  AS po_mat_stat"),
+            'gr_materials.item_no AS gr_item_no',
+            DB::raw('CASE WHEN gr_materials.is_cancel = TRUE THEN gr_materials.gr_qty * -1 ELSE gr_materials.gr_qty END AS gr_qty'),
+            DB::raw('CASE WHEN gr_materials.is_cancel = TRUE THEN (gr_materials.gr_qty * po_materials.net_price) * -1 ELSE gr_materials.gr_qty * po_materials.net_price END AS gr_total'),
+            'gr_materials.unit AS gr_unit',
+            DB::raw("CASE WHEN gr_materials.is_cancel = TRUE THEN 'Deleted' END AS gr_mat_stat"),
+            DB::raw("CASE WHEN  gr_materials.dci = TRUE THEN 'X' END AS dci"),
+            'gr_headers.actual_date',
+            'material_groups.mat_grp_desc',
+            'vendors.supplier',
+            'vendors.name_1',
+            'po_headers.status AS po_header_stat',
+            'po_headers.created_name AS po_created_name',
+            DB::raw('CASE WHEN po_headers.is_mother_po = true THEN po_materials.del_date ELSE po_headers.deliv_date END AS po_deliv_date'),
+            'po_headers.deliv_addr',
+            DB::raw('CASE WHEN po_materials.mat_code IS NOT NULL THEN po_materials.mat_code ELSE pr_materials.mat_code END AS mat_code'),
+            DB::raw('CASE WHEN po_materials.short_text IS NOT NULL THEN po_materials.short_text ELSE pr_materials.short_text END AS short_text'),
+            'po_materials.item_text',
+            'gr_headers.created_name AS gr_created_name',
+            'gr_headers.entry_date',
+            'gr_headers.delivery_note',
+            'gr_materials.mfg_date',
+            'gr_materials.sled_bbd',
+            'pr_headers.reason_pr',
+            'po_headers.header_text AS po_header_text',
+            'gr_headers.header_text  AS gr_header_text',
+            DB::raw("plants.plant || ' - ' || plants.name1 AS plant_name"),
+        )
+            ->join('pr_materials', 'pr_headers.id', '=', 'pr_materials.pr_headers_id')
+            ->leftJoin('po_materials', 'po_materials.pr_material_id', '=', 'pr_materials.id')
+            ->leftJoin('po_headers', 'po_headers.id', '=', 'po_materials.po_header_id')
+            ->leftJoin('gr_materials', 'gr_materials.po_material_id', '=', 'po_materials.id')
+            ->leftJoin('gr_headers', 'gr_headers.id', '=', 'gr_materials.gr_header_id')
+            ->leftJoin('vendors', 'vendors.supplier', '=', 'po_headers.vendor_id')
+            ->leftJoin('plants', 'plants.plant', '=', 'pr_headers.plant')
+            ->leftJoin('material_groups', 'material_groups.mat_grp_code', '=', 'pr_materials.mat_grp');
+        // REMOVE DRAFT AND CANCELLED STATUS
+        $query->where(fn ($q) => $q->where('pr_headers.appr_seq', '>', 0))
+            ->whereIn('pr_headers.plant', $this->_getUserPlant());
+
+        // Define filterable fields and conditions
+        $filters = [
+            'prnumber_from' => fn ($value) => $request->input('prnumber_to')
+                ? $query->whereBetween('pr_headers.pr_number', [$value, $request->input('prnumber_to')])
+                : $query->where('pr_headers.pr_number', 'ilike', "%{$value}%"),
+            'ponumber_from' => fn ($value) => $request->input('ponumber_to')
+                ? $query->whereBetween('po_headers.po_number', values: [$value, $request->input('ponumber_to')])
+                : $query->where('po_headers.po_number', 'ilike', "%{$value}%"),
+            'controlno_from' => fn ($value) => $request->input('controlno_to')
+                ? $query->whereBetween('po_headers.control_no', values: [$value, $request->input('controlno_to')])
+                : $query->where('po_headers.control_no', 'ilike', "%{$value}%"),
+            'grnumber_from' => fn ($value) => $request->input('grnumber_to')
+                ? $query->whereBetween('gr_headers.gr_number', values: [$value, $request->input('grnumber_to')])
+                : $query->where('gr_headers.gr_number', 'ilike', "%{$value}%"),
+            'matcode_from' => fn ($value) => $request->input('matcode_to')
+                ? $query->where(fn (Builder $q) => $q->whereBetween('pr_materials.mat_code', [$value, $request->input('matcode_to')])
+                    ->orWhereBetween('po_materials.mat_code', [$value, $request->input('matcode_to')]))
+                : $query->where(fn (Builder $q) => $q->where('pr_materials.mat_code', 'ilike', "%{$value}%")
+                    ->orWhere('po_materials.mat_code', 'ilike', "%{$value}%")),
+            'short_text' => fn ($value) => $query->where(fn (Builder $q) => $q->where('pr_materials.short_text', 'ilike', "%{$value}%")
+                ->orwhere('po_materials.short_text', 'ilike', "%{$value}%")),
+            'deliv_date_from' => fn ($value) => $request->input('deliv_date_to')
+                ? $query->whereBetween('po_headers.deliv_date', [$value, $request->input('deliv_date_to')])
+                : $query->where('po_headers.deliv_date', 'ilike', "%{$value}%"),
+            'open_po' => fn ($value) => $query->where('po_materials.po_gr_qty', '>', 0),
+            'open_pr' => fn ($value) => $query->where('pr_materials.qty_open', '>', 0),
+        ];
+        // Apply filters dynamically
+        foreach (request()->only(array_keys($filters)) as $field => $value) {
+            if (! empty($value)) {
+                $filters[$field]($value);
+            }
+        }
+
+        $query->orderBy('pr_headers.pr_number')
+            ->orderBy('pr_materials.item_no')->get();
+
+        return $query;
+    }
+
+    private function _getUserPlant(): array
+    {
+        return Auth::user()->plants->pluck('plant')->toArray();
     }
 }

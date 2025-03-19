@@ -5,7 +5,7 @@ import { useState, useEffect, KeyboardEvent } from 'react';
 import { formatNumber } from '@/lib/utils';
 import AsyncSelect from 'react-select/async';
 import { PermissionsEnum, REACT_SELECT_STYLES, STATUS_APPROVED } from '@/lib/constants';
-import { Button, Toaster, useToast } from '@/Components/ui';
+import { badgeVariants, Button, Toaster, useToast } from '@/Components/ui';
 import { Checkbox, InputField, Modal, Pagination, TextInput } from '@/Components';
 import { fetchVendor } from '@/lib/Vendor';
 import { PrinterIcon } from 'lucide-react';
@@ -67,7 +67,7 @@ export default function Index({
       header={
         <div className="flex flex-row justify-between">
           <h2 className="font-semibold text-xl text-gray-800 leading-tight">Purchase Order List</h2>
-          {can(auth.user, PermissionsEnum.EditPR) && (
+          {can(auth.user, PermissionsEnum.EditPO) && (
             <Button onClick={() => setControlNumberModal(true)} className="h-8" disabled={checkboxPo.length <= 0}>
               <PrinterIcon />
             </Button>
@@ -240,7 +240,13 @@ export default function Index({
                           <td className="px-3 py-2">{po.created_name}</td>
                           <td className="px-3 py-2">{po.doc_date}</td>
                           <td className="px-3 py-2">{po.deliv_date}</td>
-                          <td className="px-3 py-2">{po.status}</td>
+                          {/* <td className="px-3 py-2">{po.status}</td> */}
+                          <td className="px-3 py-2">
+                            <span className={badgeVariants({ variant: po.status.includes('Approval') ? 'Approval' : po.status })}>
+                              {po.status}
+                            </span>
+                          </td>
+
                           <td className="px-3 py-2 text-center">{po.print_count}</td>
                           <td className="px-3 py-2">
                             {can(auth.user, PermissionsEnum.EditPO) && po.status === STATUS_APPROVED && (

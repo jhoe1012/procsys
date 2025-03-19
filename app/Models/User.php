@@ -48,7 +48,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
         ];
     }
 
@@ -71,6 +71,15 @@ class User extends Authenticatable
     {
         return $this->belongsTo(POHeader::class, 'created_by', 'id');
     }
+
+    /**
+     * Get all of the socials for the User
+     */
+    public function socials(): HasMany
+    {
+        return $this->hasMany(Social::class);
+    }
+
     // public function roles(): HasManyThrough
     // {
     //     return $this->hasManyThrough(

@@ -72,6 +72,14 @@
             vertical-align: top;
         }
 
+        .text-right {
+            text-align: right;
+        }
+
+        .pr {
+            padding-right: 40px;
+        }
+
         .supplier_name {
             padding: 0 0 0 50px;
         }
@@ -146,11 +154,10 @@
                                 @if ($poHeader->is_mother_po)
                                     <br><b> Delivery Date: </b>{{ date('m/d/Y', strtotime($pomaterial->del_date)) }}
                                 @endif
-
                             </td>
-                            <td width='15%' class="align-top">{{ $pomaterial->po_qty }} {{ $pomaterial->unit }}
-                            </td>
-                            <td width='15%' class="align-top">
+                            <td width='6%' class="align-top text-right">{{ $pomaterial->po_qty }} </td>
+                            <td width='8%' class="align-top">{{ $pomaterial->unit }} </td>
+                            <td width='15%' class="align-top text-right pr">
                                 {{ $pomaterial->taxClass?->tax_class == 1
                                     ? Number::currency($pomaterial->net_price * ($pomaterial->taxClass?->tax_value * 0.01 + 1), 'PHP')
                                     : Number::currency($pomaterial->net_price, 'PHP') }}
@@ -165,7 +172,7 @@
                                         : round($pomaterial->net_price * $pomaterial->po_qty);
                                 $grandTotal += $totalValue;
                             @endphp
-                            <td width='15%' class="align-top">
+                            <td width='15%' class="align-top text-right pr">
                                 @php
                                     echo Number::currency($totalValue, 'PHP');
                                 @endphp
@@ -189,7 +196,7 @@
                 {{ $poHeader->created_name }}
             </div>
             <div class='approver'>
-                {{ $poHeader->workflows->pluck('approved_by')->implode('/') }}
+                {{ $poHeader->workflows->pluck('approved_by')->unique()->implode('/') }}
                 <br />
             </div>
         </div>

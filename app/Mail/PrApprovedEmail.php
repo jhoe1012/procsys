@@ -4,10 +4,10 @@ namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Support\Facades\Log;
 
 class PrApprovedEmail extends Mailable
@@ -17,7 +17,7 @@ class PrApprovedEmail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(private $requestor, private $pr_header , private array $pr_attachments = [])
+    public function __construct(private $requestor, private $pr_header, private array $pr_attachments = [])
     {
         //
     }
@@ -48,25 +48,24 @@ class PrApprovedEmail extends Mailable
      *
      * @return array<int, \Illuminate\Mail\Mailables\Attachment>
      */
-
     public function attachments(): array
     {
         if (empty($this->pr_attachments)) {
             Log::info("No attachments found for PR: {$this->pr_header->pr_number}");
-            return []; 
+
+            return [];
         }
 
         return collect($this->pr_attachments)->map(function ($filepath, $filename) {
             $fullPath = public_path($filepath);
 
-            if (!$fullPath || !file_exists($fullPath)) {
+            if (! $fullPath || ! file_exists($fullPath)) {
                 Log::error("Attachment not found: {$fullPath}");
-                return null; 
+
+                return null;
             }
 
             return Attachment::fromPath($fullPath)->as($filename);
-        })->filter()->all(); 
+        })->filter()->all();
     }
-
-
 }

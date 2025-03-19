@@ -28,6 +28,7 @@ export const DEFAULT_PR_MATERIAL = {
   del_date: undefined,
   mat_grp: undefined,
   purch_grp: undefined,
+  prctrl_grp: undefined,
 };
 
 // Custom style for react select for index

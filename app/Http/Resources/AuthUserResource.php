@@ -17,13 +17,13 @@ class AuthUserResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'email' => $this->email,
-            'roles' => $this->getRoleNames(),
+            'id'          => $this->id,
+            'name'        => $this->name,
+            'email'       => $this->email,
+            'roles'       => $this->getRoleNames(),
             'permissions' => $this->getAllPermissions()->map(fn ($permission) => $permission->name),
-            'plants' => $this->plants->map(fn ($plant) => ['plant' => $plant->plant, 'name1' => $plant->name1]),
-            'approvers' => $this->approvers,
+            'plants'      => $this->plants->map(fn ($plant) => ['plant' => $plant->plant, 'name1' => $plant->name1]),
+            'approvers'   => $this->approvers,
         ];
     }
 }

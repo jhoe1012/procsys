@@ -15,9 +15,9 @@ class UomResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'uom' => $this->uom,
-            'uom_text' => $this->uom_text,
+            'id'         => $this->id,
+            'uom'        => $this->uom,
+            'uom_text'   => $this->uom_text,
             'created_by' => new UserResource($this->whenLoaded('createdBy')),
             'updated_by' => new UserResource($this->whenLoaded('updatedBy')),
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),

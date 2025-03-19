@@ -26,7 +26,7 @@ export default function PrReport({ auth, prReport, queryParams }: PageProps) {
           </div>
         </div>
       }>
-      <Head title="Purchase Requisition" />
+      <Head title="Purchase Requisition Report" />
 
       <div className="py-2">
         <div className="max-w-8xl mx-auto sm:px-6 lg:px-2">

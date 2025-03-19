@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enum\HeaderSeq;
 use App\Enum\PermissionsEnum;
 use App\Enum\RolesEnum;
 use App\Http\Resources\PRHeaderResource;
@@ -13,12 +14,13 @@ use App\Models\ApproveStatus;
 use App\Models\Material;
 use App\Models\MaterialGroup;
 use App\Models\Plant;
+use App\Models\PrctrlGrp;
 use App\Models\PrHeader;
 use App\Models\PrMaterial;
 use App\Models\User;
-use App\Models\Attachment;
 use App\Services\AttachmentService;
 use Carbon\Carbon;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -42,11 +44,14 @@ class PRController extends Controller
         $query = PrHeader::with(['prmaterials', 'plants'])
             ->whereIn('plant', $userPlants);
 
-        // Check approval permission and filter
+        // Check approval permission
         if ($user->can(PermissionsEnum::ApproverPR)) {
-            $approverSeq = $user->approvers
-                ->firstWhere('type', 'pr')['seq'] ?? 0;
-            $query->where('appr_seq', '>=', $approverSeq);
+            $approver = $user->approvers
+                ->firstWhere('type', 'pr') ?? 0;
+            $query->whereHas(
+                'prmaterials',
+                fn (Builder $q) => $q->where('prctrl_grp_id', $approver->prctrl_grp_id)
+            )->where('appr_seq', '>=', $approver->seq);
         }
 
         $filters = [
@@ -56,9 +61,9 @@ class PRController extends Controller
                     request('pr_number_to'),
                 ])
                 : $query->where('pr_number', 'like', "%{$value}%"),
-            'plant' => fn ($value) => $query->where('plant', 'ilike', "%{$value}%"),
-            'created_name' => fn ($value) => $query->where('created_name', 'ilike', "%{$value}%"),
-            'requested_by' => fn ($value) => $query->where('requested_by', 'ilike', "%{$value}%"),
+            'plant'         => fn ($value) => $query->where('plant', 'ilike', "%{$value}%"),
+            'created_name'  => fn ($value) => $query->where('created_name', 'ilike', "%{$value}%"),
+            'requested_by'  => fn ($value) => $query->where('requested_by', 'ilike', "%{$value}%"),
             'doc_date_from' => fn ($value) => request('doc_date_to')
                 ? $query->whereBetween('doc_date', [$value, request('doc_date_to')])
                 : $query->whereDate('doc_date', $value),
@@ -76,15 +81,16 @@ class PRController extends Controller
             }
         }
 
-        $pr_header = $query->orderBy('status', 'desc')
-            ->orderBy('doc_date', 'desc')
+        $pr_header = $query->orderBy('seq', 'asc')
+            ->orderBy('pr_number', 'desc')
+            ->orderBy('status', 'asc')
             ->paginate(50)
             ->onEachSide(5);
 
         return Inertia::render('PR/Index', [
-            'pr_header' => PRHeaderResource::collection($pr_header),
+            'pr_header'   => PRHeaderResource::collection($pr_header),
             'queryParams' => $request->query() ?: null,
-            'message' => ['success' => session('success'), 'error' => session('error')],
+            'message'     => ['success' => session('success'), 'error' => session('error')],
         ]);
     }
 
@@ -92,24 +98,44 @@ class PRController extends Controller
     {
 
         return Inertia::render('PR/Create', [
-            'mat_code' => Material::select('mat_code as value', 'mat_code as label')->orderBy('mat_code')->get()->toArray(),
-            'mat_desc' => Material::select('mat_desc as value', 'mat_desc as label')->orderBy('mat_desc')->get()->toArray(),
+            'mat_code'               => Material::select('mat_code as value', 'mat_code as label')->orderBy('mat_code')->get()->toArray(),
+            'mat_desc'               => Material::select('mat_desc as value', 'mat_desc as label')->orderBy('mat_desc')->get()->toArray(),
             'materialGroupsSupplies' => MaterialGroup::supplies()->pluck('mat_grp_code')->toArray(),
+            'prCtrlGrp'              => PrctrlGrp::select('id as value', DB::raw("prctrl_grp|| ' - ' || prctrl_desc  as label"))
+                ->whereHas(
+                    'user',
+                    fn (Builder $q) => $q->where('user_id', Auth::id())
+                )
+                ->get()
+                ->toArray(),
         ]);
     }
 
     public function copy(Request $request, $prnumber): Response
     {
 
-        $pr_header = PrHeader::with('plants', 'prmaterials', 'prmaterials.altUoms', 'prmaterials.materialGroups', 'workflows', 'attachments')
+        $pr_header = PrHeader::with('plants',
+            'prmaterials',
+            'prmaterials.altUoms',
+            'prmaterials.altUoms.altUomText',
+            'prmaterials.materialGroups',
+            'workflows',
+            'attachments')
             ->where('pr_number', $prnumber)
             ->firstOrFail();
 
         return Inertia::render('PR/Create', [
-            'mat_code' => Material::select('mat_code as value', 'mat_code as label')->orderBy('mat_code')->get()->toArray(),
-            'mat_desc' => Material::select('mat_desc as value', 'mat_desc as label')->orderBy('mat_desc')->get()->toArray(),
+            'mat_code'               => Material::select('mat_code as value', 'mat_code as label')->orderBy('mat_code')->get()->toArray(),
+            'mat_desc'               => Material::select('mat_desc as value', 'mat_desc as label')->orderBy('mat_desc')->get()->toArray(),
             'materialGroupsSupplies' => MaterialGroup::supplies()->pluck('mat_grp_code')->toArray(),
-            'prheader' => new PRHeaderResource($pr_header),
+            'prheader'               => new PRHeaderResource($pr_header),
+            'prCtrlGrp'              => PrctrlGrp::select('id as value', DB::raw("prctrl_grp|| ' - ' || prctrl_desc  as label"))
+                ->whereHas(
+                    'user',
+                    fn (Builder $q) => $q->where('user_id', Auth::id())
+                )
+                ->get()
+                ->toArray(),
         ]);
     }
 
@@ -122,7 +148,7 @@ class PRController extends Controller
                     ->map(fn ($item, $index) => new PrMaterial($this->_mapPrMaterialData($item, $index)))
                     ->values();
                 $total_pr_value = $pr_materials->sum('total_value');
-                $pr_header = PrHeader::create(array_merge(
+                $pr_header      = PrHeader::create(array_merge(
                     $request->only([
                         'created_name',
                         'requested_by',
@@ -132,10 +158,10 @@ class PRController extends Controller
                         'deliv_addr',
                     ]),
                     [
-                        'doc_date' => Carbon::parse($request->input('doc_date'))->format('Y-m-d'),
+                        'doc_date'       => Carbon::parse($request->input('doc_date'))->format('Y-m-d'),
                         'total_pr_value' => $total_pr_value,
-                        'appr_seq' => 0,
-                        'status' => Str::ucfirst(ApproveStatus::DRAFT),
+                        'appr_seq'       => 0,
+                        'status'         => Str::ucfirst(ApproveStatus::DRAFT),
                     ]
                 ));
                 $pr_header->prmaterials()->saveMany($pr_materials->all());
@@ -166,7 +192,9 @@ class PRController extends Controller
         
         $approvers = Approvers::where('amount_from', '<=', $pr_header->total_pr_value)
             ->where('plant', $pr_header->plant)
-            ->where('type', operator: Approvers::TYPE_PR)->orderBy('seq')->get();
+            ->where('type', Approvers::TYPE_PR)
+            ->where('prctrl_grp_id', $pr_header->prmaterials->first()->prctrl_grp_id)
+            ->orderBy('seq')->get();
 
         if ($approvers->isEmpty()) {
             return to_route('pr.edit', $pr_header->pr_number)->with('error', 'No Approver Found.');
@@ -178,18 +206,20 @@ class PRController extends Controller
         $approvers->each(function ($approver) use ($pr_header) {
             ApproveStatus::create([
                 'pr_number' => $pr_header->pr_number,
-                'status' => $approver->desc,
-                'position' => $approver->position,
-                'seq' => $approver->seq,
+                'status'    => $approver->desc,
+                'position'  => $approver->position,
+                'seq'       => $approver->seq,
             ]);
         });
 
         $firstApprover = $approvers->first();
         $pr_header->update([
-            'status' => $firstApprover->desc,
+            'status'   => $firstApprover->desc,
             'appr_seq' => $firstApprover->seq,
+            'seq'      => HeaderSeq::ForApproval->value,
         ]);
 
+        $pr_header->refresh();
         Mail::to($firstApprover->user->email)
             ->send(new PrForApprovalEmail(
                 $firstApprover->user->name,
@@ -206,6 +236,7 @@ class PRController extends Controller
             'plants',
             'prmaterials',
             'prmaterials.altUoms',
+            'prmaterials.altUoms.altUomText',
             'prmaterials.materialGroups',
             'workflows',
             'attachments'
@@ -249,12 +280,22 @@ class PRController extends Controller
             ->filter(fn ($item) => ! empty($item->doc))->values();
 
         return Inertia::render('PR/Edit', [
-            'prheader' => new PRHeaderResource($pr_header),
-            'mat_code' => Material::select('mat_code as value', 'mat_code as label')->get()->toArray(),
-            'mat_desc' => Material::select('mat_desc as value', 'mat_desc as label')->get()->toArray(),
-            'message' => ['success' => session('success'), 'error' => session('error')],
-            'item_details' => $item_details,
+            'prheader'               => new PRHeaderResource($pr_header),
+            'mat_code'               => Material::select('mat_code as value', 'mat_code as label')->get()->toArray(),
+            'mat_desc'               => Material::select('mat_desc as value', 'mat_desc as label')->get()->toArray(),
+            'message'                => ['success' => session('success'), 'error' => session('error')],
+            'item_details'           => $item_details,
             'materialGroupsSupplies' => MaterialGroup::select('mat_grp_code')->where('is_supplies', true)->pluck('mat_grp_code')->toArray(),
+            'prCtrlGrp'              => PrctrlGrp::select('id as value', DB::raw("prctrl_grp|| ' - ' || prctrl_desc  as label"))
+                ->when(
+                    ! $request->user()->can(PermissionsEnum::ApproverPR),
+                    fn ($q) => $q->whereHas(
+                        'user',
+                        fn (Builder $q) => $q->where('user_id', Auth::id())
+                    )
+                )
+                ->get()
+                ->toArray(),
         ]);
     }
 
@@ -262,7 +303,7 @@ class PRController extends Controller
     {
         try {
             return DB::transaction(function () use ($request, $id) {
-                $pr_header = PrHeader::findOrFail($id);
+                $pr_header    = PrHeader::findOrFail($id);
                 $pr_materials = collect($request->input('prmaterials'))
                     ->filter(fn ($item) => ! empty($item['mat_code']))
                     ->map(fn ($item, $index) => $this->_mapOrUpdatePrMaterial($item, $index, $pr_header->id))
@@ -271,34 +312,33 @@ class PRController extends Controller
                         if (isset($item['id'])) {
                             $pr_material = PrMaterial::find($item['id']);
                         } else {
-                            $pr_material = new PrMaterial;
+                            $pr_material                = new PrMaterial;
                             $pr_material->pr_headers_id = $item['pr_headers_id'];
                         }
-                        $pr_material->item_no = $item['item_no'];
-                        $pr_material->mat_code = $item['mat_code'];
-                        $pr_material->short_text = $item['short_text'];
-                        $pr_material->qty = $item['qty'];
-                        $pr_material->qty_open = $item['qty_open'];
-                        $pr_material->price = $item['price'];
-                        $pr_material->ord_unit = $item['ord_unit'];
-                        $pr_material->per_unit = $item['per_unit'];
-                        $pr_material->unit = $item['unit'];
-                        $pr_material->total_value = $item['total_value'];
-                        $pr_material->currency = $item['currency'];
-                        $pr_material->del_date = $item['del_date'];
-                        $pr_material->mat_grp = $item['mat_grp'];
-                        $pr_material->purch_grp = $item['purch_grp'];
+                        $pr_material->item_no         = $item['item_no'];
+                        $pr_material->mat_code        = $item['mat_code'];
+                        $pr_material->short_text      = $item['short_text'];
+                        $pr_material->qty             = $item['qty'];
+                        $pr_material->qty_open        = $item['qty_open'];
+                        $pr_material->price           = $item['price'];
+                        $pr_material->ord_unit        = $item['ord_unit'];
+                        $pr_material->per_unit        = $item['per_unit'];
+                        $pr_material->unit            = $item['unit'];
+                        $pr_material->total_value     = $item['total_value'];
+                        $pr_material->currency        = $item['currency'];
+                        $pr_material->del_date        = $item['del_date'];
+                        $pr_material->mat_grp         = $item['mat_grp'];
+                        $pr_material->purch_grp       = $item['purch_grp'];
                         $pr_material->valuation_price = $item['valuation_price'];
-                        $pr_material->conversion = $item['conversion'];
-                        $pr_material->converted_qty = $item['converted_qty'];
-                        $pr_material->item_text = $item['item_text'];
-                        if (isset($item['qty_ordered']) && ($item['qty_ordered'] === null || $item['qty_ordered'] === 0)) {
+                        $pr_material->conversion      = $item['conversion'];
+                        $pr_material->converted_qty   = $item['converted_qty'];
+                        $pr_material->item_text       = $item['item_text'];
+                        if ($pr_material->qty_ordered === null || $pr_material->qty_ordered === 0) {
                             $pr_material->save();
                         }
 
                         return $item;
                     })->values();
-
                 $total_pr_value = $pr_materials->filter(fn ($item) => $item['status'] != 'X')->sum('total_value');
                 $total_pr_value = $total_pr_value != 0 ? $total_pr_value : $pr_header->total_pr_value;
                 $pr_header->update(
@@ -312,10 +352,11 @@ class PRController extends Controller
                             'deliv_addr',
                         ]),
                         [
-                            'doc_date' => Carbon::parse($request->input('doc_date'))->format('Y-m-d'),
+                            'doc_date'       => Carbon::parse($request->input('doc_date'))->format('Y-m-d'),
                             'total_pr_value' => $total_pr_value,
-                            'appr_seq' => 0,
-                            'status' => Str::ucfirst(ApproveStatus::DRAFT),
+                            'appr_seq'       => 0,
+                            'seq'            => HeaderSeq::Draft->value,
+                            'status'         => Str::ucfirst(ApproveStatus::DRAFT),
                         ]
                     )
                 );
@@ -344,13 +385,14 @@ class PRController extends Controller
             'plants',
             'prmaterials.materialGroups',
         ])
-        ->where('pr_number', $request->pr_number)
-        ->first();
+            ->where('pr_number', $request->pr_number)
+            ->first();
 
         $approver = Approvers::with('user')
             ->where('user_id', Auth::user()->id)
             ->where('plant', $pr_header->plant)
             ->where('type', Approvers::TYPE_PR)
+            ->where('prctrl_grp_id', $pr_header->prmaterials->first()->prctrl_grp_id)
             ->first();
 
         $email_status = 0;
@@ -362,22 +404,26 @@ class PRController extends Controller
                     ->where('seq', $pr_header->appr_seq)
                     ->where('plant', $pr_header->plant)
                     ->where('type', Approvers::TYPE_PR)
+                    ->where('prctrl_grp_id', $pr_header->prmaterials->first()->prctrl_grp_id)
+
                     ->first();
                 $pr_header->status = $approver_2nd->desc;
-
-                $email_status = 1;
+                $pr_header->seq    = HeaderSeq::ForApproval->value;
+                $email_status      = 1;
             } elseif (
                 $pr_header->total_pr_value >= $approver->amount_from
                 && $pr_header->total_pr_value <= $approver->amount_to
             ) {
-                $pr_header->status = Str::ucfirst(ApproveStatus::APPROVED);
+                $pr_header->status       = Str::ucfirst(ApproveStatus::APPROVED);
                 $pr_header->release_date = Carbon::now()->format('Y-m-d H:i:s');
-                $email_status = 2;
+                $pr_header->seq          = HeaderSeq::Approved->value;
+                $email_status            = 2;
             }
         } else {
-            $pr_header->status = Str::ucfirst($request->input('type'));
+            $pr_header->status   = Str::ucfirst($request->input('type'));
             $pr_header->appr_seq = $request->input('type') == ApproveStatus::REWORKED ? 0 : -1;
-            $approver_status = ApproveStatus::where('seq', '!=', $approver->seq)
+            $pr_header->seq      = $request->input('type') == ApproveStatus::REWORKED ? HeaderSeq::Draft->value : HeaderSeq::Cancelled->value;
+            $approver_status     = ApproveStatus::where('seq', '!=', $approver->seq)
                 ->where('pr_number', $pr_header->pr_number)
                 ->whereNull('user_id')
                 ->delete();
@@ -389,13 +435,14 @@ class PRController extends Controller
             ->where('pr_number', $pr_header->pr_number)
             ->whereNull('user_id')
             ->first();
-        $approver_status->status = Str::ucfirst($request->input('type'));
-        $approver_status->approved_by = Auth::user()->name;
-        $approver_status->user_id = Auth::user()->id;
-        $approver_status->message = $request->message;
+        $approver_status->status        = Str::ucfirst($request->input('type'));
+        $approver_status->approved_by   = Auth::user()->name;
+        $approver_status->user_id       = Auth::user()->id;
+        $approver_status->message       = $request->message;
         $approver_status->approved_date = now();
         $approver_status->save();
 
+        $pr_header->refresh();
         /**
          * Send email notification
          */
@@ -412,21 +459,20 @@ class PRController extends Controller
                 $recipients = User::whereHas('plants', function ($query) use ($plant_id) {
                     $query->where('id', $plant_id);
                 })
-                ->role(RolesEnum::PORequestor)
-                ->pluck('email')
-                ->unique()
-                ->toArray();
+                    ->role(RolesEnum::PORequestor)
+                    ->pluck('email')
+                    ->unique()
+                    ->toArray();
                 $recipients[] = $approver->user->email;
-           
                 Mail::to($pr_header->createdBy->email)
-                    ->cc($recipients) 
+                    ->cc($recipients)
                     ->send(new PrApprovedEmail(
                         $pr_header->createdBy->name,
-                        $pr_header, 
+                        $pr_header,
                         $pr_header->attachments
-                        ->pluck('filepath', 'filename')
-                        ->toArray()
-                    )); 
+                            ->pluck('filepath', 'filename')
+                            ->toArray()
+                    ));
 
                 break;
             case 3:
@@ -459,8 +505,9 @@ class PRController extends Controller
         $pr_header = PrHeader::with(['prmaterials' => fn ($query) => $query->whereNull('status')->orWhere('status', '')])
             ->findOrFail($id);
         if ($pr_header->prmaterials->isEmpty()) {
-            $pr_header->status = Str::ucfirst(ApproveStatus::CANCELLED);
+            $pr_header->status   = Str::ucfirst(ApproveStatus::CANCELLED);
             $pr_header->appr_seq = -1;
+            $pr_header->seq      = HeaderSeq::Cancelled->value;
             $pr_header->save();
         }
 
@@ -471,7 +518,7 @@ class PRController extends Controller
     {
         $prMaterials = PrMaterial::whereIn('id', $request->input('ids'))->get();
 
-        $toFlag = $prMaterials->filter(fn ($material) => $material->qty_ordered === null || $material->qty_ordered === 0);
+        $toFlag      = $prMaterials->filter(fn ($material) => $material->qty_ordered === null || $material->qty_ordered === 0);
         $withOpenQty = $prMaterials->filter(fn ($material) => $material->qty_ordered !== null && $material->qty_ordered > 0);
 
         DB::transaction(function () use ($toFlag) {
@@ -481,7 +528,7 @@ class PRController extends Controller
             }
 
             if ($toFlag->isNotEmpty()) {
-                $prHeader = $toFlag->first()->prheader;
+                $prHeader                 = $toFlag->first()->prheader;
                 $prHeader->total_pr_value = PrMaterial::where('pr_headers_id', $prHeader->id)
                     ->where(fn ($query) => $query->where('status', '<>', 'X')->orWhereNull('status'))
                     ->sum('total_value');
@@ -526,9 +573,10 @@ class PRController extends Controller
 
     public function recall($id)
     {
-        $prHeader = PrHeader::findOrFail($id);
-        $prHeader->status = Str::ucfirst(ApproveStatus::DRAFT);
+        $prHeader           = PrHeader::findOrFail($id);
+        $prHeader->status   = Str::ucfirst(ApproveStatus::DRAFT);
         $prHeader->appr_seq = 0;
+        $prHeader->seq      = HeaderSeq::Draft->value;
         $prHeader->save();
 
         return to_route('pr.edit', $prHeader->pr_number)->with('success', 'PR Recalled');
@@ -537,25 +585,26 @@ class PRController extends Controller
     private function _mapPrMaterialData(array $item, int $index)
     {
         return [
-            'item_no' => ($index + 1) * 10,
-            'mat_code' => $item['mat_code'],
-            'short_text' => $item['short_text'],
-            'item_text' => strtoupper($item['item_text']) ?? '',
-            'qty' => $item['qty'],
-            'qty_open' => $item['qty'],
-            'price' => $item['price'],
-            'ord_unit' => $item['ord_unit'],
-            'per_unit' => $item['per_unit'],
-            'unit' => $item['unit'],
-            'total_value' => $item['qty'] * $item['price'],
-            'currency' => $item['currency'],
-            'del_date' => Carbon::parse($item['del_date'])->format('Y-m-d'),
-            'mat_grp' => $item['mat_grp'],
-            'purch_grp' => $item['purch_grp'],
-            'status' => $item['status'] ?? null,
+            'item_no'         => ($index + 1) * 10,
+            'mat_code'        => $item['mat_code'],
+            'short_text'      => $item['short_text'],
+            'item_text'       => Str::limit(strtoupper($item['item_text'] ?? ''), 40, ''),
+            'qty'             => $item['qty'],
+            'qty_open'        => $item['qty'],
+            'price'           => $item['price'],
+            'ord_unit'        => $item['ord_unit'],
+            'per_unit'        => $item['per_unit'],
+            'unit'            => $item['unit'],
+            'total_value'     => $item['qty'] * $item['price'],
+            'currency'        => $item['currency'],
+            'del_date'        => Carbon::parse($item['del_date'])->format('Y-m-d'),
+            'mat_grp'         => $item['mat_grp'],
+            'purch_grp'       => $item['purch_grp'],
+            'status'          => $item['status'] ?? null,
             'valuation_price' => $item['valuation_price'],
-            'conversion' => $item['conversion'],
-            'converted_qty' => $item['converted_qty'],
+            'conversion'      => $item['conversion'],
+            'converted_qty'   => $item['converted_qty'],
+            'prctrl_grp_id'   => $item['prctrl_grp_id'] ?? null,
         ];
     }
 

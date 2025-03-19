@@ -19,3 +19,36 @@ DELETE FROM alternative_uoms WHERE mat_code NOT IN (SELECT mat_code FROM materia
 
 
 php artisan db:seed --class=RolesSeeder
+
+
+update po_headers set seq = 2 where status='Approved';
+update po_headers set seq = 1  where status ilike '%Approval%';
+update po_headers set seq = 3 where status ilike '%Cancelled%' or status ilike '%Rejected%';
+
+update pr_headers set seq = 2 where status='Approved';
+update pr_headers set seq = 1  where status ilike '%Approval%';
+update pr_headers set seq = 3 where status ilike '%Cancelled%' or status ilike '%Rejected%';
+
+php artisan db:seed --class=PrctrlGrpSeeder
+
+UPDATE pr_materials set prctrl_grp_id=1;
+
+ALTER TABLE public.series DROP CONSTRAINT series_title_unique;
+
+INSERT INTO series (id,title,plant,"from","to",current_value,created_at,updated_at) VALUES
+	 (4,'pr','P200',2020000001,2029999999,2020000000,'2024-09-24 15:23:44.000','2025-03-13 12:30:04.000'),
+	 (5,'po','P200',4502000001,4502999999,4502000000,'2024-09-24 15:23:44.000','2025-03-13 14:04:52.000'),
+	 (6,'gr','P200',5020000001,5029999999,5020000000,'2024-09-24 15:23:44.000','2025-03-13 14:15:45.000');
+
+
+BEGIN 
+
+SELECT mat_code, alt_uom, count(mat_code) FROM alternative_uoms GROUP BY mat_code, alt_uom HAVING count(mat_code) > 1 
+
+DELETE  FROM
+    alternative_uoms a
+        USING alternative_uoms b
+WHERE
+    a.id > b.id
+    AND a.mat_code = b.mat_code 
+    AND  a.alt_uom = b.alt_uom ;

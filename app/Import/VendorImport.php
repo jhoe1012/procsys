@@ -2,22 +2,17 @@
 
 namespace App\Import;
 
-use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\ToCollection;
-use Maatwebsite\Excel\Concerns\WithMultipleSheets;
-use Maatwebsite\Excel\Concerns\SkipsUnknownSheets;
-use Maatwebsite\Excel\Concerns\HasReferencesToOtherSheets;
-use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Events\BeforeSheet;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Concerns\HasReferencesToOtherSheets;
+use Maatwebsite\Excel\Concerns\SkipsUnknownSheets;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-use App\Import\VendorMasterlist;
-use App\Import\VendorPaymentTerm;
-
-class VendorImport implements WithMultipleSheets, SkipsUnknownSheets, HasReferencesToOtherSheets
+class VendorImport implements HasReferencesToOtherSheets, SkipsUnknownSheets, WithMultipleSheets
 {
     private array $vendors = [];
+
     private array $transactions = [];
+
     public $sheetName; // Store the sheet name dynamically
 
     public function sheets(): array
@@ -30,7 +25,7 @@ class VendorImport implements WithMultipleSheets, SkipsUnknownSheets, HasReferen
 
     public function onUnknownSheet($sheetName)
     {
-        Log::warning("Skipping unknown sheet: " . $sheetName);
+        Log::warning('Skipping unknown sheet: '.$sheetName);
     }
 
     public function addVendor(array $data): void

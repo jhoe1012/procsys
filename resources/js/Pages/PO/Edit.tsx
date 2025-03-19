@@ -1,10 +1,19 @@
 import { Button, Input, Label, Textarea, Toaster, useToast } from '@/Components/ui';
-import { Choice, IApprover, IMessage, IPOHeader, IPOMaterial, IVendor, IWorkflow, PageProps } from '@/types';
+import { Choice, IAlternativeUom, IApprover, IMessage, IPOHeader, IPOMaterial, IVendor, IWorkflow, PageProps } from '@/types';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useMemo, useState } from 'react';
 import 'react-datasheet-grid/dist/style.css';
-import { checkboxColumn, DataSheetGrid, dateColumn, floatColumn, intColumn, keyColumn, textColumn } from 'react-datasheet-grid';
+import {
+  checkboxColumn,
+  DataSheetGrid,
+  dateColumn,
+  floatColumn,
+  intColumn,
+  keyColumn,
+  textColumn,
+  createTextColumn,
+} from 'react-datasheet-grid';
 import {
   CUSTOM_DATA_SHEET_STYLE,
   PermissionsEnum,
@@ -102,7 +111,20 @@ const Edit = ({
       { ...keyColumn('item_no', intColumn), title: 'ItmNo', minWidth: 55, disabled: true },
       { ...keyColumn('mat_code', textColumn), title: 'Material', minWidth: 120, disabled: true },
       { ...keyColumn('short_text', textColumn), title: 'Material Description', minWidth: 300, disabled: true },
-      { ...keyColumn('item_text', textColumn), title: 'Item Text', minWidth: 300 },
+      {
+        ...keyColumn(
+          'item_text',
+          createTextColumn({
+            continuousUpdates: true,
+            parseUserInput: (value) => value?.slice(0, 40) || '',
+            formatBlurredInput: (value) => value?.slice(0, 40) || '',
+            formatInputOnFocus: (value) => value?.slice(0, 40) || '',
+            parsePastedValue: (value) => value?.slice(0, 40) || '',
+          })
+        ),
+        title: 'Item Text',
+        minWidth: 300,
+      },
       {
         ...keyColumn('po_qty', floatColumn),
         title: 'PO Qty',
@@ -112,8 +134,9 @@ const Edit = ({
       { ...keyColumn('qty_open_po', floatColumn), title: 'Open Qty', minWidth: 100, disabled: true },
       { ...keyColumn('unit', textColumn), title: 'Ord. UOM', minWidth: 55, disabled: true },
       {
-        ...keyColumn('altUomSelect', {
-          component: ({ rowData, rowIndex }) => rowData && <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChange} />,
+        ...keyColumn('alt_uom', {
+          component: ({ rowData, rowIndex }: { rowData: IAlternativeUom[]; rowIndex: number }) =>
+            rowData && rowData.length !== 0 ? <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChange} /> : <></>,
         }),
         disabled: true,
         title: '',
@@ -124,7 +147,7 @@ const Edit = ({
       {
         ...keyColumn('net_price', floatColumn),
         title: 'Net Price',
-        minWidth: 80,
+        minWidth: 100,
         disabled: ({ rowData }: any) => !!rowData.item_free,
       },
       {
@@ -373,6 +396,7 @@ const Edit = ({
                   displayKey="name1"
                   onValueChange={(value) => setData('plant', value)}
                   value={data.plant}
+                  displayValue={true}
                 />
                 <ReactSelectField
                   label="Vendor"

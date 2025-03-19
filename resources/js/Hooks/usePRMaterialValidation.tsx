@@ -9,14 +9,20 @@ const usePRMaterialValidation = () => {
     let isValid = true;
     const newErrors: string[] = [];
     const updatedMaterials = material.filter((item) => item.mat_code).map((item, index) => ({ ...item, item_no: (index + 1) * 10 }));
+    const PrCtrlGrp = new Set(updatedMaterials.map((item) => item.prctrl_grp_id));
 
     if (updatedMaterials.length === 0) {
       newErrors.push('Please add at least one item');
       isValid = false;
     }
 
+    if (PrCtrlGrp.size !== 1) {
+      newErrors.push('Ensure that the PR Controller remains the same for all line items.');
+      isValid = false;
+    }
+
     for (const updatedMaterial of updatedMaterials) {
-      const { mat_code, qty, ord_unit, unit, del_date, item_no, price, per_unit, mat_grp, item_text } = updatedMaterial;
+      const { mat_code, qty, ord_unit, unit, del_date, item_no, price, per_unit, mat_grp, item_text, prctrl_grp_id } = updatedMaterial;
 
       if (mat_code) {
         if (!qty || qty <= 0) {
@@ -55,6 +61,12 @@ const usePRMaterialValidation = () => {
 
         if (mat_grp && materialGroupsSupplies.includes(mat_grp) && !item_text) {
           newErrors.push(`Please enter item text for item no ${item_no}`);
+          isValid = false;
+          break;
+        }
+
+        if (!prctrl_grp_id) {
+          newErrors.push(`Please enter PR Controller  ${item_no}`);
           isValid = false;
           break;
         }

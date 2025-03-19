@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enum\CrudActionEnum;
+use App\Enum\HeaderSeq;
 use App\Enum\PermissionsEnum;
 use App\Http\Resources\POHeaderResource;
 use App\Http\Resources\PRMaterialsResource;
@@ -20,7 +21,6 @@ use App\Models\PrMaterial;
 use App\Models\SupplierNote;
 use App\Models\User;
 use App\Models\Vendor;
-use App\Models\Attachment;
 use App\Services\AttachmentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -60,16 +60,16 @@ class POController extends Controller
                     request('po_number_to'),
                 ])
                 : $query->where('po_number', 'like', "%{$value}%"),
-            'plant' => fn ($value) => $query->where('plant', 'ilike', "%{$value}%"),
-            'vendor' => fn ($value) => $query->where('vendor_id', 'ilike', "%{$value}%"),
-            'created_name' => fn ($value) => $query->where('created_name', 'ilike', "%{$value}%"),
+            'plant'         => fn ($value) => $query->where('plant', 'ilike', "%{$value}%"),
+            'vendor'        => fn ($value) => $query->where('vendor_id', 'ilike', "%{$value}%"),
+            'created_name'  => fn ($value) => $query->where('created_name', 'ilike', "%{$value}%"),
             'doc_date_from' => fn ($value) => request('doc_date_to')
                 ? $query->whereBetween('doc_date', [$value, request('doc_date_to')])
                 : $query->whereDate('doc_date', $value),
             'deliv_date_from' => fn ($value) => request('deliv_date_to')
                 ? $query->whereBetween('deliv_date', [$value, request('deliv_date_to')])
                 : $query->whereDate('deliv_date', $value),
-            'status' => fn ($value) => $query->where('status', 'ilike', "%{$value}%"),
+            'status'     => fn ($value) => $query->where('status', 'ilike', "%{$value}%"),
             'control_no' => fn ($value) => $value === 'blank'
                 ? $query->whereNull('control_no')
                 : $query->where('control_no', 'ilike', "%{$value}%"),
@@ -82,15 +82,16 @@ class POController extends Controller
             }
         }
 
-        $poHeader = $query->orderBy('status', 'desc')
-            ->orderBy('doc_date', 'desc')
+        $poHeader = $query->orderBy('seq', 'asc')
+            ->orderBy('status', 'asc')
+            ->orderBy('po_number', 'desc')
             ->paginate(50)
             ->onEachSide(5);
 
         return Inertia::render('PO/Index', [
-            'po_header' => POHeaderResource::collection($poHeader),
+            'po_header'   => POHeaderResource::collection($poHeader),
             'queryParams' => $request->query() ?: null,
-            'message' => ['success' => session('success'), 'error' => session('error')],
+            'message'     => ['success' => session('success'), 'error' => session('error')],
         ]);
     }
 
@@ -130,7 +131,7 @@ class POController extends Controller
                     ->map(fn ($item, $index) => new PoMaterial($this->_mapPoMaterialData($item, $index)))
                     ->values();
                 $total_po_value = $po_materials->sum('total_value');
-                $po_header = PoHeader::create(array_merge(
+                $po_header      = PoHeader::create(array_merge(
                     $request->only([
                         'control_no',
                         'vendor_id',
@@ -144,10 +145,10 @@ class POController extends Controller
                         'is_mother_po',
                     ]),
                     [
-                        'doc_date' => Carbon::parse($request->input('doc_date'))->format('Y-m-d'),
+                        'doc_date'       => Carbon::parse($request->input('doc_date'))->format('Y-m-d'),
                         'total_po_value' => $total_po_value,
-                        'appr_seq' => 0,
-                        'status' => Str::ucfirst(ApproveStatus::DRAFT),
+                        'appr_seq'       => 0,
+                        'status'         => Str::ucfirst(ApproveStatus::DRAFT),
                     ]
                 ));
 
@@ -178,6 +179,7 @@ class POController extends Controller
             'pomaterials.prmaterials',
             'pomaterials.materialNetPrices',
             'pomaterials.altUoms',
+            'pomaterials.altUoms.altUomText',
             'pomaterials.materialGroups',
             'plants',
             'vendors',
@@ -192,8 +194,8 @@ class POController extends Controller
             'vendors' => Vendor::selectRaw('supplier as value , supplier || \' - \'||name_1 as label')
                 ->where('supplier', $po_header->vendor_id)
                 ->orderBy('name_1')->get()->toArray(),
-            'poheader' => new POHeaderResource($po_header),
-            'message' => ['success' => session('success'), 'error' => session('error')],
+            'poheader'        => new POHeaderResource($po_header),
+            'message'         => ['success' => session('success'), 'error' => session('error')],
             'deliveryAddress' => DeliveryAddress::selectRaw('address as value, address as label')
                 ->whereIn('plant', $user_plants)
                 ->where('is_active', 'true')
@@ -213,42 +215,42 @@ class POController extends Controller
     {
         try {
             return DB::transaction(function () use ($request, $id) {
-                $po_header = PoHeader::findOrFail($id);
+                $po_header    = PoHeader::findOrFail($id);
                 $po_materials = collect($request->input('pomaterials'))
                     ->filter(fn ($item) => ! empty($item['mat_code']) || $item['status'] !== 'X')
                     ->map(fn ($item, $index) => $this->_mapOrUpdatePoMaterial($item, $index, $po_header->id))
                     ->map(function ($item) {
                         $converted_qty_old_value = 0;
                         if (isset($item['id'])) {
-                            $po_material = POMaterial::find($item['id']);
+                            $po_material             = POMaterial::find($item['id']);
                             $converted_qty_old_value = $po_material->converted_qty;
                         } else {
                             $po_material = new POMaterial;
                         }
-                        $po_material->po_header_id = $item['po_header_id'];
+                        $po_material->po_header_id   = $item['po_header_id'];
                         $po_material->pr_material_id = $item['pr_material_id'];
-                        $po_material->item_no = $item['item_no'];
-                        $po_material->mat_code = $item['mat_code'];
-                        $po_material->short_text = $item['short_text'];
-                        $po_material->po_qty = $item['po_qty'];
-                        $po_material->po_gr_qty = $item['po_gr_qty'];
-                        $po_material->net_price = $item['net_price'];
-                        $po_material->per_unit = $item['per_unit'];
-                        $po_material->unit = $item['unit'];
-                        $po_material->total_value = $item['total_value'];
-                        $po_material->item_free = $item['item_free'];
-                        $po_material->currency = $item['currency'];
-                        $po_material->del_date = $item['del_date'];
-                        $po_material->mat_grp = $item['mat_grp'];
-                        $po_material->requested_by = $item['requested_by'];
-                        $po_material->pr_number = $item['pr_number'];
-                        $po_material->pr_item = $item['pr_item'];
-                        $po_material->item_text = $item['item_text'];
-                        $po_material->conversion = $item['conversion'];
-                        $po_material->denominator = $item['denominator'];
-                        $po_material->converted_qty = $item['converted_qty'];
-                        $po_material->pr_unit = $item['pr_unit'];
-                        $po_material->purch_grp = $item['purch_grp'];
+                        $po_material->item_no        = $item['item_no'];
+                        $po_material->mat_code       = $item['mat_code'];
+                        $po_material->short_text     = $item['short_text'];
+                        $po_material->po_qty         = $item['po_qty'];
+                        $po_material->po_gr_qty      = $item['po_gr_qty'];
+                        $po_material->net_price      = $item['net_price'];
+                        $po_material->per_unit       = $item['per_unit'];
+                        $po_material->unit           = $item['unit'];
+                        $po_material->total_value    = $item['total_value'];
+                        $po_material->item_free      = $item['item_free'];
+                        $po_material->currency       = $item['currency'];
+                        $po_material->del_date       = $item['del_date'];
+                        $po_material->mat_grp        = $item['mat_grp'];
+                        $po_material->requested_by   = $item['requested_by'];
+                        $po_material->pr_number      = $item['pr_number'];
+                        $po_material->pr_item        = $item['pr_item'];
+                        $po_material->item_text      = $item['item_text'];
+                        $po_material->conversion     = $item['conversion'];
+                        $po_material->denominator    = $item['denominator'];
+                        $po_material->converted_qty  = $item['converted_qty'];
+                        $po_material->pr_unit        = $item['pr_unit'];
+                        $po_material->purch_grp      = $item['purch_grp'];
                         $po_material->save();
 
                         $this->_updatePrMaterial($po_material, $converted_qty_old_value, CrudActionEnum::UPDATE);
@@ -278,10 +280,11 @@ class POController extends Controller
                         'is_mother_po',
                     ]),
                     [
-                        'doc_date' => Carbon::parse($request->input('doc_date'))->format('Y-m-d'),
+                        'doc_date'       => Carbon::parse($request->input('doc_date'))->format('Y-m-d'),
                         'total_po_value' => $total_po_value,
-                        'appr_seq' => 0,
-                        'status' => Str::ucfirst(ApproveStatus::DRAFT),
+                        'appr_seq'       => 0,
+                        'seq'            => HeaderSeq::Draft->value,
+                        'status'         => Str::ucfirst(ApproveStatus::DRAFT),
                     ]
                 ));
 
@@ -324,18 +327,20 @@ class POController extends Controller
         $approvers->each(function ($approver) use ($po_header) {
             ApproveStatus::create([
                 'po_number' => $po_header->po_number,
-                'status' => $approver->desc,
-                'position' => $approver->position,
-                'seq' => $approver->seq,
+                'status'    => $approver->desc,
+                'position'  => $approver->position,
+                'seq'       => $approver->seq,
             ]);
         });
 
         $firstApprover = $approvers->first();
         $po_header->update([
-            'status' => $firstApprover->desc,
+            'status'   => $firstApprover->desc,
             'appr_seq' => $firstApprover->seq,
+            'seq'      => HeaderSeq::ForApproval->value,
         ]);
 
+        $po_header->refresh();
         if ($firstApprover->user) {
             Mail::to($firstApprover->user->email)
                 ->send(new PoForApprovalEmail(
@@ -365,8 +370,9 @@ class POController extends Controller
         $po_header = PoHeader::with(['pomaterials' => fn ($query) => $query->whereNull('status')
             ->orWhere('status', '')])->findOrFail($id);
         if ($po_header->pomaterials->isEmpty()) {
-            $po_header->status = Str::ucfirst(ApproveStatus::CANCELLED);
+            $po_header->status   = Str::ucfirst(ApproveStatus::CANCELLED);
             $po_header->appr_seq = -1;
+            $po_header->seq      = HeaderSeq::Cancelled->value;
             $po_header->save();
         }
 
@@ -397,20 +403,23 @@ class POController extends Controller
                     ->where('plant', $po_header->plant)
                     ->where('type', Approvers::TYPE_PO)->first();
                 $po_header->status = $approver_2nd->desc;
-                $email_status = 1;
+                $po_header->seq    = HeaderSeq::ForApproval->value;
+                $email_status      = 1;
             } elseif (
                 $po_header->total_po_value <= $approver->amount_to
             ) {
-                $po_header->status = Str::ucfirst(ApproveStatus::APPROVED);
+                $po_header->status       = Str::ucfirst(ApproveStatus::APPROVED);
                 $po_header->release_date = Carbon::now()->format('Y-m-d H:i:s');
+                $po_header->seq          = HeaderSeq::Approved->value;
                 $this->_updateNetPrice($po_header);
                 // $this->_updateValuation($po_header);
                 $email_status = 2;
             }
         } else {
-            $po_header->status = Str::ucfirst($request->input('type'));
+            $po_header->status   = Str::ucfirst($request->input('type'));
             $po_header->appr_seq = $request->input('type') == ApproveStatus::REWORKED ? 0 : -1;
-            $approver_status = ApproveStatus::where('seq', '!=', $approver->seq)
+            $po_header->seq      = $request->input('type') == ApproveStatus::REWORKED ? HeaderSeq::Draft->value : HeaderSeq::Cancelled->value;
+            $approver_status     = ApproveStatus::where('seq', '!=', $approver->seq)
                 ->where('po_number', operator: $po_header->po_number)
                 ->whereNull('user_id')
                 ->delete();
@@ -424,21 +433,14 @@ class POController extends Controller
             ->whereNull('user_id')
             ->first();
 
-        $approver_status->status = Str::ucfirst($request->input('type'));
-        $approver_status->approved_by = Auth::user()->name;
-        $approver_status->user_id = Auth::user()->id;
-        $approver_status->message = $request->message;
+        $approver_status->status        = Str::ucfirst($request->input('type'));
+        $approver_status->approved_by   = Auth::user()->name;
+        $approver_status->user_id       = Auth::user()->id;
+        $approver_status->message       = $request->message;
         $approver_status->approved_date = now();
         $approver_status->save();
 
-        $finance = User::where(
-            'cc_by_deliv_addr',
-            'like',
-            '%|'.DeliveryAddress::where('address', $po_header->deliv_addr)->pluck('id')->first().'|%'
-        )->pluck('email')->toArray();
-
-        $approved_cc = [$approver->user->email, ...$finance];
-
+        $po_header->refresh();
         /**
          * Send email notification
          */
@@ -451,14 +453,21 @@ class POController extends Controller
                     ));
                 break;
             case 2:
+                $finance = User::where(
+                    'cc_by_deliv_addr',
+                    'like',
+                    '%|'.DeliveryAddress::where('address', $po_header->deliv_addr)->pluck('id')->first().'|%'
+                )->pluck('email')->toArray();
+
+                $approved_cc = [$approver->user->email, ...$finance];
                 Mail::to($po_header->createdBy->email)
                     ->cc($approved_cc)
                     ->send(new PoApprovedEmail(
-                        $po_header->createdBy->name, 
+                        $po_header->createdBy->name,
                         $po_header,
                         $po_header->attachments
-                        ->pluck('filepath', 'filename')
-                        ->toArray()
+                            ->pluck('filepath', 'filename')
+                            ->toArray()
                     ));
                 break;
             case 3:
@@ -487,8 +496,8 @@ class POController extends Controller
             'materialGroups',
             'prheader',
             'altUoms',
+            'altUoms.altUomText',
             'materialNetPrices' => fn ($query) => $query->where('plant', $request->input('plant'))
-                // ->where('vendor', $request->input('vendor'))
                 ->whereDate('valid_from', '<=', $doc_date)
                 ->whereDate('valid_to', '>=', $doc_date),
         ])
@@ -505,7 +514,7 @@ class POController extends Controller
     public function flagDelete(Request $request)
     {
         foreach ($request->input('ids') as $id) {
-            $pomaterial = PoMaterial::findOrFail($id);
+            $pomaterial         = PoMaterial::findOrFail($id);
             $pomaterial->status = PoMaterial::FLAG_DELETE;
             $pomaterial->save();
             $this->_updatePrMaterial($pomaterial, 0, CrudActionEnum::DELETE);
@@ -517,7 +526,7 @@ class POController extends Controller
     public function flagComplete(Request $request)
     {
         foreach ($request->input('ids') as $id) {
-            $po_material = PoMaterial::findOrFail($id);
+            $po_material         = PoMaterial::findOrFail($id);
             $po_material->status = PoMaterial::FLAG_DELIVER;
             $po_material->save();
         }
@@ -532,7 +541,7 @@ class POController extends Controller
             'plants',
             'vendors',
             'pomaterials.taxClass',
-            'workflows' => fn ($query) => $query->where('status', Str::ucfirst(ApproveStatus::APPROVED)),
+            'workflows'   => fn ($query) => $query->where('status', Str::ucfirst(ApproveStatus::APPROVED)),
             'pomaterials' => fn ($query) => $query->whereNull('status')->orWhere('status', ''),
         ])->findOrFail($id);
 
@@ -544,9 +553,10 @@ class POController extends Controller
 
     public function recall($id)
     {
-        $poHeader = PoHeader::findOrFail($id);
-        $poHeader->status = Str::ucfirst(ApproveStatus::DRAFT);
+        $poHeader           = PoHeader::findOrFail($id);
+        $poHeader->status   = Str::ucfirst(ApproveStatus::DRAFT);
         $poHeader->appr_seq = 0;
+        $poHeader->seq      = HeaderSeq::Draft->value;
         $poHeader->save();
 
         return to_route('po.edit', $poHeader->po_number)->with('success', 'PO Recalled');
@@ -555,7 +565,7 @@ class POController extends Controller
     public function updateControlNo(Request $request)
     {
 
-        $po_header = PoHeader::findOrFail($request->input('id'));
+        $po_header             = PoHeader::findOrFail($request->input('id'));
         $po_header->control_no = $request->input('control_no');
         $po_header->save();
 
@@ -571,7 +581,7 @@ class POController extends Controller
             'plants',
             'vendors',
             'pomaterials.taxClass',
-            'workflows' => fn ($query) => $query->where('status', Str::ucfirst(ApproveStatus::APPROVED)),
+            'workflows'   => fn ($query) => $query->where('status', Str::ucfirst(ApproveStatus::APPROVED)),
             'pomaterials' => fn ($query) => $query->whereNull('status')->orWhere('status', ''),
         ])->whereIn('id', $request->input('checkboxPo'))->orderBy('id')->get();
 
@@ -590,10 +600,10 @@ class POController extends Controller
     private function _updatePrMaterial($pomaterial, $converted_qty_old_value, CrudActionEnum $action): void
     {
         if ($pomaterial->prmaterials instanceof PrMaterial) {
-            $conversion = $pomaterial->prmaterials->conversion;
+            $conversion    = $pomaterial->prmaterials->conversion;
             $converted_qty = $pomaterial->converted_qty;
 
-            $qty_open = $pomaterial->prmaterials->qty_open * $conversion;
+            $qty_open    = $pomaterial->prmaterials->qty_open * $conversion;
             $qty_ordered = $pomaterial->prmaterials->qty_ordered * $conversion;
 
             switch ($action) {
@@ -616,7 +626,7 @@ class POController extends Controller
                     return;
             }
 
-            $pomaterial->prmaterials->qty_open = $qty_open / $conversion;
+            $pomaterial->prmaterials->qty_open    = $qty_open / $conversion;
             $pomaterial->prmaterials->qty_ordered = $qty_ordered / $conversion;
 
             $pomaterial->prmaterials->save();
@@ -627,29 +637,29 @@ class POController extends Controller
     {
         return [
             'pr_material_id' => $item['pr_material_id'],
-            'item_no' => ($index + 1) * 10,
-            'mat_code' => $item['mat_code'],
-            'short_text' => $item['short_text'],
-            'po_qty' => $item['po_qty'],
-            'po_gr_qty' => $item['po_qty'],
-            'net_price' => $item['net_price'],
-            'per_unit' => $item['per_unit'],
-            'unit' => $item['unit'],
-            'total_value' => $item['po_qty'] * $item['net_price'],
-            'item_free' => $item['item_free'] ?? false,
-            'currency' => $item['currency'],
-            'del_date' => Carbon::parse($item['del_date'])->format('Y-m-d'),
-            'mat_grp' => $item['mat_grp'],
-            'requested_by' => $item['requested_by'],
-            'pr_number' => $item['pr_number'],
-            'pr_item' => $item['pr_item'],
-            'item_text' => strtoupper($item['item_text']) ?? '',
-            'conversion' => $item['conversion_po'],
-            'denominator' => 1,
-            'converted_qty' => $item['converted_qty_po'],
-            'pr_unit' => $item['pr_unit'],
-            'purch_grp' => $item['purch_grp'] ?? '',
-            'status' => $item['status'] ?? '',
+            'item_no'        => ($index + 1) * 10,
+            'mat_code'       => $item['mat_code'],
+            'short_text'     => $item['short_text'],
+            'po_qty'         => $item['po_qty'],
+            'po_gr_qty'      => $item['po_qty'],
+            'net_price'      => $item['net_price'],
+            'per_unit'       => $item['per_unit'],
+            'unit'           => $item['unit'],
+            'total_value'    => $item['po_qty'] * $item['net_price'],
+            'item_free'      => $item['item_free'] ?? false,
+            'currency'       => $item['currency'],
+            'del_date'       => Carbon::parse($item['del_date'])->format('Y-m-d'),
+            'mat_grp'        => $item['mat_grp'],
+            'requested_by'   => $item['requested_by'],
+            'pr_number'      => $item['pr_number'],
+            'pr_item'        => $item['pr_item'],
+            'item_text'      => Str::limit(strtoupper($item['item_text'] ?? ''), 40, ''),
+            'conversion'     => $item['conversion_po'],
+            'denominator'    => 1,
+            'converted_qty'  => $item['converted_qty_po'],
+            'pr_unit'        => $item['pr_unit'],
+            'purch_grp'      => $item['purch_grp'] ?? '',
+            'status'         => $item['status'] ?? '',
         ];
     }
 
@@ -671,17 +681,17 @@ class POController extends Controller
             }
             MaterialNetPrice::updateOrCreate(
                 [
-                    'vendor' => $poHeader->vendor_id,
-                    'plant' => $poHeader->plant,
-                    'mat_code' => $poMaterial->mat_code,
-                    'currency' => $poMaterial->currency,
-                    'uom' => $poMaterial->unit,
-                    'per_unit' => $poMaterial->per_unit,
-                    'valid_from' => $poHeader->doc_date->format('Y-m-d'),
+                    'vendor'        => $poHeader->vendor_id,
+                    'plant'         => $poHeader->plant,
+                    'mat_code'      => $poMaterial->mat_code,
+                    'currency'      => $poMaterial->currency,
+                    'uom'           => $poMaterial->unit,
+                    'per_unit'      => $poMaterial->per_unit,
+                    'valid_from'    => $poHeader->doc_date->format('Y-m-d'),
                     'min_order_qty' => 0,
                 ],
                 [
-                    'price' => $poMaterial->net_price,
+                    'price'    => $poMaterial->net_price,
                     'valid_to' => Carbon::parse($poHeader->doc_date)->addMonths(5)->format('Y-m-d'),
 
                 ]
