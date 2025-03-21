@@ -38,21 +38,18 @@ export default function usePOMaterial() {
     if (materialNetPriceUomVendor) {
       net_price = materialNetPriceUomVendor.price;
       min_order_qty = materialNetPriceUomVendor.min_order_qty;
-      total_value = ((net_price ?? 0) / (per_unit ?? 0)) * (po_qty ?? 0);
     } else if (materialNetPriceUom) {
       net_price = materialNetPriceUom.price;
       min_order_qty = materialNetPriceUom.min_order_qty;
-      total_value = ((net_price ?? 0) / (per_unit ?? 0)) * (po_qty ?? 0);
     } else if (materialNetPriceUomFirst) {
       net_price = materialNetPriceUomFirst;
-      total_value = ((net_price ?? 0) / (per_unit ?? 0)) * (po_qty ?? 0);
     } else {
       net_price = material.net_price ?? material.price;
-      total_value = ((net_price ?? 0) / (per_unit ?? 0)) * (po_qty ?? 0);
     }
 
     // set net price based on DB net price
     net_price = is_update ? material.net_price : net_price;
+    total_value = ((net_price ?? 0) / (per_unit ?? 0)) * (po_qty ?? 0);
 
     return { conversion_po, ord_unit, net_price, converted_qty_po, total_value, min_order_qty, qty_open_po, unit: ord_unit, po_qty };
   };

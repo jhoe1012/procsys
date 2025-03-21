@@ -594,7 +594,7 @@ class POController extends Controller
             $controlNo++;
         }
 
-        return view('print.po-mass', ['poHeaders' => $poHeaders]);
+        return view("print.po-mass-{$poHeaders->first()->plant}", ['poHeaders' => $poHeaders]);
     }
 
     private function _updatePrMaterial($pomaterial, $converted_qty_old_value, CrudActionEnum $action): void

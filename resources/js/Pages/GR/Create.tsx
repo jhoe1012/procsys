@@ -82,7 +82,7 @@ const Create = ({ auth }: PageProps) => {
   const columns = [
     { ...keyColumn('item_no', intColumn), title: 'ItmNo', maxWidth: 50, disabled: true },
     { ...keyColumn('mat_code', textColumn), title: 'Material', maxWidth: 130, disabled: true },
-    { ...keyColumn('short_text', textColumn), title: 'Material Description', maxWidth: 350, disabled: true },
+    { ...keyColumn('short_text', textColumn), title: 'Material Description', maxWidth: 500, disabled: true },
     { ...keyColumn('po_gr_qty', floatColumn), title: 'PO Qty', maxWidth: 130, disabled: true },
     { ...keyColumn('gr_qty', floatColumn), title: 'Qty', maxWidth: 130 },
     { ...keyColumn('unit', textColumn), title: 'Unit', maxWidth: 55 },

@@ -113,6 +113,7 @@ export default function AddPrtoPo({ p_plant, p_doc_date, addToPO }) {
                   <th className="px-3 py-1"> Pr</th>
                   <th className="px-3 py-1"> Material</th>
                   <th className="px-3 py-1"> Material Description</th>
+                  <th className="px-3 py-1"> Item Text </th>
                   <th className="px-3 py-1"> Open Qty</th>
                   <th className="px-3 py-1"> Unit</th>
                   <th className="px-3 py-1"> Per</th>
@@ -136,6 +137,7 @@ export default function AddPrtoPo({ p_plant, p_doc_date, addToPO }) {
                       <td className="px-3 py-1">{pr.pr_number}</td>
                       <td className="px-3 py-1">{pr.mat_code}</td>
                       <td className="px-3 py-1">{pr.short_text}</td>
+                      <td className="px-3 py-1">{pr.item_text}</td>
                       <td className="px-3 py-1">{pr.qty_open}</td>
                       <td className="px-3 py-1">{pr.ord_unit}</td>
                       <td className="px-3 py-1">{pr.per_unit}</td>

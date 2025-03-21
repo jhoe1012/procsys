@@ -112,7 +112,7 @@ const Edit = ({
       { ...keyColumn('status', textColumn), title: 'Sts', disabled: true, minWidth: 35 },
       { ...keyColumn('item_no', intColumn), title: 'ItmNo', disabled: true, minWidth: 55 },
       { ...keyColumn('mat_code', selectColumn({ choices: mat_code })), title: 'Material', minWidth: 120 },
-      { ...keyColumn('short_text', selectColumn({ choices: mat_desc })), title: 'Material Description', minWidth: 300 },
+      { ...keyColumn('short_text', selectColumn({ choices: mat_desc })), title: 'Material Description', minWidth: 400 },
       {
         ...keyColumn(
           'item_text',
