@@ -189,7 +189,7 @@ class PRController extends Controller
             'prmaterials' => fn ($query) => $query->whereNull('status')->orWhere('status', ''),
             'plants',
         ])->findOrFail($id);
-
+        
         $approvers = Approvers::where('amount_from', '<=', $pr_header->total_pr_value)
             ->where('plant', $pr_header->plant)
             ->where('type', Approvers::TYPE_PR)
@@ -455,9 +455,9 @@ class PRController extends Controller
                     ));
                 break;
             case 2:
-                $recipients = User::whereHas('plants', function ($query) use ($pr_header) { // v2
-                    $plant_id = Plant::pluck('id')->where('plant', $pr_header->plant);
-                    $query->find($plant_id);
+                $plant_id = Plant::where('plant', $pr_header->plant)->value('id'); 
+                $recipients = User::whereHas('plants', function ($query) use ($plant_id) {
+                    $query->where('id', $plant_id);
                 })
                     ->role(RolesEnum::PORequestor)
                     ->pluck('email')
