@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import moment from 'moment';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -11,31 +12,12 @@ export const formatNumber = (n: number) =>
     maximumFractionDigits: 2,
   });
 
-export const reactSelectStyles = {
-  control: (provided, state) => ({
-    ...provided,
-    minHeight: '1.75rem',
-    height: '1.75rem',
-    fontSize: '0.875rem',
-  }),
+export const formatShortDate = (date: string) => moment(date).format('ll');
 
-  valueContainer: (provided, state) => ({
-    ...provided,
-    height: '1.75rem',
-    padding: '0 6px',
-    textTransform: 'capitalize',
-  }),
+export const formatLongDate = (date: string) => moment(date).format('lll');
 
-  input: (provided, state) => ({
-    ...provided,
-    margin: '0px',
-    
-  }),
-  indicatorSeparator: (state) => ({
-    display: 'none',
-  }),
-  indicatorsContainer: (provided, state) => ({
-    ...provided,
-    height: '1.75rem',
-  }),
-};
+export const formatCurrency = (amount: number) =>
+  new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'PHP',
+  }).format(amount);

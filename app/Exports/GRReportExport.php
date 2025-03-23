@@ -5,7 +5,6 @@ namespace App\Exports;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-
 class GRReportExport implements FromArray, WithHeadings
 {
     public function __construct(private array $data) {}
@@ -34,7 +33,7 @@ class GRReportExport implements FromArray, WithHeadings
             'Header Text',
             'Item No',
             'Material',
-            'Short Text',
+            'Material Description',
             'Qty',
             'Unit',
             'Open PO',

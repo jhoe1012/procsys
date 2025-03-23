@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class PermissionSeeder extends Seeder
@@ -12,9 +11,9 @@ class PermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        include_once dirname(__FILE__) . '/../permissions/pr.php';
-        include_once dirname(__FILE__) . '/../permissions/po.php';
-        include_once dirname(__FILE__) . '/../permissions/gr.php';
-        include_once dirname(__FILE__) . '/../permissions/admin.php';
+        // include_once dirname(__FILE__) . '/../permissions/pr.php';
+        // include_once dirname(__FILE__) . '/../permissions/po.php';
+        // include_once dirname(__FILE__) . '/../permissions/gr.php';
+        // include_once dirname(__FILE__) . '/../permissions/admin.php';
     }
 }

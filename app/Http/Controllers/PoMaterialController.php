@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PoMaterial;
 use App\Http\Requests\StorePoMaterialRequest;
 use App\Http\Requests\UpdatePoMaterialRequest;
+use App\Models\PoMaterial;
 
 class PoMaterialController extends Controller
 {

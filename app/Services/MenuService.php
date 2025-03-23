@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enum\PermissionsEnum;
 use Illuminate\Support\Facades\Auth;
 
 class MenuService
@@ -11,125 +12,142 @@ class MenuService
     public function getMenus()
     {
         $this->buildMenus();
+
         return $this->menus;
     }
 
     private function buildMenus()
     {
-        // dd(Auth::user()->can('approve.po'));
+
+        $user        = Auth::user();
         $this->menus = [
             [
-                'label' => 'Purchase Requisition',
-                'permissions' => Auth::user()->can('read.pr'),
-                'childrens' => [
+                'label'       => 'Purchase Requisition',
+                'permissions' => $user->can(PermissionsEnum::ReadPR),
+                'childrens'   => [
                     [
-                        'label' => 'PR Listing',
-                        'permissions' => Auth::user()->can('read.pr'),
-                        'href' => route('pr.index'),
+                        'label'       => 'PR Listing',
+                        'permissions' => $user->can(PermissionsEnum::ReadPR),
+                        'href'        => route('pr.index'),
                     ],
                     [
-                        'label' => 'Create PR',
-                        'permissions' => Auth::user()->can('create.pr'),
-                        'href' => route('pr.create'),
-                    ],
-
-                ]
-            ],
-            [
-                'label' => 'Purchase Order',
-                'permissions' => Auth::user()->can('read.po'),
-                'childrens' => [
-                    [
-                        'label' => 'PO Listing',
-                        'permissions' => Auth::user()->can('read.po'),
-                        'href' => route('po.index'),
-                    ],
-                    [
-                        'label' => 'Create PO',
-                        'permissions' => Auth::user()->can('create.po'),
-                        'href' => route('po.create'),
+                        'label'       => 'Create PR',
+                        'permissions' => $user->can(PermissionsEnum::CreatePR),
+                        'href'        => route('pr.create'),
                     ],
 
-                ]
+                ],
             ],
             [
-                'label' => 'Goods Receipt',
-                'permissions' => Auth::user()->can('read.gr'),
-                'childrens' => [
+                'label'       => 'Purchase Order',
+                'permissions' => $user->can(PermissionsEnum::ReadPO),
+                'childrens'   => [
                     [
-                        'label' => 'GR Listing',
-                        'permissions' => Auth::user()->can('read.gr'),
-                        'href' => route('gr.index'),
+                        'label'       => 'PO Listing',
+                        'permissions' => $user->can(PermissionsEnum::ReadPO),
+                        'href'        => route('po.index'),
                     ],
                     [
-                        'label' => 'Create GR',
-                        'permissions' => Auth::user()->can('create.gr'),
-                        'href' => route('gr.create'),
+                        'label'       => 'Create PO',
+                        'permissions' => $user->can(PermissionsEnum::CreatePO),
+                        'href'        => route('po.create'),
                     ],
 
-                ]
+                ],
             ],
             [
-                'label' => 'Reports',
+                'label'       => 'Goods Receipt',
+                'permissions' => $user->can(PermissionsEnum::ReadGR),
+                'childrens'   => [
+                    [
+                        'label'       => 'GR Listing',
+                        'permissions' => $user->can(PermissionsEnum::ReadGR),
+                        'href'        => route('gr.index'),
+                    ],
+                    [
+                        'label'       => 'Create GR',
+                        'permissions' => $user->can(PermissionsEnum::CreateGR),
+                        'href'        => route('gr.create'),
+                    ],
+
+                ],
+            ],
+            [
+                'label'       => 'Reports',
                 'permissions' => true,
-                'childrens' => [
+                'childrens'   => [
                     [
-                        'label' => 'PR Report',
-                        'permissions' =>true,
-                        'href' => route('report.pr'),
+                        'label'       => 'PR Report',
+                        'permissions' => true,
+                        'href'        => route('report.pr'),
                     ],
                     [
-                        'label' => 'PO Report',
-                        'permissions' =>true,
-                        'href' => route('report.po'),
+                        'label'       => 'PO Report',
+                        'permissions' => true,
+                        'href'        => route('report.po'),
                     ],
                     [
-                        'label' => 'GR Report',
-                        'permissions' =>true,
-                        'href' => route('report.gr'),
+                        'label'       => 'GR Report',
+                        'permissions' => true,
+                        'href'        => route('report.gr'),
                     ],
                     [
-                        'label' => 'Material Report',
-                        'permissions' =>true,
-                        'href' => route('report.material'),
-                    ]
-                ]
+                        'label'       => 'Material Report',
+                        'permissions' => true,
+                        'href'        => route('report.material'),
+                    ],
+                    [
+                        'label'       => ' PO History',
+                        'permissions' => true,
+                        'href'        => route('report.pohistory'),
+                    ],
+                ],
             ],
             [
-                'label' => 'Administration',
-                'permissions' => Auth::user()->can('admin'),
-                'childrens' => [
+                'label'       => 'Administration',
+                'permissions' => $user->can(PermissionsEnum::Admin),
+                'childrens'   => [
                     [
-                        'label' => 'Vendor',
-                        'permissions' => Auth::user()->can('admin'),
-                        'href' => route('vendor.index'),
+                        'label'       => 'Vendors',
+                        'permissions' => $user->can(PermissionsEnum::Admin),
+                        'href'        => route('vendor.index'),
                     ],
                     [
-                        'label' => 'Material',
-                        'permissions' => Auth::user()->can('admin'),
-                        'href' => '',
+                        'label'       => 'Materials',
+                        'permissions' => $user->can(PermissionsEnum::Admin),
+                        'href'        => route('material.index'),
                     ],
                     [
-                        'label' => 'Valuation Price',
-                        'permissions' => Auth::user()->can('admin'),
-                        'href' => route('val_price.index'),
+                        'label'       => 'Material Alt UOM',
+                        'permissions' => $user->can(PermissionsEnum::Admin),
+                        'href'        => route('altuom.index'),
                     ],
                     [
-                        'label' => 'Net Price',
-                        'permissions' => Auth::user()->can('admin'),
-                        'href' => route('net_price.index'),
+                        'label'       => 'Plants',
+                        'permissions' => $user->can(PermissionsEnum::Admin),
+                        'href'        => '',
                     ],
                     [
-                        'label' => 'User and Access',
-                        'permissions' => Auth::user()->can('admin'),
-                        'href' => '',
+                        'label'       => 'Valuation Prices',
+                        'permissions' => $user->can(PermissionsEnum::Admin),
+                        'href'        => route('val_price.index'),
                     ],
                     [
-                        'label' => 'Approvers',
-                        'permissions' => Auth::user()->can('admin'),
-                        'href' => route('approver.index'),
+                        'label'       => 'Net Prices',
+                        'permissions' => $user->can(PermissionsEnum::Admin),
+                        'href'        => route('net_price.index'),
                     ],
-                ]
+                    [
+                        'label'       => 'Users',
+                        'permissions' => $user->can(PermissionsEnum::Admin),
+                        'href'        => route('user.index'),
+                    ],
+                    [
+                        'label'       => 'Approvers',
+                        'permissions' => $user->can(PermissionsEnum::Admin),
+                        'href'        => route('approver.index'),
+                    ],
+                ],
             ],
         ];
     }

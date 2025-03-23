@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('plant');
             $table->foreignId('user_id')->constrained('users');
             $table->string('position');
-            $table->decimal('amount_from',15,2);
-            $table->decimal('amount_to',15,2);
+            $table->decimal('amount_from', 15, 2);
+            $table->decimal('amount_to', 15, 2);
             $table->integer('seq');
             $table->string('desc')->nullable();
             $table->integer('created_by')->nullable();

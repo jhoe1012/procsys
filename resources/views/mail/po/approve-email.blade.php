@@ -91,7 +91,8 @@
                     <tr>
                         <td>Item No</td>
                         <td>Material</td>
-                        <td>Short Text</td>
+                        <td>Material Description</td>
+                        <td>Item Text</td>
                         <td>PO Qty</td>
                         <td>Net Price</td>
                         <td>Unit</td>
@@ -107,13 +108,14 @@
                             <td>{{ $pomaterial->item_no }}</td>
                             <td>{{ $pomaterial->mat_code }}</td>
                             <td>{{ $pomaterial->short_text }}</td>
+                            <td>{{ $pomaterial->item_text }}</td>
                             <td>{{ $pomaterial->po_qty }}</td>
                             <td>{{ Number::currency($pomaterial->net_price, 'PHP') }}</td>
                             <td>{{ $pomaterial->unit }}</td>
                             <td>{{ Number::currency($pomaterial->total_value, 'PHP') }}</td>
                             <td>{{ $pomaterial->currency }}</td>
                             <td>{{ date('Y-m-d', strtotime($pomaterial->del_date)) }}</td>
-                            <td>{{ $pomaterial->mat_grp }}</td>
+                            <td>{{ $pomaterial->materialGroups->mat_grp_desc }}</td>
                         </tr>
                     @endforeach
                 </tbody>

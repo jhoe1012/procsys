@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\GrHeader;
 use App\Http\Requests\StoreGrHeaderRequest;
 use App\Http\Requests\UpdateGrHeaderRequest;
+use App\Models\GrHeader;
 
 class GrHeaderController extends Controller
 {

@@ -1,36 +1,47 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm, Link } from '@inertiajs/react';
-import { PageProps, IPRMaterial, IPRHeader, IMessage, IWorkflow, IApprover } from '@/types';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/ui/tabs';
-import { Button } from '@/Components/ui/button';
-import { Textarea } from '@/Components/ui/textarea';
-import { Input } from '@/Components/ui/input';
-import { Label } from '@/Components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
-import Approval from './Partial/Approval';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/table';
-import 'react-datasheet-grid/dist/style.css';
-import { useState, useEffect, FormEventHandler } from 'react';
-import { Choice } from '@/Components/SelectComponent';
-import selectColumn from '@/Components/SelectComponent';
 import {
-  DataSheetGrid,
+  AltUom,
+  AttachmentList,
+  Discard,
+  Dropzone,
+  FlagForAction,
+  GenericTable,
+  InputField,
+  Loading,
+  selectColumn,
+  SelectField,
+  TabFields,
+} from '@/Components';
+import { Button, Input, Label, Textarea, Toaster, useToast } from '@/Components/ui';
+import { usePRMaterial, usePRMaterialValidation } from '@/Hooks';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import {
+  CUSTOM_DATA_SHEET_STYLE,
+  DEFAULT_PR_MATERIAL,
+  PermissionsEnum,
+  SEQ_DRAFT,
+  SEQ_REJECT,
+  STATUS_APPROVED,
+  STATUS_REJECTED,
+  STATUS_REWORK,
+} from '@/lib/constants';
+import { formatNumber } from '@/lib/utils';
+import { Choice, IAlternativeUom, IApprover, IitemDetails, IMessage, IPRHeader, IPRMaterial, IWorkflow, PageProps } from '@/types';
+import { Head, useForm, Link } from '@inertiajs/react';
+import { FormEventHandler, useEffect, useMemo, useState } from 'react';
+import {
   checkboxColumn,
-  textColumn,
+  DataSheetGrid,
+  dateColumn,
+  floatColumn,
   intColumn,
   keyColumn,
-  floatColumn,
-  dateColumn,
+  textColumn,
+  createTextColumn,
 } from 'react-datasheet-grid';
+import 'react-datasheet-grid/dist/style.css';
 import { Operation } from 'react-datasheet-grid/dist/types';
-import { Toaster } from '@/Components/ui/toaster';
-import { useToast } from '@/Components/ui/use-toast';
-import Discard from '@/Components/Discard';
-import { formatNumber } from '@/lib/utils';
-import FlagForAction from '@/Components/FlagForAction';
-import { SEQ_DRAFT, STATUS_APPROVED, STATUS_REJECTED, STATUS_REWORK } from '@/lib/constants';
-import Dropzone from '@/Components/Dropzone';
-import { XMarkIcon } from '@heroicons/react/24/solid';
+import Approval from './Partial/Approval';
+import { can } from '@/lib/helper';
 
 const Edit = ({
   auth,
@@ -39,22 +50,33 @@ const Edit = ({
   mat_desc,
   message,
   item_details,
-}: PageProps<{ prheader: IPRHeader }> &
-  PageProps<{ mat_code: Choice[] }> &
-  PageProps<{ mat_desc: Choice[] }> &
-  PageProps<{ message: IMessage }>) => {
-  const dateToday = new Date().toLocaleDateString();
-
+  materialGroupsSupplies,
+  prCtrlGrp,
+}: PageProps<{
+  prheader: IPRHeader;
+  mat_code: Choice[];
+  mat_desc: Choice[];
+  message: IMessage;
+  item_details: IitemDetails;
+  materialGroupsSupplies: string[];
+  prCtrlGrp: Choice[];
+}>) => {
+  const { toast } = useToast();
   const [material, setMaterial] = useState<IPRMaterial[]>(
     prheader.prmaterials.map((prmaterial) => ({
       ...prmaterial,
+      mat_grp_desc: prmaterial.materialGroups?.mat_grp_desc || '',
       del_date: new Date(prmaterial.del_date || ''),
+      altUomSelect: [
+        ...new Set([prmaterial.ord_unit, ...(prmaterial.alt_uom ? prmaterial.alt_uom.map((item: IAlternativeUom) => item.alt_uom) : [])]),
+      ],
     }))
   );
   const [itemDetails, setItemDetails] = useState([]);
   const [files, setFiles] = useState([]);
   const [apprSeq, setApprSeq] = useState<IApprover>();
-
+  const { updateMaterialPR, computeConversion, isLoading } = usePRMaterial();
+  const { validateMaterials } = usePRMaterialValidation();
   const { data, setData, post, errors, reset, processing } = useForm<IPRHeader>({
     id: prheader.id,
     pr_number: prheader.pr_number,
@@ -64,7 +86,7 @@ const Edit = ({
     requested_by: prheader.requested_by,
     plant: prheader.plant,
     reason_pr: prheader.reason_pr,
-    header_text: prheader.header_text,
+    header_text: prheader.header_text ?? '',
     total_pr_value: prheader.total_pr_value,
     status: prheader.status || '',
     deliv_addr: prheader.deliv_addr,
@@ -73,162 +95,197 @@ const Edit = ({
     _method: 'patch',
   });
 
-  const { toast } = useToast();
+  const handleOnChangeUom = (value: string, rowIndex: number) => {
+    setMaterial((prevMaterial) => {
+      const newMaterial = [...prevMaterial];
+      newMaterial[rowIndex] = {
+        ...newMaterial[rowIndex],
+        ...computeConversion(newMaterial[rowIndex], value),
+      };
+      return newMaterial;
+    });
+  };
 
-  const columns = [
-    { ...keyColumn('sel', checkboxColumn), title: 'Sel', minWidth: 30 },
-    { ...keyColumn('status', textColumn), title: 'Sts', disabled: true, minWidth: 35 },
-    { ...keyColumn('item_no', intColumn), title: 'ItmNo', disabled: true, minWidth: 55 },
-    { ...keyColumn('mat_code', selectColumn({ choices: mat_code })), title: 'Material', minWidth: 120 },
-    { ...keyColumn('short_text', selectColumn({ choices: mat_desc })), title: 'Short Text', minWidth: 300 },
-    { ...keyColumn('qty', floatColumn), title: 'Qty', minWidth: 70 },
-    { ...keyColumn('ord_unit', textColumn), title: 'Ord Unit', minWidth: 55 },
-    { ...keyColumn('qty_ordered', floatColumn), title: 'Qty Ordered', minWidth: 70, disabled: true },
-    { ...keyColumn('qty_open', floatColumn), title: 'Qty Open', minWidth: 70, disabled: true },
-    { ...keyColumn('price', floatColumn), title: 'Price', minWidth: 70, disabled: true },
-    { ...keyColumn('per_unit', floatColumn), title: 'Per Unit', minWidth: 40, disabled: true },
-    { ...keyColumn('unit', textColumn), title: 'Unit', minWidth: 40, disabled: true },
-    { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 90, disabled: true },
-    { ...keyColumn('currency', textColumn), title: 'Curr', minWidth: 40, disabled: true },
-    { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 130 },
-    { ...keyColumn('mat_grp', textColumn), title: 'Mat Grp', minWidth: 100, disabled: true },
-    { ...keyColumn('purch_grp', textColumn), title: 'Purch Grp', minWidth: 90, disabled: true },
+  const columns = useMemo(
+    () => [
+      { ...keyColumn('sel', checkboxColumn), title: 'Sel', minWidth: 30 },
+      { ...keyColumn('status', textColumn), title: 'Sts', disabled: true, minWidth: 35 },
+      { ...keyColumn('item_no', intColumn), title: 'ItmNo', disabled: true, minWidth: 55 },
+      { ...keyColumn('mat_code', selectColumn({ choices: mat_code })), title: 'Material', minWidth: 120 },
+      { ...keyColumn('short_text', selectColumn({ choices: mat_desc })), title: 'Material Description', minWidth: 400 },
+      {
+        ...keyColumn(
+          'item_text',
+          createTextColumn({
+            continuousUpdates: true,
+            parseUserInput: (value) => value?.slice(0, 40) || '',
+            formatBlurredInput: (value) => value?.slice(0, 40) || '',
+            formatInputOnFocus: (value) => value?.slice(0, 40) || '',
+            parsePastedValue: (value) => value?.slice(0, 40) || '',
+          })
+        ),
+        title: 'Item Text',
+        minWidth: 300,
+      },
+      { ...keyColumn('qty', floatColumn), title: 'Qty', minWidth: 70, disabled: ({ rowData }: any) => rowData.qty_ordered > 0 },
+      {
+        ...keyColumn('ord_unit', textColumn),
+        title: 'Ord UOM',
+        minWidth: 55,
+        disabled: true,
+      },
+      {
+        ...keyColumn('alt_uom', {
+          component: ({ rowData, rowIndex }: { rowData: IAlternativeUom[]; rowIndex: number }) =>
+            rowData && rowData.length !== 0 ? <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChangeUom} /> : <></>,
+        }),
+        disabled: true,
+        title: '',
+        minWidth: 20,
+        maxWidth: 20,
+      },
+      {
+        ...keyColumn('price', floatColumn),
+        title: 'Price',
+        minWidth: 90,
+        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
+      },
+      {
+        ...keyColumn('per_unit', floatColumn),
+        title: 'Per Unit',
+        minWidth: 50,
+        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
+      },
+      // { ...keyColumn('unit', textColumn), title: 'B.UOM', minWidth: 60, disabled: true },
+      { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 120, disabled: true },
+      { ...keyColumn('currency', textColumn), title: 'Curr', minWidth: 40, disabled: true },
+      { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 130 },
+      { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 100, disabled: true },
+      { ...keyColumn('purch_grp', textColumn), title: 'Purch Grp', minWidth: 90, disabled: true },
+      {
+        ...keyColumn('prctrl_grp_id', selectColumn({ choices: prCtrlGrp })),
+        title: 'PR Controller',
+        minWidth: 200,
+        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
+      },
+    ],
+    []
+  );
+
+  const workflowColumns = useMemo(
+    () => [
+      { header: 'Position', accessor: (row: IWorkflow) => row.position },
+      { header: 'Status', accessor: (row: IWorkflow) => row.status },
+      { header: 'Approved By', accessor: (row: IWorkflow) => row.approved_by },
+      { header: 'Approved Date', accessor: (row: IWorkflow) => row.approved_date },
+      { header: 'Remarks', accessor: (row: IWorkflow) => row.message },
+    ],
+    []
+  );
+
+  const headerTabs = [
+    {
+      value: 'reasonForPr',
+      label: 'Reason for PR',
+      visible: true,
+      content: <Textarea value={data.reason_pr} onChange={(e) => setData('reason_pr', e.target.value)} required={true} />,
+    },
+    {
+      value: 'headerText',
+      label: 'Header Text',
+      visible: true,
+      content: <Textarea value={data.header_text} onChange={(e) => setData('header_text', e.target.value)} />,
+    },
+    {
+      value: 'workflow',
+      label: 'Workflow',
+      visible: prheader.workflows && prheader.workflows?.length > 0,
+      content: <GenericTable columns={workflowColumns} data={prheader.workflows} className="w-11/2 text-xs bg-white" />,
+    },
+    {
+      value: 'attachment',
+      label: 'Attachment',
+      visible: true,
+      content: (
+        <>
+          <AttachmentList
+            attachments={prheader.attachments}
+            canDelete={can(auth.user, PermissionsEnum.EditPR) /* auth.permissions.pr.edit */}
+          />
+          <Dropzone files={files} setFiles={setFiles} />
+        </>
+      ),
+    },
   ];
 
-  const customStyle = {
-    '--dsg-header-text-color': 'rgb(10, 10, 10)',
-    '--dsg-cell-disabled-background-color': 'rgb(245, 245, 245)',
-    '--dsg-border-color': '#bfbdbd',
-  };
+  const itemDetailsColumns = [
+    { header: 'Document', accessor: (row: IitemDetails) => row.doc },
+    { header: 'Item', accessor: (row: IitemDetails) => row.itm },
+    { header: 'Status', accessor: (row: IitemDetails) => row.sts },
+    { header: 'Quantity', accessor: (row: IitemDetails) => row.qty },
+    { header: 'Unit', accessor: (row: IitemDetails) => row.unit },
+  ];
 
-  const getMaterialInfo = async (material: string) => {
-    try {
-      const response = await window.axios.get(route('material.details'), {
-        params: { material: material, plant: data.plant },
-      });
-      return response.data.data;
-    } catch (error) {
-      console.error('Error fetching material info:', error);
-      return null;
-    }
-  };
+  const footerTabs = [
+    {
+      value: 'itemDetails',
+      label: 'Item Details',
+      visible: itemDetails.length > 0,
+      content: <GenericTable columns={itemDetailsColumns} data={itemDetails} className="w-11/2 text-xs bg-white" />,
+    },
+    {
+      value: 'action',
+      label: 'Action',
+      visible: can(auth.user, PermissionsEnum.EditPR), //auth.permissions.pr.edit,
+      content: (
+        <div>
+          <FlagForAction
+            p_description="Remove flag for this item(s)?"
+            p_title="Remove Flag"
+            p_url={route('pr.flag.remove')}
+            p_disable={material.filter((mat) => mat.sel == true).length == 0}
+            p_items={{ ids: material.filter((mat) => mat.sel == true).map((mat) => mat.id) }}
+          />
+
+          <FlagForAction
+            p_description="Flag delete this item(s)?"
+            p_title="Flag Delete"
+            p_url={route('pr.flag.delete')}
+            p_disable={material.filter((mat) => mat.sel == true).length == 0}
+            p_items={{ ids: material.filter((mat) => mat.sel == true).map((mat) => mat.id) }}
+          />
+
+          <FlagForAction
+            p_description="Flag close this item(s)?"
+            p_title="Flag Close"
+            p_url={route('pr.flag.close')}
+            p_disable={material.filter((mat) => mat.sel == true).length == 0}
+            p_items={{ ids: material.filter((mat) => mat.sel == true).map((mat) => mat.id) }}
+          />
+        </div>
+      ),
+    },
+  ];
 
   const updateMaterial = async (newValue: IPRMaterial[], operations: Operation[]) => {
-    const updatedMaterial = [...newValue];
-    const oldMaterialValue = [...material];
-
-    for (const operation of operations) {
-      if (operation.type === 'UPDATE') {
-        const value = updatedMaterial[operation.fromRowIndex];
-        const oldValue = oldMaterialValue[operation.fromRowIndex];
-
-        if (value.mat_code && value.mat_code !== oldValue.mat_code) {
-          const materialInfo = await getMaterialInfo(value.mat_code);
-          if (materialInfo) {
-            value.short_text = materialInfo.mat_desc;
-            value.ord_unit = materialInfo.base_uom;
-            value.unit = materialInfo.base_uom;
-            value.price = parseFloat(materialInfo.valuations[0]?.valuation_price || 0);
-            value.currency = materialInfo.valuations[0]?.currency || '';
-            value.per_unit = parseFloat(materialInfo.valuations[0]?.per_unit || 0);
-            value.mat_grp = materialInfo.materialGroups[0]?.mat_grp_code || '';
-            value.purch_grp = materialInfo.purchasingGroups[0]?.purch_grp || '';
-            value.total_value = value.price * (value.qty || 0);
-          }
-        }
-
-        if (value.short_text && value.short_text !== oldValue.short_text) {
-          const materialInfo = await getMaterialInfo(value.short_text);
-          if (materialInfo) {
-            value.mat_code = materialInfo.mat_code;
-            value.ord_unit = materialInfo.base_uom;
-            value.unit = materialInfo.base_uom;
-            value.price = parseFloat(materialInfo.valuations[0]?.valuation_price || 0);
-            value.currency = materialInfo.valuations[0]?.currency || '';
-            value.per_unit = parseFloat(materialInfo.valuations[0]?.per_unit || 0);
-            value.mat_grp = materialInfo.materialGroups[0]?.mat_grp_code || '';
-            value.purch_grp = materialInfo.purchasingGroups[0]?.purch_grp || '';
-            value.total_value = value.price * (value.qty || 0);
-          }
-        }
-
-        if (value.qty !== oldValue.qty) {
-          value.total_value = ((value.price ?? 0) / (value.per_unit ?? 0)) * (value.qty ?? 0);
-        }
-        value.item_no = (operation.fromRowIndex + 1) * 10;
-      }
-    }
-
+    const updatedMaterial = await updateMaterialPR(newValue, operations, material, data.plant, data.doc_date, materialGroupsSupplies);
     setMaterial(updatedMaterial);
-    setData({ ...data, prmaterials: updatedMaterial });
   };
 
   const handleSubmit: FormEventHandler = async (e) => {
     e.preventDefault();
-    if (handleCheck()) {
+    const { isValid, updatedMaterials } = validateMaterials(material, materialGroupsSupplies);
+    setMaterial(updatedMaterials);
+    if (isValid) {
       post(route('pr.update', prheader.id), {
         preserveScroll: true,
+        preserveState: false,
         onSuccess: (page) => {
           reset();
           setFiles([]);
         },
       });
     }
-  };
-
-  const handleCheck = () => {
-    const date_today = new Date();
-    let flag = true;
-    const item = material
-      .filter((item) => item.mat_code !== undefined)
-      .map((item, index) => ({ ...item, item_no: (index + 1) * 10 }));
-    setMaterial(item);
-    if (item.length <= 0) {
-      toast({
-        variant: 'destructive',
-        title: `Please add atleast 1 item`,
-      });
-      return false;
-    }
-
-    for (let i = 0; i < material.length; i++) {
-      if (material[i].mat_code !== undefined && material[i].mat_code !== '') {
-        if (material[i].qty === undefined || material[i]?.qty <= 0) {
-          toast({
-            variant: 'destructive',
-            title: `Please enter quantity for item no ${material[i].item_no}`,
-          });
-          flag = false;
-          break;
-        }
-
-        if (material[i].ord_unit === undefined || material[i]?.ord_unit === null) {
-          toast({
-            variant: 'destructive',
-            title: `Please enter order unit for item no ${material[i].item_no}`,
-          });
-          flag = false;
-          break;
-        }
-
-        if (material[i].del_date === undefined || material[i]?.del_date === null) {
-          toast({
-            variant: 'destructive',
-            description: `Please enter delivery date for item no ${material[i].item_no}`,
-          });
-          flag = false;
-          break;
-        } else if (material[i].del_date?.getTime() <= date_today.getTime()) {
-          toast({
-            variant: 'destructive',
-            description: `Please enter delivery date greater than today for item no ${material[i].item_no}`,
-          });
-          flag = false;
-          break;
-        }
-      }
-    }
-    return flag;
   };
 
   useEffect(() => {
@@ -253,8 +310,13 @@ const Edit = ({
   useEffect(() => {
     const prTotal = material.filter((mat) => mat?.status != 'X').reduce((acc, mat) => acc + (mat.total_value || 0), 0);
     const m_checked = material.filter((item) => item.sel == true).map((item) => item.mat_code)[0];
-    setData((prevHeader: IPRHeader) => ({ ...prevHeader, total_pr_value: prTotal, attachment: files }));
     const m_item_details = item_details.filter((item) => item.mat_code == m_checked);
+    setData((prevHeader: IPRHeader) => ({
+      ...prevHeader,
+      total_pr_value: prTotal,
+      attachment: files,
+      prmaterials: material,
+    }));
     setItemDetails(m_item_details);
   }, [material, files]);
 
@@ -272,145 +334,44 @@ const Edit = ({
       user={auth.user}
       menus={auth.menu}
       header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Edit Purchase Requisition</h2>}>
-      <Head title="PR Create" />
+      <Head title="PR Edit" />
+      {isLoading && <Loading />}
       <Toaster />
       <div className="py-2">
         <div className="max-w-8xl mx-auto sm:px-6 lg:px-2">
           <div className="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg">
             <form onSubmit={handleSubmit}>
               <div className="p-5 flex flex-wrap gap-4">
-                <div className="flex-auto">
-                  <Label htmlFor="prnumber">PR Number</Label>
-                  <Input type="text" id="prnumber" value={data.pr_number} disabled />
-                </div>
-                <div className="flex-auto">
-                  <Label htmlFor="createdby">Created By</Label>
-                  <Input type="text" id="createdby" defaultValue={data.created_name} disabled />
-                </div>
-                <div className="flex-auto">
-                  <Label htmlFor="date">Date</Label>
-                  <Input type="text" id="date" defaultValue={data.doc_date} disabled />
-                </div>
-                <div className="flex-auto">
-                  <Label htmlFor="requested_by">Requested By</Label>
-                  <Input
-                    type="text"
-                    id="requested_by"
-                    value={data.requested_by}
-                    required={true}
-                    onChange={(e) => setData('requested_by', e.target.value)}
-                  />
-                </div>
-                <div className="flex-auto">
-                  <Label htmlFor="requestingPlant">Requesting Plant</Label>
-                  <Select defaultValue={data.plant} onValueChange={(value) => setData('plant', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Plant" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {auth.user.plants &&
-                        auth.user.plants.map((plant) => (
-                          <SelectItem value={plant.plant} key={plant.plant}>
-                            {plant.plant} {plant.name1}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <InputField label="PR Number" id="prnumber" defaultValue={data.pr_number} disabled={true} />
+                <InputField label="Created By" id="createdby" defaultValue={data.created_name} disabled={true} />
+                <InputField label="Date" id="date" type="date" defaultValue={data.doc_date} disabled={true} />
+                <InputField
+                  label="Requested By"
+                  id="requested_by"
+                  value={data.requested_by}
+                  required={true}
+                  onChange={(e) => setData('requested_by', e.target.value)}
+                />
+                <SelectField
+                  label="Requesting Plant"
+                  items={auth.user.plants}
+                  valueKey="plant"
+                  displayKey="name1"
+                  onValueChange={(value) => setData('plant', value)}
+                  value={data.plant}
+                  displayValue={true}
+                />
               </div>
               <div className="p-5">
-                <Tabs defaultValue="reasonForPr" className="max-w-8xl">
-                  <TabsList>
-                    <TabsTrigger value="reasonForPr">Reason for PR</TabsTrigger>
-                    <TabsTrigger value="headerText">Header Text</TabsTrigger>
-                    <TabsTrigger value="workflow">Workflow</TabsTrigger>
-                    <TabsTrigger value="attachment">Attachment</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="reasonForPr">
-                    <Textarea
-                      value={data.reason_pr}
-                      onChange={(e) => setData('reason_pr', e.target.value)}
-                      required={true}
-                    />
-                  </TabsContent>
-                  <TabsContent value="headerText">
-                    <Textarea value={data.header_text} onChange={(e) => setData('header_text', e.target.value)} />
-                  </TabsContent>
-                  <TabsContent value="workflow">
-                    <Table className="w-11/2 text-xs">
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Position</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Approved By</TableHead>
-                          <TableHead>Approved Date</TableHead>
-                          <TableHead>Remarks</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {prheader.workflows &&
-                          prheader.workflows.map((workflow: IWorkflow) => (
-                            <TableRow key={workflow.id}>
-                              <TableCell>{workflow.position}</TableCell>
-                              <TableCell>{workflow.status} </TableCell>
-                              <TableCell> {workflow.approved_by} </TableCell>
-                              <TableCell>{workflow.approved_date} </TableCell>
-                              <TableCell>{workflow.message} </TableCell>
-                            </TableRow>
-                          ))}
-                      </TableBody>
-                    </Table>
-                  </TabsContent>
-                  <TabsContent value="attachment">
-                    <ul className="mt-3 mb-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-5 ">
-                      {prheader.attachments &&
-                        prheader.attachments.map((attachment) => (
-                          <li key={attachment.filename} className="relative h-12 rounded-md shadow-lg p-2 bg-white">
-                            {auth.permissions.pr.edit && (
-                              <Link
-                                preserveScroll
-                                href={route('attachment.delete', attachment.id)}
-                                method="delete"
-                                as="button"
-                                className="w-7 h-7  bg-slate-100 rounded-full flex justify-center items-center absolute top-3 right-2 hover:bg-red-200 transition-colors">
-                                <XMarkIcon className="w-6 h-6  text-red-600 hover:fill-red-700 transition-colors" />
-                              </Link>
-                            )}
-                            <p className="mt-2 text-blue-600 text-sm font-medium truncate pr-7">
-                              <a href={'/' + attachment.filepath} download={true}>
-                                {attachment.filename}
-                              </a>
-                            </p>
-                          </li>
-                        ))}
-                    </ul>
-                    <Dropzone files={files} setFiles={setFiles} />
-                  </TabsContent>
-                </Tabs>
+                <TabFields defaultValue="reasonForPr" className="max-w-8xl" tabs={headerTabs} />
               </div>
               <div className="p-2">
                 <DataSheetGrid
-                  createRow={() => ({
-                    sel: false,
-                    item_no: undefined,
-                    status: undefined,
-                    mat_code: undefined,
-                    short_text: undefined,
-                    qty: undefined,
-                    ord_unit: undefined,
-                    qty_ordered: undefined,
-                    qty_open: undefined,
-                    price: undefined,
-                    per_unit: undefined,
-                    unit: undefined,
-                    total_value: undefined,
-                    del_date: undefined,
-                    mat_grp: undefined,
-                  })}
+                  createRow={() => DEFAULT_PR_MATERIAL}
                   value={material}
                   onChange={updateMaterial}
                   columns={columns}
-                  style={customStyle}
+                  style={CUSTOM_DATA_SHEET_STYLE}
                   disableExpandSelection
                   rowHeight={30}
                   className="text-sm"
@@ -425,70 +386,15 @@ const Edit = ({
                 </div>
               </div>
               <div className="p-2 pt-0">
-                <Tabs defaultValue="itemDetails" className="max-w-xl">
-                  <TabsList>
-                    <TabsTrigger value="itemDetails">Item Details</TabsTrigger>
-                    <TabsTrigger value="action">Action</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="itemDetails">
-                    <Table className="w-11/2 text-sm ml-5 border border-collapse">
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Document</TableHead>
-                          <TableHead>Item</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Quantity</TableHead>
-                          <TableHead>Unit</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody className="">
-                        {itemDetails &&
-                          itemDetails.map((item) => (
-                            <TableRow key={item.doc}>
-                              <TableCell>{item.doc}</TableCell>
-                              <TableCell>{item.itm} </TableCell>
-                              <TableCell> {item.sts} </TableCell>
-                              <TableCell>{item.qty} </TableCell>
-                              <TableCell>{item.unit} </TableCell>
-                            </TableRow>
-                          ))}
-                      </TableBody>
-                    </Table>
-                  </TabsContent>
-                  <TabsContent value="action">
-                    {auth.permissions.pr.edit && (
-                      <>
-                        <FlagForAction
-                          p_description="Are you sure you want to flag delete this item(s)?"
-                          p_title="Flag for Delete"
-                          p_url={route('pr.flag.delete')}
-                          p_disable={
-                            material.filter((mat) => mat.sel == true).length == 0 || prheader.appr_seq != SEQ_DRAFT
-                          }
-                          p_items={{ ids: material.filter((mat) => mat.sel == true).map((mat) => mat.id) }}
-                        />
-
-                        <FlagForAction
-                          p_description="Are you sure you want to flag close this item(s)?"
-                          p_title="Flag Close"
-                          p_url={route('pr.flag.close')}
-                          p_disable={
-                            material.filter((mat) => mat.sel == true).length == 0 || prheader.appr_seq != SEQ_DRAFT
-                          }
-                          p_items={{ ids: material.filter((mat) => mat.sel == true).map((mat) => mat.id) }}
-                        />
-                      </>
-                    )}
-                  </TabsContent>
-                </Tabs>
+                <TabFields defaultValue="itemDetails" className="max-w-8xl" tabs={footerTabs} />
                 <div className="p-5 justify-end grid grid-cols-8 gap-4">
-                  {auth.permissions.pr.edit && (
+                  {can(auth.user, PermissionsEnum.EditPR) && ( //auth.permissions.pr.edit && (
                     <>
                       <Button
                         type="submit"
                         variant="outline"
                         className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] disabled:cursor-not-allowed disabled:opacity-100 disabled:bg-gray-100"
-                        disabled={prheader.appr_seq != SEQ_DRAFT || processing}>
+                        disabled={prheader.appr_seq == SEQ_REJECT || processing}>
                         Save
                       </Button>
                       <Link
@@ -515,7 +421,7 @@ const Edit = ({
                       />
 
                       <Link
-                        disabled={prheader.status == STATUS_APPROVED}
+                        // disabled={prheader.status == STATUS_APPROVED}
                         preserveScroll
                         href={route('pr.recall', prheader.id)}
                         as="button"
@@ -528,7 +434,7 @@ const Edit = ({
                 </div>
               </div>
             </form>
-            {auth.permissions.pr.approver && (
+            {can(auth.user, PermissionsEnum.ApproverPR) && ( //auth.permissions.pr.approver && (
               <div className="px-5 pb-5">
                 <Approval
                   p_pr_number={data.pr_number}
@@ -539,8 +445,6 @@ const Edit = ({
                     prheader.status == STATUS_REWORK ||
                     prheader.status == STATUS_REJECTED ||
                     apprSeq?.seq != prheader.appr_seq
-                      ? true
-                      : false
                   }
                 />
                 <Approval
@@ -552,8 +456,6 @@ const Edit = ({
                     prheader.status == STATUS_REWORK ||
                     prheader.status == STATUS_REJECTED ||
                     apprSeq?.seq != prheader.appr_seq
-                      ? true
-                      : false
                   }
                 />
                 <Approval
@@ -565,8 +467,6 @@ const Edit = ({
                     prheader.status == STATUS_REWORK ||
                     prheader.status == STATUS_REJECTED ||
                     apprSeq?.seq != prheader.appr_seq
-                      ? true
-                      : false
                   }
                 />
               </div>

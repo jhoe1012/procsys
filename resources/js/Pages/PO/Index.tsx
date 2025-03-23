@@ -1,14 +1,15 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { PageProps, IMessage, IPOHeaderPage, IPOHeader, IPOMaterial } from '@/types';
-import Modal from '@/Components/Modal';
 import { useState, useEffect, KeyboardEvent } from 'react';
-import Pagination from '@/Components/Pagination';
-import TextInput from '@/Components/TextInput';
-import { useToast } from '@/Components/ui/use-toast';
-import { Toaster } from '@/Components/ui/toaster';
-import { formatNumber, reactSelectStyles } from '@/lib/utils';
+import { formatNumber } from '@/lib/utils';
 import AsyncSelect from 'react-select/async';
+import { PermissionsEnum, REACT_SELECT_STYLES, STATUS_APPROVED } from '@/lib/constants';
+import { badgeVariants, Button, Toaster, useToast } from '@/Components/ui';
+import { Checkbox, InputField, Modal, Pagination, TextInput } from '@/Components';
+import { fetchVendor } from '@/lib/Vendor';
+import { PrinterIcon } from 'lucide-react';
+import { can } from '@/lib/helper';
 
 export default function Index({
   auth,
@@ -18,6 +19,11 @@ export default function Index({
 }: PageProps<{ po_header: IPOHeaderPage }> & PageProps<{ queryParams: any }> & PageProps<{ message: IMessage }>) {
   const [selectedPO, setSelectedPO] = useState<IPOHeader | null>(null);
   const [poMaterials, setPoMaterials] = useState<IPOMaterial[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const [checkboxPo, setCheckboxPo] = useState<number[]>([]);
+  const [controlNumberModal, setControlNumberModal] = useState(false);
+  const [controlNumber, setControlNumber] = useState('');
 
   queryParams = queryParams || {};
 
@@ -54,32 +60,20 @@ export default function Index({
     searchFieldChanged(name, (e.target as HTMLInputElement).value);
   };
 
-  const [modalOpen, setModalOpen] = useState(false);
-
-  const closeModal = () => {
-    setModalOpen(false);
-  };
-
-  const fetchVendor = async (inputValue) => {
-    if (!inputValue) return [];
-
-    try {
-      const response = await window.axios.get(route('vendor.search', { search: inputValue }));
-      return response.data.data.map((item) => ({
-        value: item.supplier,
-        label: `${item.supplier} - ${item.name_1}`,
-      }));
-    } catch (e) {
-      console.log('Error fetching data:', e);
-      return [];
-    }
-  };
-
   return (
     <AuthenticatedLayout
       user={auth.user}
       menus={auth.menu}
-      header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Purchase Order List</h2>}>
+      header={
+        <div className="flex flex-row justify-between">
+          <h2 className="font-semibold text-xl text-gray-800 leading-tight">Purchase Order List</h2>
+          {can(auth.user, PermissionsEnum.EditPO) && (
+            <Button onClick={() => setControlNumberModal(true)} className="h-8" disabled={checkboxPo.length <= 0}>
+              <PrinterIcon />
+            </Button>
+          )}
+        </div>
+      }>
       <Head title="View PO " />
 
       <Toaster />
@@ -92,10 +86,10 @@ export default function Index({
                 <table className=" table-auto w-full text-xs text-left rtl:text-right text-gray-500">
                   <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b-2 border-gray-500">
                     <tr className="text-nowrap">
-                      <th className="px-3 py-2"> </th>
+                      <th className="px-1 py-2"> </th>
                       <th className="px-1 py-2">
                         <TextInput
-                          className="h-7 text-xs p-1 m-0"
+                          className="h-7 text-xs p-1 m-0 w-28"
                           defaultValue={queryParams.po_number_from}
                           onBlur={(e) => searchFieldChanged('po_number_from', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('po_number_from', e)}
@@ -109,7 +103,7 @@ export default function Index({
                       <th className="px-1 py-2">
                         <TextInput
                           type="date"
-                          className="h-7 text-xs p-1 m-0"
+                          className="h-7 text-xs p-1 m-0 "
                           defaultValue={queryParams.doc_date_from}
                           onBlur={(e) => searchFieldChanged('doc_date_from', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('doc_date_from', e)}
@@ -129,7 +123,7 @@ export default function Index({
                       <th className="px-3 py-2"> </th>
                       <th className="px-1 py-2">
                         <TextInput
-                          className="h-7 text-xs p-1 m-0"
+                          className="h-7 text-xs p-1 m-0 w-28"
                           defaultValue={queryParams.po_number_to}
                           onBlur={(e) => searchFieldChanged('po_number_to', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('po_number_to', e)}
@@ -138,7 +132,7 @@ export default function Index({
                       </th>
                       <th className="px-1 py-2">
                         <TextInput
-                          className="h-7 text-xs p-1 m-0"
+                          className="h-7 text-xs p-1 m-0 w-28"
                           defaultValue={queryParams.control_no}
                           onBlur={(e) => searchFieldChanged('control_no', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('control_no', e)}
@@ -147,7 +141,7 @@ export default function Index({
                       </th>
                       <th className="px-1 py-2">
                         <TextInput
-                          className="h-7 text-xs p-1 m-0"
+                          className="h-7 text-xs p-1 m-0 w-28"
                           defaultValue={queryParams.plant}
                           onBlur={(e) => searchFieldChanged('plant', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('plant', e)}
@@ -160,12 +154,10 @@ export default function Index({
                           cacheOptions
                           defaultOptions
                           loadOptions={fetchVendor}
-                          value={
-                            queryParams.vendor ? { label: `${queryParams.vendor} `, value: queryParams.vendor } : null
-                          }
+                          value={queryParams.vendor ? { label: `${queryParams.vendor} `, value: queryParams.vendor } : null}
                           onChange={(option: any) => searchFieldChanged('vendor', option?.value)}
                           placeholder="Vendor"
-                          styles={reactSelectStyles}
+                          styles={REACT_SELECT_STYLES}
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -197,7 +189,7 @@ export default function Index({
                       </th>
                       <th className="px-1 py-2">
                         <TextInput
-                          className="h-7 text-xs p-1 m-0"
+                          className="h-7 text-xs p-1 m-0 w-28"
                           defaultValue={queryParams.status}
                           onBlur={(e) => searchFieldChanged('status', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('status', e)}
@@ -217,6 +209,8 @@ export default function Index({
                       <th className="px-3 py-2"> Doc Date</th>
                       <th className="px-3 py-2"> Deliv. Date</th>
                       <th className="px-3 py-2"> Status</th>
+                      <th className="px-3 py-2"> Print</th>
+                      <th className="px-3 py-2"> </th>
                     </tr>
                   </thead>
 
@@ -224,7 +218,7 @@ export default function Index({
                     {po_header.data.length > 0 ? (
                       po_header.data.map((po, index) => (
                         // <tr className="bg-white border-b" key={po.id}>
-                        <tr className={'border-b ' + (index % 2 === 0 ? 'bg-gray-100' : 'bg-white')}  key={po.id}>
+                        <tr className={'border-b ' + (index % 2 === 0 ? 'bg-gray-100' : 'bg-white')} key={po.id}>
                           <td className="px-3 py-2">
                             <input
                               type="radio"
@@ -246,8 +240,24 @@ export default function Index({
                           <td className="px-3 py-2">{po.created_name}</td>
                           <td className="px-3 py-2">{po.doc_date}</td>
                           <td className="px-3 py-2">{po.deliv_date}</td>
-                          <td className="px-3 py-2">{po.status}</td>
-                          <td className="px-3 py-2"></td>
+                          {/* <td className="px-3 py-2">{po.status}</td> */}
+                          <td className="px-3 py-2">
+                            <span className={badgeVariants({ variant: po.status.includes('Approval') ? 'Approval' : po.status })}>
+                              {po.status}
+                            </span>
+                          </td>
+
+                          <td className="px-3 py-2 text-center">{po.print_count}</td>
+                          <td className="px-3 py-2">
+                            {can(auth.user, PermissionsEnum.EditPO) && po.status === STATUS_APPROVED && (
+                              <Checkbox
+                                className="border-blue-500"
+                                onChange={(e) =>
+                                  setCheckboxPo((prev) => (e.target.checked ? [...prev, po.id] : prev?.filter((id) => id !== po.id)))
+                                }
+                              />
+                            )}
+                          </td>
                         </tr>
                       ))
                     ) : (
@@ -259,7 +269,12 @@ export default function Index({
                 </table>
                 <Pagination links={po_header.meta.links} />
               </div>
-              <Modal show={modalOpen} onClose={closeModal} maxWidth="3xl">
+              <Modal
+                show={modalOpen}
+                onClose={() => {
+                  setModalOpen(false);
+                }}
+                maxWidth="3xl">
                 <div className="flex-1 p-5">
                   <table className="w-full text-xs text-left rtl:text-right text-gray-500">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b-2 border-gray-500">
@@ -272,7 +287,7 @@ export default function Index({
                         <th className="px-3 py-2">Stat</th>
                         <th className="px-3 py-2">itemNo</th>
                         <th className="px-3 py-2">Material </th>
-                        <th className="px-3 py-2">Short Text</th>
+                        <th className="px-3 py-2">Material Description</th>
                         <th className="px-3 py-2">Del Date</th>
                         <th className="px-3 py-2">Qty</th>
                         <th className="px-3 py-2">Unit</th>
@@ -311,6 +326,33 @@ export default function Index({
                       </Link>
                     )}
                   </div>
+                </div>
+              </Modal>
+              <Modal
+                show={controlNumberModal}
+                onClose={() => {
+                  setControlNumberModal(false);
+                  setControlNumber('');
+                }}
+                maxWidth="3xl">
+                <div className="p-5 flex flex-col">
+                  <InputField
+                    label="Control No."
+                    id="controlNumber"
+                    defaultValue={controlNumber}
+                    onChange={(e) => setControlNumber(e.target.value)}
+                    type="number"
+                    required={true}
+                    className="text-center"
+                  />
+
+                  <a
+                    target="_blank"
+                    href={route('po.mass-print', { controlNumber: controlNumber, checkboxPo: checkboxPo })}
+                    onClick={() => setControlNumberModal(false)}
+                    className="flex items-center justify-center text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1 text-center  mt-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800">
+                    <PrinterIcon /> Print
+                  </a>
                 </div>
               </Modal>
             </div>

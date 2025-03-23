@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Series;
 use App\Http\Requests\StoreSeriesRequest;
 use App\Http\Requests\UpdateSeriesRequest;
+use App\Models\Series;
 
 class SeriesController extends Controller
 {

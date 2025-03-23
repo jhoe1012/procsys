@@ -13,12 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table( 'po_headers', function (Blueprint $table) {
-            if ( ! Schema::hasColumn( 'po_headers', 'deliv_date' ) ) {
-                $table->date( 'deliv_date' )->nullable();
+        Schema::table('po_headers', function (Blueprint $table) {
+            if (! Schema::hasColumn('po_headers', 'deliv_date')) {
+                $table->date('deliv_date')->nullable();
             }
-            if ( ! Schema::hasColumn( 'po_headers', 'notes' ) ) {
-                $table->text( 'notes' )->nullable();
+            if (! Schema::hasColumn('po_headers', 'notes')) {
+                $table->text('notes')->nullable();
             }
         });
     }
@@ -30,13 +30,13 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table( 'po_headers', function (Blueprint $table) {
-            if ( Schema::hasColumn( 'po_headers', 'deliv_date' ) ) {
-                $table->dropColumn( 'deliv_date' );
+        Schema::table('po_headers', function (Blueprint $table) {
+            if (Schema::hasColumn('po_headers', 'deliv_date')) {
+                $table->dropColumn('deliv_date');
             }
 
-            if ( Schema::hasColumn( 'po_headers', 'notes' ) ) {
-                $table->dropColumn( 'notes' );
+            if (Schema::hasColumn('po_headers', 'notes')) {
+                $table->dropColumn('notes');
             }
         });
     }

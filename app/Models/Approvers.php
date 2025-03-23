@@ -9,11 +9,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Approvers extends Model
 {
-    use HasFactory, CreatedUpdatedBy;
+    use CreatedUpdatedBy, HasFactory;
 
     const TYPE_PR = 'pr';
-    const TYPE_PO = 'po';
 
+    const TYPE_PO = 'po';
 
     protected $fillable = [
         'type',
@@ -25,12 +25,13 @@ class Approvers extends Model
         'seq',
     ];
 
-    public function user() : BelongsTo {
+    public function user(): BelongsTo
+    {
         return $this->belongsTo(User::class);
     }
 
-    public function plants(): BelongsTo{
+    public function plants(): BelongsTo
+    {
         return $this->belongsTo(Plant::class, 'plant', 'plant');
     }
-
 }

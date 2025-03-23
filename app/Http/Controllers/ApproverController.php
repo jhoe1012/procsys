@@ -11,7 +11,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
-
 class ApproverController extends Controller
 {
     /**
@@ -21,19 +20,19 @@ class ApproverController extends Controller
     {
         $query = Approvers::query();
 
-        $query =  $query->with(['plants', 'user']);
+        $query = $query->with(['plants', 'user']);
 
         if (request('plant')) {
-            $query->where('plant', 'ilike', "%" . request('plant') . "%");
+            $query->where('plant', 'ilike', '%'.request('plant').'%');
         }
         if (request('name')) {
-            $query->whereHas('user', fn($query) => $query->where('name', 'ilike', "%" . request('name') . "%"));
+            $query->whereHas('user', fn ($query) => $query->where('name', 'ilike', '%'.request('name').'%'));
         }
         if (request('email')) {
-            $query->whereHas('user', fn($query) => $query->where('email', 'ilike', "%" . request('email') . "%"));
+            $query->whereHas('user', fn ($query) => $query->where('email', 'ilike', '%'.request('email').'%'));
         }
         if (request('position')) {
-            $query->where('position', 'ilike', "%" . request('position') . "%");
+            $query->where('position', 'ilike', '%'.request('position').'%');
         }
 
         $vendor = $query->orderBy(column: 'type', direction: 'asc')
@@ -42,22 +41,23 @@ class ApproverController extends Controller
             ->paginate(50)
             ->onEachSide(5);
 
-        $plants =  Plant::select('plant', "name1")
+        $plants = Plant::select('plant', 'name1')
             ->orderBy('plant')
             ->get()
-            ->map(fn($item) =>  [
+            ->map(fn ($item) => [
                 'value' => $item->plant,
-                'label' => $item->plant . '-' . $item->name1
+                'label' => $item->plant.'-'.$item->name1,
             ])->toArray();
 
         // return ApproverResource::collection($vendor);
         return Inertia::render('Admin/Approver/Index', [
-            'approvers' => ApproverResource::collection($vendor),
-            'plants' => $plants,
+            'approvers'   => ApproverResource::collection($vendor),
+            'plants'      => $plants,
             'queryParams' => $request->query() ?: null,
-            'message' => ['success' => session('success'), 'error' => session('error')],
+            'message'     => ['success' => session('success'), 'error' => session('error')],
         ]);
     }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -71,15 +71,15 @@ class ApproverController extends Controller
      */
     public function store(Request $request)
     {
-        $approver = new Approvers();
-        $approver->type = Str::lower($request->input('type'));
-        $approver->plant = $request->input('plant');
-        $approver->user_id = $request->input('user_id');
-        $approver->position = $request->input('position');
+        $approver              = new Approvers;
+        $approver->type        = Str::lower($request->input('type'));
+        $approver->plant       = $request->input('plant');
+        $approver->user_id     = $request->input('user_id');
+        $approver->position    = $request->input('position');
         $approver->amount_from = $request->input('amount_from');
-        $approver->amount_to = $request->input('amount_to');
-        $approver->seq = $request->input('seq');
-        $approver->desc = $request->input('desc');
+        $approver->amount_to   = $request->input('amount_to');
+        $approver->seq         = $request->input('seq');
+        $approver->desc        = $request->input('desc');
         $approver->save();
 
     }
@@ -105,14 +105,14 @@ class ApproverController extends Controller
      */
     public function update(Request $request, Approvers $approver)
     {
-        $approver->type = Str::lower($request->input('type'));
-        $approver->plant = $request->input('plant');
-        $approver->user_id = $request->input('user_id');
-        $approver->position = $request->input('position');
+        $approver->type        = Str::lower($request->input('type'));
+        $approver->plant       = $request->input('plant');
+        $approver->user_id     = $request->input('user_id');
+        $approver->position    = $request->input('position');
         $approver->amount_from = $request->input('amount_from');
-        $approver->amount_to = $request->input('amount_to');
-        $approver->seq = $request->input('seq');
-        $approver->desc = $request->input('desc');
+        $approver->amount_to   = $request->input('amount_to');
+        $approver->seq         = $request->input('seq');
+        $approver->desc        = $request->input('desc');
         $approver->save();
 
     }
@@ -128,11 +128,12 @@ class ApproverController extends Controller
     public function search(Request $request)
     {
 
-        if (!$request->input('search'))
+        if (! $request->input('search')) {
             return;
+        }
 
-        $user = User::where('name', 'ilike' , "%{$request->input('search')}%")
-        ->orderBy('name')->get();
+        $user = User::where('name', 'ilike', "%{$request->input('search')}%")
+            ->orderBy('name')->get();
 
         return UserResource::collection($user);
     }

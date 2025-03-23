@@ -5,25 +5,26 @@ import { Label } from '@/Components/ui/label';
 import AsyncSelect from 'react-select/async';
 import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
-import { IApprover } from '@/types';
+import { Choice, IApprover } from '@/types';
 import Select from 'react-select';
+import { PencilSquareIcon } from '@heroicons/react/24/solid';
 
-export default function Edit({ p_plants, p_approver }) {
+export default function Edit({ p_plants, p_approver }: { p_plants: Choice; p_approver: IApprover }) {
   const [showModal, setShowModal] = useState(false);
 
   const { data, setData, patch, processing, reset, errors } = useForm<IApprover>({
     type: p_approver.type,
-    typeChoice: [{label: p_approver.type.toUpperCase(), value: p_approver.type.toUpperCase()}],
+    typeChoice: { label: p_approver.type.toUpperCase(), value: p_approver.type.toUpperCase() },
     plant: p_approver.plant,
-    plantChoice: [{ value: p_approver.plant, label: `${p_approver.plant}-${p_approver.plants?.name1}` }],
+    plantChoice: { value: p_approver.plant, label: `${p_approver.plant}-${p_approver.plants?.name1}` },
     user_id: p_approver.user_id,
-    user_idChoice: [{ value: p_approver.user_id, label: p_approver.user.name }],
+    user_idChoice: { value: p_approver.user_id, label: p_approver.user.name },
     position: p_approver.position,
     amount_from: p_approver.amount_from,
     amount_to: p_approver.amount_to,
     seq: p_approver.seq,
     desc: p_approver.desc,
-    _method:'patch',
+    _method: 'patch',
   });
 
   const approver_type = [
@@ -37,7 +38,6 @@ export default function Edit({ p_plants, p_approver }) {
     patch(route('approver.update', p_approver.id), {
       preserveScroll: true,
       onSuccess: () => closeModal(),
-      //   onError: () => passwordInput.current?.focus(),
       onFinish: () => reset(),
     });
   };
@@ -65,25 +65,9 @@ export default function Edit({ p_plants, p_approver }) {
     }
   };
 
-
   return (
     <section className={`space-y-6`}>
-       <svg
-        onClick={() => setShowModal(true)}
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={1.5}
-        stroke="currentColor"
-        className="size-6 cursor-pointer text-blue-500">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
-        />
-      </svg>
-
-      {/* <Button onClick={() => setShowModal(true)}>Add</Button> */}
+      <PencilSquareIcon onClick={() => setShowModal(true)} className="size-6 cursor-pointer text-blue-500" />
 
       <Modal show={showModal} onClose={closeModal} maxWidth="lg">
         <form onSubmit={updateApprover}>
@@ -197,10 +181,7 @@ export default function Edit({ p_plants, p_approver }) {
             </div>
 
             <div className="grid justify-items-center m-3">
-              <Button
-                variant="outline"
-                disabled={processing}
-                className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-60">
+              <Button variant="outline" disabled={processing} className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-60">
                 Save
               </Button>
             </div>

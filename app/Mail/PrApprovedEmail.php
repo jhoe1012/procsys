@@ -3,11 +3,12 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class PrApprovedEmail extends Mailable
 {
@@ -16,7 +17,7 @@ class PrApprovedEmail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(private  $requestor, private $approver_email,  private  $pr_header)
+    public function __construct(private $requestor, private $pr_header, private array $pr_attachments = [])
     {
         //
     }
@@ -27,8 +28,7 @@ class PrApprovedEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "ProcMgmt - PR {$this->pr_header->pr_number} is {$this->pr_header->status}",
-            cc: $this->approver_email
+            subject: "ProcMgmt - PR {$this->pr_header->pr_number} is {$this->pr_header->status}"
         );
     }
 
@@ -50,6 +50,22 @@ class PrApprovedEmail extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        if (empty($this->pr_attachments)) {
+            Log::info("No attachments found for PR: {$this->pr_header->pr_number}");
+
+            return [];
+        }
+
+        return collect($this->pr_attachments)->map(function ($filepath, $filename) {
+            $fullPath = public_path($filepath);
+
+            if (! $fullPath || ! file_exists($fullPath)) {
+                Log::error("Attachment not found: {$fullPath}");
+
+                return null;
+            }
+
+            return Attachment::fromPath($fullPath)->as($filename);
+        })->filter()->all();
     }
 }

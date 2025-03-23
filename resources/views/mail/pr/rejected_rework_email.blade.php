@@ -79,8 +79,8 @@
         <h2>Action Required: Purchase Requisition {{ $pr_header->pr_number }} is {{ $pr_header->status }} </h2>
         <p>Dear {{ $requestor }},</p>
         <p>I am writing to inform you that the Purchase Requisition {{ $pr_header->pr_number }}, submitted on
-            {{ date('Y-m-d', strtotime($pr_header->doc_date)) }}, has been reviewed but cannot be approved in its current form. Below are the
-            reasons for the rejection and the necessary actions for rework:</p>
+            {{ date('Y-m-d', strtotime($pr_header->doc_date)) }}, has been reviewed but cannot be approved in its
+            current form. Below are the reasons for the rejection and the necessary actions for rework:</p>
         <p><strong>Rejection Reason:</strong> {{ $pr_header->workflows[count($pr_header->workflows) - 1]->message }}</p>
 
         <p>Please revise the Purchase Order based on the feedback provided and resubmit it for approval. If you have any
@@ -97,7 +97,8 @@
                     <tr>
                         <td>Item No</td>
                         <td>Material</td>
-                        <td>Short Text</td>
+                        <td>Material Description</td>
+                        <td>Item Text</td>
                         <td>Qty</td>
                         <td>Ord Unit</td>
                         <td>Price</td>
@@ -114,6 +115,7 @@
                             <td>{{ $prmaterial->item_no }}</td>
                             <td>{{ $prmaterial->mat_code }}</td>
                             <td>{{ $prmaterial->short_text }}</td>
+                            <td>{{ $prmaterial->item_text }}</td>
                             <td>{{ $prmaterial->qty }}</td>
                             <td>{{ $prmaterial->ord_unit }}</td>
                             <td>{{ Number::currency($prmaterial->price, 'PHP') }}</td>
@@ -121,7 +123,7 @@
                             <td>{{ Number::currency($prmaterial->total_value, 'PHP') }}</td>
                             <td>{{ $prmaterial->currency }}</td>
                             <td>{{ date('Y-m-d', strtotime($prmaterial->del_date)) }}</td>
-                            <td>{{ $prmaterial->mat_grp }}</td>
+                            <td>{{ $prmaterial->materialGroups->mat_grp_desc }}</td>
                         </tr>
                     @endforeach
                 </tbody>

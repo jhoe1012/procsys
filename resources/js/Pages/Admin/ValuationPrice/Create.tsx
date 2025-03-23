@@ -7,6 +7,7 @@ import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
 import { IMaterialValuation } from '@/types';
 import Select from 'react-select';
+import { fetchMaterial } from '@/lib/Material';
 
 export default function Create({ p_plants }) {
   const [showModal, setShowModal] = useState(false);
@@ -21,7 +22,6 @@ export default function Create({ p_plants }) {
     valid_to: '',
   });
 
-  
   const createValuation: FormEventHandler = (e) => {
     e.preventDefault();
 
@@ -35,26 +35,8 @@ export default function Create({ p_plants }) {
 
   const closeModal = () => {
     setShowModal(false);
-
     reset();
   };
-
-  const fetchMaterial = async (inputValue) => {
-    if (!inputValue) return [];
-
-    try {
-      const response = await window.axios.get(route('material.search', { search: inputValue }));
-
-      return response.data.data.map((item) => ({
-        value: item.mat_code,
-        label: `${item.mat_code} - ${item.mat_desc}`,
-      }));
-    } catch (e) {
-      console.log('Error fetching data:', e);
-      return [];
-    }
-  };
-
 
   return (
     <section className={`space-y-6`}>
@@ -62,7 +44,7 @@ export default function Create({ p_plants }) {
 
       <Modal show={showModal} onClose={closeModal} maxWidth="lg">
         <form onSubmit={createValuation}>
-          <div className="m-2"> 
+          <div className="m-2">
             <div className="flex ">
               <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="plant">
                 Plant
@@ -102,7 +84,6 @@ export default function Create({ p_plants }) {
                 className="m-2 w-full border-gray-300 h-10 "
                 type="text"
                 id="currency"
-                
                 defaultValue={data.currency}
                 onChange={(e) => setData('currency', e.target.value)}
               />
@@ -162,10 +143,7 @@ export default function Create({ p_plants }) {
             </div>
 
             <div className="grid justify-items-center m-3">
-              <Button
-                variant="outline"
-                disabled={processing}
-                className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-60">
+              <Button variant="outline" disabled={processing} className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-60">
                 Save
               </Button>
             </div>

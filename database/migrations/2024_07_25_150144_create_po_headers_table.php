@@ -21,10 +21,10 @@ return new class extends Migration
             $table->string('plant');
             $table->text('header_text')->nullable();
             $table->text('approver_text')->nullable();
-            $table->decimal('total_po_value',15,2);
+            $table->decimal('total_po_value', 15, 2);
             $table->string('status')->nullable();
             $table->dateTime('release_date')->nullable();
-            $table->integer("appr_seq")->nullable();
+            $table->integer('appr_seq')->nullable();
             $table->string('deliv_addr')->nullable();
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();

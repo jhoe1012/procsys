@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ApproveStatus;
 use App\Http\Requests\StoreApproveStatusRequest;
 use App\Http\Requests\UpdateApproveStatusRequest;
+use App\Models\ApproveStatus;
 
 class ApproveStatusController extends Controller
 {

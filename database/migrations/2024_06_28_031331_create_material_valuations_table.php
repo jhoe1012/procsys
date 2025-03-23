@@ -16,10 +16,10 @@ return new class extends Migration
             $table->string('mat_code', 20);
             $table->string('plant', 20);
             $table->string('currency')->default('PHP');
-            $table->decimal('valuation_price',15,2);
+            $table->decimal('valuation_price', 15, 2);
             $table->integer('per_unit')->default(1);
-            $table->date("valid_from");
-            $table->date("valid_to");
+            $table->date('valid_from');
+            $table->date('valid_to');
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();
             $table->timestamps();

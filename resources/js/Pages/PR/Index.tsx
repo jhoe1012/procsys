@@ -8,7 +8,10 @@ import Pagination from '@/Components/Pagination';
 import TextInput from '@/Components/TextInput';
 import { useToast } from '@/Components/ui/use-toast';
 import { Toaster } from '@/Components/ui/toaster';
-import { formatNumber } from '@/lib/utils';
+import { formatLongDate, formatNumber, formatShortDate } from '@/lib/utils';
+import { can } from '@/lib/helper';
+import { PermissionsEnum } from '@/lib/constants';
+import { badgeVariants } from '@/Components/ui';
 
 export default function Index({
   auth,
@@ -55,10 +58,10 @@ export default function Index({
     searchFieldChanged(name, (e.target as HTMLInputElement).value);
   };
 
-  const [modalOpen, setModalOpenm] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const closeModal = () => {
-    setModalOpenm(false);
+    setModalOpen(false);
   };
 
   return (
@@ -133,9 +136,9 @@ export default function Index({
                       <th className="px-1 py-2">
                         <TextInput
                           className="h-7 text-xs p-1 m-0"
-                          defaultValue={queryParams.create_name}
-                          onBlur={(e) => searchFieldChanged('create_name', e.target.value)}
-                          onKeyDown={(e) => handleKeyPress('create_name', e)}
+                          defaultValue={queryParams.created_name}
+                          onBlur={(e) => searchFieldChanged('created_name', e.target.value)}
+                          onKeyDown={(e) => handleKeyPress('created_name', e)}
                           placeholder="Created By"
                         />
                       </th>
@@ -202,7 +205,7 @@ export default function Index({
                               name="sel"
                               onClick={() => {
                                 setSelectedPR(pr);
-                                setModalOpenm(true);
+                                setModalOpen(true);
                               }}
                             />
                           </td>
@@ -212,9 +215,13 @@ export default function Index({
                           </td>
                           <td className="px-3 py-2">{pr.created_name}</td>
                           <td className="px-3 py-2">{pr.requested_by}</td>
-                          <td className="px-3 py-2">{pr.doc_date}</td>
-                          <td className="px-3 py-2">{pr.updated_at}</td>
-                          <td className="px-3 py-2">{pr.status}</td>
+                          <td className="px-3 py-2">{formatShortDate(pr.doc_date)}</td>
+                          <td className="px-3 py-2">{formatLongDate(pr.updated_at!)}</td>
+                          <td className="px-3 py-2">
+                            <span className={badgeVariants({ variant: pr.status.includes('Approval') ? 'Approval' : pr.status })}>
+                              {pr.status}
+                            </span>
+                          </td>
                           {/* <td className="px-3 py-2">{pr?.plants?.name1}</td> */}
                         </tr>
                       ))
@@ -247,11 +254,11 @@ export default function Index({
                         <th className="px-3 py-2">Stat </th>
                         <th className="px-3 py-2">itemNo</th>
                         <th className="px-3 py-2">Material</th>
-                        <th className="px-3 py-2">Short Text</th>
+                        <th className="px-3 py-2">Material Description</th>
                         <th className="px-3 py-2">Del Date</th>
                         <th className="px-3 py-2">Quantity</th>
                         <th className="px-3 py-2">Open Qty</th>
-                        <th className="px-3 py-2">Unit</th>
+                        <th className="px-3 py-2">Ord. Unit</th>
                         <th className="px-3 py-2">Total Value</th>
                         <th className="px-3 py-2">Curr</th>
                       </tr>
@@ -264,10 +271,10 @@ export default function Index({
                           <td className="px-3 py-2">{prmaterial.item_no}</td>
                           <td className="px-3 py-2">{prmaterial.mat_code}</td>
                           <td className="px-3 py-2">{prmaterial.short_text}</td>
-                          <td className="px-3 py-2">{prmaterial.del_date?.toString()}</td>
+                          <td className="px-3 py-2">{formatShortDate(prmaterial.del_date)}</td>
                           <td className="px-3 py-2">{prmaterial.qty}</td>
                           <td className="px-3 py-2">{prmaterial.qty_open}</td>
-                          <td className="px-3 py-2">{prmaterial.unit}</td>
+                          <td className="px-3 py-2">{prmaterial.ord_unit}</td>
                           <td className="px-3 py-2">{formatNumber(prmaterial.total_value ?? 0)}</td>
                           <td className="px-3 py-2">{prmaterial.currency}</td>
                         </tr>
@@ -280,12 +287,22 @@ export default function Index({
                   </table>
                   <div className="flex flex-row-reverse pt-2">
                     <div>
+                      {selectedPR?.id &&
+                        can(auth.user, PermissionsEnum.CreatePR) && ( //auth.permissions.pr.create && (
+                          <Link
+                            href={route('pr.copy', selectedPR.pr_number)}
+                            className=" p-3 m-3 bg-blue-500 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input  hover:bg-blue-400 hover:text-accent-foreground hover:border-gray-500">
+                            Copy PR
+                          </Link>
+                        )}
                       {selectedPR?.id && (
-                        <Link
-                          href={route('pr.edit', selectedPR.pr_number)}
-                          className=" p-3 m-3 bg-yellow-500 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input  hover:bg-yellow-400 hover:text-accent-foreground hover:border-gray-500">
-                          Display PR
-                        </Link>
+                        <>
+                          <Link
+                            href={route('pr.edit', selectedPR.pr_number)}
+                            className=" p-3 m-3 bg-yellow-500 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input  hover:bg-yellow-400 hover:text-accent-foreground hover:border-gray-500">
+                            Display PR
+                          </Link>
+                        </>
                       )}
                     </div>
                   </div>

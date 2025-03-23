@@ -1,15 +1,11 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
-import { PageProps, IMessage, IMaterialValuationPage } from '@/types';
-
+import { PageProps, IMessage, IMaterialValuationPage, Choice } from '@/types';
 import { useEffect, KeyboardEvent } from 'react';
-import Pagination from '@/Components/Pagination';
-import TextInput from '@/Components/TextInput';
-import { useToast } from '@/Components/ui/use-toast';
-import { Toaster } from '@/Components/ui/toaster';
+import { AdminUpload, Pagination, TextInput } from '@/Components';
+import { Toaster, useToast } from '@/Components/ui';
 import Create from './Create';
 import Edit from './Edit';
-import { Choice } from '@/Components/SelectComponent';
 
 export default function Index({
   auth,
@@ -17,10 +13,7 @@ export default function Index({
   queryParams,
   plant,
   message,
-}: PageProps<{ materialValuation: IMaterialValuationPage }> &
-  PageProps<{ queryParams: any }> &
-  PageProps<{ plant: Choice }> &
-  PageProps<{ message: IMessage }>) {
+}: PageProps<{ materialValuation: IMaterialValuationPage; queryParams: any; plant: Choice; message: IMessage }>) {
   const { toast } = useToast();
 
   useEffect(() => {
@@ -29,7 +22,7 @@ export default function Index({
         title: message.success,
       });
     }
-  }, []);
+  }, [message]);
 
   queryParams = queryParams || {};
 
@@ -56,7 +49,10 @@ export default function Index({
       header={
         <div className="flex flex-row justify-between">
           <h2 className="font-semibold text-xl text-gray-800 leading-tight">Valuation Price List</h2>
-          <Create p_plants={plant} />
+          <div className="flex gap-2">
+            <Create p_plants={plant} />
+            <AdminUpload url={route('val_price.import')} pageName={'Valuation Price List'} />
+          </div>
         </div>
       }>
       <Head title="View Valuation Price " />

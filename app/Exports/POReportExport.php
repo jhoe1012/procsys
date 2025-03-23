@@ -5,7 +5,6 @@ namespace App\Exports;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-
 class POReportExport implements FromArray, WithHeadings
 {
     public function __construct(private array $data) {}
@@ -32,7 +31,7 @@ class POReportExport implements FromArray, WithHeadings
             'Supplier',
             'Supplier Name',
             'Material',
-            'Short Text',
+            'Material Description',
             'Matl Grp',
             'PO Quantity',
             'PO Unit',

@@ -2,12 +2,13 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { PageProps, IMessage, IGRHeader, IGRMaterials, IGRHeaderPage } from '@/types';
 import { useState, useEffect, KeyboardEvent } from 'react';
-import Pagination from '@/Components/Pagination';
-import TextInput from '@/Components/TextInput';
-import { useToast } from '@/Components/ui/use-toast';
-import { Toaster } from '@/Components/ui/toaster';
-import Modal from '@/Components/Modal';
 import { PrinterIcon } from '@heroicons/react/24/solid';
+import { can } from '@/lib/helper';
+import { PermissionsEnum, REACT_SELECT_STYLES } from '@/lib/constants';
+import AsyncSelect from 'react-select/async';
+import { Toaster, useToast } from '@/Components/ui';
+import { Modal, Pagination, TextInput } from '@/Components';
+import { fetchVendor } from '@/lib/Vendor';
 
 const Index = ({
   auth,
@@ -15,7 +16,6 @@ const Index = ({
   queryParams = {},
   message,
 }: PageProps<{ gr_header: IGRHeaderPage }> & PageProps<{ queryParams: any }> & PageProps<{ message: IMessage }>) => {
-  
   const [selectedGr, setSelectedGr] = useState<IGRHeader | null>(null);
   const [grmaterials, setGrmaterials] = useState<IGRMaterials[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -81,7 +81,7 @@ const Index = ({
                           defaultValue={queryParams.gr_number_from}
                           onBlur={(e) => searchFieldChanged('gr_number_from', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('gr_number_from', e)}
-                          placeholder='GR No. From'
+                          placeholder="GR No. From"
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -90,7 +90,7 @@ const Index = ({
                           defaultValue={queryParams.po_number_from}
                           onBlur={(e) => searchFieldChanged('po_number_from', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('po_number_from', e)}
-                          placeholder='PO No. From'
+                          placeholder="PO No. From"
                         />
                       </th>
                       <th className="px-1 py-2"></th>
@@ -132,7 +132,7 @@ const Index = ({
                           defaultValue={queryParams.gr_number_to}
                           onBlur={(e) => searchFieldChanged('gr_number_to', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('gr_number_to', e)}
-                          placeholder='GR No. To'
+                          placeholder="GR No. To"
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -141,7 +141,7 @@ const Index = ({
                           defaultValue={queryParams.po_number_to}
                           onBlur={(e) => searchFieldChanged('po_number_to', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('po_number_to', e)}
-                          placeholder='PO No. To'
+                          placeholder="PO No. To"
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -150,16 +150,19 @@ const Index = ({
                           defaultValue={queryParams.plant}
                           onBlur={(e) => searchFieldChanged('plant', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('plant', e)}
-                          placeholder='Plant'
+                          placeholder="Plant"
                         />
                       </th>
                       <th className="px-1 py-2">
-                        <TextInput
-                          className="h-7 w-full text-xs p-1 m-0"
-                          defaultValue={queryParams.vendor}
-                          onBlur={(e) => searchFieldChanged('vendor', e.target.value)}
-                          onKeyDown={(e) => handleKeyPress('vendor', e)}
-                          placeholder='Vendor'
+                        <AsyncSelect
+                          className="p-2 w-full border-gray-500"
+                          cacheOptions
+                          defaultOptions
+                          loadOptions={fetchVendor}
+                          value={queryParams.vendor ? { label: `${queryParams.vendor} `, value: queryParams.vendor } : null}
+                          onChange={(option: any) => searchFieldChanged('vendor', option?.value)}
+                          placeholder="Vendor"
+                          styles={REACT_SELECT_STYLES}
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -168,7 +171,7 @@ const Index = ({
                           defaultValue={queryParams.entered_by}
                           onBlur={(e) => searchFieldChanged('entered_by', e.target.value)}
                           onKeyDown={(e) => handleKeyPress('entered_by', e)}
-                          placeholder='Entered By'
+                          placeholder="Entered By"
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -218,7 +221,7 @@ const Index = ({
                     {gr_header.data.length > 0 ? (
                       gr_header.data.map((gr, index) => (
                         // <tr className="bg-white border-b" key={gr.id}>
-                        <tr className={'border-b ' + (index % 2 === 0 ? 'bg-gray-100' : 'bg-white')}  key={gr.id}>
+                        <tr className={'border-b ' + (index % 2 === 0 ? 'bg-gray-100' : 'bg-white')} key={gr.id}>
                           <td className="px-3 py-2">
                             <input
                               type="radio"
@@ -270,7 +273,7 @@ const Index = ({
                         <th className="px-3 py-2">Stat</th>
                         <th className="px-3 py-2">ItemNo</th>
                         <th className="px-3 py-2">Material</th>
-                        <th className="px-3 py-2">Short Text</th>
+                        <th className="px-3 py-2">Material Description</th>
                         <th className="px-3 py-2">Qty</th>
                         <th className="px-3 py-2">Unit</th>
                         <th className="px-3 py-2">PO Del Date</th>
@@ -312,7 +315,7 @@ const Index = ({
                   <div>
                     {selectedGr?.id && (
                       <>
-                        {auth.permissions.gr.cancel && (
+                        {can(auth.user, PermissionsEnum.CancelGR) && ( //auth.permissions.gr.cancel && (
                           <Link
                             href={route('gr.edit', selectedGr.gr_number)}
                             className=" p-3 m-3 bg-gray-100 inline-flex items-center justify-center whitespace-nowrap rounded-md text-xs font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input  hover:bg-gray-400 hover:text-accent-foreground hover:border-gray-500">

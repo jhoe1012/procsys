@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PoHeader;
 use App\Http\Requests\StorePoHeaderRequest;
 use App\Http\Requests\UpdatePoHeaderRequest;
+use App\Models\PoHeader;
 
 class PoHeaderController extends Controller
 {

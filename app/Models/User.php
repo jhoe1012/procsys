@@ -11,10 +11,12 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use  HasApiTokens, HasFactory, Notifiable; 
+    use HasApiTokens, HasFactory, HasRoles, Notifiable;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -24,6 +26,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'position',
     ];
 
     /**
@@ -45,62 +48,66 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
         ];
     }
-    public function plants() : BelongsToMany {
+
+    public function plants(): BelongsToMany
+    {
         return $this->belongsToMany(Plant::class);
     }
-    public function approvers() : HasMany {
+
+    public function approvers(): HasMany
+    {
         return $this->hasMany(Approvers::class);
     }
-    public function prHeaderCreatedBy() : BelongsTo {
+
+    public function prHeaderCreatedBy(): BelongsTo
+    {
         return $this->belongsTo(PrHeader::class, 'created_by', 'id');
     }
-    public function poHeaderCreatedBy() : BelongsTo {
+
+    public function poHeaderCreatedBy(): BelongsTo
+    {
         return $this->belongsTo(POHeader::class, 'created_by', 'id');
     }
-    public function roles(): HasManyThrough
+
+    /**
+     * Get all of the socials for the User
+     */
+    public function socials(): HasMany
     {
-        return $this->hasManyThrough(
-            Roles::class,
-            UserRoleRelation::class,
-            'user_id',
-            'id',
-            'id',
-            'role_id'
-        );
+        return $this->hasMany(Social::class);
     }
 
-    public function assignRole( $roleName )
-    {
-        if ( $role = Roles::namespace( $roleName ) ) {
-            $combinaison = UserRoleRelation::combinaison( $this, $role )->first();
+    // public function roles(): HasManyThrough
+    // {
+    //     return $this->hasManyThrough(
+    //         Roles::class,
+    //         UserRoleRelation::class,
+    //         'user_id',
+    //         'id',
+    //         'id',
+    //         'role_id'
+    //     );
+    // }
 
-            if ( ! $combinaison instanceof UserRoleRelation ) {
-                $combinaison = new UserRoleRelation;
-            }
+    // public function assignRole($roleName)
+    // {
+    //     if ($role = Roles::namespace($roleName)) {
+    //         $combinaison = new UserRoleRelation;
+    //         $combinaison->user_id = $this->id;
+    //         $combinaison->role_id = $role->id;
+    //         $combinaison->save();
 
-            $combinaison->user_id = $this->id;
-            $combinaison->role_id = $role->id;
-            $combinaison->save();
-
-            return [
-                'status' => 'success',
-                'message' => __( 'The role was successfully assigned.' ),
-            ];
-        } elseif ( is_array( $roleName ) ) {
-            collect( $roleName )->each( fn( $role ) => $this->assignRole( $role ) );
-
-            return [
-                'status' => 'success',
-                'message' => __( 'The role were successfully assigned.' ),
-            ];
-        }
-
-        return [
-            'status' => 'error',
-            'message' => __( 'Unable to identifier the provided role.' ),
-        ];
-    }
+    //         return [
+    //             'status' => 'success',
+    //             'message' => __('The role was successfully assigned.'),
+    //         ];
+    //     }
+    //     return [
+    //         'status' => 'error',
+    //         'message' => __('Unable to identifier the provided role.'),
+    //     ];
+    // }
 }

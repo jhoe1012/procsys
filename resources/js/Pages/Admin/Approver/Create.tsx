@@ -5,7 +5,7 @@ import { Label } from '@/Components/ui/label';
 import AsyncSelect from 'react-select/async';
 import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
-import { IApprover, IPlants } from '@/types';
+import { IApprover } from '@/types';
 import Select from 'react-select';
 
 export default function Create({ p_plants }) {
@@ -175,10 +175,7 @@ export default function Create({ p_plants }) {
             </div>
 
             <div className="grid justify-items-center m-3">
-              <Button
-                variant="outline"
-                disabled={processing}
-                className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-60">
+              <Button variant="outline" disabled={processing} className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-60">
                 Save
               </Button>
             </div>

@@ -11,6 +11,8 @@ import { DataSheetGrid, checkboxColumn, textColumn, intColumn, keyColumn, floatC
 import { Toaster } from '@/Components/ui/toaster';
 import { Card, CardContent } from '@/Components/ui/card';
 import { Operation } from 'react-datasheet-grid/dist/types';
+import { can } from '@/lib/helper';
+import { PermissionsEnum } from '@/lib/constants';
 
 const Edit = ({ auth, grheader }: PageProps & PageProps<{ grheader: IGRHeader }>) => {
   const [material, setMaterial] = useState<IGRMaterials[]>(grheader.grmaterials);
@@ -36,7 +38,7 @@ const Edit = ({ auth, grheader }: PageProps & PageProps<{ grheader: IGRHeader }>
   const columns = [
     { ...keyColumn('item_no', intColumn), title: 'ItmNo', maxWidth: 50, disabled: true },
     { ...keyColumn('mat_code', textColumn), title: 'Material', maxWidth: 130, disabled: true },
-    { ...keyColumn('short_text', textColumn), title: 'Short Text', maxWidth: 500, disabled: true },
+    { ...keyColumn('short_text', textColumn), title: 'Material Description', maxWidth: 500, disabled: true },
     { ...keyColumn('gr_qty', floatColumn), title: 'Qty', maxWidth: 130, disabled: true },
     { ...keyColumn('unit', textColumn), title: 'Unit', maxWidth: 55, disabled: true },
     { ...keyColumn('po_deliv_date', textColumn), title: 'PO Del Date', maxWidth: 130, disabled: true },
@@ -151,12 +153,9 @@ const Edit = ({ auth, grheader }: PageProps & PageProps<{ grheader: IGRHeader }>
 
               <div className="p-2 pt-0">
                 <div className="p-5 justify-end grid grid-cols-8 gap-4">
-                  {auth.permissions.gr.cancel && (
+                  {can(auth.user, PermissionsEnum.CancelGR) && ( //auth.permissions.gr.cancel && (
                     <>
-                      <Button
-                        variant="outline"
-                        disabled={processing}
-                        className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110]">
+                      <Button variant="outline" disabled={processing} className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110]">
                         Post
                       </Button>
                       <Link

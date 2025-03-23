@@ -15,12 +15,12 @@ class MaterialGroupResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'mat_grp_code' => $this->mat_grp_code,
-            'mat_grp_desc' => $this->mat_grp_desc,
+            'id'            => $this->id,
+            'mat_grp_code'  => $this->mat_grp_code,
+            'mat_grp_desc'  => $this->mat_grp_desc,
             'mat_grp_desc2' => $this->mat_grp_desc2,
-            'created_by' => $this->created_by,
-            'updated_by' => $this->updated_by,
+            'created_by'    => $this->created_by,
+            'updated_by'    => $this->updated_by,
         ];
     }
 }

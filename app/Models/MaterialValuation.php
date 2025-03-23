@@ -16,6 +16,7 @@ class MaterialValuation extends Model
     {
         return $this->belongsTo(Material::class, 'mat_code', 'mat_code');
     }
+
     public function plants(): HasOne
     {
         return $this->hasOne(Plant::class, 'plant', 'plant');

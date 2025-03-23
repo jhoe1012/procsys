@@ -10,6 +10,8 @@ class Series extends Model
     use HasFactory;
 
     const PR = 'pr';
+
     const PO = 'po';
+
     const GR = 'gr';
 }

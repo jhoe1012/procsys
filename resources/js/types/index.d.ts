@@ -2,10 +2,22 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  email_verified_at: string;
+  email_verified_at?: string;
+  password?: string;
   position: string;
-  plants: IPlants[] | undefined;
-  approvers: IApprover[] | undefined;
+  plants?: IPlants[];
+  approvers?: IApprover[];
+  roles?: IRoles[];
+}
+
+export interface AuthUser {
+  id: number;
+  name: string;
+  email: string;
+  plants: { name1: string; plant: string }[];
+  approvers: IApprover[];
+  roles: string[];
+  permissions: string[];
 }
 
 export interface Crud {
@@ -19,13 +31,7 @@ export interface Crud {
 
 export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
   auth: {
-    user: User;
-    permissions: {
-      pr: Crud;
-      po: Crud;
-      gr: Crud;
-      admin: Crud;
-    };
+    user: AuthUser;
     menu: any;
   };
 };
@@ -60,19 +66,16 @@ export interface IApprover {
   amount_to: number;
   seq: number;
   desc: string;
-  created_by: string;
-  updated_by: string;
-  created_at: string;
-  updated_at: string;
+  created_by?: string;
+  updated_by?: string;
+  created_at?: string;
+  updated_at?: string;
   plants?: IPlants;
   user?: User;
-  _method: string;
+  _method?: string;
 }
 export interface IMaterial {
-  base_uom: string;
-  created_at: string;
-  created_by: string;
-  id: number;
+  id?: number;
   mat_code: string;
   mat_desc: string;
   mat_grp_code: string;
@@ -80,10 +83,24 @@ export interface IMaterial {
   min_rem_shelf_life: number;
   old_mat_code: string;
   order_uom: string;
+  base_uom: string;
   total_shelf_life: number;
-  updated_at: string;
-  updated_by: string;
-  valuations: IMaterialValuation;
+  updated_at?: string;
+  updated_by?: User;
+  created_at?: string;
+  created_by?: User;
+  valuations?: IMaterialValuation;
+  materialGroups?: IMaterialGroups;
+  altUoms?: IAlternativeUom[];
+  _method?: string;
+  mat_groupChoice?: Choice;
+}
+
+export interface IMaterialGroups {
+  id: number;
+  mat_grp_code: string;
+  mat_grp_desc: string;
+  mat_grp_desc2: string;
 }
 
 export interface IMaterialValuation {
@@ -152,6 +169,17 @@ export interface IVendorPage extends IPagination {
 export interface IApproverPage extends IPagination {
   data: IApprover[];
 }
+export interface IMaterialPage extends IPagination {
+  data: IMaterial[];
+}
+
+export interface IAlternativeUomPage extends IPagination {
+  data: IAlternativeUom[];
+}
+
+export interface IUserPage extends IPagination {
+  data: User[];
+}
 
 export interface ILink {
   url: string | undefined;
@@ -200,24 +228,31 @@ export interface IPRMaterial {
   item_no?: number;
   mat_code?: string;
   short_text?: string;
+  item_text?: string;
   qty?: number;
   ord_unit?: string;
   qty_ordered?: number;
   qty_open?: number;
   price?: number;
+  valuation_price: number;
   per_unit?: number;
   unit?: string;
   total_value?: number;
   currency?: number;
   del_date?: Date;
   mat_grp?: string;
+  mat_grp_desc?: string;
   purch_grp?: string;
-  altUom?: Array<string>;
+  altUomSelect?: Array<string>;
+  alt_uom?: IAlternativeUom[];
+  conversion?: number;
+  converted_qty?: number;
   created_by?: string;
   updated_by?: string;
   created_at?: string;
   updated_at?: string;
   requested_by?: string;
+  prctrl_grp_id?: number;
 }
 
 export interface IMessage {
@@ -241,7 +276,7 @@ export interface IWorkflow {
 
 export interface IPOHeader {
   id: number;
-  po_number?: number;
+  po_number?: string;
   control_no?: string;
   vendor_id?: string;
   vendor_name?: string;
@@ -258,6 +293,7 @@ export interface IPOHeader {
   attachments?: IPRAttachment[];
   total_po_value: number;
   status?: string;
+  print_count?: number;
   appr_seq?: number;
   deliv_addr: string;
   created_by?: string;
@@ -267,6 +303,7 @@ export interface IPOHeader {
   pomaterials: IPOMaterial[];
   workflows?: IWorkflow[];
   _method?: string;
+  is_mother_po: boolean;
 }
 
 export interface IPOMaterial {
@@ -274,13 +311,14 @@ export interface IPOMaterial {
   id?: number;
   po_header_id?: number;
   po_material_id?: number;
-  pr_material_id?:number;
+  pr_material_id?: number;
   status?: string;
   item_no?: number;
   mat_code?: string;
   short_text?: string;
   po_qty?: number;
   qty_open?: number;
+  qty_open_po?: number;
   net_price?: number;
   per_unit?: number;
   unit?: string;
@@ -289,6 +327,7 @@ export interface IPOMaterial {
   currency?: string;
   del_date?: Date;
   mat_grp?: string;
+  mat_grp_desc?: string;
   requested_by?: string;
   pr_number?: number;
   pr_item?: number;
@@ -299,10 +338,17 @@ export interface IPOMaterial {
   updated_at?: string;
   min_order_qty?: number;
   conversion?: number;
+  conversion_po?: number;
   converted_qty?: number;
+  converted_qty_po?: number;
   purch_grp?: string;
   pr_unit?: string;
   denominator?: number;
+  altUomSelect?: Array<string>;
+  alt_uom?: IAlternativeUom[];
+  materialNetPrices: IMaterialNetPrice[];
+  qty?: number; // qty from PR
+  origPOQty?: number; // qty from PO DB
 }
 
 export interface IVendor {
@@ -407,22 +453,92 @@ export interface IMaterialNetPrice {
 }
 
 export interface IAlternativeUom {
-  id: number;
+  id?: number;
   mat_code: string;
+  mat_codeChoice?: Choice;
+  material?: IMaterial;
   alt_uom: string;
+  alt_uomChoice?: Choice;
+  altUomText?: IUom;
   counter: number;
   denominator: number;
   ean_num: string;
   ean_upc: string;
   ean_category: string;
   unit_of_weight: string;
-  created_by: string;
-  updated_by: string;
-  created_at: string;
-  updated_at: string;
+  unit_of_weightChoice?: Choice;
+  unitOfWeightText?: IUom;
+  created_by?: User;
+  updated_by?: User;
+  created_at?: string;
+  updated_at?: string;
+  _method?: string;
 }
 
 export type Choice = {
   label: string;
   value: string;
 };
+
+export interface FormFieldProps {
+  label: string;
+  id: string;
+  type?: string;
+  value?: string;
+  defaultValue?: string;
+  required?: boolean;
+  disabled?: boolean;
+  className?: string | undefined;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+export interface GenericSelectProps<T> {
+  label?: string;
+  items: T[] | undefined;
+  valueKey: keyof T;
+  displayKey: keyof T;
+  value: string;
+  onValueChange: (value: string) => void;
+  placeholder?: string;
+  displayValue?: boolean;
+}
+
+export interface TabItem {
+  value: string;
+  label: string;
+  visible: boolean;
+  content: React.ReactNode;
+}
+
+export interface TabsProps {
+  defaultValue: string;
+  tabs: TabItem[];
+  className?: string;
+}
+
+export interface IitemDetails {
+  doc: string;
+  itm: string;
+  sts: string;
+  qty: number;
+  unit: string;
+}
+
+export interface IUom {
+  id: number;
+  uom: string;
+  uom_text: string;
+  created_by?: User;
+  updated_by?: User;
+  created_at?: string;
+  update_at?: string;
+}
+
+export interface IRoles {
+  id: number;
+  name: string;
+  namespace: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+}

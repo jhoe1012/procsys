@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('plant');
             $table->string('mat_code', 20);
             $table->string('currency', 10);
-            $table->decimal('price', 15,2);
+            $table->decimal('price', 15, 2);
             $table->decimal('per_unit');
             $table->string('uom', 10);
             $table->date('valid_from');
