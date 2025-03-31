@@ -193,7 +193,10 @@ class PRController extends Controller
         Mail::to($firstApprover->user->email)
             ->send(new PrForApprovalEmail(
                 $firstApprover->user->name,
-                $pr_header
+                $pr_header,
+                $pr_header->attachments
+                ->pluck('filepath', 'filename')
+                ->toArray()
             ));
 
         return to_route('pr.index')->with('success', "PR {$pr_header->pr_number} sent for approval.");
@@ -255,7 +258,7 @@ class PRController extends Controller
             'message' => ['success' => session('success'), 'error' => session('error')],
             'item_details' => $item_details,
             'materialGroupsSupplies' => MaterialGroup::select('mat_grp_code')->where('is_supplies', true)->pluck('mat_grp_code')->toArray(),
-        ]);
+        ]);    
     }
 
     public function update(Request $request, $id)
@@ -344,7 +347,7 @@ class PRController extends Controller
             'plants',
             'prmaterials.materialGroups',
         ])
-        ->where('pr_number', $request->pr_number)
+        ->where('pr_number', $request->pr_number) 
         ->first();
 
         $approver = Approvers::with('user')
@@ -404,7 +407,10 @@ class PRController extends Controller
                 Mail::to($approver_2nd->user->email)
                     ->send(new PrForApprovalEmail(
                         $approver_2nd->user->name,
-                        $pr_header
+                        $pr_header,
+                        $pr_header->attachments
+                        ->pluck('filepath', 'filename')
+                        ->toArray()
                     ));
                 break;
             case 2:
@@ -565,5 +571,28 @@ class PRController extends Controller
             $this->_mapPrMaterialData($item, $index),
             ['pr_headers_id' => $pr_header_id, 'id' => $item['id'] ?? null]
         );
+    }
+
+    public function testData(){
+        $pr_header = PrHeader::with([
+            'createdBy',
+            'workflows',
+            'attachments',
+            'prmaterials' => fn ($query) => $query->whereNull('status')->orWhere('status', ''),
+            'plants',
+            'prmaterials.materialGroups',
+        ]) 
+        ->where('pr_number', '2020000009') 
+        ->first();
+
+        $details = $pr_header->prmaterials->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->short_text,
+                'status' => $item->status
+            ];
+        });
+        
+        dd($details);
     }
 }
