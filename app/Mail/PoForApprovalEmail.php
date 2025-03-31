@@ -44,6 +44,7 @@ class PoForApprovalEmail extends Mailable
             with: ['approver_name' => $this->approver_name,  'po_header' => $this->po_header],
         );
     }
+
     /**
      * Get the attachments for the message.
      *
