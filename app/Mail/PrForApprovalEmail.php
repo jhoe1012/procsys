@@ -44,7 +44,7 @@ class PrForApprovalEmail extends Mailable
             with: ['approver_name' => $this->approver_name,  'pr_header' => $this->pr_header],
         );
     }
-
+    
     /**
      * Get the attachments for the message.
      *

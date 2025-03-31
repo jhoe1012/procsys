@@ -572,27 +572,4 @@ class PRController extends Controller
             ['pr_headers_id' => $pr_header_id, 'id' => $item['id'] ?? null]
         );
     }
-
-    public function testData(){
-        $pr_header = PrHeader::with([
-            'createdBy',
-            'workflows',
-            'attachments',
-            'prmaterials' => fn ($query) => $query->whereNull('status')->orWhere('status', ''),
-            'plants',
-            'prmaterials.materialGroups',
-        ]) 
-        ->where('pr_number', '2020000009') 
-        ->first();
-
-        $details = $pr_header->prmaterials->map(function ($item) {
-            return [
-                'id' => $item->id,
-                'name' => $item->short_text,
-                'status' => $item->status
-            ];
-        });
-        
-        dd($details);
-    }
 }
