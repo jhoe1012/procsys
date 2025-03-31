@@ -345,11 +345,14 @@ class POController extends Controller
             Mail::to($firstApprover->user->email)
                 ->send(new PoForApprovalEmail(
                     $firstApprover->user->name,
-                    $po_header
+                    $po_header,
+                    $po_header->attachments
+                    ->pluck('filepath', 'filename')
+                    ->toArray()
                 ));
         }
 
-        return to_route('po.index')->with('success', "PR {$po_header->po_number} sent for approval.");
+        return to_route('po.index')->with('success', "PO {$po_header->po_number} sent for approval.");
     }
 
     public function discard($id)
@@ -449,7 +452,10 @@ class POController extends Controller
                 Mail::to($approver_2nd->user->email)
                     ->send(new PoForApprovalEmail(
                         $approver_2nd->user->name,
-                        $po_header
+                        $po_header,
+                        $po_header->attachments
+                        ->pluck('filepath', 'filename')
+                        ->toArray()
                     ));
                 break;
             case 2:
@@ -699,6 +705,5 @@ class POController extends Controller
             );
         }
     }
-
     private function _updateValuation($poHeader) {}
 }
