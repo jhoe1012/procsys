@@ -102,11 +102,11 @@
         }
 
         .buyer {
-            padding: 22px 0 0 415px;
+            padding: 22px 0 0 420px;
         }
 
         .approver {
-            padding: 50px 0 0 415px;
+            padding: 50px 0 0 420px;
         }
 
         .page-break {
@@ -132,9 +132,7 @@
                 </tr>
                 <tr>
                     <td> </td>
-                    <td class="addr" colspan='2'>
-                        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp;
-                        {{ $poHeader->deliv_addr }} </td>
+                    <td class="addr" colspan='2'>{{ $poHeader->deliv_addr }} </td>
 
                 </tr>
             </table>
@@ -147,14 +145,19 @@
                     @foreach ($poHeader->pomaterials as $pomaterial)
                         <tr>
                             <td width='10%' class="align-top itemcode">{{ $pomaterial->mat_code }}</td>
-                            <td width='40%' class="align-top">{{ $pomaterial->short_text }}
-                                @if ($pomaterial->item_text)
-                                    <br> {{ $pomaterial->item_text }}
-                                @endif
-                                @if ($poHeader->is_mother_po)
-                                    <br><b> Delivery Date: </b>{{ date('m/d/Y', strtotime($pomaterial->del_date)) }}
-                                @endif
-                            </td>
+                            @if (in_array($pomaterial->mat_code, ['C000008']))
+                                <td width='40%' class="align-top">{{ $pomaterial->item_text }}</td>
+                            @else
+                                <td width='40%' class="align-top">{{ $pomaterial->short_text }}
+                                    @if ($pomaterial->item_text)
+                                        <br> {{ $pomaterial->item_text }}
+                                    @endif
+                                    @if ($poHeader->is_mother_po)
+                                        <br><b> Delivery Date:
+                                        </b>{{ date('m/d/Y', strtotime($pomaterial->del_date)) }}
+                                    @endif
+                                </td>
+                            @endif
                             <td width='6%' class="align-top text-right">{{ $pomaterial->po_qty }} </td>
                             <td width='8%' class="align-top">{{ $pomaterial->unit }} </td>
                             <td width='15%' class="align-top text-right pr">

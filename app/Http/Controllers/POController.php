@@ -456,7 +456,8 @@ class POController extends Controller
                 $finance = User::where(
                     'cc_by_deliv_addr',
                     'like',
-                    '%|'.DeliveryAddress::where('address', $po_header->deliv_addr)->pluck('id')->first().'|%'
+                    '%|'.DeliveryAddress::where('address', $po_header->deliv_addr)
+                    ->where('plant', $po_header->plant)->pluck('id')->first().'|%'
                 )->pluck('email')->toArray();
 
                 $approved_cc = [$approver->user->email, ...$finance];

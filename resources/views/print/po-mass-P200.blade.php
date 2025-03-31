@@ -53,7 +53,7 @@
         .amount {
             text-align: right;
             font-size: 25px;
-            padding: 60px 50px 0 50px;
+            padding: 50px 50px 0 50px;
             margin-top: 10px;
             /* float: right; */
             /* top: 30vw; */
@@ -101,11 +101,11 @@
         }
 
         .date {
-            padding-top: 0 0 0 0;
+            padding: 25px 0 0 0;
         }
 
         .buyer {
-            padding: 12px 0 0 430px;
+            padding: 13px 0 0 430px;
         }
 
         .approver {
@@ -127,13 +127,12 @@
                 </tr>
                 <tr>
                     <td> </td>
-
                     <td class='date'> {{ date('d-M-Y', strtotime($poHeader->doc_date)) }} </td>
                     @if (!$poHeader->is_mother_po)
                         <td class='date'> {{ date('d-M-Y', strtotime($poHeader->deliv_date)) }} </td>
                     @endif
                 </tr>
-                <tr height='118mm'>
+                <tr height='115mm'>
                     <td class="supplier_name" width='62%'>{{ $poHeader->vendors->supplier }} -
                         {{ $poHeader->vendors->name_1 }}</td>
                     <td class="addr" colspan='3'>
@@ -149,15 +148,20 @@
 
                     @foreach ($poHeader->pomaterials as $pomaterial)
                         <tr>
-                            <td width='10%' class="align-top itemcode">{{ $pomaterial->mat_code }}</td>
-                            <td width='40%' class="align-top">{{ $pomaterial->short_text }}
-                                @if ($pomaterial->item_text)
-                                    <br> {{ $pomaterial->item_text }}
-                                @endif
-                                @if ($poHeader->is_mother_po)
-                                    <br><b> Delivery Date: </b>{{ date('m/d/Y', strtotime($pomaterial->del_date)) }}
-                                @endif
-                            </td>
+                            <td width='7%' class="align-top itemcode">{{ $pomaterial->mat_code }}</td>
+                            @if (in_array($pomaterial->mat_code, ['C000008']))
+                                <td width='40%' class="align-top">{{ $pomaterial->item_text }}</td>
+                            @else
+                                <td width='40%' class="align-top">{{ $pomaterial->short_text }}
+                                    @if ($pomaterial->item_text)
+                                        <br> {{ $pomaterial->item_text }}
+                                    @endif
+                                    @if ($poHeader->is_mother_po)
+                                        <br><b> Delivery Date:
+                                        </b>{{ date('m/d/Y', strtotime($pomaterial->del_date)) }}
+                                    @endif
+                                </td>
+                            @endif
                             <td width='6%' class="align-top text-right">{{ $pomaterial->po_qty }} </td>
                             <td width='8%' class="align-top">{{ $pomaterial->unit }} </td>
                             <td width='15%' class="align-top text-right pr">
@@ -209,7 +213,7 @@
 </body>
 
 <script>
-    // window.print();
+    window.print();
 </script>
 
 </html>

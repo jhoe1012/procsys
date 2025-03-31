@@ -59,11 +59,11 @@ const usePRMaterialValidation = () => {
           break;
         }
 
-        if (mat_grp && materialGroupsSupplies.includes(mat_grp) && !item_text) {
-          newErrors.push(`Please enter item text for item no ${item_no}`);
-          isValid = false;
-          break;
-        }
+        // if (mat_grp && materialGroupsSupplies.includes(mat_grp) && !item_text) {
+        //   newErrors.push(`Please enter item text for item no ${item_no}`);
+        //   isValid = false;
+        //   break;
+        // }
 
         if (!prctrl_grp_id) {
           newErrors.push(`Please enter PR Controller  ${item_no}`);
