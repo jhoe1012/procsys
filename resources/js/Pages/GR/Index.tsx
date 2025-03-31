@@ -2,14 +2,13 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { PageProps, IMessage, IGRHeader, IGRMaterials, IGRHeaderPage } from '@/types';
 import { useState, useEffect, KeyboardEvent } from 'react';
-import Pagination from '@/Components/Pagination';
-import TextInput from '@/Components/TextInput';
-import { useToast } from '@/Components/ui/use-toast';
-import { Toaster } from '@/Components/ui/toaster';
-import Modal from '@/Components/Modal';
 import { PrinterIcon } from '@heroicons/react/24/solid';
 import { can } from '@/lib/helper';
-import { PermissionsEnum } from '@/lib/constants';
+import { PermissionsEnum, REACT_SELECT_STYLES } from '@/lib/constants';
+import AsyncSelect from 'react-select/async';
+import { Toaster, useToast } from '@/Components/ui';
+import { Modal, Pagination, TextInput } from '@/Components';
+import { fetchVendor } from '@/lib/Vendor';
 
 const Index = ({
   auth,
@@ -155,12 +154,15 @@ const Index = ({
                         />
                       </th>
                       <th className="px-1 py-2">
-                        <TextInput
-                          className="h-7 w-full text-xs p-1 m-0"
-                          defaultValue={queryParams.vendor}
-                          onBlur={(e) => searchFieldChanged('vendor', e.target.value)}
-                          onKeyDown={(e) => handleKeyPress('vendor', e)}
+                        <AsyncSelect
+                          className="p-2 w-full border-gray-500"
+                          cacheOptions
+                          defaultOptions
+                          loadOptions={fetchVendor}
+                          value={queryParams.vendor ? { label: `${queryParams.vendor} `, value: queryParams.vendor } : null}
+                          onChange={(option: any) => searchFieldChanged('vendor', option?.value)}
                           placeholder="Vendor"
+                          styles={REACT_SELECT_STYLES}
                         />
                       </th>
                       <th className="px-1 py-2">

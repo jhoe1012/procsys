@@ -3,8 +3,8 @@
 namespace App\Import;
 
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\ToCollection;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Concerns\ToCollection;
 
 class VendorPaymentTerm implements ToCollection
 {
@@ -17,9 +17,9 @@ class VendorPaymentTerm implements ToCollection
 
     public function collection(Collection $rows): void
     {
-        $rows->shift(); 
+        $rows->shift();
         $rowIndex = 2;
-        $vendors = $this->parent->getVendors();
+        $vendors  = $this->parent->getVendors();
         foreach ($rows as $row) {
             $supplierId = $row[0];
 
@@ -31,7 +31,7 @@ class VendorPaymentTerm implements ToCollection
                     'payment_terms' => trim(strip_tags($row[3])) ?? '',
                 ]);
             } else {
-                Log::warning("Skipping transaction: Unknown supplier ID " . $supplierId);
+                Log::warning('Skipping transaction: Unknown supplier ID '.$supplierId);
             }
         }
     }

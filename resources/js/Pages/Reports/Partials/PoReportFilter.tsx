@@ -4,7 +4,7 @@ import { Label } from '@/Components/ui/label';
 import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
 import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/solid';
-import Checkbox from '@/Components/Checkbox';
+import { Checkbox } from '@/Components';
 
 export default function PoReportFilter({ queryParams, filterReport }: { queryParams: any; filterReport: (queryParam: any) => void }) {
   const [showModal, setShowModal] = useState(false);
@@ -21,12 +21,7 @@ export default function PoReportFilter({ queryParams, filterReport }: { queryPar
     if (e.key !== 'Enter') return;
 
     searchFieldChanged(name, (e.target as HTMLInputElement).value);
-  };
-
-  const handleFilter = () => filterReport(queryParams);
-
-  const clearFilter = () => {
-    filterReport({});
+    filterReport(queryParams);
   };
 
   const closeModal = () => {
@@ -237,17 +232,20 @@ export default function PoReportFilter({ queryParams, filterReport }: { queryPar
               onBlur={(e) => searchFieldChanged('purch_grp', e.target.value)}
               onKeyDown={(e) => handleKeyPress('purch_grp', e)}
             />
-            <Checkbox onChange={(e) => searchFieldChanged('open_po', e.target.checked)} />
+            <Checkbox checked={queryParams.open_po} onChange={(e) => searchFieldChanged('open_po', e.target.checked)} />
             <Label className="text-sm  w-full" htmlFor="type">
               With Open PO
             </Label>
           </div>
 
           <div className="flex content-center justify-center gap-4 m-5">
-            <Button onClick={handleFilter} variant="outline" className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-52">
+            <Button
+              onClick={() => filterReport(queryParams)}
+              variant="outline"
+              className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-52">
               Filter
             </Button>
-            <Button onClick={clearFilter} variant="secondary" className=" w-52">
+            <Button onClick={() => filterReport({})} variant="secondary" className=" w-52">
               Clear
             </Button>
           </div>

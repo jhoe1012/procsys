@@ -33,11 +33,11 @@ class PoHeader extends Model
     protected function casts(): array
     {
         return [
-            'doc_date' => 'datetime',
-            'deliv_date' => 'datetime',
+            'doc_date'       => 'datetime',
+            'deliv_date'     => 'datetime',
             'total_po_value' => 'float',
-            'created_at' => 'datetime',
-            'updated_at' => 'datetime',
+            'created_at'     => 'datetime',
+            'updated_at'     => 'datetime',
         ];
     }
 

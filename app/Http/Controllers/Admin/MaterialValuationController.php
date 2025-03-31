@@ -51,9 +51,9 @@ class MaterialValuationController extends Controller
 
         return Inertia::render('Admin/ValuationPrice/Index', [
             'materialValuation' => MaterialValuationResource::collection($materialValuation),
-            'plant' => $plant,
-            'queryParams' => $request->query() ?: null,
-            'message' => ['success' => session('success'), 'error' => session('error')],
+            'plant'             => $plant,
+            'queryParams'       => $request->query() ?: null,
+            'message'           => ['success' => session('success'), 'error' => session('error')],
         ]);
     }
 
@@ -70,14 +70,14 @@ class MaterialValuationController extends Controller
      */
     public function store(Request $request)
     {
-        $materialValuation = new MaterialValuation;
-        $materialValuation->plant = $request->input('plant');
-        $materialValuation->mat_code = $request->input('mat_code');
-        $materialValuation->currency = $request->input('currency');
+        $materialValuation                  = new MaterialValuation;
+        $materialValuation->plant           = $request->input('plant');
+        $materialValuation->mat_code        = $request->input('mat_code');
+        $materialValuation->currency        = $request->input('currency');
         $materialValuation->valuation_price = $request->input('valuation_price');
-        $materialValuation->per_unit = $request->input('per_unit');
-        $materialValuation->valid_from = $request->input('valid_from');
-        $materialValuation->valid_to = $request->input('valid_to');
+        $materialValuation->per_unit        = $request->input('per_unit');
+        $materialValuation->valid_from      = $request->input('valid_from');
+        $materialValuation->valid_to        = $request->input('valid_to');
         $materialValuation->save();
 
         return to_route('val_price.index')->with('success', 'Net price created.');
@@ -104,13 +104,13 @@ class MaterialValuationController extends Controller
      */
     public function update(Request $request, MaterialValuation $materialValuation)
     {
-        $materialValuation->plant = $request->input('plant');
-        $materialValuation->mat_code = $request->input('mat_code');
-        $materialValuation->currency = $request->input('currency');
+        $materialValuation->plant           = $request->input('plant');
+        $materialValuation->mat_code        = $request->input('mat_code');
+        $materialValuation->currency        = $request->input('currency');
         $materialValuation->valuation_price = $request->input('valuation_price');
-        $materialValuation->per_unit = $request->input('per_unit');
-        $materialValuation->valid_from = $request->input('valid_from');
-        $materialValuation->valid_to = $request->input('valid_to');
+        $materialValuation->per_unit        = $request->input('per_unit');
+        $materialValuation->valid_from      = $request->input('valid_from');
+        $materialValuation->valid_to        = $request->input('valid_to');
         $materialValuation->save();
 
         return to_route('val_price.index')->with('success', 'Net price created.');
@@ -126,7 +126,7 @@ class MaterialValuationController extends Controller
 
     public function import(Request $request)
     {
-        $files = AttachmentService::handleImport($request);
+        $files             = AttachmentService::handleImport($request);
         $materialValuation = new MaterialValuationImport;
 
         Excel::import($materialValuation, storage_path('app/'.$files[0]['filepath']));

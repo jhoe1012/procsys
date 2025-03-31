@@ -20,12 +20,7 @@ export default function GrReportFilter({ queryParams, filterReport }: { queryPar
     if (e.key !== 'Enter') return;
 
     searchFieldChanged(name, (e.target as HTMLInputElement).value);
-  };
-
-  const handleFilter = () => filterReport(queryParams);
-
-  const clearFilter = () => {
-    filterReport({});
+    filterReport(queryParams);
   };
 
   const closeModal = () => {
@@ -234,10 +229,13 @@ export default function GrReportFilter({ queryParams, filterReport }: { queryPar
           </div>
 
           <div className="flex content-center justify-center gap-4 mb-5">
-            <Button onClick={handleFilter} variant="outline" className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-52">
+            <Button
+              onClick={() => filterReport(queryParams)}
+              variant="outline"
+              className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-52">
               Filter
             </Button>
-            <Button onClick={clearFilter} variant="secondary" className=" w-52">
+            <Button onClick={() => filterReport({})} variant="secondary" className=" w-52">
               Clear
             </Button>
           </div>

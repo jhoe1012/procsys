@@ -1,6 +1,7 @@
 #/bin/sh
 
-composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist &&
+#git reset --hard &&  git pull origin main
+composer install  &&
 npm ci &&
 npx vite build && 
 php artisan migrate --force &&

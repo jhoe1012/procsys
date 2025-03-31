@@ -51,10 +51,10 @@ class ApproverController extends Controller
 
         // return ApproverResource::collection($vendor);
         return Inertia::render('Admin/Approver/Index', [
-            'approvers' => ApproverResource::collection($vendor),
-            'plants' => $plants,
+            'approvers'   => ApproverResource::collection($vendor),
+            'plants'      => $plants,
             'queryParams' => $request->query() ?: null,
-            'message' => ['success' => session('success'), 'error' => session('error')],
+            'message'     => ['success' => session('success'), 'error' => session('error')],
         ]);
     }
 
@@ -71,15 +71,15 @@ class ApproverController extends Controller
      */
     public function store(Request $request)
     {
-        $approver = new Approvers;
-        $approver->type = Str::lower($request->input('type'));
-        $approver->plant = $request->input('plant');
-        $approver->user_id = $request->input('user_id');
-        $approver->position = $request->input('position');
+        $approver              = new Approvers;
+        $approver->type        = Str::lower($request->input('type'));
+        $approver->plant       = $request->input('plant');
+        $approver->user_id     = $request->input('user_id');
+        $approver->position    = $request->input('position');
         $approver->amount_from = $request->input('amount_from');
-        $approver->amount_to = $request->input('amount_to');
-        $approver->seq = $request->input('seq');
-        $approver->desc = $request->input('desc');
+        $approver->amount_to   = $request->input('amount_to');
+        $approver->seq         = $request->input('seq');
+        $approver->desc        = $request->input('desc');
         $approver->save();
 
     }
@@ -105,14 +105,14 @@ class ApproverController extends Controller
      */
     public function update(Request $request, Approvers $approver)
     {
-        $approver->type = Str::lower($request->input('type'));
-        $approver->plant = $request->input('plant');
-        $approver->user_id = $request->input('user_id');
-        $approver->position = $request->input('position');
+        $approver->type        = Str::lower($request->input('type'));
+        $approver->plant       = $request->input('plant');
+        $approver->user_id     = $request->input('user_id');
+        $approver->position    = $request->input('position');
         $approver->amount_from = $request->input('amount_from');
-        $approver->amount_to = $request->input('amount_to');
-        $approver->seq = $request->input('seq');
-        $approver->desc = $request->input('desc');
+        $approver->amount_to   = $request->input('amount_to');
+        $approver->seq         = $request->input('seq');
+        $approver->desc        = $request->input('desc');
         $approver->save();
 
     }

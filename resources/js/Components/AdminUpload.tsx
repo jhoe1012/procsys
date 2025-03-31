@@ -1,22 +1,20 @@
 import { useState, FormEventHandler, useEffect } from 'react';
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import Dropzone from './Dropzone';
-import { Button, useToast, Label, Input } from './ui';
+import { Button, useToast } from './ui';
 import Modal from './Modal';
-import Select from 'react-select';
+import { IMessage } from '@/types';
 
 export default function AdminUpload({ url, pageName }: { url: string; pageName: string }) {
   const [showModal, setShowModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [showMissing, setMissing] = useState([]);
-  const [showLoading, setLoading] = useState(false); // Add loading state
   const [files, setFiles] = useState([]);
-  const [tranType, setTranType] = useState('both');
   const { data, setData, post, processing, reset, errors } = useForm({
     file: files,
-    tran_type: tranType,
   });
   const { toast } = useToast();
+
+  const { message } = usePage().props;
 
   useEffect(() => {
     if (errors.hasOwnProperty('error')) {
@@ -29,35 +27,26 @@ export default function AdminUpload({ url, pageName }: { url: string; pageName: 
 
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault();
-    setLoading(true);
     post(url, {
       preserveScroll: true,
       onSuccess: (page) => {
-        const errorData = page.props.message?.missing ?? {};
-        setMissing(errorData);
         setShowSuccess(true);
         closeModal();
       },
       onFinish: () => {
-        setLoading(false);
-        // closeModal();
+        closeModal();
       },
     });
   };
 
-  // useEffect(() => {
-  //   setData('file', files);
-  // }, [files]);
   useEffect(() => {
     setData('file', files);
-    setData('tran_type', tranType); // Update transaction type in form data
-  }, [files, tranType]);
+  }, [files]);
 
   const closeModal = () => {
     setShowModal(false);
     reset();
     setFiles([]);
-    setTranType([]); // Reset transaction type
   };
 
   const closeSuccessModal = () => setShowSuccess(false);
@@ -81,7 +70,7 @@ export default function AdminUpload({ url, pageName }: { url: string; pageName: 
             )}
           </div>
           {/* Display errors if any */}
-          {Object.keys(showMissing).length > 0 && pageName !== 'Valuation Price List' && (
+          {message.missing && message.missing.length > 0 && pageName !== 'Valuation Price List' && (
             <>
               <div className="flex flex-col p-2 mt-3">
                 <h1 className="font-semibold text-sm border-b text-red-600 border-gray-300 mb-2 p-1">
@@ -97,19 +86,20 @@ export default function AdminUpload({ url, pageName }: { url: string; pageName: 
                       </tr>
                     </thead>
                     <tbody>
-                      {Object.entries(showMissing).map(([key, errorDetails]) => (
-                        <tr key={key} className="bg-white text-center">
-                          <td className="border border-gray-300 px-2 py-2 font-semibold">Incomplete Details</td>
-                          {pageName === 'Vendor' && (
-                            <td className="border border-gray-300 px-2 py-2 font-semibold">{errorDetails.sheet}</td>
-                          )}
-                          <td className="border border-gray-300 px-2 py-2 text-sm font-bold text-red-600">
-                            <span className="inline-flex items-center bg-gray-200 text-red-600  font-semibold px-2 py-2 rounded-md">
-                              {pageName === 'Vendor' && errorDetails.row_id ? `Row: ${errorDetails.row_id}` : `Row: ${errorDetails}` }
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
+                      {message.missing &&
+                        message.missing.map((errorDetails, index) => (
+                          <tr key={index} className="bg-white text-center">
+                            <td className="border border-gray-300 px-2 py-2 font-semibold">Incomplete Details</td>
+                            {pageName === 'Vendor' && (
+                              <td className="border border-gray-300 px-2 py-2 font-semibold">{errorDetails.sheet}</td>
+                            )}
+                            <td className="border border-gray-300 px-2 py-2 text-sm font-bold text-red-600">
+                              <span className="inline-flex items-center bg-gray-200 text-red-600  font-semibold px-2 py-2 rounded-md">
+                                {pageName === 'Vendor' && errorDetails.row_id ? `Row: ${errorDetails.row_id}` : `Row: ${errorDetails}`}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>
@@ -141,29 +131,6 @@ export default function AdminUpload({ url, pageName }: { url: string; pageName: 
               </div>
             </div>
           </div>
-
-          {/* Transaction Type Selection */}
-
-          {/* {pageName == 'Vendor' && (
-            <div className="grid grid-cols-12 items-center gap-3 mb-4">
-              <Label className="col-span-3 text-right text-sm font-medium" htmlFor="tran_type">
-                Transaction Type
-              </Label>
-              <div className="col-span-9">
-                <Select
-                  id="tran_type"
-                  className="w-full border-gray-300 rounded-md shadow-sm"
-                  options={[
-                    { value: 'both', label: 'Both'  },
-                    { value: 'add', label: 'Add to List' },
-                    { value: 'transaction', label: 'Update Payment Transaction' },
-                  ]}
-                  value={tranType}
-                  onChange={(selectedOption) => setTranType(selectedOption)}
-                />
-              </div>
-            </div>
-          )} */}
 
           {/* File Upload */}
           <div className="mb-4">

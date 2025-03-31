@@ -28,8 +28,8 @@ class MaterialNetPrice extends Model
     protected function casts(): array
     {
         return [
-            'price' => 'float',
-            'per_unit' => 'float',
+            'price'         => 'float',
+            'per_unit'      => 'float',
             'min_order_qty' => 'float',
         ];
     }

@@ -24,8 +24,8 @@
         }
 
         .printable-area {
-            width: 8.5in;
-            height: 11in;
+            width: 9in;
+            height: 8.5in;
         }
 
         table,
@@ -46,14 +46,14 @@
             text-align: right;
             font-weight: bold;
             font-size: 20px;
-            padding: 60px 80px 50px 80px;
+            padding: 13mm 5mm 10mm 0;
 
         }
 
         .amount {
             text-align: right;
             font-size: 25px;
-            padding: 70px 70px 50px 50px;
+            padding: 60px 50px 0 50px;
             margin-top: 10px;
             /* float: right; */
             /* top: 30vw; */
@@ -61,44 +61,55 @@
         }
 
         .addr {
-            padding: 12px 40px 90px 0;
+            padding: 5px 10px 50px 0;
+            vertical-align: top;
         }
 
         .itemcode {
-            padding-left: 5px;
+            padding-left: 0;
         }
 
         .align-top {
             vertical-align: top;
         }
 
+        .text-right {
+            text-align: right;
+        }
+
+        .pr {
+            padding-right: 40px;
+        }
+
         .supplier_name {
-            padding: 0 0 0 50px;
+            padding: 0 0 0 0;
+            vertical-align: top;
         }
 
         .notes {
             padding-left: 10px;
-            width: 90%;
+            width: 95%;
             font-size: 13px;
 
         }
 
         .line_item {
-            min-height: 240px;
-            max-height: 240px;
+            min-height: 90mm;
+            max-height: 90mm;
+            /* margin-left: -10mm; */
             /* background-color: blue; */
         }
 
         .date {
-            padding-top: 20px;
+            padding-top: 0 0 0 0;
         }
 
         .buyer {
-            padding: 22px 0 0 415px;
+            padding: 12px 0 0 430px;
         }
 
         .approver {
-            padding: 50px 0 0 415px;
+            padding: 23px 0 0 430px;
         }
 
         .page-break {
@@ -111,21 +122,21 @@
     @foreach ($poHeaders as $poHeader)
         <div class="printable-area ">
             <table>
-
-                <td colspan="5" class="ponumber"> {{ $poHeader->po_number }} </td>
-                </tr>
                 <tr>
-                    <td class="supplier_name" width='57%'>{{ $poHeader->vendors->supplier }} -
-                        {{ $poHeader->vendors->name_1 }} </td>
-                    <td class='date'> {{ date('m/d/Y', strtotime($poHeader->doc_date)) }} </td>
-                    @if (!$poHeader->is_mother_po)
-                        <td class='date'> {{ date('m/d/Y', strtotime($poHeader->deliv_date)) }} </td>
-                    @endif
+                    <td colspan="5" class="ponumber"> {{ $poHeader->po_number }} </td>
                 </tr>
                 <tr>
                     <td> </td>
-                    <td class="addr" colspan='2'>
-                        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp;
+
+                    <td class='date'> {{ date('d-M-Y', strtotime($poHeader->doc_date)) }} </td>
+                    @if (!$poHeader->is_mother_po)
+                        <td class='date'> {{ date('d-M-Y', strtotime($poHeader->deliv_date)) }} </td>
+                    @endif
+                </tr>
+                <tr height='118mm'>
+                    <td class="supplier_name" width='62%'>{{ $poHeader->vendors->supplier }} -
+                        {{ $poHeader->vendors->name_1 }}</td>
+                    <td class="addr" colspan='3'>
                         {{ $poHeader->deliv_addr }} </td>
 
                 </tr>
@@ -146,11 +157,10 @@
                                 @if ($poHeader->is_mother_po)
                                     <br><b> Delivery Date: </b>{{ date('m/d/Y', strtotime($pomaterial->del_date)) }}
                                 @endif
-
                             </td>
-                            <td width='15%' class="align-top">{{ $pomaterial->po_qty }} {{ $pomaterial->unit }}
-                            </td>
-                            <td width='15%' class="align-top">
+                            <td width='6%' class="align-top text-right">{{ $pomaterial->po_qty }} </td>
+                            <td width='8%' class="align-top">{{ $pomaterial->unit }} </td>
+                            <td width='15%' class="align-top text-right pr">
                                 {{ $pomaterial->taxClass?->tax_class == 1
                                     ? Number::currency($pomaterial->net_price * ($pomaterial->taxClass?->tax_value * 0.01 + 1), 'PHP')
                                     : Number::currency($pomaterial->net_price, 'PHP') }}
@@ -165,7 +175,7 @@
                                         : round($pomaterial->net_price * $pomaterial->po_qty);
                                 $grandTotal += $totalValue;
                             @endphp
-                            <td width='15%' class="align-top">
+                            <td width='15%' class="align-top text-right pr">
                                 @php
                                     echo Number::currency($totalValue, 'PHP');
                                 @endphp
@@ -189,7 +199,7 @@
                 {{ $poHeader->created_name }}
             </div>
             <div class='approver'>
-                {{ $poHeader->workflows->pluck('approved_by')->implode('/') }}
+                {{ $poHeader->workflows->pluck('approved_by')->unique()->implode('/') }}
                 <br />
             </div>
         </div>
@@ -199,7 +209,7 @@
 </body>
 
 <script>
-    window.print();
+    // window.print();
 </script>
 
 </html>

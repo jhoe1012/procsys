@@ -13,16 +13,16 @@ class MaterialValuationSeeder extends Seeder
     public function run(): void
     {
         MaterialValuation::truncate();
-        $csv = fopen(base_path('database/csv/valuation.csv'), 'r');
+        $csv       = fopen(base_path('database/csv/valuation.csv'), 'r');
         $firstline = true;
         while (($data = fgetcsv($csv, 1000, ',')) !== false) {
             if (! $firstline) {
                 MaterialValuation::create([
-                    'mat_code' => $data[0],
-                    'plant' => $data[1],
+                    'mat_code'        => $data[0],
+                    'plant'           => $data[1],
                     'valuation_price' => $data[2],
-                    'valid_from' => $data[3],
-                    'valid_to' => $data[4],
+                    'valid_from'      => $data[3],
+                    'valid_to'        => $data[4],
                 ]);
             }
             $firstline = false;
