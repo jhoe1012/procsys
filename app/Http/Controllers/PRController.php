@@ -223,7 +223,10 @@ class PRController extends Controller
         Mail::to($firstApprover->user->email)
             ->send(new PrForApprovalEmail(
                 $firstApprover->user->name,
-                $pr_header
+                $pr_header,
+                $pr_header->attachments
+                ->pluck('filepath', 'filename')
+                ->toArray()
             ));
 
         return to_route('pr.index')->with('success', "PR {$pr_header->pr_number} sent for approval.");
@@ -296,7 +299,7 @@ class PRController extends Controller
                 )
                 ->get()
                 ->toArray(),
-        ]);
+        ]); 
     }
 
     public function update(Request $request, $id)
@@ -388,6 +391,7 @@ class PRController extends Controller
             ->where('pr_number', $request->pr_number)
             ->first();
 
+
         $approver = Approvers::with('user')
             ->where('user_id', Auth::user()->id)
             ->where('plant', $pr_header->plant)
@@ -451,7 +455,10 @@ class PRController extends Controller
                 Mail::to($approver_2nd->user->email)
                     ->send(new PrForApprovalEmail(
                         $approver_2nd->user->name,
-                        $pr_header
+                        $pr_header,
+                        $pr_header->attachments
+                        ->pluck('filepath', 'filename')
+                        ->toArray()
                     ));
                 break;
             case 2:
