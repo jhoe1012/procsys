@@ -69,15 +69,7 @@ export default function usePRMaterial() {
           const value = updatedMaterial[i];
           const oldValue = material[i];
 
-          let triggeredBy = null;
-          if (value.mat_code !== oldValue.mat_code) {
-            triggeredBy = 'mat_code';
-          }
-          if (value.short_text !== oldValue.short_text) {
-            triggeredBy = 'short_text';
-          }
-
-          const selectedValue = triggeredBy === 'short_text' ? value.short_text : value.mat_code;
+          const selectedValue = value.short_text !== oldValue.short_text ? value.short_text : value.mat_code;
 
           if (selectedValue) {
             const materialInfo = await getMaterialInfo(selectedValue ?? '', plant, doc_date);
