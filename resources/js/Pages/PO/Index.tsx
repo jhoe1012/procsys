@@ -282,6 +282,7 @@ export default function Index({
                         <th className="px-3 py-2">itemNo</th>
                         <th className="px-3 py-2">Material </th>
                         <th className="px-3 py-2">Material Description</th>
+                        <th className="px-3 py-2">Item Text </th>
                         <th className="px-3 py-2">Del Date</th>
                         <th className="px-3 py-2">Qty</th>
                         <th className="px-3 py-2">Unit</th>
@@ -298,6 +299,7 @@ export default function Index({
                             <td className="px-3 py-2">{poMaterial.item_no}</td>
                             <td className="px-3 py-2">{poMaterial.mat_code}</td>
                             <td className="px-3 py-2">{poMaterial.short_text}</td>
+                            <td className="px-3 py-2">{poMaterial.item_text}</td>
                             <td className="px-3 py-2">{poMaterial.del_date?.toString()}</td>
                             <td className="px-3 py-2">{poMaterial.po_qty}</td>
                             <td className="px-3 py-2">{poMaterial.unit}</td>
