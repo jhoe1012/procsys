@@ -85,6 +85,9 @@
             <p><strong>Created By:</strong> {{ $po_header->created_name }}</p>
             <p><strong>Vendor: </strong> {{ $po_header->vendors->supplier }}-{{ $po_header->vendors->name_1 }}</p>
             <p><strong>Doc Date:</strong> {{ date('F j, Y', strtotime($po_header->doc_date)) }}</p>
+            @if ($po_header->is_mother_po)
+                <p><strong>Del Date:</strong> {{ date('F j, Y', strtotime($po_header->deliv_date)) }}</p>
+            @endif
             <p><strong>Requesting Plant:</strong> {{ $po_header->plants->name1 }}</p>
             <table>
                 <thead>
@@ -98,7 +101,9 @@
                         <td>Unit</td>
                         <td>Total Value</td>
                         <td>Curr</td>
-                        <td>Del Date</td>
+                        @if (!$po_header->is_mother_po)
+                            <td>Del Date</td>
+                        @endif
                         <td>Mat Grp</td>
                     </tr>
                 </thead>
@@ -114,7 +119,9 @@
                             <td>{{ $pomaterial->unit }}</td>
                             <td>{{ Number::currency($pomaterial->total_value, 'PHP') }}</td>
                             <td>{{ $pomaterial->currency }}</td>
-                            <td>{{ date('Y-m-d', strtotime($pomaterial->del_date)) }}</td>
+                            @if (!$po_header->is_mother_po)
+                                <td>{{ date('Y-m-d', strtotime($pomaterial->del_date)) }}</td>
+                            @endif
                             <td>{{ $pomaterial->materialGroups->mat_grp_desc }}</td>
                         </tr>
                     @endforeach
