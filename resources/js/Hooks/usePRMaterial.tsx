@@ -68,10 +68,11 @@ export default function usePRMaterial() {
         for (let i = operation.fromRowIndex; i < operation.toRowIndex; i++) {
           const value = updatedMaterial[i];
           const oldValue = material[i];
+          const selectedValue = value.short_text !== oldValue.short_text ? value.short_text : value.mat_code;
 
-          if ((value.mat_code && value.mat_code !== oldValue.mat_code) || (value.short_text && value.short_text !== oldValue.short_text)) {
+          if (selectedValue) {
             // const materialInfo = await fetchMaterialInfo(value.short_text ?? value.mat_code, plant, doc_date);
-            const materialInfo = await getMaterialInfo(value.short_text ?? value.mat_code ?? '', plant, doc_date);
+            const materialInfo = await getMaterialInfo(selectedValue ?? '', plant, doc_date);
             if (materialInfo) {
               const { altUoms = [], valuations = [{}], materialGroups = [], purchasingGroups = [] } = materialInfo;
               const ord_unit = materialInfo.order_uom || materialInfo.base_uom;
