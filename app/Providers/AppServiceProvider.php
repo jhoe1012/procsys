@@ -21,9 +21,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(UrlGenerator $url): void
     {
-        if($this->app->environment('production')) {
+        if ($this->app->environment('production')) {
             // URL::forceScheme('https');
-            $this->app['request']->server->set('HTTPS','on');
+            $this->app['request']->server->set('HTTPS', 'on');
         }
 
         Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {

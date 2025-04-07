@@ -5,9 +5,13 @@ import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
 import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/solid';
 import { Checkbox } from '@/Components';
+import { usePage } from '@inertiajs/react';
+import Select from 'react-select';
+import { PageProps } from '@/types';
 
 export default function PrReportFilter({ queryParams, filterReport }: { queryParams: any; filterReport: (queryParam: any) => void }) {
   const [showModal, setShowModal] = useState(false);
+  const plants = usePage<PageProps>().props.auth.user.plants.map((item) => ({ label: item.name1, value: item.plant }));
 
   const searchFieldChanged = (name: string, value: string) => {
     if (value) {
@@ -38,7 +42,7 @@ export default function PrReportFilter({ queryParams, filterReport }: { queryPar
         <AdjustmentsHorizontalIcon className="h-6 w-6" />
       </button>
 
-      <Modal show={showModal} onClose={closeModal} maxWidth="xl">
+      <Modal show={showModal} onClose={closeModal} maxWidth="2xl">
         <div className="m-2">
           <div className="flex ">
             <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="type">
@@ -128,6 +132,23 @@ export default function PrReportFilter({ queryParams, filterReport }: { queryPar
               onKeyDown={(e) => handleKeyPress('short_text', e)}
             />
           </div>
+          <div className="flex items-center space-x-4">
+            <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
+              Plant
+            </Label>
+            <Select
+              className="m-2 w-full border-gray-500 h-10"
+              options={plants}
+              defaultValue={plants.filter((item) => item.value === queryParams.plant)}
+              onChange={(option: any) => searchFieldChanged('plant', option?.value)}
+              required={true}
+              placeholder="Plant"
+            />
+            <Checkbox checked={queryParams.open_pr} onChange={(e) => searchFieldChanged('open_pr', e.target.checked)} />
+            <Label className="text-sm  w-full" htmlFor="type">
+              With Open PR
+            </Label>
+          </div>
           <div className="flex ">
             <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
               Request Date
@@ -196,22 +217,6 @@ export default function PrReportFilter({ queryParams, filterReport }: { queryPar
               onBlur={(e) => searchFieldChanged('created_name', e.target.value)}
               onKeyDown={(e) => handleKeyPress('created_name', e)}
             />
-          </div>
-          <div className="flex items-center space-x-4">
-            <Label className="text-sm text-right w-7/12" htmlFor="type">
-              Plant
-            </Label>
-            <Input
-              className="m-2 w-full border-gray-300 h-10 "
-              type="text"
-              defaultValue={queryParams.plant}
-              onBlur={(e) => searchFieldChanged('plant', e.target.value)}
-              onKeyDown={(e) => handleKeyPress('plant', e)}
-            />
-            <Checkbox checked={queryParams.open_pr} onChange={(e) => searchFieldChanged('open_pr', e.target.checked)} />
-            <Label className="text-sm  w-full" htmlFor="type">
-              With Open PR
-            </Label>
           </div>
 
           <div className="flex content-center justify-center gap-4 mb-5">

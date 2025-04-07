@@ -129,7 +129,7 @@ const Edit = ({
         ...keyColumn('po_qty', floatColumn),
         title: 'PO Qty',
         minWidth: 70,
-        disabled: ({ rowData }: any) => rowData.po_gr_qty != rowData.po_qty,
+        disabled: ({ rowData }: any) => rowData.po_gr_qty && rowData.po_gr_qty != rowData.po_qty,
       },
       { ...keyColumn('qty_open_po', floatColumn), title: 'Open Qty', minWidth: 100, disabled: true },
       { ...keyColumn('unit', textColumn), title: 'Ord. UOM', minWidth: 55, disabled: true },

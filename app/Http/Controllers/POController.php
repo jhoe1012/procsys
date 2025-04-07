@@ -89,9 +89,10 @@ class POController extends Controller
             ->onEachSide(5);
 
         return Inertia::render('PO/Index', [
-            'po_header'   => POHeaderResource::collection($poHeader),
-            'queryParams' => $request->query() ?: null,
-            'message'     => ['success' => session('success'), 'error' => session('error')],
+            'po_header'     => POHeaderResource::collection($poHeader),
+            'queryParams'   => $request->query() ?: null,
+            'message'       => ['success' => session('success'), 'error' => session('error')],
+            'vendorsChoice' => Vendor::vendorsChoice(),
         ]);
     }
 
@@ -103,10 +104,7 @@ class POController extends Controller
         })->toArray();
 
         return Inertia::render('PO/Create', [
-            'vendors' => Vendor::selectRaw('supplier as value , supplier || \' - \'||name_1 as label')
-                ->orderBy('name_1')
-                ->get()
-                ->toArray(),
+            'vendors'         => Vendor::vendorsChoice(),
             'deliveryAddress' => DeliveryAddress::selectRaw('address as value, address as label')
                 ->whereIn('plant', $user_plants)
                 ->where('is_active', 'true')
@@ -347,8 +345,8 @@ class POController extends Controller
                     $firstApprover->user->name,
                     $po_header,
                     $po_header->attachments
-                    ->pluck('filepath', 'filename')
-                    ->toArray()
+                        ->pluck('filepath', 'filename')
+                        ->toArray()
                 ));
         }
 
@@ -454,8 +452,8 @@ class POController extends Controller
                         $approver_2nd->user->name,
                         $po_header,
                         $po_header->attachments
-                        ->pluck('filepath', 'filename')
-                        ->toArray()
+                            ->pluck('filepath', 'filename')
+                            ->toArray()
                     ));
                 break;
             case 2:
@@ -463,7 +461,7 @@ class POController extends Controller
                     'cc_by_deliv_addr',
                     'like',
                     '%|'.DeliveryAddress::where('address', $po_header->deliv_addr)
-                    ->where('plant', $po_header->plant)->pluck('id')->first().'|%'
+                        ->where('plant', $po_header->plant)->pluck('id')->first().'|%'
                 )->pluck('email')->toArray();
 
                 $approved_cc = [$approver->user->email, ...$finance];
@@ -705,5 +703,6 @@ class POController extends Controller
             );
         }
     }
+
     private function _updateValuation($poHeader) {}
 }

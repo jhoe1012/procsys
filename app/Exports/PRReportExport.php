@@ -26,6 +26,7 @@ class PRReportExport implements FromArray, WithHeadings
             'Item',
             'Material',
             'Material Description',
+            'Item Text',
             'PR Quantity',
             'PR Unit',
             'Open PR Qty',

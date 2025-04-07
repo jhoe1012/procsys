@@ -43,4 +43,12 @@ class Vendor extends Model
     {
         return $this->belongsTo(PoHeader::class, 'vendor_id', 'supplier');
     }
+
+    public function scopeVendorsChoice($query): array
+    {
+        return $query->selectRaw('supplier as value , supplier || \' - \'||name_1 as label')
+            ->orderBy('name_1')
+            ->get()
+            ->toArray();
+    }
 }

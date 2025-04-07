@@ -5,9 +5,14 @@ import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
 import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/solid';
 import { Checkbox } from '@/Components';
+import Select from 'react-select';
+import { usePage } from '@inertiajs/react';
+import { Choice, PageProps } from '@/types';
 
 export default function PoReportFilter({ queryParams, filterReport }: { queryParams: any; filterReport: (queryParam: any) => void }) {
   const [showModal, setShowModal] = useState(false);
+  const plants = usePage<PageProps>().props.auth.user.plants.map((item) => ({ label: item.name1, value: item.plant }));
+  const vendorsChoice: Choice[] = usePage<PageProps>().props.vendorsChoice!;
 
   const searchFieldChanged = (name: string, value: any) => {
     if (value) {
@@ -80,24 +85,16 @@ export default function PoReportFilter({ queryParams, filterReport }: { queryPar
           </div>
 
           <div className="flex ">
-            <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
+            <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="type">
               Supplier
             </Label>
-            <Input
-              className="m-2 w-full border-gray-300 h-10"
-              type="text"
-              defaultValue={queryParams.supplier_code}
-              onBlur={(e) => searchFieldChanged('supplier_code', e.target.value)}
-              onKeyDown={(e) => handleKeyPress('supplier_code', e)}
-              placeholder="Code"
-            />
-            <Input
-              className="m-2 w-full border-gray-300 h-10 "
-              type="text"
-              defaultValue={queryParams.supplier_name}
-              onBlur={(e) => searchFieldChanged('supplier_name', e.target.value)}
-              onKeyDown={(e) => handleKeyPress('supplier_name', e)}
-              placeholder="Name"
+            <Select
+              className="m-2 w-full border-gray-500 h-10"
+              options={vendorsChoice}
+              defaultValue={vendorsChoice.find(({ value }) => value === queryParams.vendor)}
+              onChange={(option: any) => searchFieldChanged('vendor', option?.value)}
+              required={true}
+              placeholder="Vendor"
             />
           </div>
 
@@ -176,26 +173,19 @@ export default function PoReportFilter({ queryParams, filterReport }: { queryPar
               onKeyDown={(e) => handleKeyPress('short_text', e)}
             />
           </div>
-          {/*          
           <div className="flex ">
-            <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
-              Release Date
+            <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="type">
+              Plant
             </Label>
-            <Input
-              className="m-2 w-full border-gray-300 h-10"
-              type="date"
-              defaultValue={queryParams.release_date_from}
-              onBlur={(e) => searchFieldChanged('release_date_from', e.target.value)}
-              onKeyDown={(e) => handleKeyPress('release_date_from', e)}
+            <Select
+              className="m-2 w-full border-gray-500 h-10"
+              options={plants}
+              defaultValue={plants.filter((item) => item.value === queryParams.plant)}
+              onChange={(option: any) => searchFieldChanged('plant', option?.value)}
+              required={true}
+              placeholder="Plant"
             />
-            <Input
-              className="m-2 w-full border-gray-300 h-10 "
-              type="date"
-              defaultValue={queryParams.release_date_to}
-              onBlur={(e) => searchFieldChanged('release_date_to', e.target.value)}
-              onKeyDown={(e) => handleKeyPress('release_date_to', e)}
-            />
-          </div> */}
+          </div>
           <div className="flex ">
             <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="type">
               Created By
@@ -208,19 +198,6 @@ export default function PoReportFilter({ queryParams, filterReport }: { queryPar
               onKeyDown={(e) => handleKeyPress('created_name', e)}
             />
           </div>
-          <div className="flex ">
-            <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="type">
-              Plant
-            </Label>
-            <Input
-              className="m-2 w-full border-gray-300 h-10 "
-              type="text"
-              defaultValue={queryParams.plant}
-              onBlur={(e) => searchFieldChanged('plant', e.target.value)}
-              onKeyDown={(e) => handleKeyPress('plant', e)}
-            />
-          </div>
-
           <div className="flex items-center space-x-4">
             <Label className="text-sm text-right w-7/12" htmlFor="type">
               Purchasing Group

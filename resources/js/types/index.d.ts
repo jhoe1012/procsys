@@ -34,6 +34,7 @@ export type PageProps<T extends Record<string, unknown> = Record<string, unknown
     user: AuthUser;
     menu: any;
   };
+  vendorsChoice?: Choice[];
 };
 
 export interface IPlants {

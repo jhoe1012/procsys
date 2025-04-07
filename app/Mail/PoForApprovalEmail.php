@@ -4,10 +4,10 @@ namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Support\Facades\Log;
 
 class PoForApprovalEmail extends Mailable
@@ -17,7 +17,7 @@ class PoForApprovalEmail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(private $approver_name, private $po_header , private array $po_attachments = [])
+    public function __construct(private $approver_name, private $po_header, private array $po_attachments = [])
     {
         //
     }
@@ -44,6 +44,7 @@ class PoForApprovalEmail extends Mailable
             with: ['approver_name' => $this->approver_name,  'po_header' => $this->po_header],
         );
     }
+
     /**
      * Get the attachments for the message.
      *
@@ -53,18 +54,20 @@ class PoForApprovalEmail extends Mailable
     {
         if (empty($this->po_attachments)) {
             Log::info("No attachments found for PO: {$this->po_header->po_number}");
-            return []; 
+
+            return [];
         }
 
         return collect($this->po_attachments)->map(function ($filepath, $filename) {
             $fullPath = public_path($filepath);
 
-            if (!$fullPath || !file_exists($fullPath)) {
+            if (! $fullPath || ! file_exists($fullPath)) {
                 Log::error("Attachment not found: {$fullPath}");
-                return null; 
+
+                return null;
             }
 
             return Attachment::fromPath($fullPath)->as($filename);
-        })->filter()->all(); 
+        })->filter()->all();
     }
 }

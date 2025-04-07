@@ -189,7 +189,7 @@ class PRController extends Controller
             'prmaterials' => fn ($query) => $query->whereNull('status')->orWhere('status', ''),
             'plants',
         ])->findOrFail($id);
-        
+
         $approvers = Approvers::where('amount_from', '<=', $pr_header->total_pr_value)
             ->where('plant', $pr_header->plant)
             ->where('type', Approvers::TYPE_PR)
@@ -225,8 +225,8 @@ class PRController extends Controller
                 $firstApprover->user->name,
                 $pr_header,
                 $pr_header->attachments
-                ->pluck('filepath', 'filename')
-                ->toArray()
+                    ->pluck('filepath', 'filename')
+                    ->toArray()
             ));
 
         return to_route('pr.index')->with('success', "PR {$pr_header->pr_number} sent for approval.");
@@ -299,7 +299,7 @@ class PRController extends Controller
                 )
                 ->get()
                 ->toArray(),
-        ]); 
+        ]);
     }
 
     public function update(Request $request, $id)
@@ -336,6 +336,7 @@ class PRController extends Controller
                         $pr_material->conversion      = $item['conversion'];
                         $pr_material->converted_qty   = $item['converted_qty'];
                         $pr_material->item_text       = $item['item_text'];
+                        $pr_material->prctrl_grp_id   = $item['prctrl_grp_id'];
                         if ($pr_material->qty_ordered === null || $pr_material->qty_ordered === 0) {
                             $pr_material->save();
                         }
@@ -390,7 +391,6 @@ class PRController extends Controller
         ])
             ->where('pr_number', $request->pr_number)
             ->first();
-
 
         $approver = Approvers::with('user')
             ->where('user_id', Auth::user()->id)
@@ -457,12 +457,12 @@ class PRController extends Controller
                         $approver_2nd->user->name,
                         $pr_header,
                         $pr_header->attachments
-                        ->pluck('filepath', 'filename')
-                        ->toArray()
+                            ->pluck('filepath', 'filename')
+                            ->toArray()
                     ));
                 break;
             case 2:
-                $plant_id = Plant::where('plant', $pr_header->plant)->value('id'); 
+                $plant_id   = Plant::where('plant', $pr_header->plant)->value('id');
                 $recipients = User::whereHas('plants', function ($query) use ($plant_id) {
                     $query->where('id', $plant_id);
                 })

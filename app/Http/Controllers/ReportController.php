@@ -7,6 +7,7 @@ use App\Exports\MaterialReportExport;
 use App\Exports\POHistoryExport;
 use App\Exports\POReportExport;
 use App\Exports\PRReportExport;
+use App\Models\Vendor;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -44,7 +45,8 @@ class ReportController extends Controller
                 ->paginate(15)
                 ->onEachSide(5)
                 ->appends($request->query() ?: null),
-            'queryParams' => $request->query() ?: null,
+            'queryParams'   => $request->query() ?: null,
+            'vendorsChoice' => Vendor::vendorsChoice(),
 
         ]);
     }
@@ -65,8 +67,8 @@ class ReportController extends Controller
                 ->paginate(15)
                 ->onEachSide(5)
                 ->appends($request->query() ?: null),
-            'queryParams' => $request->query() ?: null,
-
+            'queryParams'   => $request->query() ?: null,
+            'vendorsChoice' => Vendor::vendorsChoice(),
         ]);
     }
 
@@ -107,7 +109,8 @@ class ReportController extends Controller
                 ->paginate(50)
                 ->onEachSide(2)
                 ->appends($request->query() ?: null),
-            'queryParams' => $request->query() ?: null,
+            'queryParams'   => $request->query() ?: null,
+            'vendorsChoice' => Vendor::vendorsChoice(),
 
         ]);
     }
@@ -130,6 +133,7 @@ class ReportController extends Controller
             'pr_materials.item_no',
             'pr_materials.mat_code',
             'pr_materials.short_text',
+            'pr_materials.item_text',
             'pr_materials.qty',
             'pr_materials.unit',
             'pr_materials.qty_open',
@@ -208,6 +212,7 @@ class ReportController extends Controller
             'vendors.name_1',
             'po_materials.mat_code',
             'po_materials.short_text',
+            'po_materials.item_text',
             'po_materials.mat_grp',
             'po_materials.po_qty',
             'po_materials.unit',
@@ -251,13 +256,12 @@ class ReportController extends Controller
             'release_date_from' => fn ($value) => $request->input('release_date_to')
                 ? $query->whereBetween('po_headers.release_date', [$value, $request->input('release_date_to')])
                 : $query->where('po_headers.release_date', 'ilike', "%{$value}%"),
-            'purch_grp'     => fn ($value) => $query->where('po_materials.purch_grp', 'ilike', "%{$value}%"),
-            'supplier_code' => fn ($value) => $query->where('po_headers.vendor_id', 'ilike', "%{$value}%"),
-            'supplier_name' => fn ($value) => $query->where('vendors.name_1', 'ilike', "%{$value}%"),
-            'short_text'    => fn ($value) => $query->where('po_materials.short_text', 'ilike', "%{$value}%"),
-            'created_name'  => fn ($value) => $query->where('po_headers.created_name', 'ilike', "%{$value}%"),
-            'plant'         => fn ($value) => $query->where('po_headers.plant', 'ilike', "%{$value}%"),
-            'open_po'       => fn ($value) => $query->where('po_materials.po_gr_qty', '>', 0),
+            'purch_grp'    => fn ($value) => $query->where('po_materials.purch_grp', 'ilike', "%{$value}%"),
+            'short_text'   => fn ($value) => $query->where('po_materials.short_text', 'ilike', "%{$value}%"),
+            'created_name' => fn ($value) => $query->where('po_headers.created_name', 'ilike', "%{$value}%"),
+            'plant'        => fn ($value) => $query->where('po_headers.plant', $value),
+            'vendor'       => fn ($value) => $query->where('po_headers.vendor_id', $value),
+            'open_po'      => fn ($value) => $query->where('po_materials.po_gr_qty', '>', 0),
         ];
 
         // Apply filters dynamically
@@ -335,6 +339,8 @@ class ReportController extends Controller
             'created_name'  => fn ($value) => $query->where('gr_headers.created_name', 'ilike', "%{$value}%"),
             'delivery_note' => fn ($value) => $query->where('gr_headers.delivery_note', 'ilike', "%{$value}%"),
             'short_text'    => fn ($value) => $query->where('gr_materials.short_text', 'ilike', "%{$value}%"),
+            'plant'         => fn ($value) => $query->where('gr_headers.plant', $value),
+            'vendor'        => fn ($value) => $query->where('gr_headers.vendor_id', $value),
         ];
 
         // Apply filters dynamically
@@ -474,6 +480,8 @@ class ReportController extends Controller
                 : $query->where('po_headers.deliv_date', 'ilike', "%{$value}%"),
             'open_po' => fn ($value) => $query->where('po_materials.po_gr_qty', '>', 0),
             'open_pr' => fn ($value) => $query->where('pr_materials.qty_open', '>', 0),
+            'plant'   => fn ($value) => $query->where('pr_headers.plant', $value),
+            'vendor'  => fn ($value) => $query->where('po_headers.vendor_id', $value),
         ];
         // Apply filters dynamically
         foreach (request()->only(array_keys($filters)) as $field => $value) {

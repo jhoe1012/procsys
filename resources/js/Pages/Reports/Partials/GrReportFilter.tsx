@@ -4,9 +4,14 @@ import { Label } from '@/Components/ui/label';
 import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
 import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/solid';
+import Select from 'react-select';
+import { usePage } from '@inertiajs/react';
+import { Choice, PageProps } from '@/types';
 
 export default function GrReportFilter({ queryParams, filterReport }: { queryParams: any; filterReport: (queryParam: any) => void }) {
   const [showModal, setShowModal] = useState(false);
+  const plantsChoice: Choice[] = usePage<PageProps>().props.auth.user.plants.map((item) => ({ label: item.name1, value: item.plant }));
+  const vendorsChoice: Choice[] = usePage<PageProps>().props.vendorsChoice!;
 
   const searchFieldChanged = (name: string, value: string) => {
     if (value) {
@@ -102,27 +107,19 @@ export default function GrReportFilter({ queryParams, filterReport }: { queryPar
             />
           </div>
           <div className="flex ">
-            <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
+            <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="type">
               Supplier
             </Label>
-            <Input
-              className="m-2 w-full border-gray-300 h-10"
-              type="text"
-              defaultValue={queryParams.supplier_code}
-              onBlur={(e) => searchFieldChanged('supplier_code', e.target.value)}
-              onKeyDown={(e) => handleKeyPress('supplier_code', e)}
-              placeholder="Code"
-            />
-            <Input
-              className="m-2 w-full border-gray-300 h-10 "
-              type="text"
-              defaultValue={queryParams.supplier_name}
-              onBlur={(e) => searchFieldChanged('supplier_name', e.target.value)}
-              onKeyDown={(e) => handleKeyPress('supplier_name', e)}
-              placeholder="Name"
+            <Select
+              className="m-2 w-full border-gray-500 h-10"
+              options={vendorsChoice}
+              defaultValue={vendorsChoice.find(({ value }) => value === queryParams.vendor)}
+              onChange={(option: any) => searchFieldChanged('vendor', option?.value)}
+              required={true}
+              placeholder="Vendor"
             />
           </div>
-
+          {/* 
           <div className="flex ">
             <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="type">
               Created By
@@ -134,7 +131,7 @@ export default function GrReportFilter({ queryParams, filterReport }: { queryPar
               onBlur={(e) => searchFieldChanged('created_name', e.target.value)}
               onKeyDown={(e) => handleKeyPress('created_name', e)}
             />
-          </div>
+          </div> */}
 
           <div className="flex ">
             <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
@@ -179,7 +176,19 @@ export default function GrReportFilter({ queryParams, filterReport }: { queryPar
               placeholder="To"
             />
           </div>
-
+          <div className="flex ">
+            <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="type">
+              Plant
+            </Label>
+            <Select
+              className="m-2 w-full border-gray-500 h-10"
+              options={plantsChoice}
+              defaultValue={plantsChoice.find(({ value }) => value === queryParams.plant)}
+              onChange={(option: any) => searchFieldChanged('plant', option?.value)}
+              required={true}
+              placeholder="Plant"
+            />
+          </div>
           <div className="flex ">
             <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="type">
               Delivery Note
