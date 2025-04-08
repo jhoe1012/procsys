@@ -72,7 +72,7 @@ export default function usePRMaterial() {
 
           if (selectedValue) {
             // const materialInfo = await fetchMaterialInfo(value.short_text ?? value.mat_code, plant, doc_date);
-            const materialInfo = await getMaterialInfo(selectedValue ?? '', plant, doc_date);
+            const materialInfo = await getMaterialInfo(selectedValue, plant, doc_date);
             if (materialInfo) {
               const { altUoms = [], valuations = [{}], materialGroups = [], purchasingGroups = [] } = materialInfo;
               const ord_unit = materialInfo.order_uom || materialInfo.base_uom;

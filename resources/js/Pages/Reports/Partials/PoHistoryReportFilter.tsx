@@ -3,10 +3,12 @@ import Modal from '@/Components/Modal';
 import { Label } from '@/Components/ui/label';
 import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
-import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/solid';
 import { Checkbox } from '@/Components';
 import { Filter } from 'lucide-react';
 import { ScrollArea } from '@/Components/ui';
+import Select from 'react-select';
+import { usePage } from '@inertiajs/react';
+import { Choice, PageProps } from '@/types';
 
 export default function PoHistoryReportFilter({
   queryParams,
@@ -16,6 +18,8 @@ export default function PoHistoryReportFilter({
   filterReport: (queryParam: any) => void;
 }) {
   const [showModal, setShowModal] = useState(false);
+  const plantsChoice: Choice[] = usePage<PageProps>().props.auth.user.plants.map((item) => ({ label: item.name1, value: item.plant }));
+  const vendorsChoice: Choice[] = usePage<PageProps>().props.vendorsChoice!;
 
   const searchFieldChanged = (name: string, value: string) => {
     if (value) {
@@ -44,9 +48,35 @@ export default function PoHistoryReportFilter({
         Filter
       </Button>
 
-      <Modal show={showModal} onClose={closeModal} maxWidth="xl">
+      <Modal show={showModal} onClose={closeModal} maxWidth="2xl">
         <ScrollArea>
           <div className="m-2">
+            <div className="flex ">
+              <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="type">
+                Supplier
+              </Label>
+              <Select
+                className="m-2 w-full border-gray-500 h-10"
+                options={vendorsChoice}
+                defaultValue={vendorsChoice.find(({ value }) => value === queryParams.vendor)}
+                onChange={(option: any) => searchFieldChanged('vendor', option?.value)}
+                required={true}
+                placeholder="Vendor"
+              />
+            </div>
+            <div className="flex ">
+              <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="type">
+                Plant
+              </Label>
+              <Select
+                className="m-2 w-full border-gray-500 h-10"
+                options={plantsChoice}
+                defaultValue={plantsChoice.find(({ value }) => value === queryParams.plant)}
+                onChange={(option: any) => searchFieldChanged('plant', option?.value)}
+                required={true}
+                placeholder="Plant"
+              />
+            </div>
             <div className="flex ">
               <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
                 PR Number
@@ -169,7 +199,6 @@ export default function PoHistoryReportFilter({
                 onKeyDown={(e) => handleKeyPress('short_text', e)}
               />
             </div>
-
             <div className="flex ">
               <Label className="p-3 w-6/12 text-sm content-center text-right" htmlFor="type">
                 Deliv. Date

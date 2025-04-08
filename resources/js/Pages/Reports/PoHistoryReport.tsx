@@ -6,6 +6,9 @@ import { Pagination } from '@/Components';
 import { DataTable, setDataTableColumns } from '@/Components/ui';
 
 const _columns = {
+  mat_code: { title: 'MATERIAL', type: 'string' },
+  short_text: { title: 'SHORT TEXT', type: 'string' },
+  item_text: { title: 'ITEM TEXT', type: 'string' },
   pr_number: { title: 'PR NUMBER', type: 'string' },
   po_number: { title: 'PO NUMBER', type: 'string' },
   control_no: { title: 'CONTROL NO.', type: 'string' },
@@ -41,9 +44,6 @@ const _columns = {
   po_created_name: { title: 'PO CREATED BY', type: 'string' },
   deliv_addr: { title: 'DELIV. ADDR.', type: 'string' },
   po_deliv_date: { title: 'PO DELIV. DATE', type: 'date' },
-  mat_code: { title: 'MATERIAL', type: 'string' },
-  short_text: { title: 'SHORT TEXT', type: 'string' },
-  item_text: { title: 'ITEM TEXT', type: 'string' },
   gr_created_name: { title: 'GR CREATED BY', type: 'string' },
   entry_date: { title: 'GR ENTRY DATE', type: 'date' },
   delivery_note: { title: 'DELIVERY NOTE', type: 'string' },

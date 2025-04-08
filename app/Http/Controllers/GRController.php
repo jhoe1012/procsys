@@ -9,6 +9,7 @@ use App\Models\GrHeader;
 use App\Models\GrMaterial;
 use App\Models\PoHeader;
 use App\Models\PoMaterial;
+use App\Models\Vendor;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -72,9 +73,10 @@ class GRController extends Controller
             ->onEachSide(5);
 
         return Inertia::render('GR/Index', [
-            'gr_header'   => GRHeaderResource::collection($gr_header),
-            'queryParams' => $request->query() ?: null,
-            'message'     => ['success' => session('success'), 'error' => session('error')],
+            'gr_header'     => GRHeaderResource::collection($gr_header),
+            'queryParams'   => $request->query() ?: null,
+            'message'       => ['success' => session('success'), 'error' => session('error')],
+            'vendorsChoice' => Vendor::vendorsChoice(),
         ]);
     }
 

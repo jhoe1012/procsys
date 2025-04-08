@@ -1,22 +1,22 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import { PageProps, IMessage, IPOHeaderPage, IPOHeader, IPOMaterial } from '@/types';
+import { PageProps, IMessage, IPOHeaderPage, IPOHeader, IPOMaterial, Choice } from '@/types';
 import { useState, useEffect, KeyboardEvent } from 'react';
-import { formatNumber } from '@/lib/utils';
-import AsyncSelect from 'react-select/async';
+import { formatNumber, formatShortDate } from '@/lib/utils';
 import { PermissionsEnum, REACT_SELECT_STYLES, STATUS_APPROVED } from '@/lib/constants';
 import { badgeVariants, Button, Toaster, useToast } from '@/Components/ui';
 import { Checkbox, InputField, Modal, Pagination, TextInput } from '@/Components';
-import { fetchVendor } from '@/lib/Vendor';
 import { PrinterIcon } from 'lucide-react';
 import { can } from '@/lib/helper';
+import Select from 'react-select';
 
 export default function Index({
   auth,
   po_header,
   queryParams = {},
   message,
-}: PageProps<{ po_header: IPOHeaderPage }> & PageProps<{ queryParams: any }> & PageProps<{ message: IMessage }>) {
+  vendorsChoice,
+}: PageProps<{ po_header: IPOHeaderPage; queryParams: any; message: IMessage; vendorsChoice: Choice[] }>) {
   const [selectedPO, setSelectedPO] = useState<IPOHeader | null>(null);
   const [poMaterials, setPoMaterials] = useState<IPOMaterial[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -24,6 +24,8 @@ export default function Index({
   const [checkboxPo, setCheckboxPo] = useState<number[]>([]);
   const [controlNumberModal, setControlNumberModal] = useState(false);
   const [controlNumber, setControlNumber] = useState('');
+
+  const plantsChoice: Choice[] = auth.user.plants.map(({ plant, name1 }) => ({ value: plant, label: name1 }));
 
   queryParams = queryParams || {};
 
@@ -140,23 +142,20 @@ export default function Index({
                         />
                       </th>
                       <th className="px-1 py-2">
-                        <TextInput
-                          className="h-7 text-xs p-1 m-0 w-28"
-                          defaultValue={queryParams.plant}
-                          onBlur={(e) => searchFieldChanged('plant', e.target.value)}
-                          onKeyDown={(e) => handleKeyPress('plant', e)}
+                        <Select
                           placeholder="Plant"
+                          value={plantsChoice.find(({ value }) => value === queryParams.plant)}
+                          options={plantsChoice}
+                          onChange={(option: any) => searchFieldChanged('plant', option?.value)}
+                          styles={REACT_SELECT_STYLES}
                         />
                       </th>
                       <th className="px-1 py-2">
-                        <AsyncSelect
-                          className="p-2 w-full border-gray-500"
-                          cacheOptions
-                          defaultOptions
-                          loadOptions={fetchVendor}
-                          value={queryParams.vendor ? { label: `${queryParams.vendor} `, value: queryParams.vendor } : null}
-                          onChange={(option: any) => searchFieldChanged('vendor', option?.value)}
+                        <Select
                           placeholder="Vendor"
+                          value={vendorsChoice.find(({ value }) => value === queryParams.vendor)}
+                          options={vendorsChoice}
+                          onChange={(option: any) => searchFieldChanged('vendor', option?.value)}
                           styles={REACT_SELECT_STYLES}
                         />
                       </th>
@@ -238,8 +237,8 @@ export default function Index({
                             {po.vendor_id} - {po.vendors?.name_1}
                           </td>
                           <td className="px-3 py-2">{po.created_name}</td>
-                          <td className="px-3 py-2">{po.doc_date}</td>
-                          <td className="px-3 py-2">{po.deliv_date}</td>
+                          <td className="px-3 py-2">{formatShortDate(po.doc_date)}</td>
+                          <td className="px-3 py-2">{formatShortDate(po.deliv_date)}</td>
                           {/* <td className="px-3 py-2">{po.status}</td> */}
                           <td className="px-3 py-2">
                             <span className={badgeVariants({ variant: po.status.includes('Approval') ? 'Approval' : po.status })}>

@@ -41,6 +41,7 @@ export default function PrReport({ auth, prReport, queryParams }: PageProps) {
                     <th className="px-3 py-2">Item</th>
                     <th className="px-3 py-2">Material</th>
                     <th className="px-3 py-2">Material Description</th>
+                    <th className="px-3 py-2">Item Text</th>
                     <th className="px-3 py-2">PR Quantity</th>
                     <th className="px-3 py-2">PR Unit</th>
                     <th className="px-3 py-2">Open PR Qty</th>
@@ -70,6 +71,7 @@ export default function PrReport({ auth, prReport, queryParams }: PageProps) {
                         <td className="px-3 py-2">{pr.item_no}</td>
                         <td className="px-3 py-2">{pr.mat_code}</td>
                         <td className="px-3 py-2">{pr.short_text}</td>
+                        <td className="px-3 py-2">{pr.item_text}</td>
                         <td className="px-3 py-2">{pr.qty}</td>
                         <td className="px-3 py-2">{pr.unit}</td>
                         <td className="px-3 py-2">{pr.qty_open}</td>
