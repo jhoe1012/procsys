@@ -12,6 +12,16 @@ class GrHeader extends Model
 {
     use CreatedUpdatedBy, HasFactory;
 
+    protected $fillable = ['po_number',
+        'created_name',
+        'vendor_id',
+        'plant',
+        'entry_date',
+        'posting_date',
+        'actual_date',
+        'delivery_note',
+        'header_text', ];
+
     public function grmaterials(): HasMany
     {
         return $this->hasMany(GrMaterial::class)->orderBy('item_no', 'asc');

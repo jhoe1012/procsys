@@ -294,6 +294,7 @@ class ReportController extends Controller
             'gr_materials.item_no',
             'gr_materials.mat_code',
             'gr_materials.short_text',
+            'gr_materials.item_text',
             'gr_materials.gr_qty',
             'gr_materials.unit',
             'po_materials.po_gr_qty',
@@ -306,12 +307,13 @@ class ReportController extends Controller
             'gr_materials.dci',
             'gr_materials.is_cancel',
             'gr_materials.cancel_datetime',
-            'gr_materials.cancel_by'
+            'users.name AS cancel_by'
         )
             ->join('gr_headers', 'gr_headers.id', '=', 'gr_materials.gr_header_id')
             ->Join('vendors', 'vendors.supplier', '=', 'gr_headers.vendor_id')
             ->leftJoin('po_materials', 'po_materials.id', '=', 'gr_materials.po_material_id')
-            ->leftJoin('po_headers', 'po_headers.po_number', '=', 'gr_headers.po_number');
+            ->leftJoin('po_headers', 'po_headers.po_number', '=', 'gr_headers.po_number')
+            ->leftJoin('users', 'gr_materials.cancel_by', '=', 'users.id');
         $query->whereIn('gr_headers.plant', $this->_getUserPlant());
 
         // Define filterable fields and conditions
