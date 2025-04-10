@@ -9,29 +9,25 @@ import { useState } from 'react';
 import { DataSheetGrid, checkboxColumn, textColumn, intColumn, keyColumn, floatColumn } from 'react-datasheet-grid';
 import { Toaster } from '@/Components/ui/toaster';
 import { Card, CardContent } from '@/Components/ui/card';
+import { CUSTOM_DATA_SHEET_STYLE } from '@/lib/constants';
 
 const Show = ({ auth, grheader }: PageProps & PageProps<{ grheader: IGRHeader }>) => {
   const [material, setMaterial] = useState<IGRMaterials[]>(grheader.grmaterials);
 
   const columns = [
-    { ...keyColumn('item_no', intColumn), title: 'ItmNo', maxWidth: 50, disabled: true },
-    { ...keyColumn('mat_code', textColumn), title: 'Material', maxWidth: 130, disabled: true },
-    { ...keyColumn('short_text', textColumn), title: 'Material Description', maxWidth: 500, disabled: true },
-    { ...keyColumn('gr_qty', floatColumn), title: 'Qty', maxWidth: 130, disabled: true },
-    { ...keyColumn('unit', textColumn), title: 'Unit', maxWidth: 55, disabled: true },
-    { ...keyColumn('po_deliv_date', textColumn), title: 'PO Del Date', maxWidth: 130, disabled: true },
-    { ...keyColumn('batch', textColumn), title: 'Batch', maxWidth: 130, disabled: true },
-    { ...keyColumn('mfg_date', textColumn), title: 'Mfg Date', maxWidth: 130, disabled: true },
-    { ...keyColumn('sled_bbd', textColumn), title: 'SLED/BBD', maxWidth: 130, disabled: true },
-    { ...keyColumn('po_item', textColumn), title: 'PO Item', maxWidth: 55, disabled: true },
-    { ...keyColumn('dci', checkboxColumn), title: 'DCI', maxWidth: 55, disabled: true },
+    { ...keyColumn('item_no', intColumn), title: 'ItmNo', minWidth: 50, disabled: true },
+    { ...keyColumn('mat_code', textColumn), title: 'Material', minWidth: 130, disabled: true },
+    { ...keyColumn('short_text', textColumn), title: 'Material Description', minWidth: 400, disabled: true },
+    { ...keyColumn('item_text', textColumn), title: 'Item Text', minWidth: 400, disabled: true },
+    { ...keyColumn('gr_qty', floatColumn), title: 'Qty', minWidth: 70, disabled: true },
+    { ...keyColumn('unit', textColumn), title: 'Unit', minWidth: 55, disabled: true },
+    { ...keyColumn('po_deliv_date', textColumn), title: 'PO Del Date', minWidth: 130, disabled: true },
+    { ...keyColumn('batch', textColumn), title: 'Batch', minWidth: 130, disabled: true },
+    { ...keyColumn('mfg_date', textColumn), title: 'Mfg Date', minWidth: 130, disabled: true },
+    { ...keyColumn('sled_bbd', textColumn), title: 'SLED/BBD', minWidth: 130, disabled: true },
+    { ...keyColumn('po_item', textColumn), title: 'PO Item', minWidth: 55, disabled: true },
+    { ...keyColumn('dci', checkboxColumn), title: 'DCI', minWidth: 55, disabled: true },
   ];
-
-  const customStyle = {
-    '--dsg-header-text-color': 'rgb(10, 10, 10)',
-    '--dsg-cell-disabled-background-color': 'rgb(245, 245, 245)',
-    '--dsg-border-color': '#bfbdbd',
-  };
 
   return (
     <AuthenticatedLayout
@@ -112,7 +108,7 @@ const Show = ({ auth, grheader }: PageProps & PageProps<{ grheader: IGRHeader }>
                 value={material}
                 onChange={setMaterial}
                 columns={columns}
-                style={customStyle}
+                style={CUSTOM_DATA_SHEET_STYLE}
                 disableExpandSelection
                 rowHeight={30}
                 className="text-sm"

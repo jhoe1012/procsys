@@ -10,11 +10,12 @@ const SelectField = <T extends Record<string, any>>({
   onValueChange,
   placeholder = 'Select an option',
   displayValue = false,
+  required = false,
 }: GenericSelectProps<T>) => {
   return (
     <div className="flex-auto">
       {label && <Label>{label}</Label>}
-      <Select defaultValue={value} onValueChange={onValueChange}>
+      <Select defaultValue={value} onValueChange={onValueChange} required={required}>
         <SelectTrigger>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>

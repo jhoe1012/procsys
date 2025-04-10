@@ -409,6 +409,7 @@ export interface IGRMaterials {
   item_no?: number;
   mat_code?: string;
   short_text?: string;
+  item_text?: string;
   po_gr_qty?: number;
   gr_qty?: number;
   unit?: string;
@@ -502,6 +503,7 @@ export interface GenericSelectProps<T> {
   onValueChange: (value: string) => void;
   placeholder?: string;
   displayValue?: boolean;
+  required?: boolean;
 }
 
 export interface TabItem {

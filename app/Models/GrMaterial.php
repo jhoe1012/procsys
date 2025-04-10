@@ -16,6 +16,7 @@ class GrMaterial extends Model
         'item_no',
         'mat_code',
         'short_text',
+        'item_text',
         'gr_qty',
         'unit',
         'po_deliv_date',
