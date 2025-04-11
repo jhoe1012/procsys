@@ -15,7 +15,7 @@ export default function AltUom({
 }) {
   const [showModal, setShowModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const filteredData = rowData.filter((item) =>
     Object.entries(item).some(([key, val]) => {
       if (typeof val === 'object' && val !== null) {
@@ -34,7 +34,7 @@ export default function AltUom({
       />
 
       <Modal show={showModal} onClose={() => setShowModal(false)} maxWidth="lg">
-        <div className="border border-gray-300">
+        <div className="border border-gray-300 max-h-[90vh] p-1 overflow-hidden flex flex-col">
           <table className="w-full border-collapse table-fixed">
             <thead className="bg-gray-200 sticky top-0">
               <tr>
@@ -54,13 +54,13 @@ export default function AltUom({
                 </th>
               </tr>
               <tr>
-                <th className="border border-gray-300 p-2">Unit</th>
+                <th className="border border-gray-300 p-2 p-w-5">Unit</th>
                 <th className="border border-gray-300 p-2">Unit Text</th>
                 <th className="border border-gray-300 p-2">Conversion</th>
               </tr>
             </thead>
           </table>
-          <div className="max-h-96 overflow-y-auto relative">
+          <div className="overflow-y-auto min-h-[50vh]">
             <table className="w-full border-collapse table-fixed">
               <tbody>
                 {filteredData.map((altUom, index) => (
