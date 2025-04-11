@@ -31,6 +31,26 @@ export const DEFAULT_PR_MATERIAL = {
   prctrl_grp: undefined,
 };
 
+export const DEFAULT_GR_MATERIAL = {
+  id: undefined,
+  gr_header_id: undefined,
+  po_material_id: undefined,
+  item_no: undefined,
+  mat_code: undefined,
+  short_text: undefined,
+  item_text: undefined,
+  po_gr_qty: undefined,
+  gr_qty: undefined,
+  unit: undefined,
+  po_deliv_date: undefined,
+  batch: undefined,
+  mfg_date: undefined,
+  sled_bbd: undefined,
+  po_number: undefined,
+  po_item: undefined,
+  dci: undefined,
+};
+
 // Custom style for react select for index
 export const REACT_SELECT_STYLES = {
   control: (provided: CSSObjectWithLabel) => ({

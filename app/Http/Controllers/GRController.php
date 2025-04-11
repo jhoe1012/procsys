@@ -86,12 +86,7 @@ class GRController extends Controller
     public function create()
     {
 
-        return Inertia::render('GR/Create', [
-            // 'ponumber' => PoHeader::select('po_number as value', 'po_number as label')
-            //     ->where('status', Str::ucfirst(ApproveStatus::APPROVED))
-            //     ->get()
-            //     ->toArray(),
-        ]);
+        return Inertia::render('GR/Create', []);
     }
 
     /**
@@ -99,18 +94,19 @@ class GRController extends Controller
      */
     public function store(Request $request)
     {
-        $gr_header               = new GrHeader;
-        $gr_header->po_number    = $request->input('po_number');
-        $gr_header->created_name = $request->input('created_name');
-        $gr_header->vendor_id    = $request->input('vendor_id');
-        $gr_header->plant        = $request->input('plant');
-
-        $gr_header->entry_date    = $request->input('entry_date');
-        $gr_header->posting_date  = $request->input('posting_date');
-        $gr_header->actual_date   = $request->input('actual_date');
-        $gr_header->delivery_note = $request->input('delivery_note');
-        $gr_header->header_text   = $request->input('header_text');
-        $gr_header->save();
+        $gr_header = GrHeader::create(
+            $request->only([
+                'po_number',
+                'created_name',
+                'vendor_id',
+                'plant',
+                'entry_date',
+                'posting_date',
+                'actual_date',
+                'delivery_note',
+                'header_text',
+            ])
+        );
 
         $gr_materials = collect($request->input('grmaterials'))
             ->filter(fn ($item) => ! empty($item['mat_code']))
@@ -120,6 +116,7 @@ class GRController extends Controller
                 'item_no'        => ($index + 1) * 10,
                 'mat_code'       => $item['mat_code'],
                 'short_text'     => $item['short_text'],
+                'item_text'      => $item['item_text'],
                 'gr_qty'         => $item['gr_qty'],
                 'unit'           => $item['unit'],
                 'po_deliv_date'  => $item['po_deliv_date'],

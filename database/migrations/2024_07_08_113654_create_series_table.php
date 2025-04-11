@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('series', function (Blueprint $table) {
             $table->id();
-            $table->string('title', 2)->unique();
+            $table->string('title', 2);
             $table->string('plant', 10);
             $table->bigInteger('from');
             $table->bigInteger('to');
