@@ -63,6 +63,7 @@ export default function AddPrtoPo({ p_plant, p_doc_date, addToPO }) {
         ...computeConversion(item, item.ord_unit ?? ''),
         del_date: new Date(item.del_date || ''),
         pr_material_id: item.id,
+        id: undefined,
         pr_item: item.item_no,
         pr_unit: item.unit,
         altUomSelect: altUomSelect,
