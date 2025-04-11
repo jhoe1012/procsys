@@ -219,7 +219,7 @@ class PRController extends Controller
             'seq'      => HeaderSeq::ForApproval->value,
         ]);
 
-        $pr_header->refresh();
+        $pr_header->load('workflows');
         Mail::to($firstApprover->user->email)
             ->send(new PrForApprovalEmail(
                 $firstApprover->user->name,
@@ -446,7 +446,7 @@ class PRController extends Controller
         $approver_status->approved_date = now();
         $approver_status->save();
 
-        $pr_header->refresh();
+        $pr_header->load('workflows');
         /**
          * Send email notification
          */

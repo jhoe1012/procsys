@@ -338,7 +338,7 @@ class POController extends Controller
             'seq'      => HeaderSeq::ForApproval->value,
         ]);
 
-        $po_header->refresh();
+        $po_header->load('workflows');
         if ($firstApprover->user) {
             Mail::to($firstApprover->user->email)
                 ->send(new PoForApprovalEmail(
@@ -441,7 +441,7 @@ class POController extends Controller
         $approver_status->approved_date = now();
         $approver_status->save();
 
-        $po_header->refresh();
+        $po_header->load('workflows');
         /**
          * Send email notification
          */
