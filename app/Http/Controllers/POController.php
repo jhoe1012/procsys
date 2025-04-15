@@ -602,7 +602,7 @@ class POController extends Controller
 
         return view("print.po-mass-{$poHeaders->first()->plant}",
             [
-                'poHeaders'        => $poHeaders,
+                 'poHeaders'        => $poHeaders,
                 'genericMaterials' => Material::genericItems()->pluck('mat_code')->toArray(),
             ]);
     }
