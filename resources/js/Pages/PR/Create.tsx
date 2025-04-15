@@ -25,10 +25,18 @@ const Create = ({
   auth,
   mat_code,
   mat_desc,
-  prheader,
   materialGroupsSupplies,
   prCtrlGrp,
-}: PageProps<{ mat_code: Choice[]; mat_desc: Choice[]; prheader: IPRHeader; materialGroupsSupplies: string[]; prCtrlGrp: Choice[] }>) => {
+  materialGeneric,
+  prheader,
+}: PageProps<{
+  mat_code: Choice[];
+  mat_desc: Choice[];
+  prheader: IPRHeader;
+  materialGroupsSupplies: string[];
+  prCtrlGrp: Choice[];
+  materialGeneric: string[];
+}>) => {
   const initialMaterial = prheader
     ? prheader.prmaterials.map((prmaterial) => ({
         ...prmaterial,
@@ -136,14 +144,14 @@ const Create = ({
       { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 90, disabled: true },
       { ...keyColumn('currency', textColumn), title: 'Curr', minWidth: 50, disabled: true },
       { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 130 },
-      { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 100, disabled: true },
-      { ...keyColumn('purch_grp', textColumn), title: 'Purch Grp', minWidth: 90, disabled: true },
       {
         ...keyColumn('prctrl_grp_id', selectColumn({ choices: prCtrlGrp })),
         title: 'PR Controller',
         minWidth: 200,
         disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
       },
+      { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 100, disabled: true },
+      { ...keyColumn('purch_grp', textColumn), title: 'Purch Grp', minWidth: 90, disabled: true },
     ],
     []
   );
@@ -176,7 +184,7 @@ const Create = ({
 
   const handleSubmit: FormEventHandler = async (e) => {
     e.preventDefault();
-    const { isValid, updatedMaterials } = validateMaterials(material, materialGroupsSupplies);
+    const { isValid, updatedMaterials } = validateMaterials(material, materialGeneric);
     setMaterial(updatedMaterials);
     if (isValid) {
       post(route('pr.store'));

@@ -101,11 +101,11 @@
         }
 
         .date {
-            padding: 25px 0 0 0;
+            padding: 22px 0 0 0;
         }
 
         .buyer {
-            padding: 13px 0 0 430px;
+            padding: 30px 0 0 430px;
         }
 
         .approver {
@@ -132,7 +132,7 @@
                         <td class='date'> {{ date('d-M-Y', strtotime($poHeader->deliv_date)) }} </td>
                     @endif
                 </tr>
-                <tr height='115mm'>
+                <tr height='100mm'>
                     <td class="supplier_name" width='62%'>{{ $poHeader->vendors->supplier }} -
                         {{ $poHeader->vendors->name_1 }}</td>
                     <td class="addr" colspan='3'>
@@ -149,7 +149,7 @@
                     @foreach ($poHeader->pomaterials as $pomaterial)
                         <tr>
                             <td width='7%' class="align-top itemcode">{{ $pomaterial->mat_code }}</td>
-                            @if (in_array($pomaterial->mat_code, ['C000008']))
+                            @if (in_array($pomaterial->mat_code, $genericMaterials))
                                 <td width='40%' class="align-top">{{ $pomaterial->item_text }}</td>
                             @else
                                 <td width='40%' class="align-top">{{ $pomaterial->short_text }}

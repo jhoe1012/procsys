@@ -13,6 +13,7 @@ use App\Mail\PoRejectedReworkEmail;
 use App\Models\Approvers;
 use App\Models\ApproveStatus;
 use App\Models\DeliveryAddress;
+use App\Models\Material;
 use App\Models\MaterialGroup;
 use App\Models\MaterialNetPrice;
 use App\Models\PoHeader;
@@ -418,7 +419,7 @@ class POController extends Controller
             }
         } else {
             $po_header->status   = Str::ucfirst($request->input('type'));
-            $po_header->appr_seq = $request->input('type') == ApproveStatus::REWORKED ? 0 : -1;
+            $po_header->appr_seq = $request->input('type') == ApproveStatus::REWORKED ? HeaderSeq::Draft->value : HeaderSeq::Rejected->value;
             $po_header->seq      = $request->input('type') == ApproveStatus::REWORKED ? HeaderSeq::Draft->value : HeaderSeq::Cancelled->value;
             $approver_status     = ApproveStatus::where('seq', '!=', $approver->seq)
                 ->where('po_number', operator: $po_header->po_number)
@@ -599,7 +600,11 @@ class POController extends Controller
             $controlNo++;
         }
 
-        return view("print.po-mass-{$poHeaders->first()->plant}", ['poHeaders' => $poHeaders]);
+        return view("print.po-mass-{$poHeaders->first()->plant}",
+      [
+                'poHeaders'        => $poHeaders,
+                'genericMaterials' => Material::genericItems()->pluck('mat_code')->toArray(),
+            ]);
     }
 
     private function _updatePrMaterial($pomaterial, $converted_qty_old_value, CrudActionEnum $action): void

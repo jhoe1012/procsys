@@ -61,7 +61,7 @@
         }
 
         .addr {
-            padding: 30px 40px 90px 0;
+            padding: 25px 40px 70px 0;
         }
 
         .itemcode {
@@ -145,7 +145,7 @@
                     @foreach ($poHeader->pomaterials as $pomaterial)
                         <tr>
                             <td width='10%' class="align-top itemcode">{{ $pomaterial->mat_code }}</td>
-                            @if (in_array($pomaterial->mat_code, ['C000008']))
+                            @if (in_array($pomaterial->mat_code, $genericMaterials))
                                 <td width='40%' class="align-top">{{ $pomaterial->item_text }}</td>
                             @else
                                 <td width='40%' class="align-top">{{ $pomaterial->short_text }}
