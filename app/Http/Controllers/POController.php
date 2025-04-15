@@ -41,7 +41,7 @@ class POController extends Controller
         $user = $request->user();
 
         // Fetch user plants
-        $userPlants = $user->plants->pluck('plant')->toArray();
+        $userPlants = $user->plants()->pluck('plant')->toArray();
 
         // Initialize query with relationships
         $query = PoHeader::with(['pomaterials', 'plants', 'vendors'])
@@ -601,7 +601,7 @@ class POController extends Controller
         }
 
         return view("print.po-mass-{$poHeaders->first()->plant}",
-      [
+            [
                 'poHeaders'        => $poHeaders,
                 'genericMaterials' => Material::genericItems()->pluck('mat_code')->toArray(),
             ]);

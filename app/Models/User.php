@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -80,34 +79,8 @@ class User extends Authenticatable
         return $this->hasMany(Social::class);
     }
 
-    // public function roles(): HasManyThrough
-    // {
-    //     return $this->hasManyThrough(
-    //         Roles::class,
-    //         UserRoleRelation::class,
-    //         'user_id',
-    //         'id',
-    //         'id',
-    //         'role_id'
-    //     );
-    // }
-
-    // public function assignRole($roleName)
-    // {
-    //     if ($role = Roles::namespace($roleName)) {
-    //         $combinaison = new UserRoleRelation;
-    //         $combinaison->user_id = $this->id;
-    //         $combinaison->role_id = $role->id;
-    //         $combinaison->save();
-
-    //         return [
-    //             'status' => 'success',
-    //             'message' => __('The role was successfully assigned.'),
-    //         ];
-    //     }
-    //     return [
-    //         'status' => 'error',
-    //         'message' => __('Unable to identifier the provided role.'),
-    //     ];
-    // }
+    public function prCtrlGrp(): BelongsToMany
+    {
+        return $this->belongsToMany(PrctrlGrp::class);
+    }
 }
