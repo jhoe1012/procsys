@@ -38,20 +38,20 @@ class PRController extends Controller
         $user = $request->user();
 
         // Fetch user plants
-        $userPlants = $user->plants->pluck('plant')->toArray();
+        $userPlants = $user->plants()->pluck('plant')->toArray();
 
         // Initialize query with relationships
         $query = PrHeader::with(['prmaterials', 'plants'])
+            ->whereHas('prmaterials',
+                fn (Builder $q) => $q->whereIn('prctrl_grp_id',
+                    $user->prCtrlGrp()->pluck('id')->toArray()))
             ->whereIn('plant', $userPlants);
 
         // Check approval permission
         if ($user->can(PermissionsEnum::ApproverPR)) {
             $approver = $user->approvers
                 ->firstWhere('type', 'pr') ?? 0;
-            $query->whereHas(
-                'prmaterials',
-                fn (Builder $q) => $q->where('prctrl_grp_id', $approver->prctrl_grp_id)
-            )->where('appr_seq', '>=', $approver->seq);
+            $query->where('appr_seq', '>=', $approver->seq);
         }
 
         $filters = [
