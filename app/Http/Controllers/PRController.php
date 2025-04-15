@@ -96,18 +96,12 @@ class PRController extends Controller
 
     public function create(): Response
     {
-
         return Inertia::render('PR/Create', [
-            'mat_code'               => Material::select('mat_code as value', 'mat_code as label')->orderBy('mat_code')->get()->toArray(),
-            'mat_desc'               => Material::select('mat_desc as value', 'mat_desc as label')->orderBy('mat_desc')->get()->toArray(),
+            'mat_code'               => Material::getMaterialCode(),
+            'mat_desc'               => Material::getMaterialDescription(),
             'materialGroupsSupplies' => MaterialGroup::supplies()->pluck('mat_grp_code')->toArray(),
-            'prCtrlGrp'              => PrctrlGrp::select('id as value', DB::raw("prctrl_grp|| ' - ' || prctrl_desc  as label"))
-                ->whereHas(
-                    'user',
-                    fn (Builder $q) => $q->where('user_id', Auth::id())
-                )
-                ->get()
-                ->toArray(),
+            'prCtrlGrp'              => PrctrlGrp::getUserPrController(Auth::id()),
+            'materialGeneric'        => Material::genericItems()->pluck('mat_code')->toArray(),
         ]);
     }
 
@@ -125,17 +119,12 @@ class PRController extends Controller
             ->firstOrFail();
 
         return Inertia::render('PR/Create', [
-            'mat_code'               => Material::select('mat_code as value', 'mat_code as label')->orderBy('mat_code')->get()->toArray(),
-            'mat_desc'               => Material::select('mat_desc as value', 'mat_desc as label')->orderBy('mat_desc')->get()->toArray(),
+            'mat_code'               => Material::getMaterialCode(),
+            'mat_desc'               => Material::getMaterialDescription(),
             'materialGroupsSupplies' => MaterialGroup::supplies()->pluck('mat_grp_code')->toArray(),
+            'prCtrlGrp'              => PrctrlGrp::getUserPrController(Auth::id()),
+            'materialGeneric'        => Material::genericItems()->pluck('mat_code')->toArray(),
             'prheader'               => new PRHeaderResource($pr_header),
-            'prCtrlGrp'              => PrctrlGrp::select('id as value', DB::raw("prctrl_grp|| ' - ' || prctrl_desc  as label"))
-                ->whereHas(
-                    'user',
-                    fn (Builder $q) => $q->where('user_id', Auth::id())
-                )
-                ->get()
-                ->toArray(),
         ]);
     }
 
@@ -284,21 +273,13 @@ class PRController extends Controller
 
         return Inertia::render('PR/Edit', [
             'prheader'               => new PRHeaderResource($pr_header),
-            'mat_code'               => Material::select('mat_code as value', 'mat_code as label')->get()->toArray(),
-            'mat_desc'               => Material::select('mat_desc as value', 'mat_desc as label')->get()->toArray(),
+            'mat_code'               => Material::getMaterialCode(),
+            'mat_desc'               => Material::getMaterialDescription(),
             'message'                => ['success' => session('success'), 'error' => session('error')],
             'item_details'           => $item_details,
             'materialGroupsSupplies' => MaterialGroup::select('mat_grp_code')->where('is_supplies', true)->pluck('mat_grp_code')->toArray(),
-            'prCtrlGrp'              => PrctrlGrp::select('id as value', DB::raw("prctrl_grp|| ' - ' || prctrl_desc  as label"))
-                ->when(
-                    ! $request->user()->can(PermissionsEnum::ApproverPR),
-                    fn ($q) => $q->whereHas(
-                        'user',
-                        fn (Builder $q) => $q->where('user_id', Auth::id())
-                    )
-                )
-                ->get()
-                ->toArray(),
+            'prCtrlGrp'              => PrctrlGrp::getUserPrController(Auth::id()),
+            'materialGeneric'        => Material::genericItems()->pluck('mat_code')->toArray(),
         ]);
     }
 

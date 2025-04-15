@@ -135,7 +135,7 @@ class ReportController extends Controller
             'pr_materials.short_text',
             'pr_materials.item_text',
             'pr_materials.qty',
-            'pr_materials.unit',
+            'pr_materials.ord_unit as unit',
             'pr_materials.qty_open',
             'po_materials.po_qty',
             'po_materials.unit as po_unit',

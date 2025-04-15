@@ -52,6 +52,7 @@ const Edit = ({
   item_details,
   materialGroupsSupplies,
   prCtrlGrp,
+  materialGeneric,
 }: PageProps<{
   prheader: IPRHeader;
   mat_code: Choice[];
@@ -60,6 +61,7 @@ const Edit = ({
   item_details: IitemDetails;
   materialGroupsSupplies: string[];
   prCtrlGrp: Choice[];
+  materialGeneric: string[];
 }>) => {
   const { toast } = useToast();
   const [material, setMaterial] = useState<IPRMaterial[]>(
@@ -160,14 +162,14 @@ const Edit = ({
       { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 120, disabled: true },
       { ...keyColumn('currency', textColumn), title: 'Curr', minWidth: 40, disabled: true },
       { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 130 },
-      { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 100, disabled: true },
-      { ...keyColumn('purch_grp', textColumn), title: 'Purch Grp', minWidth: 90, disabled: true },
       {
         ...keyColumn('prctrl_grp_id', selectColumn({ choices: prCtrlGrp })),
         title: 'PR Controller',
         minWidth: 200,
         disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
       },
+      { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 100, disabled: true },
+      { ...keyColumn('purch_grp', textColumn), title: 'Purch Grp', minWidth: 90, disabled: true },
     ],
     []
   );
@@ -274,7 +276,7 @@ const Edit = ({
 
   const handleSubmit: FormEventHandler = async (e) => {
     e.preventDefault();
-    const { isValid, updatedMaterials } = validateMaterials(material, materialGroupsSupplies);
+    const { isValid, updatedMaterials } = validateMaterials(material, materialGeneric);
     setMaterial(updatedMaterials);
     if (isValid) {
       post(route('pr.update', prheader.id), {

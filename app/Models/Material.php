@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Trait\CreatedUpdatedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -52,5 +53,26 @@ class Material extends Model
     public function updatedBy(): HasOne
     {
         return $this->hasOne(User::class, 'id', 'updated_by');
+    }
+
+    public static function getMaterialCode(): array
+    {
+        return self::select('mat_code as value', 'mat_code as label')
+            ->orderBy('mat_code')
+            ->get()
+            ->toArray();
+    }
+
+    public static function getMaterialDescription(): array
+    {
+        return self::select('mat_desc as value', 'mat_desc as label')
+            ->orderBy('mat_desc')
+            ->get()
+            ->toArray();
+    }
+
+    public static function scopeGenericItems(Builder $query): void
+    {
+        $query->where('is_generic', true);
     }
 }
