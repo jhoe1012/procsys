@@ -65,21 +65,29 @@ export default function usePOMaterial() {
           let { total_value, net_price } = computeConversion(value, value.unit ?? '');
 
           value.po_qty =
-            value.min_order_qty && value.min_order_qty > 0 && value.po_qty < value.min_order_qty ? value.min_order_qty : value.po_qty;
+          value.min_order_qty && value.min_order_qty > 0 && (value.po_qty ?? 0) < value.min_order_qty ? value.min_order_qty : (value.po_qty ?? 0);
+
+          const pastedQty = value.po_qty;
 
           if (is_edit) {
-            const _openPOWithOrigPO = value.qty_open_po + value.origPOQty;
-            value.po_qty = value.po_qty > _openPOWithOrigPO ? _openPOWithOrigPO : value.po_qty;
-            // Set po_gr_qty equal to po_qty to prevent the field from being disabled during editing.
-            value.po_gr_qty = value.po_qty;
+            const _openPOWithOrigPO = (value.qty_open_po ?? 0) + (value.origPOQty ?? 0);
+            value.po_qty = Math.min(pastedQty, _openPOWithOrigPO);
+             // Set po_gr_qty equal to po_qty to prevent the field from being disabled during editing.
+             value.po_gr_qty = value.po_qty;
           } else {
-            value.po_qty = value.po_qty > value.qty_open_po ? value.qty_open_po : value.po_qty;
+            value.po_qty = Math.min(pastedQty, value.qty_open_po ?? 0);
           }
-          // compare old and new net price if not same will prioritize new net price
-          // recompute total value if net price and qty changes
-          if (oldValue.net_price !== value.net_price || oldValue.po_qty !== value.po_qty) {
-            net_price = value.net_price ?? 0;
-            total_value = ((net_price ?? 0) / (value.per_unit ?? 0)) * (value.po_qty ?? 0);
+
+          if (value.min_order_qty && value.min_order_qty > 0) {
+            value.po_qty = Math.max(value.po_qty, value.min_order_qty);
+          } 
+
+          // Ensure total_value is recalculated only when necessary
+          if (oldValue.net_price !== value.net_price || oldValue.po_qty !== value.po_qty || oldValue.per_unit !== value.per_unit) {
+            net_price = value.net_price ?? oldValue.net_price ?? 0;
+            total_value = ((net_price ?? 0) / (value.per_unit ?? 1)) * (value.po_qty ?? oldValue.po_qty ?? 0);
+          } else {
+            total_value = oldValue.total_value ?? 0; // Retain the previous total_value if no changes
           }
 
           value.item_no = (operation.fromRowIndex + 1) * 10;
@@ -89,7 +97,6 @@ export default function usePOMaterial() {
         }
       }
     }
-
     return updatedMaterial;
   };
 
