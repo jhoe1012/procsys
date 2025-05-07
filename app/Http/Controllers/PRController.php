@@ -318,10 +318,10 @@ class PRController extends Controller
                         $pr_material->converted_qty   = $item['converted_qty'];
                         $pr_material->item_text       = $item['item_text'];
                         $pr_material->prctrl_grp_id   = $item['prctrl_grp_id'];
-                        if ($pr_material->qty_ordered === null || $pr_material->qty_ordered === 0) {
+                        if (($pr_material->qty_ordered === null || $pr_material->qty_ordered == 0) && $pr_material->status != 'X') {
                             $pr_material->save();
                         }
-
+                        
                         return $item;
                     })->values();
                 $total_pr_value = $pr_materials->filter(fn ($item) => $item['status'] != 'X')->sum('total_value');
