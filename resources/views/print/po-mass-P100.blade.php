@@ -24,8 +24,11 @@
         }
 
         .printable-area {
-            width: 8.5in;
-            height: 11in;
+            width: 9in;
+            height: 8.5in;
+            position: relative;
+            box-sizing: border-box;
+            padding-bottom: 100px;
         }
 
         table,
@@ -46,26 +49,25 @@
             text-align: right;
             font-weight: bold;
             font-size: 20px;
-            padding: 60px 80px 50px 80px;
+            padding: 13mm 5mm 10mm 0;
 
         }
 
         .amount {
+            position: absolute;
+            right: 50px;
+            bottom: 120px;
             text-align: right;
             font-size: 25px;
-            padding: 70px 70px 50px 50px;
-            margin-top: 10px;
-            /* float: right; */
-            /* top: 30vw; */
-            /* display: block; */
         }
 
         .addr {
-            padding: 25px 40px 70px 0;
+            padding: 5px 10px 50px 0;
+            vertical-align: top;
         }
 
         .itemcode {
-            padding-left: 5px;
+            padding-left: 0;
         }
 
         .align-top {
@@ -81,32 +83,39 @@
         }
 
         .supplier_name {
-            padding: 0 0 0 50px;
+            padding: 0 0 0 0;
+            vertical-align: top;
         }
 
         .notes {
             padding-left: 10px;
-            width: 90%;
+            width: 95%;
             font-size: 13px;
-
+            margin-bottom: 20px;
+            clear: both;
         }
 
         .line_item {
-            min-height: 240px;
-            max-height: 240px;
+            min-height: 90mm;
+            max-height: 90mm;
+            /* margin-left: -10mm; */
             /* background-color: blue; */
         }
 
         .date {
-            padding-top: 20px;
+            padding: 22px 0 0 0;
         }
 
         .buyer {
-            padding: 22px 0 0 420px;
+            position: absolute;
+            left: 430px;
+            bottom: 70px;
         }
 
         .approver {
-            padding: 50px 0 0 420px;
+            position: absolute;
+            left: 430px;
+            bottom: 30px;
         }
 
         .page-break {
