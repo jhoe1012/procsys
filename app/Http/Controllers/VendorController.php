@@ -142,60 +142,37 @@ class VendorController extends Controller
     }
 
     public function import(Request $request)
-    {
+    { 
         try {
             $files = AttachmentService::handleImport($request);
-            if (empty($files)) {
-                throw ValidationException::withMessages(['error' => ['No valid files were uploaded ']]);
-            }
-            $importData = new VendorImport;
-            Excel::import($importData, storage_path('app/'.$files[0]['filepath']));
-            $getData = $importData->getData();
-
-            if (empty($getData)) {
-                throw ValidationException::withMessages([
-                    'error' => ['No valid vendor records found.'],
-                ]);
-            }
-
-            $emptyData = [];
-
-            DB::transaction(function () use ($getData, &$emptyData) {
-                $validDataLFA1 = collect($getData['vendors'])
-                    ->filter(fn ($row) => ! empty($row['supplier'] ?? null))
-                    ->all();
-
-                $emptyDataLFA1 = collect($getData['vendors'])
-                    ->filter(fn ($row) => empty($row['supplier'] ?? null))
-                    ->map(fn ($row) => [
-                        'row_id' => $row['row_id'] ?? null,
-                        'sheet'  => 'LFA1',
-                    ])
-                    ->values()
-                    ->all();
-
-                $validDataLFM1 = collect($getData['transactions'])
-                    ->filter(fn ($row) => ! empty($row['supplier'] ?? null))
-                    ->all();
-
-                $emptyDataLFM1 = collect($getData['transactions'])
-                    ->filter(fn ($row) => empty($row['supplier'] ?? null))
-                    ->map(fn ($row) => [
-                        'row_id' => $row['row_id'] ?? null,
-                        'sheet'  => 'LFM1',
-                    ])
-                    ->values()
-                    ->all();
-
-                $emptyData = array_merge($emptyDataLFA1, $emptyDataLFM1);
-
-                foreach ($validDataLFA1 as $data) {
-                    Vendor::updateOrCreate(
-                        ['supplier' => $data['supplier']],
-                        $data
-                    );
+                if (empty($files)) {
+                    throw ValidationException::withMessages(['error' => ['No valid files were uploaded ']]);
                 }
-                foreach ($validDataLFM1 as $data) {
+                $importData = new VendorImport;
+                Excel::import($importData, storage_path('app/'.$files['filepath']));
+                $getData = $importData->getVendorData();
+
+                if (empty($getData)) {
+                    throw ValidationException::withMessages([
+                        'error' => ['No valid vendor records found.'],
+                    ]);
+                }
+            
+            $emptyData = [];
+            
+            DB::transaction(function () use ($getData, &$emptyData) {
+
+                $validData = collect($getData)
+                    ->filter(fn ($row) => ! empty($row['supplier'] ?? null))
+                    ->all();
+
+                $emptyData = collect($getData)
+                    ->filter(fn ($row) => empty($row['supplier'] ?? null))
+                    ->map(fn ($row) => $row['row_id'] ?? null)
+                    ->values()
+                    ->all();
+
+                    foreach ($validData as $data) {
                     Vendor::updateOrCreate(
                         ['supplier' => $data['supplier']],
                         $data
@@ -219,4 +196,5 @@ class VendorController extends Controller
         }
 
     }
+}
 }
