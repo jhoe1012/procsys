@@ -35,8 +35,8 @@ class Vendor extends Model
         'telephone_1',
         'telephone_2',
         'vat_reg_no',
-        'currency',
-        'payment_terms',
+        // 'currency',
+        // 'payment_terms',
     ];
 
     public function poheader(): BelongsTo

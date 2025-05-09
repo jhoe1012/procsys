@@ -39,14 +39,14 @@ class AttachmentService
 
         $file = $request->file('file');
 
-        if (! in_array(strtolower($file->getClientOriginalExtension()), Attachment::ALLOWED_FILES_EXCEL_ONLY)) {
+        if (! in_array(strtolower($file[0]->getClientOriginalExtension()), Attachment::ALLOWED_FILES_EXCEL_ONLY, true)) {
             throw ValidationException::withMessages(['error' => ['File type not supported']]);
         }
 
-        $originalName    = $file->getClientOriginalName();
-        $timestampedName = time().'_'.Str::slug(pathinfo($originalName, PATHINFO_FILENAME), '_').'.'.$file->getClientOriginalExtension();
-        $filepath        = $file->storeAs('imports', $timestampedName);
-
+        $originalName    = $file[0]->getClientOriginalName();
+        $timestampedName = time().'_'.Str::slug(pathinfo($originalName, PATHINFO_FILENAME), '_').'.'.$file[0]->getClientOriginalExtension();
+        $filepath        = $file[0]->storeAs('imports', $timestampedName);
+  
         return ['filepath' => $filepath];
-    }
+    } 
 }

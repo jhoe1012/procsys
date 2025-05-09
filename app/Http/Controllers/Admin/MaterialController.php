@@ -145,7 +145,7 @@ class MaterialController extends Controller
             }
 
             $importData = new MaterialImport;
-            Excel::import($importData, storage_path('app/'.$files[0]['filepath']));
+            Excel::import($importData, storage_path('app/'.$files['filepath']));
             $getData = $importData->getMaterialImport();
 
             if (empty($getData)) {
