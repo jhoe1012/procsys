@@ -22,8 +22,8 @@ const usePRMaterialValidation = () => {
     }
 
     for (const updatedMaterial of updatedMaterials) {
-      const { mat_code, qty, ord_unit, unit, del_date, item_no, price, per_unit, mat_grp, item_text, prctrl_grp_id } = updatedMaterial;
-
+      const { mat_code, qty, ord_unit, unit, del_date, item_no, price, per_unit, mat_grp, item_text, prctrl_grp_id  , status} = updatedMaterial;
+      
       if (mat_code) {
         if (!qty || qty <= 0) {
           newErrors.push(`Please enter quantity for item no ${item_no}`);
@@ -53,7 +53,7 @@ const usePRMaterialValidation = () => {
           newErrors.push(`Please enter delivery date for item no ${item_no}`);
           isValid = false;
           break;
-        } else if (new Date(del_date).getTime() <= dateToday.getTime()) {
+        } else if (new Date(del_date).getTime() <= dateToday.getTime() && status === null) {
           newErrors.push(`Please enter a delivery date greater than today for item no ${item_no}`);
           isValid = false;
           break;
