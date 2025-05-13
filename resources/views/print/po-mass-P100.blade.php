@@ -145,19 +145,19 @@
                     @foreach ($poHeader->pomaterials as $pomaterial)
                         <tr>
                             <td width='10%' class="align-top itemcode">{{ $pomaterial->mat_code }}</td>
-                            @if (in_array($pomaterial->mat_code, $genericMaterials))
-                                <td width='40%' class="align-top">{{ $pomaterial->item_text }}</td>
-                            @else
-                                <td width='40%' class="align-top">{{ $pomaterial->short_text }}
+                            <td width='40%' class="align-top">
+                                @if (in_array($pomaterial->mat_code, $genericMaterials))
+                                    {{ $pomaterial->item_text }}
+                                @else
+                                    {{ $pomaterial->short_text }} <br>
                                     @if ($pomaterial->item_text)
-                                        <br> {{ $pomaterial->item_text }}
+                                        {{ $pomaterial->item_text }} &nbsp;&nbsp;
                                     @endif
-                                    @if ($poHeader->is_mother_po)
-                                        <br><b> Delivery Date:
-                                        </b>{{ date('m/d/Y', strtotime($pomaterial->del_date)) }}
-                                    @endif
-                                </td>
-                            @endif
+                                @endif
+                                @if ($poHeader->is_mother_po)
+                                    <b> Delivery Date: </b>{{ date('d-M-Y', strtotime($pomaterial->del_date)) }}
+                                @endif
+                            </td>
                             <td width='6%' class="align-top text-right">{{ $pomaterial->po_qty }} </td>
                             <td width='8%' class="align-top">{{ $pomaterial->unit }} </td>
                             <td width='15%' class="align-top text-right pr">

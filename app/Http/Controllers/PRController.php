@@ -506,7 +506,7 @@ class PRController extends Controller
     {
         $prMaterials = PrMaterial::whereIn('id', $request->input('ids'))->get();
 
-        $toFlag      = $prMaterials->filter(fn ($material) => $material->qty_ordered === null || $material->qty_ordered === 0);
+        $toFlag      = $prMaterials->filter(fn ($material) => $material->qty_ordered === null || $material->qty_ordered == 0);
         $withOpenQty = $prMaterials->filter(fn ($material) => $material->qty_ordered !== null && $material->qty_ordered > 0);
 
         DB::transaction(function () use ($toFlag) {

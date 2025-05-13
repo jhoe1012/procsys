@@ -599,12 +599,16 @@ class POController extends Controller
             $poHeader->save();
             $controlNo++;
         }
+        $data = [
+            'poHeaders'        => $poHeaders,
+            'genericMaterials' => Material::genericItems()->pluck('mat_code')->toArray(),
+        ];
 
-        return view("print.po-mass-{$poHeaders->first()->plant}",
-            [
-                 'poHeaders'        => $poHeaders,
-                'genericMaterials' => Material::genericItems()->pluck('mat_code')->toArray(),
-            ]);
+        if($request->input('poform') === 'smbi'){
+            return view("print.po-mass-store", $data);
+        }
+
+        return view("print.po-mass-{$poHeaders->first()->plant}", $data);
     }
 
     private function _updatePrMaterial($pomaterial, $converted_qty_old_value, CrudActionEnum $action): void

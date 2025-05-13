@@ -4,7 +4,7 @@ import { PageProps, IMessage, IPOHeaderPage, IPOHeader, IPOMaterial, Choice } fr
 import { useState, useEffect, KeyboardEvent } from 'react';
 import { formatNumber, formatShortDate } from '@/lib/utils';
 import { PermissionsEnum, REACT_SELECT_STYLES, STATUS_APPROVED } from '@/lib/constants';
-import { badgeVariants, Button, Toaster, useToast } from '@/Components/ui';
+import { badgeVariants, Button, Label, RadioGroup, RadioGroupItem, Toaster, useToast } from '@/Components/ui';
 import { Checkbox, InputField, Modal, Pagination, TextInput } from '@/Components';
 import { PrinterIcon } from 'lucide-react';
 import { can } from '@/lib/helper';
@@ -24,6 +24,7 @@ export default function Index({
   const [checkboxPo, setCheckboxPo] = useState<number[]>([]);
   const [controlNumberModal, setControlNumberModal] = useState(false);
   const [controlNumber, setControlNumber] = useState('');
+  const [poform, setPoForm] = useState('egi');
 
   const plantsChoice: Choice[] = auth.user.plants.map(({ plant, name1 }) => ({ value: plant, label: name1 }));
 
@@ -334,6 +335,7 @@ export default function Index({
                 onClose={() => {
                   setControlNumberModal(false);
                   setControlNumber('');
+                  setPoForm('egi');
                 }}
                 maxWidth="3xl">
                 <div className="p-5 flex flex-col">
@@ -347,9 +349,20 @@ export default function Index({
                     className="text-center"
                   />
 
+                  <RadioGroup defaultValue="egi" className="mt-3" onValueChange={setPoForm}>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="egi" id="egi" />
+                      <Label htmlFor="egi">EGI PO Form</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="smbi" id="smbi"  />
+                      <Label htmlFor="smbi">SMBI PO Form</Label>
+                    </div>
+                  </RadioGroup>
+
                   <a
                     target="_blank"
-                    href={route('po.mass-print', { controlNumber: controlNumber, checkboxPo: checkboxPo })}
+                    href={route('po.mass-print', { controlNumber: controlNumber, checkboxPo: checkboxPo, poform: poform })}
                     onClick={() => setControlNumberModal(false)}
                     className="flex items-center justify-center text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1 text-center  mt-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800">
                     <PrinterIcon /> Print

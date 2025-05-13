@@ -155,7 +155,7 @@
                                 @else
                                     {{ $pomaterial->short_text }} <br>
                                     @if ($pomaterial->item_text)
-                                        {{ $pomaterial->item_text }}  &nbsp;&nbsp;
+                                        {{ $pomaterial->item_text }} &nbsp;&nbsp;
                                     @endif
                                 @endif
                                 @if ($poHeader->is_mother_po)
