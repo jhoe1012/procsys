@@ -11,7 +11,7 @@
 
     <style>
         * {
-            /* outline: 1px red solid; */
+            outline: 1px red solid;
             font-family: Tahoma, "Trebuchet MS", sans-serif;
             font-size: 14px;
         }
@@ -28,6 +28,7 @@
             height: 8.5in;
             position: relative;
             box-sizing: border-box;
+            display: block;
             padding-bottom: 100px;
         }
 
@@ -49,25 +50,24 @@
             text-align: right;
             font-weight: bold;
             font-size: 20px;
-            padding: 13mm 5mm 10mm 0;
+            padding: 60px 80px 50px 80px;
 
         }
 
         .amount {
             position: absolute;
-            right: 50px;
             bottom: 120px;
+            right: 50px;
             text-align: right;
             font-size: 25px;
         }
 
         .addr {
-            padding: 5px 10px 50px 0;
-            vertical-align: top;
+            padding: 25px 40px 70px 0;
         }
 
         .itemcode {
-            padding-left: 0;
+            padding-left: 5px;
         }
 
         .align-top {
@@ -83,39 +83,36 @@
         }
 
         .supplier_name {
-            padding: 0 0 0 0;
-            vertical-align: top;
+            padding: 0 0 0 50px;
         }
 
         .notes {
             padding-left: 10px;
-            width: 95%;
+            width: 90%;
             font-size: 13px;
-            margin-bottom: 20px;
-            clear: both;
+
         }
 
         .line_item {
-            min-height: 90mm;
-            max-height: 90mm;
-            /* margin-left: -10mm; */
+            min-height: 240px;
+            max-height: 240px;
             /* background-color: blue; */
         }
 
         .date {
-            padding: 22px 0 0 0;
+            padding-top: 20px;
         }
 
         .buyer {
             position: absolute;
-            left: 430px;
-            bottom: 70px;
+            bottom: 60px;
+            left: 420px;
         }
 
         .approver {
             position: absolute;
-            left: 430px;
-            bottom: 30px;
+            bottom: 20px;
+            left: 420px;
         }
 
         .page-break {
