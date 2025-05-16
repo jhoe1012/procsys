@@ -11,7 +11,7 @@
 
     <style>
         * {
-            outline: 1px red solid;
+/*             outline: 1px red solid; */
             font-family: Tahoma, "Trebuchet MS", sans-serif;
             font-size: 14px;
         }
