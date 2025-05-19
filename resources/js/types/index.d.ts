@@ -67,6 +67,7 @@ export interface IApprover {
   amount_to: number;
   seq: number;
   desc: string;
+  prctrl_grp_id: number;
   created_by?: string;
   updated_by?: string;
   created_at?: string;
@@ -210,6 +211,7 @@ export interface IPRHeader {
   plants?: IPlants;
   prmaterials: IPRMaterial[];
   attachments?: IPRAttachment[];
+  prctrl_grp_id?: number
   _method?: string;
 }
 export interface IPRAttachment {

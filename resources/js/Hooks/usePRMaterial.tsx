@@ -24,9 +24,10 @@ export default function usePRMaterial() {
   };
 
   const computeConversion = (material: IPRMaterial, ord_unit: string) => {
+    
     const altUom = material.alt_uom?.find(({ alt_uom }) => alt_uom === ord_unit) || {};
     const conversion = (altUom.counter ?? 1) / (altUom.denominator ?? 1);
-    const price = material.valuation_price * conversion;
+    const price = (material.price ?? material.valuation_price) * conversion;
     const converted_qty = (material.qty ?? 0) * conversion;
     const total_value = ((price ?? 0) / (material.per_unit ?? 0)) * (material.qty ?? 0);
 
@@ -78,22 +79,24 @@ export default function usePRMaterial() {
             });
           }
 
-          if (value.mat_code && value.mat_grp && materialGroupsSupplies.includes(value.mat_grp)) {
-            value.unit = value.ord_unit;
-          }
+          // if (value.mat_code && value.mat_grp && materialGroupsSupplies.includes(value.mat_grp)) {
+          //   value.unit = value.ord_unit;
+          // }
 
           if ((value.qty && value.qty !== oldValue.qty) || (value.price && value.price > 0)) {
-            if (value.mat_grp && materialGroupsSupplies.includes(value.mat_grp)) {
-              const suppliesMaterial = {
-                price: value.price ?? value.valuation_price,
-                total_value: value.qty * ((value.price ?? value.valuation_price) / value.per_unit) || 0,
-                conversion: 1,
-                converted_qty: value.qty,
-              };
-              Object.assign(value, { ...suppliesMaterial });
-            } else {
+            // if (value.mat_grp && materialGroupsSupplies.includes(value.mat_grp)) {
+            //   const suppliesMaterial = { 
+            //     price: value.price ?? value.valuation_price,
+            //     total_value: value.qty * ((value.price ?? value.valuation_price) / value.per_unit) || 0,
+            //     conversion: 1,
+            //     converted_qty: value.qty,
+            //   };
+            //   Object.assign(value, { ...suppliesMaterial });
+            // } else {
+            //   Object.assign(value, { ...computeConversion(value, value.ord_unit ?? '') });
+            // }
               Object.assign(value, { ...computeConversion(value, value.ord_unit ?? '') });
-            }
+
           }
 
           value.item_no = (i + 1) * 10;

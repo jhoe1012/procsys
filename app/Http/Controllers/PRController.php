@@ -42,16 +42,29 @@ class PRController extends Controller
 
         // Initialize query with relationships
         $query = PrHeader::with(['prmaterials', 'plants'])
-            ->whereHas('prmaterials',
-                fn (Builder $q) => $q->whereIn('prctrl_grp_id',
-                    $user->prCtrlGrp()->pluck('id')->toArray()))
+            ->whereHas(
+                'prmaterials',
+                fn (Builder $q) => $q->whereIn(
+                    'prctrl_grp_id',
+                    $user->prCtrlGrp()->pluck('id')->toArray()
+                )
+            )
             ->whereIn('plant', $userPlants);
 
         // Check approval permission
         if ($user->can(PermissionsEnum::ApproverPR)) {
-            $approver = $user->approvers
-                ->firstWhere('type', 'pr') ?? 0;
-            $query->where('appr_seq', '>=', $approver->seq);
+            $approver = $user->approvers()
+                ->where('type', 'pr')->orderBy('seq')->get();
+            $combination = $approver->map(function ($item) {
+                return "'{$item->plant}{$item->seq}{$item->prctrl_grp_id}'";
+            })->join(',');
+
+            if (! $approver->isEmpty()) {
+                $query->where(function ($q) use ($combination) {
+                    $q->whereRaw(DB::raw("plant||appr_seq||prctrl_grp_id IN ({$combination})"))
+                        ->orWhere('status', Str::ucfirst(ApproveStatus::APPROVED));
+                });
+            }
         }
 
         $filters = [
@@ -108,13 +121,15 @@ class PRController extends Controller
     public function copy(Request $request, $prnumber): Response
     {
 
-        $pr_header = PrHeader::with('plants',
+        $pr_header = PrHeader::with(
+            'plants',
             'prmaterials',
             'prmaterials.altUoms',
             'prmaterials.altUoms.altUomText',
             'prmaterials.materialGroups',
             'workflows',
-            'attachments')
+            'attachments'
+        )
             ->where('pr_number', $prnumber)
             ->firstOrFail();
 
@@ -151,6 +166,7 @@ class PRController extends Controller
                         'total_pr_value' => $total_pr_value,
                         'appr_seq'       => 0,
                         'status'         => Str::ucfirst(ApproveStatus::DRAFT),
+                        'prctrl_grp_id'  => $pr_materials->first()['prctrl_grp_id'] ?? null,
                     ]
                 ));
                 $pr_header->prmaterials()->saveMany($pr_materials->all());
@@ -321,7 +337,7 @@ class PRController extends Controller
                         if (($pr_material->qty_ordered === null || $pr_material->qty_ordered == 0) && $pr_material->status === null) {
                             $pr_material->save();
                         }
-                        
+
                         return $item;
                     })->values();
                 $total_pr_value = $pr_materials->filter(fn ($item) => $item['status'] === null)->sum('total_value');
@@ -342,6 +358,7 @@ class PRController extends Controller
                             'appr_seq'       => 0,
                             'seq'            => HeaderSeq::Draft->value,
                             'status'         => Str::ucfirst(ApproveStatus::DRAFT),
+                            'prctrl_grp_id'  => $pr_materials->first()['prctrl_grp_id'] ?? null,
                         ]
                     )
                 );
@@ -390,7 +407,6 @@ class PRController extends Controller
                     ->where('plant', $pr_header->plant)
                     ->where('type', Approvers::TYPE_PR)
                     ->where('prctrl_grp_id', $pr_header->prmaterials->first()->prctrl_grp_id)
-
                     ->first();
                 $pr_header->status = $approver_2nd->desc;
                 $pr_header->seq    = HeaderSeq::ForApproval->value;
@@ -506,7 +522,7 @@ class PRController extends Controller
     {
         $prMaterials = PrMaterial::whereIn('id', $request->input('ids'))->get();
 
-        $toFlag      = $prMaterials->filter(fn ($material) => $material->qty_ordered === null || $material->qty_ordered === 0);
+        $toFlag      = $prMaterials->filter(fn ($material) => $material->qty_ordered === null || $material->qty_ordered == 0);
         $withOpenQty = $prMaterials->filter(fn ($material) => $material->qty_ordered !== null && $material->qty_ordered > 0);
 
         DB::transaction(function () use ($toFlag) {
