@@ -407,9 +407,7 @@ class POController extends Controller
                 $po_header->status = $approver_2nd->desc;
                 $po_header->seq    = HeaderSeq::ForApproval->value;
                 $email_status      = 1;
-            } elseif (
-                $po_header->total_po_value <= $approver->amount_to
-            ) {
+            } elseif ($po_header->total_po_value <= $approver->amount_to) {
                 $po_header->status       = Str::ucfirst(ApproveStatus::APPROVED);
                 $po_header->release_date = Carbon::now()->format('Y-m-d H:i:s');
                 $po_header->seq          = HeaderSeq::Approved->value;
@@ -417,7 +415,7 @@ class POController extends Controller
                 // $this->_updateValuation($po_header);
                 $email_status = 2;
             }
-        } else {
+        }else {
             $po_header->status   = Str::ucfirst($request->input('type'));
             $po_header->appr_seq = $request->input('type') == ApproveStatus::REWORKED ? HeaderSeq::Draft->value : HeaderSeq::Rejected->value;
             $po_header->seq      = $request->input('type') == ApproveStatus::REWORKED ? HeaderSeq::Draft->value : HeaderSeq::Cancelled->value;
@@ -425,8 +423,18 @@ class POController extends Controller
                 ->where('po_number', operator: $po_header->po_number)
                 ->whereNull('user_id')
                 ->delete();
+
+            if($request->input('type') == ApproveStatus::REJECTED){
+                foreach ($po_header->pomaterials as $pomaterial) {
+                    $pomaterial->status = PoMaterial::FLAG_DELETE;
+                    $pomaterial->save();
+                    // update open and order qty in pr
+                    $this->_updatePrMaterial($pomaterial, 0, CrudActionEnum::DELETE);
+                }
+            }
             $email_status = 3;
         }
+        
 
         $po_header->save();
 
