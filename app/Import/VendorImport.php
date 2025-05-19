@@ -2,57 +2,44 @@
 
 namespace App\Import;
 
-use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Concerns\HasReferencesToOtherSheets;
-use Maatwebsite\Excel\Concerns\SkipsUnknownSheets;
-use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\ToCollection;
 
-class VendorImport implements HasReferencesToOtherSheets, SkipsUnknownSheets, WithMultipleSheets
+class VendorImport implements ToCollection
 {
-    private array $vendors = [];
+    private $vendorImport;
 
-    private array $transactions = [];
-
-    public $sheetName; // Store the sheet name dynamically
-
-    public function sheets(): array
+    public function collection(Collection $rows)
     {
-        return [
-            'LFA1' => new VendorMasterlist($this),
-            'LFM1' => new VendorPaymentTerm($this),
-        ];
+        $rows->shift(); // Remove the header row
+
+        foreach ($rows as $row) {
+            $this->vendorImport[] = [
+                'supplier'      => trim(strip_tags($row[0])),
+                'account_group' => trim(strip_tags($row[1])),
+                'tax_number'    => trim(strip_tags($row[2])),
+                'tax_number_2'  => trim(strip_tags($row[3])),
+                'name_1'        => trim(strip_tags($row[4])),
+                'name_2'        => trim(strip_tags($row[5])),
+                'name_3'        => trim(strip_tags($row[6])),
+                'name_4'        => trim(strip_tags($row[7])),
+                'search_term'   => trim(strip_tags($row[8])),
+                'city'          => trim(strip_tags($row[9])),
+                'country'       => trim(strip_tags($row[10])),
+                'district'      => trim(strip_tags($row[11])),
+                'postal_code'   => trim(strip_tags($row[12])),
+                'street'        => trim(strip_tags($row[13])),
+                'address'       => trim(strip_tags($row[14])),
+                'city_2'        => trim(strip_tags($row[15])),
+                'telephone_1'   => trim(strip_tags($row[16])),
+                'telephone_2'   => trim(strip_tags($row[17])),
+                'vat_reg_no'    => trim(strip_tags($row[18])),
+            ];
+        }
     }
 
-    public function onUnknownSheet($sheetName)
+    public function getVendorData(): array
     {
-        Log::warning('Skipping unknown sheet: '.$sheetName);
-    }
-
-    public function addVendor(array $data): void
-    {
-        $this->vendors[$data['supplier']] = $data;
-    }
-
-    public function addTransaction(array $data): void
-    {
-        $this->transactions[] = $data;
-    }
-
-    public function getVendors(): array
-    {
-        return $this->vendors;
-    }
-
-    public function getTransactions(): array
-    {
-        return $this->transactions;
-    }
-
-    public function getData(): array
-    {
-        return [
-            'vendors'      => $this->vendors,
-            'transactions' => $this->transactions,
-        ];
+        return $this->vendorImport ?? [];
     }
 }
