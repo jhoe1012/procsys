@@ -1,5 +1,5 @@
 import { Button, Input, Label, Textarea, Toaster, useToast } from '@/Components/ui';
-import { Choice, IAlternativeUom, IApprover, IMessage, IPOHeader, IPOMaterial, IVendor, IWorkflow, PageProps } from '@/types';
+import { Choice, IAlternativeUom, IMessage, IPOHeader, IPOMaterial, IVendor, IWorkflow, PageProps } from '@/types';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useMemo, useState } from 'react';
@@ -33,7 +33,6 @@ import {
   FlagForAction,
   GenericTable,
   InputField,
-  PrintButton,
   ReactSelectField,
   SelectField,
   TabFields,
@@ -55,7 +54,13 @@ const Edit = ({
 }: PageProps<{ vendors: []; poheader: IPOHeader; message: IMessage; deliveryAddress: Choice[]; supplierNotes: Choice[] }>) => {
   const { toast } = useToast();
 
-  const [apprSeq, setApprSeq] = useState<IApprover>();
+  const approverGrpId = auth.user.approvers.filter((approver) => approver.type === 'po').map((approver) => approver.plant + approver.seq);
+  const headerGrpId = poheader.plant + poheader.appr_seq;
+  const disableButton =
+    poheader.status == STATUS_APPROVED ||
+    poheader.status == STATUS_REWORK ||
+    poheader.status == STATUS_REJECTED ||
+    !approverGrpId.includes(headerGrpId);
   const [vendor, setVendor] = useState<IVendor | undefined>(poheader.vendors);
   const [files, setFiles] = useState([]);
   const { computeConversion, updateMaterialPO, getVendorInfo } = usePOMaterial();
@@ -311,10 +316,6 @@ const Edit = ({
         title: message.error,
       });
     }
-
-    if (auth.user.approvers) {
-      setApprSeq(auth.user.approvers.filter((approver) => approver.type == 'po')[0]);
-    }
   }, [message]);
 
   useEffect(() => {
@@ -484,45 +485,9 @@ const Edit = ({
             </form>
             {can(auth.user, PermissionsEnum.ApproverPO) && ( //auth.permissions.po.approver && (
               <div className="px-5 pb-5">
-                <Approval
-                  p_po_number={data.po_number}
-                  p_type="approved"
-                  p_title="approve"
-                  p_disable={
-                    poheader.status == STATUS_APPROVED ||
-                    poheader.status == STATUS_REWORK ||
-                    poheader.status == STATUS_REJECTED ||
-                    apprSeq?.seq != poheader.appr_seq
-                      ? true
-                      : false
-                  }
-                />
-                <Approval
-                  p_po_number={data.po_number}
-                  p_type="rework"
-                  p_title="rework"
-                  p_disable={
-                    poheader.status == STATUS_APPROVED ||
-                    poheader.status == STATUS_REWORK ||
-                    poheader.status == STATUS_REJECTED ||
-                    apprSeq?.seq != poheader.appr_seq
-                      ? true
-                      : false
-                  }
-                />
-                <Approval
-                  p_po_number={data.po_number}
-                  p_type="rejected"
-                  p_title="reject"
-                  p_disable={
-                    poheader.status == STATUS_APPROVED ||
-                    poheader.status == STATUS_REWORK ||
-                    poheader.status == STATUS_REJECTED ||
-                    apprSeq?.seq != poheader.appr_seq
-                      ? true
-                      : false
-                  }
-                />
+                <Approval p_po_number={data.po_number} p_type="approved" p_title="approve" p_disable={disableButton} />
+                <Approval p_po_number={data.po_number} p_type="rework" p_title="rework" p_disable={disableButton} />
+                <Approval p_po_number={data.po_number} p_type="rejected" p_title="reject" p_disable={disableButton} />
               </div>
             )}
           </div>

@@ -76,7 +76,16 @@ const Edit = ({
   );
   const [itemDetails, setItemDetails] = useState([]);
   const [files, setFiles] = useState([]);
-  const [apprSeq, setApprSeq] = useState<IApprover>();
+  const approverGrpId = auth.user.approvers
+    .filter((approver) => approver.type === 'pr')
+    .map((approver) => approver.plant + approver.seq + approver.prctrl_grp_id);
+  const headerGrpId = prheader.plant + prheader.appr_seq + prheader.prctrl_grp_id;
+  const disableButton =
+    prheader.status == STATUS_APPROVED ||
+    prheader.status == STATUS_REWORK ||
+    prheader.status == STATUS_REJECTED ||
+    !approverGrpId.includes(headerGrpId);
+  
   const { updateMaterialPR, computeConversion, isLoading } = usePRMaterial();
   const { validateMaterials } = usePRMaterialValidation();
   const { data, setData, post, errors, reset, processing } = useForm<IPRHeader>({
@@ -303,10 +312,6 @@ const Edit = ({
         title: message.error,
       });
     }
-
-    if (auth.user.approvers) {
-      setApprSeq(auth.user.approvers.filter((approver) => approver.type == 'pr')[0]);
-    }
   }, [message]);
 
   useEffect(() => {
@@ -438,39 +443,9 @@ const Edit = ({
             </form>
             {can(auth.user, PermissionsEnum.ApproverPR) && ( //auth.permissions.pr.approver && (
               <div className="px-5 pb-5">
-                <Approval
-                  p_pr_number={data.pr_number}
-                  p_type="approved"
-                  p_title="approve"
-                  p_disable={
-                    prheader.status == STATUS_APPROVED ||
-                    prheader.status == STATUS_REWORK ||
-                    prheader.status == STATUS_REJECTED ||
-                    apprSeq?.seq != prheader.appr_seq
-                  }
-                />
-                <Approval
-                  p_pr_number={data.pr_number}
-                  p_type="rework"
-                  p_title="rework"
-                  p_disable={
-                    prheader.status == STATUS_APPROVED ||
-                    prheader.status == STATUS_REWORK ||
-                    prheader.status == STATUS_REJECTED ||
-                    apprSeq?.seq != prheader.appr_seq
-                  }
-                />
-                <Approval
-                  p_pr_number={data.pr_number}
-                  p_type="rejected"
-                  p_title="reject"
-                  p_disable={
-                    prheader.status == STATUS_APPROVED ||
-                    prheader.status == STATUS_REWORK ||
-                    prheader.status == STATUS_REJECTED ||
-                    apprSeq?.seq != prheader.appr_seq
-                  }
-                />
+                <Approval p_pr_number={data.pr_number} p_type="approved" p_title="approve" p_disable={disableButton} />
+                <Approval p_pr_number={data.pr_number} p_type="rework" p_title="rework" p_disable={disableButton} />
+                <Approval p_pr_number={data.pr_number} p_type="rejected" p_title="reject" p_disable={disableButton} />
               </div>
             )}
           </div>

@@ -49,9 +49,19 @@ class POController extends Controller
 
         // Check approval permission and filter
         if ($user->can(PermissionsEnum::ApproverPO)) {
-            $approverSeq = $user->approvers
-                ->firstWhere('type', 'po')['seq'] ?? 0;
-            $query->where('appr_seq', '>=', $approverSeq);
+
+            $approver = $user->approvers()
+                ->where('type', 'pr')->orderBy('seq')->get();
+            $combination = $approver->map(function ($item) {
+                return "'{$item->plant}{$item->seq}'";
+            })->join(',');
+
+            if (! $approver->isEmpty()) {
+                $query->where(function ($q) use ($combination) {
+                    $q->whereRaw(DB::raw("plant||appr_seq IN ({$combination})"))
+                        ->orWhere('status', Str::ucfirst(ApproveStatus::APPROVED));
+                });
+            }
         }
         // Define filterable fields and conditions
         $filters = [
@@ -604,8 +614,8 @@ class POController extends Controller
             'genericMaterials' => Material::genericItems()->pluck('mat_code')->toArray(),
         ];
 
-        if($request->input('poform') === 'smbi'){
-            return view("print.po-mass-store", $data);
+        if ($request->input('poform') === 'smbi') {
+            return view('print.po-mass-store', $data);
         }
 
         return view("print.po-mass-{$poHeaders->first()->plant}", $data);
@@ -688,7 +698,7 @@ class POController extends Controller
     private function _updateNetPrice($poHeader)
     {
         $matGroupSupplies = MaterialGroup::supplies()->pluck('mat_grp_code')->toArray();
-
+        // TODO UPDATE ONLY MATERIALS THAT IS NOT GENERIC
         foreach ($poHeader->pomaterials as $poMaterial) {
             if (in_array($poMaterial->mat_grp, $matGroupSupplies)) {
                 continue;
