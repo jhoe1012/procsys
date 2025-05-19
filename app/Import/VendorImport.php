@@ -12,11 +12,9 @@ class VendorImport implements ToCollection
     public function collection(Collection $rows)
     {
         $rows->shift(); // Remove the header row
-        $rowIndex = 2;
 
         foreach ($rows as $row) {
             $this->vendorImport[] = [
-                'row_id'        => $rowIndex++,
                 'supplier'      => trim(strip_tags($row[0])),
                 'account_group' => trim(strip_tags($row[1])),
                 'tax_number'    => trim(strip_tags($row[2])),
