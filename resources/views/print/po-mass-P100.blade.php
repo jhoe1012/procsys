@@ -17,17 +17,23 @@
         }
 
         body {
-
             margin: 0;
             padding: 0;
-
         }
 
         .printable-area {
+<<<<<<< Updated upstream
             width: 9in;
             height: 8.5in;
             position: relative;
             box-sizing: border-box;
+=======
+            width: 8.5in;
+            height: 11in;
+            position: relative;
+            box-sizing: border-box;
+            display: block;
+>>>>>>> Stashed changes
             padding-bottom: 100px;
         }
 
@@ -49,6 +55,7 @@
             text-align: right;
             font-weight: bold;
             font-size: 20px;
+<<<<<<< Updated upstream
             padding: 13mm 5mm 10mm 0;
 
         }
@@ -57,6 +64,15 @@
             position: absolute;
             right: 50px;
             bottom: 120px;
+=======
+            padding: 60px 80px 50px 80px;
+z        }
+
+        .amount {
+            position: absolute;
+            bottom: 350px;
+            right: 70px;
+>>>>>>> Stashed changes
             text-align: right;
             font-size: 25px;
         }
@@ -108,14 +124,24 @@
 
         .buyer {
             position: absolute;
+<<<<<<< Updated upstream
             left: 430px;
             bottom: 70px;
+=======
+            bottom: 260px;
+            left: 420px;
+>>>>>>> Stashed changes
         }
 
         .approver {
             position: absolute;
+<<<<<<< Updated upstream
             left: 430px;
             bottom: 30px;
+=======
+            bottom: 193px;
+            left: 420px;
+>>>>>>> Stashed changes
         }
 
         .page-break {

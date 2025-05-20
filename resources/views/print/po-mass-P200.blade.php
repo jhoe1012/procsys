@@ -28,6 +28,10 @@
             height: 8.5in;
             position: relative;
             box-sizing: border-box;
+<<<<<<< Updated upstream
+=======
+            display: block;
+>>>>>>> Stashed changes
             padding-bottom: 100px;
         }
 
@@ -56,7 +60,11 @@
         .amount {
             position: absolute;
             right: 50px;
+<<<<<<< Updated upstream
             bottom: 120px;
+=======
+            bottom: 80px;
+>>>>>>> Stashed changes
             text-align: right;
             font-size: 25px;
         }
@@ -91,8 +99,11 @@
             padding-left: 10px;
             width: 95%;
             font-size: 13px;
+<<<<<<< Updated upstream
             margin-bottom: 20px;
             clear: both;
+=======
+>>>>>>> Stashed changes
         }
 
         .line_item {
@@ -109,13 +120,23 @@
         .buyer {
             position: absolute;
             left: 430px;
+<<<<<<< Updated upstream
             bottom: 70px;
+=======
+            bottom: 30px;
+>>>>>>> Stashed changes
         }
 
         .approver {
             position: absolute;
+<<<<<<< Updated upstream
             left: 430px;
             bottom: 30px;
+=======
+            /* padding: 33px 0 0 430px; */
+            left: 430px;
+            bottom: -8px;
+>>>>>>> Stashed changes
         }
 
         .page-break {
@@ -160,7 +181,11 @@
                             @else
                                 <td width='40%' class="align-top">{{ $pomaterial->short_text }}
                                     @if ($pomaterial->item_text)
+<<<<<<< Updated upstream
                                         <br> {{ $pomaterial->item_text }}
+=======
+                                        {{ $pomaterial->item_text }} &nbsp;&nbsp;
+>>>>>>> Stashed changes
                                     @endif
                                     @if ($poHeader->is_mother_po)
                                         <br><b> Delivery Date:
