@@ -22,18 +22,11 @@
         }
 
         .printable-area {
-<<<<<<< Updated upstream
-            width: 9in;
-            height: 8.5in;
-            position: relative;
-            box-sizing: border-box;
-=======
             width: 8.5in;
             height: 11in;
             position: relative;
             box-sizing: border-box;
             display: block;
->>>>>>> Stashed changes
             padding-bottom: 100px;
         }
 
@@ -55,16 +48,6 @@
             text-align: right;
             font-weight: bold;
             font-size: 20px;
-<<<<<<< Updated upstream
-            padding: 13mm 5mm 10mm 0;
-
-        }
-
-        .amount {
-            position: absolute;
-            right: 50px;
-            bottom: 120px;
-=======
             padding: 60px 80px 50px 80px;
 z        }
 
@@ -72,18 +55,16 @@ z        }
             position: absolute;
             bottom: 350px;
             right: 70px;
->>>>>>> Stashed changes
             text-align: right;
             font-size: 25px;
         }
 
         .addr {
-            padding: 5px 10px 50px 0;
-            vertical-align: top;
+            padding: 25px 40px 70px 0;
         }
 
         .itemcode {
-            padding-left: 0;
+            padding-left: 5px;
         }
 
         .align-top {
@@ -99,49 +80,36 @@ z        }
         }
 
         .supplier_name {
-            padding: 0 0 0 0;
-            vertical-align: top;
+            padding: 0 0 0 50px;
         }
 
         .notes {
             padding-left: 10px;
-            width: 95%;
+            width: 90%;
             font-size: 13px;
-            margin-bottom: 20px;
-            clear: both;
+
         }
 
         .line_item {
-            min-height: 90mm;
-            max-height: 90mm;
-            /* margin-left: -10mm; */
+            min-height: 240px;
+            max-height: 240px;
             /* background-color: blue; */
         }
 
         .date {
-            padding: 22px 0 0 0;
+            padding-top: 20px;
         }
 
         .buyer {
             position: absolute;
-<<<<<<< Updated upstream
-            left: 430px;
-            bottom: 70px;
-=======
             bottom: 260px;
             left: 420px;
->>>>>>> Stashed changes
         }
 
         .approver {
             position: absolute;
-<<<<<<< Updated upstream
-            left: 430px;
-            bottom: 30px;
-=======
             bottom: 193px;
             left: 420px;
->>>>>>> Stashed changes
         }
 
         .page-break {
@@ -180,19 +148,19 @@ z        }
                     @foreach ($poHeader->pomaterials as $pomaterial)
                         <tr>
                             <td width='10%' class="align-top itemcode">{{ $pomaterial->mat_code }}</td>
-                            @if (in_array($pomaterial->mat_code, $genericMaterials))
-                                <td width='40%' class="align-top">{{ $pomaterial->item_text }}</td>
-                            @else
-                                <td width='40%' class="align-top">{{ $pomaterial->short_text }}
+                            <td width='40%' class="align-top">
+                                @if (in_array($pomaterial->mat_code, $genericMaterials))
+                                    {{ $pomaterial->item_text }}
+                                @else
+                                    {{ $pomaterial->short_text }} <br>
                                     @if ($pomaterial->item_text)
-                                        <br> {{ $pomaterial->item_text }}
+                                        {{ $pomaterial->item_text }} &nbsp;&nbsp;
                                     @endif
-                                    @if ($poHeader->is_mother_po)
-                                        <br><b> Delivery Date:
-                                        </b>{{ date('m/d/Y', strtotime($pomaterial->del_date)) }}
-                                    @endif
-                                </td>
-                            @endif
+                                @endif
+                                @if ($poHeader->is_mother_po)
+                                    <b> Delivery Date: </b>{{ date('d-M-Y', strtotime($pomaterial->del_date)) }}
+                                @endif
+                            </td>
                             <td width='6%' class="align-top text-right">{{ $pomaterial->po_qty }} </td>
                             <td width='8%' class="align-top">{{ $pomaterial->unit }} </td>
                             <td width='15%' class="align-top text-right pr">

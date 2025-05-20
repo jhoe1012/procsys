@@ -28,10 +28,7 @@
             height: 8.5in;
             position: relative;
             box-sizing: border-box;
-<<<<<<< Updated upstream
-=======
             display: block;
->>>>>>> Stashed changes
             padding-bottom: 100px;
         }
 
@@ -60,11 +57,7 @@
         .amount {
             position: absolute;
             right: 50px;
-<<<<<<< Updated upstream
-            bottom: 120px;
-=======
             bottom: 80px;
->>>>>>> Stashed changes
             text-align: right;
             font-size: 25px;
         }
@@ -99,11 +92,6 @@
             padding-left: 10px;
             width: 95%;
             font-size: 13px;
-<<<<<<< Updated upstream
-            margin-bottom: 20px;
-            clear: both;
-=======
->>>>>>> Stashed changes
         }
 
         .line_item {
@@ -120,23 +108,14 @@
         .buyer {
             position: absolute;
             left: 430px;
-<<<<<<< Updated upstream
-            bottom: 70px;
-=======
             bottom: 30px;
->>>>>>> Stashed changes
         }
 
         .approver {
             position: absolute;
-<<<<<<< Updated upstream
-            left: 430px;
-            bottom: 30px;
-=======
             /* padding: 33px 0 0 430px; */
             left: 430px;
             bottom: -8px;
->>>>>>> Stashed changes
         }
 
         .page-break {
@@ -176,23 +155,19 @@
                     @foreach ($poHeader->pomaterials as $pomaterial)
                         <tr>
                             <td width='7%' class="align-top itemcode">{{ $pomaterial->mat_code }}</td>
-                            @if (in_array($pomaterial->mat_code, $genericMaterials))
-                                <td width='40%' class="align-top">{{ $pomaterial->item_text }}</td>
-                            @else
-                                <td width='40%' class="align-top">{{ $pomaterial->short_text }}
+                            <td width='40%' class="align-top">
+                                @if (in_array($pomaterial->mat_code, $genericMaterials))
+                                    {{ $pomaterial->item_text }}
+                                @else
+                                    {{ $pomaterial->short_text }} <br>
                                     @if ($pomaterial->item_text)
-<<<<<<< Updated upstream
-                                        <br> {{ $pomaterial->item_text }}
-=======
                                         {{ $pomaterial->item_text }} &nbsp;&nbsp;
->>>>>>> Stashed changes
                                     @endif
-                                    @if ($poHeader->is_mother_po)
-                                        <br><b> Delivery Date:
-                                        </b>{{ date('m/d/Y', strtotime($pomaterial->del_date)) }}
-                                    @endif
-                                </td>
-                            @endif
+                                @endif
+                                @if ($poHeader->is_mother_po)
+                                    <b> Delivery Date: </b>{{ date('d-M-Y', strtotime($pomaterial->del_date)) }}
+                                @endif
+                            </td>
                             <td width='6%' class="align-top text-right">{{ $pomaterial->po_qty }} </td>
                             <td width='8%' class="align-top">{{ $pomaterial->unit }} </td>
                             <td width='15%' class="align-top text-right pr">
