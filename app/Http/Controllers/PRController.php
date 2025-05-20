@@ -439,7 +439,7 @@ class PRController extends Controller
         $approver_status->status        = Str::ucfirst($request->input('type'));
         $approver_status->approved_by   = Auth::user()->name;
         $approver_status->user_id       = Auth::user()->id;
-        $approver_status->message       = $request->message;
+        $approver_status->message       = $request->input('message');
         $approver_status->approved_date = now();
         $approver_status->save();
 
