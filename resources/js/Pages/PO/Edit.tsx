@@ -43,6 +43,7 @@ import Approval from './Partial/Approval';
 import AddPrtoPo from './Partial/AddPrtoPo';
 import { Operation } from 'react-datasheet-grid/dist/types';
 import { can } from '@/lib/helper';
+import { LetterText, NotebookPen, Paperclip, Pointer, Truck, Warehouse, Workflow } from 'lucide-react';
 
 const Edit = ({
   auth,
@@ -192,18 +193,21 @@ const Edit = ({
     {
       value: 'header_text',
       label: 'Header Text',
+      tabIcon: <LetterText size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: <Textarea value={data.header_text} onChange={(e) => setData('header_text', e.target.value)} />,
     },
     {
       value: 'approver_text',
       label: 'Remarks',
+      tabIcon: <LetterText size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: <Textarea value={data.approver_text} onChange={(e) => setData('approver_text', e.target.value)} />,
     },
     {
       value: 'notes',
       label: 'Notes',
+      tabIcon: <NotebookPen size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: (
         <SelectField
@@ -218,6 +222,7 @@ const Edit = ({
     {
       value: 'deliveryAddress',
       label: 'Delivery Address',
+      tabIcon: <Truck size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: (
         <SelectField
@@ -232,6 +237,8 @@ const Edit = ({
     {
       value: 'attachment',
       label: 'Attachment',
+      tabIcon: <Paperclip size={16} strokeWidth={1} className="text-black " />,
+
       visible: true,
       content: (
         <>
@@ -246,12 +253,14 @@ const Edit = ({
     {
       value: 'workflow',
       label: 'Workflow',
+      tabIcon: <Workflow size={16} strokeWidth={1} className="text-black " />,
       visible: poheader.workflows && poheader.workflows?.length > 0,
       content: <GenericTable columns={workflowColumns} data={poheader.workflows} className="w-11/2 text-xs bg-white" />,
     },
     {
       value: 'vendor',
       label: 'Vendor Info',
+      tabIcon: <Warehouse size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: <VendorCard vendor={vendor} />,
     },
@@ -261,6 +270,7 @@ const Edit = ({
     {
       value: 'action',
       label: 'Action',
+      tabIcon: <Pointer size={16} strokeWidth={1} className="text-black " />, 
       visible: can(auth.user, PermissionsEnum.EditPO), //auth.permissions.po.edit,
       content: (
         <>

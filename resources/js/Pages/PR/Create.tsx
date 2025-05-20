@@ -20,6 +20,7 @@ import { Loading, Dropzone, selectColumn, InputField, SelectField, TabFields, Al
 import { usePRMaterial, usePRMaterialValidation } from '@/Hooks';
 import { CUSTOM_DATA_SHEET_STYLE, DATE_TODAY, DEFAULT_PR_MATERIAL, PermissionsEnum } from '@/lib/constants';
 import { can } from '@/lib/helper';
+import { LetterText, Paperclip } from 'lucide-react';
 
 const Create = ({
   auth,
@@ -160,18 +161,21 @@ const Create = ({
     {
       value: 'reasonForPr',
       label: 'Reason for PR',
+      tabIcon: <LetterText size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: <Textarea value={data.reason_pr} onChange={(e) => setData('reason_pr', e.target.value)} required={true} />,
     },
     {
       value: 'headerText',
       label: 'Header Text',
+      tabIcon: <LetterText size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: <Textarea value={data.header_text} onChange={(e) => setData('header_text', e.target.value)} />,
     },
     {
       value: 'attachment',
       label: 'Attachment',
+      tabIcon: <Paperclip size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: <Dropzone files={files} setFiles={setFiles} />,
     },

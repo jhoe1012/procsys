@@ -21,6 +21,7 @@ import { formatNumber } from '@/lib/utils';
 import AddPrtoPo from './Partial/AddPrtoPo';
 import { usePOMaterial, usePOMaterialValidation } from '@/Hooks';
 import { can } from '@/lib/helper';
+import { LetterText, NotebookPen, Paperclip, Truck, Warehouse } from 'lucide-react';
 
 const Create = ({
   auth,
@@ -135,18 +136,21 @@ const Create = ({
     {
       value: 'header_text',
       label: 'Header Text',
+      tabIcon: <LetterText size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: <Textarea value={data.header_text} onChange={(e) => setData('header_text', e.target.value)} />,
     },
     {
       value: 'approver_text',
       label: 'Remarks',
+      tabIcon: <LetterText size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: <Textarea value={data.approver_text} onChange={(e) => setData('approver_text', e.target.value)} />,
     },
     {
       value: 'notes',
       label: 'Notes',
+      tabIcon: <NotebookPen size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: (
         <SelectField
@@ -161,6 +165,7 @@ const Create = ({
     {
       value: 'deliveryAddress',
       label: 'Delivery Address',
+      tabIcon: <Truck size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: (
         <SelectField
@@ -175,12 +180,14 @@ const Create = ({
     {
       value: 'attachment',
       label: 'Attachment',
+      tabIcon: <Paperclip size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: <Dropzone files={files} setFiles={setFiles} />,
     },
     {
       value: 'vendor',
       label: 'Vendor Info',
+      tabIcon: <Warehouse size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: <VendorCard vendor={vendor} />,
     },

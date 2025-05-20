@@ -25,7 +25,7 @@ import {
   STATUS_REWORK,
 } from '@/lib/constants';
 import { formatNumber } from '@/lib/utils';
-import { Choice, IAlternativeUom, IApprover, IitemDetails, IMessage, IPRHeader, IPRMaterial, IWorkflow, PageProps } from '@/types';
+import { Choice, IAlternativeUom, IitemDetails, IMessage, IPRHeader, IPRMaterial, IWorkflow, PageProps } from '@/types';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useMemo, useState } from 'react';
 import {
@@ -42,6 +42,7 @@ import 'react-datasheet-grid/dist/style.css';
 import { Operation } from 'react-datasheet-grid/dist/types';
 import Approval from './Partial/Approval';
 import { can } from '@/lib/helper';
+import { LetterText, List, Paperclip, Pointer, Workflow } from 'lucide-react';
 
 const Edit = ({
   auth,
@@ -198,24 +199,28 @@ const Edit = ({
     {
       value: 'reasonForPr',
       label: 'Reason for PR',
+      tabIcon: <LetterText size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: <Textarea value={data.reason_pr} onChange={(e) => setData('reason_pr', e.target.value)} required={true} />,
     },
     {
       value: 'headerText',
       label: 'Header Text',
+      tabIcon: <LetterText size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: <Textarea value={data.header_text} onChange={(e) => setData('header_text', e.target.value)} />,
     },
     {
       value: 'workflow',
       label: 'Workflow',
+      tabIcon: <Workflow size={16} strokeWidth={1} className="text-black " />,
       visible: prheader.workflows && prheader.workflows?.length > 0,
       content: <GenericTable columns={workflowColumns} data={prheader.workflows} className="w-11/2 text-xs bg-white" />,
     },
     {
       value: 'attachment',
       label: 'Attachment',
+      tabIcon: <Paperclip size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: (
         <>
@@ -241,12 +246,14 @@ const Edit = ({
     {
       value: 'itemDetails',
       label: 'Item Details',
+      tabIcon: <List size={16} strokeWidth={1} className="text-black " />,
       visible: itemDetails.length > 0,
       content: <GenericTable columns={itemDetailsColumns} data={itemDetails} className="w-11/2 text-xs bg-white" />,
     },
     {
       value: 'action',
       label: 'Action',
+      tabIcon: <Pointer size={16} strokeWidth={1} className="text-black " />, 
       visible: can(auth.user, PermissionsEnum.EditPR), //auth.permissions.pr.edit,
       content: (
         <div>

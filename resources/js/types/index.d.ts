@@ -513,12 +513,13 @@ export interface TabItem {
   label: string;
   visible: boolean;
   content: React.ReactNode;
+  tabIcon?: React.ReactNode;
 }
 
 export interface TabsProps {
   defaultValue: string;
   tabs: TabItem[];
-  className?: string;
+  className?: string; 
 }
 
 export interface IitemDetails {
