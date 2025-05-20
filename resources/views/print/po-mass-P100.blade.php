@@ -25,9 +25,6 @@
             width: 8.5in;
             height: 11in;
             position: relative;
-            box-sizing: border-box;
-            display: block;
-            padding-bottom: 100px;
         }
 
         table,
