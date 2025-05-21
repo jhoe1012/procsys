@@ -291,7 +291,7 @@ const Edit = ({
   ];
 
   const updateMaterial = async (newValue: IPRMaterial[], operations: Operation[]) => {
-    const updatedMaterial = await updateMaterialPR(newValue, operations, material, data.plant, data.doc_date, materialGeneric);
+    const updatedMaterial = await updateMaterialPR(newValue, operations, material, data.plant, data.doc_date, materialGeneric, prCtrlGrp);
     setMaterial(updatedMaterial);
   };
 

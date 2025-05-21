@@ -1,4 +1,4 @@
-import { IPRMaterial } from '@/types';
+import { Choice, IPRMaterial } from '@/types';
 import { useState } from 'react';
 import { Operation } from 'react-datasheet-grid/dist/types';
 
@@ -28,7 +28,7 @@ export default function usePRMaterial() {
     const conversion = (altUom.counter ?? 1) / (altUom.denominator ?? 1);
     let price = 0;
     if (isGenericMaterial) {
-      price = material.price * conversion; 
+      price = material.price * conversion;
     } else {
       price = material.valuation_price * conversion;
     }
@@ -44,7 +44,8 @@ export default function usePRMaterial() {
     material: IPRMaterial[],
     plant: string,
     doc_date: string,
-    materialGeneric: string[]
+    materialGeneric: string[],
+    prCtrlGrp: Choice[]
   ): Promise<IPRMaterial[]> => {
     const updatedMaterial = [...newValue];
     setIsLoading(true);
@@ -78,7 +79,7 @@ export default function usePRMaterial() {
               mat_grp: materialGroups?.mat_grp_code || '',
               mat_grp_desc: materialGroups?.mat_grp_desc || '',
               purch_grp: purchasingGroups?.purch_grp || '',
-              prctrl_grp_id: purchasingGroups?.prCtrlGrp?.id || undefined,
+              prctrl_grp_id: purchasingGroups?.prCtrlGrp?.id || prCtrlGrp[0]?.value || undefined,
               qty_ordered: null,
               item_text: null,
             });
