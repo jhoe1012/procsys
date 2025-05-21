@@ -26,15 +26,13 @@ const Create = ({
   auth,
   mat_code,
   mat_desc,
-  materialGroupsSupplies,
   prCtrlGrp,
   materialGeneric,
   prheader,
 }: PageProps<{
   mat_code: Choice[];
   mat_desc: Choice[];
-  prheader: IPRHeader;
-  materialGroupsSupplies: string[];
+  prheader: IPRHeader; 
   prCtrlGrp: Choice[];
   materialGeneric: string[];
 }>) => {
@@ -133,13 +131,13 @@ const Create = ({
         ...keyColumn('price', floatColumn),
         title: 'Price',
         minWidth: 90,
-        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
+        disabled: ({ rowData }: any) => rowData.mat_code && !materialGeneric.includes(rowData.mat_code),
       },
       {
         ...keyColumn('per_unit', floatColumn),
         title: 'Per Unit',
         minWidth: 50,
-        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
+        disabled: ({ rowData }: any) => rowData.mat_code && !materialGeneric.includes(rowData.mat_code),
       },
       // { ...keyColumn('unit', textColumn), title: 'B.UOM', minWidth: 60, disabled: true },
       { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 90, disabled: true },
@@ -149,7 +147,7 @@ const Create = ({
         ...keyColumn('prctrl_grp_id', selectColumn({ choices: prCtrlGrp })),
         title: 'PR Controller',
         minWidth: 200,
-        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
+        disabled: ({ rowData }: any) => rowData.mat_code && !materialGeneric.includes(rowData.mat_code),
       },
       { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 100, disabled: true },
       { ...keyColumn('purch_grp', textColumn), title: 'Purch Grp', minWidth: 90, disabled: true },
@@ -182,7 +180,7 @@ const Create = ({
   ];
 
   const updateMaterial = async (newValue: IPRMaterial[], operations: Operation[]) => {
-    const updatedMaterial = await updateMaterialPR(newValue, operations, material, data.plant, data.doc_date, materialGroupsSupplies);
+    const updatedMaterial = await updateMaterialPR(newValue, operations, material, data.plant, data.doc_date, materialGeneric);
     setMaterial(updatedMaterial);
   };
 

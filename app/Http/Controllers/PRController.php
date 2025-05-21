@@ -112,7 +112,6 @@ class PRController extends Controller
         return Inertia::render('PR/Create', [
             'mat_code'               => Material::getMaterialCode(),
             'mat_desc'               => Material::getMaterialDescription(),
-            'materialGroupsSupplies' => MaterialGroup::supplies()->pluck('mat_grp_code')->toArray(),
             'prCtrlGrp'              => PrctrlGrp::getUserPrController(Auth::id()),
             'materialGeneric'        => Material::genericItems()->pluck('mat_code')->toArray(),
         ]);
@@ -136,7 +135,6 @@ class PRController extends Controller
         return Inertia::render('PR/Create', [
             'mat_code'               => Material::getMaterialCode(),
             'mat_desc'               => Material::getMaterialDescription(),
-            'materialGroupsSupplies' => MaterialGroup::supplies()->pluck('mat_grp_code')->toArray(),
             'prCtrlGrp'              => PrctrlGrp::getUserPrController(Auth::id()),
             'materialGeneric'        => Material::genericItems()->pluck('mat_code')->toArray(),
             'prheader'               => new PRHeaderResource($pr_header),
@@ -293,7 +291,6 @@ class PRController extends Controller
             'mat_desc'               => Material::getMaterialDescription(),
             'message'                => ['success' => session('success'), 'error' => session('error')],
             'item_details'           => $item_details,
-            'materialGroupsSupplies' => MaterialGroup::select('mat_grp_code')->where('is_supplies', true)->pluck('mat_grp_code')->toArray(),
             'prCtrlGrp'              => PrctrlGrp::getUserPrController(Auth::id()),
             'materialGeneric'        => Material::genericItems()->pluck('mat_code')->toArray(),
         ]);

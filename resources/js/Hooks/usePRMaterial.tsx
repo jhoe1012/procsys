@@ -23,11 +23,15 @@ export default function usePRMaterial() {
     return materialCache[material];
   };
 
-  const computeConversion = (material: IPRMaterial, ord_unit: string) => {
-    
+  const computeConversion = (material: IPRMaterial, ord_unit: string, isGenericMaterial: boolean = false) => {
     const altUom = material.alt_uom?.find(({ alt_uom }) => alt_uom === ord_unit) || {};
     const conversion = (altUom.counter ?? 1) / (altUom.denominator ?? 1);
-    const price = (material.price ?? material.valuation_price) * conversion;
+    let price = 0;
+    if (isGenericMaterial) {
+      price = material.price * conversion; 
+    } else {
+      price = material.valuation_price * conversion;
+    }
     const converted_qty = (material.qty ?? 0) * conversion;
     const total_value = ((price ?? 0) / (material.per_unit ?? 0)) * (material.qty ?? 0);
 
@@ -40,7 +44,7 @@ export default function usePRMaterial() {
     material: IPRMaterial[],
     plant: string,
     doc_date: string,
-    materialGroupsSupplies: string[]
+    materialGeneric: string[]
   ): Promise<IPRMaterial[]> => {
     const updatedMaterial = [...newValue];
     setIsLoading(true);
@@ -67,7 +71,8 @@ export default function usePRMaterial() {
               short_text: materialInfo.mat_desc,
               ord_unit: ord_unit,
               unit: materialInfo.base_uom,
-              valuation_price: parseFloat(valuations[0]?.valuation_price || '0'),
+              valuation_price: parseFloat(valuations[0]?.valuation_price || 0),
+              price: null,
               currency: valuations[0]?.currency || 'PHP',
               per_unit: parseFloat(valuations[0]?.per_unit || '1'),
               mat_grp: materialGroups?.mat_grp_code || '',
@@ -84,19 +89,11 @@ export default function usePRMaterial() {
           // }
 
           if ((value.qty && value.qty !== oldValue.qty) || (value.price && value.price > 0)) {
-            // if (value.mat_grp && materialGroupsSupplies.includes(value.mat_grp)) {
-            //   const suppliesMaterial = { 
-            //     price: value.price ?? value.valuation_price,
-            //     total_value: value.qty * ((value.price ?? value.valuation_price) / value.per_unit) || 0,
-            //     conversion: 1,
-            //     converted_qty: value.qty,
-            //   };
-            //   Object.assign(value, { ...suppliesMaterial });
-            // } else {
-            //   Object.assign(value, { ...computeConversion(value, value.ord_unit ?? '') });
-            // }
+            if (value.mat_grp && materialGeneric.includes(value.mat_code)) {
+              Object.assign(value, { ...computeConversion(value, value.ord_unit ?? '', true) });
+            } else {
               Object.assign(value, { ...computeConversion(value, value.ord_unit ?? '') });
-
+            }
           }
 
           value.item_no = (i + 1) * 10;
