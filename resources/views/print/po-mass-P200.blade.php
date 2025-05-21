@@ -26,6 +26,7 @@
         .printable-area {
             width: 9in;
             height: 8.5in;
+            position: relative;
         }
 
         table,
@@ -51,13 +52,11 @@
         }
 
         .amount {
+            position: absolute;
+            right: 50px;
+            bottom: 80px;
             text-align: right;
             font-size: 25px;
-            padding: 50px 50px 0 50px;
-            margin-top: 10px;
-            /* float: right; */
-            /* top: 30vw; */
-            /* display: block; */
         }
 
         .addr {
@@ -90,7 +89,6 @@
             padding-left: 10px;
             width: 95%;
             font-size: 13px;
-
         }
 
         .line_item {
@@ -105,11 +103,16 @@
         }
 
         .buyer {
-            padding: 30px 0 0 430px;
+            position: absolute;
+            left: 430px;
+            bottom: 30px;
         }
 
         .approver {
-            padding: 23px 0 0 430px;
+            position: absolute;
+            /* padding: 33px 0 0 430px; */
+            left: 430px;
+            bottom: -8px;
         }
 
         .page-break {
@@ -155,7 +158,7 @@
                                 @else
                                     {{ $pomaterial->short_text }} <br>
                                     @if ($pomaterial->item_text)
-                                        {{ $pomaterial->item_text }}  &nbsp;&nbsp;
+                                        {{ $pomaterial->item_text }} &nbsp;&nbsp;
                                     @endif
                                 @endif
                                 @if ($poHeader->is_mother_po)

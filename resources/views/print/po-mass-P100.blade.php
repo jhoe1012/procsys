@@ -17,15 +17,14 @@
         }
 
         body {
-
             margin: 0;
             padding: 0;
-
         }
 
         .printable-area {
             width: 8.5in;
             height: 11in;
+            position: relative;
         }
 
         table,
@@ -47,17 +46,14 @@
             font-weight: bold;
             font-size: 20px;
             padding: 60px 80px 50px 80px;
-
-        }
+z        }
 
         .amount {
+            position: absolute;
+            bottom: 350px;
+            right: 70px;
             text-align: right;
             font-size: 25px;
-            padding: 70px 70px 50px 50px;
-            margin-top: 10px;
-            /* float: right; */
-            /* top: 30vw; */
-            /* display: block; */
         }
 
         .addr {
@@ -102,11 +98,15 @@
         }
 
         .buyer {
-            padding: 22px 0 0 420px;
+            position: absolute;
+            bottom: 260px;
+            left: 420px;
         }
 
         .approver {
-            padding: 50px 0 0 420px;
+            position: absolute;
+            bottom: 193px;
+            left: 420px;
         }
 
         .page-break {
