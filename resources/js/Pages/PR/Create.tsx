@@ -32,7 +32,7 @@ const Create = ({
 }: PageProps<{
   mat_code: Choice[];
   mat_desc: Choice[];
-  prheader: IPRHeader;
+  prheader: IPRHeader; 
   prCtrlGrp: Choice[];
   materialGeneric: string[];
 }>) => {
@@ -72,17 +72,10 @@ const Create = ({
   const handleOnChangeUom = (value: string, rowIndex: number) => {
     setMaterial((prevMaterial) => {
       const newMaterial = [...prevMaterial];
-      if (materialGeneric.includes(newMaterial[rowIndex].mat_code)) {
-        newMaterial[rowIndex] = {
-          ...newMaterial[rowIndex],
-          ...computeConversion(newMaterial[rowIndex], value, true),
-        };
-      } else {
-        newMaterial[rowIndex] = {
-          ...newMaterial[rowIndex],
-          ...computeConversion(newMaterial[rowIndex], value),
-        };
-      }
+      newMaterial[rowIndex] = {
+        ...newMaterial[rowIndex],
+        ...computeConversion(newMaterial[rowIndex], value),
+      };
       return newMaterial;
     });
   };

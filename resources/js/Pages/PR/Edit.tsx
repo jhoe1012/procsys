@@ -58,7 +58,7 @@ const Edit = ({
   mat_code: Choice[];
   mat_desc: Choice[];
   message: IMessage;
-  item_details: IitemDetails; 
+  item_details: IitemDetails;
   prCtrlGrp: Choice[];
   materialGeneric: string[];
 }>) => {
@@ -84,7 +84,7 @@ const Edit = ({
     prheader.status == STATUS_REWORK ||
     prheader.status == STATUS_REJECTED ||
     !approverGrpId.includes(headerGrpId);
-  
+
   const { updateMaterialPR, computeConversion, isLoading } = usePRMaterial();
   const { validateMaterials } = usePRMaterialValidation();
   const { data, setData, post, errors, reset, processing } = useForm<IPRHeader>({
@@ -108,10 +108,17 @@ const Edit = ({
   const handleOnChangeUom = (value: string, rowIndex: number) => {
     setMaterial((prevMaterial) => {
       const newMaterial = [...prevMaterial];
-      newMaterial[rowIndex] = {
-        ...newMaterial[rowIndex],
-        ...computeConversion(newMaterial[rowIndex], value),
-      };
+      if (materialGeneric.includes(newMaterial[rowIndex].mat_code)) {
+        newMaterial[rowIndex] = {
+          ...newMaterial[rowIndex],
+          ...computeConversion(newMaterial[rowIndex], value, true),
+        };
+      } else {
+        newMaterial[rowIndex] = {
+          ...newMaterial[rowIndex],
+          ...computeConversion(newMaterial[rowIndex], value),
+        };
+      }
       return newMaterial;
     });
   };
@@ -251,7 +258,7 @@ const Edit = ({
     {
       value: 'action',
       label: 'Action',
-      tabIcon: <Pointer size={16} strokeWidth={1} className="text-black " />, 
+      tabIcon: <Pointer size={16} strokeWidth={1} className="text-black " />,
       visible: can(auth.user, PermissionsEnum.EditPR), //auth.permissions.pr.edit,
       content: (
         <div>
