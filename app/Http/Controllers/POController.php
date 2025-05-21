@@ -49,9 +49,19 @@ class POController extends Controller
 
         // Check approval permission and filter
         if ($user->can(PermissionsEnum::ApproverPO)) {
-            $approverSeq = $user->approvers
-                ->firstWhere('type', 'po')['seq'] ?? 0;
-            $query->where('appr_seq', '>=', $approverSeq);
+
+            $approver = $user->approvers()
+                ->where('type', 'pr')->orderBy('seq')->get();
+            $combination = $approver->map(function ($item) {
+                return "'{$item->plant}{$item->seq}'";
+            })->join(',');
+
+            if (! $approver->isEmpty()) {
+                $query->where(function ($q) use ($combination) {
+                    $q->whereRaw(DB::raw("plant||appr_seq IN ({$combination})"))
+                        ->orWhere('status', Str::ucfirst(ApproveStatus::APPROVED));
+                });
+            }
         }
         // Define filterable fields and conditions
         $filters = [
@@ -407,9 +417,7 @@ class POController extends Controller
                 $po_header->status = $approver_2nd->desc;
                 $po_header->seq    = HeaderSeq::ForApproval->value;
                 $email_status      = 1;
-            } elseif (
-                $po_header->total_po_value <= $approver->amount_to
-            ) {
+            } elseif ($po_header->total_po_value <= $approver->amount_to) {
                 $po_header->status       = Str::ucfirst(ApproveStatus::APPROVED);
                 $po_header->release_date = Carbon::now()->format('Y-m-d H:i:s');
                 $po_header->seq          = HeaderSeq::Approved->value;
@@ -417,7 +425,7 @@ class POController extends Controller
                 // $this->_updateValuation($po_header);
                 $email_status = 2;
             }
-        } else {
+        }else {
             $po_header->status   = Str::ucfirst($request->input('type'));
             $po_header->appr_seq = $request->input('type') == ApproveStatus::REWORKED ? HeaderSeq::Draft->value : HeaderSeq::Rejected->value;
             $po_header->seq      = $request->input('type') == ApproveStatus::REWORKED ? HeaderSeq::Draft->value : HeaderSeq::Cancelled->value;
@@ -425,8 +433,18 @@ class POController extends Controller
                 ->where('po_number', operator: $po_header->po_number)
                 ->whereNull('user_id')
                 ->delete();
+
+            if($request->input('type') == ApproveStatus::REJECTED){
+                foreach ($po_header->pomaterials as $pomaterial) {
+                    $pomaterial->status = PoMaterial::FLAG_DELETE;
+                    $pomaterial->save();
+                    // update open and order qty in pr
+                    $this->_updatePrMaterial($pomaterial, 0, CrudActionEnum::DELETE);
+                }
+            }
             $email_status = 3;
         }
+        
 
         $po_header->save();
 
@@ -599,12 +617,16 @@ class POController extends Controller
             $poHeader->save();
             $controlNo++;
         }
+        $data = [
+            'poHeaders'        => $poHeaders,
+            'genericMaterials' => Material::genericItems()->pluck('mat_code')->toArray(),
+        ];
 
-        return view("print.po-mass-{$poHeaders->first()->plant}",
-            [
-                 'poHeaders'        => $poHeaders,
-                'genericMaterials' => Material::genericItems()->pluck('mat_code')->toArray(),
-            ]);
+        if ($request->input('poform') === 'smbi') {
+            return view('print.po-mass-store', $data);
+        }
+
+        return view("print.po-mass-{$poHeaders->first()->plant}", $data);
     }
 
     private function _updatePrMaterial($pomaterial, $converted_qty_old_value, CrudActionEnum $action): void
@@ -684,7 +706,7 @@ class POController extends Controller
     private function _updateNetPrice($poHeader)
     {
         $matGroupSupplies = MaterialGroup::supplies()->pluck('mat_grp_code')->toArray();
-
+        // TODO UPDATE ONLY MATERIALS THAT IS NOT GENERIC
         foreach ($poHeader->pomaterials as $poMaterial) {
             if (in_array($poMaterial->mat_grp, $matGroupSupplies)) {
                 continue;

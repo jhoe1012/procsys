@@ -202,7 +202,7 @@ class GRController extends Controller
 
                 if ($gr_material->pomaterials instanceof PoMaterial) {
                     $gr_material->pomaterials->po_gr_qty += $gr_material->gr_qty;
-                    $gr_material->pomaterials->status = '';
+                    $gr_material->pomaterials->status = null;
                     $gr_material->pomaterials->save();
                 }
                 $gr_material->save();

@@ -8,7 +8,7 @@ export default function ApplicationLogo({
   return (
     <>
       {yellowLogo ? (
-        <img width={150} height={100} src="/asset/logo/Goldilocks-logo-yellow.png" />
+        <img width={300} height={200} src="/asset/logo/Goldilocks-logo-yellow.png" />
       ) : (
         <img width={150} height={100} src="/asset/logo/Goldilocks-logo.png" />
       )}

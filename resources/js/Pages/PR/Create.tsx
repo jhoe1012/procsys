@@ -20,20 +20,19 @@ import { Loading, Dropzone, selectColumn, InputField, SelectField, TabFields, Al
 import { usePRMaterial, usePRMaterialValidation } from '@/Hooks';
 import { CUSTOM_DATA_SHEET_STYLE, DATE_TODAY, DEFAULT_PR_MATERIAL, PermissionsEnum } from '@/lib/constants';
 import { can } from '@/lib/helper';
+import { LetterText, Paperclip } from 'lucide-react';
 
 const Create = ({
   auth,
   mat_code,
   mat_desc,
-  materialGroupsSupplies,
   prCtrlGrp,
   materialGeneric,
   prheader,
 }: PageProps<{
   mat_code: Choice[];
   mat_desc: Choice[];
-  prheader: IPRHeader;
-  materialGroupsSupplies: string[];
+  prheader: IPRHeader; 
   prCtrlGrp: Choice[];
   materialGeneric: string[];
 }>) => {
@@ -132,13 +131,13 @@ const Create = ({
         ...keyColumn('price', floatColumn),
         title: 'Price',
         minWidth: 90,
-        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
+        disabled: ({ rowData }: any) => rowData.mat_code && !materialGeneric.includes(rowData.mat_code),
       },
       {
         ...keyColumn('per_unit', floatColumn),
         title: 'Per Unit',
         minWidth: 50,
-        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
+        disabled: ({ rowData }: any) => rowData.mat_code && !materialGeneric.includes(rowData.mat_code),
       },
       // { ...keyColumn('unit', textColumn), title: 'B.UOM', minWidth: 60, disabled: true },
       { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 90, disabled: true },
@@ -148,7 +147,7 @@ const Create = ({
         ...keyColumn('prctrl_grp_id', selectColumn({ choices: prCtrlGrp })),
         title: 'PR Controller',
         minWidth: 200,
-        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
+        disabled: ({ rowData }: any) => rowData.mat_code && !materialGeneric.includes(rowData.mat_code),
       },
       { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 100, disabled: true },
       { ...keyColumn('purch_grp', textColumn), title: 'Purch Grp', minWidth: 90, disabled: true },
@@ -160,25 +159,28 @@ const Create = ({
     {
       value: 'reasonForPr',
       label: 'Reason for PR',
+      tabIcon: <LetterText size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: <Textarea value={data.reason_pr} onChange={(e) => setData('reason_pr', e.target.value)} required={true} />,
     },
     {
       value: 'headerText',
       label: 'Header Text',
+      tabIcon: <LetterText size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: <Textarea value={data.header_text} onChange={(e) => setData('header_text', e.target.value)} />,
     },
     {
       value: 'attachment',
       label: 'Attachment',
+      tabIcon: <Paperclip size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: <Dropzone files={files} setFiles={setFiles} />,
     },
   ];
 
   const updateMaterial = async (newValue: IPRMaterial[], operations: Operation[]) => {
-    const updatedMaterial = await updateMaterialPR(newValue, operations, material, data.plant, data.doc_date, materialGroupsSupplies);
+    const updatedMaterial = await updateMaterialPR(newValue, operations, material, data.plant, data.doc_date, materialGeneric, prCtrlGrp);
     setMaterial(updatedMaterial);
   };
 

@@ -3,6 +3,7 @@ import { Modal } from '@/Components';
 import { Square2StackIcon } from '@heroicons/react/24/solid';
 import { IAlternativeUom } from '@/types';
 import TextInput from '@/Components/TextInput';
+import { SquarePen } from 'lucide-react';
 
 export default function AltUom({
   rowData,
@@ -27,11 +28,15 @@ export default function AltUom({
 
   return (
     <>
-      <Square2StackIcon
+      {/* <Square2StackIcon
         onClick={() => setShowModal(true)}
         className="h-5 w-5 cursor-pointer text-blue-500"
         aria-label="Open Alternative Unit of Measure Modal"
-      />
+      />  */}
+
+      <SquarePen  onClick={() => setShowModal(true)}
+        className="h-5 w-5 cursor-pointer text-blue-500"
+        aria-label="Open Alternative Unit of Measure Modal"/>
 
       <Modal show={showModal} onClose={() => setShowModal(false)} maxWidth="lg">
         <div className="border border-gray-300 max-h-[90vh] p-1 overflow-hidden flex flex-col">

@@ -7,7 +7,7 @@ const TabFields: React.FC<TabsProps> = ({ defaultValue, tabs, className }) => {
       <TabsList>
         {tabs.map((tab) => (
           <TabsTrigger value={tab.value} key={tab.value}>
-            {tab.label}
+          { tab.tabIcon && tab.tabIcon}&nbsp;{tab.label}
           </TabsTrigger>
         ))}
       </TabsList>

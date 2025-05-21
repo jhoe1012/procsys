@@ -31,6 +31,7 @@ class PRHeaderResource extends JsonResource
             'appr_seq'       => $this->appr_seq,
             'created_by'     => $this->created_by,
             'updated_by'     => $this->updated_by,
+            'prctrl_grp_id'  => $this->prctrl_grp_id,
             'created_at'     => $this->created_at->format('Y-m-d H:m:i'),
             'updated_at'     => $this->updated_at->format('Y-m-d H:m:i'),
             'plants'         => new PlantResource($this->whenLoaded('plants')),

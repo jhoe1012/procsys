@@ -25,7 +25,7 @@ import {
   STATUS_REWORK,
 } from '@/lib/constants';
 import { formatNumber } from '@/lib/utils';
-import { Choice, IAlternativeUom, IApprover, IitemDetails, IMessage, IPRHeader, IPRMaterial, IWorkflow, PageProps } from '@/types';
+import { Choice, IAlternativeUom, IitemDetails, IMessage, IPRHeader, IPRMaterial, IWorkflow, PageProps } from '@/types';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useMemo, useState } from 'react';
 import {
@@ -42,6 +42,7 @@ import 'react-datasheet-grid/dist/style.css';
 import { Operation } from 'react-datasheet-grid/dist/types';
 import Approval from './Partial/Approval';
 import { can } from '@/lib/helper';
+import { LetterText, List, Paperclip, Pointer, Workflow } from 'lucide-react';
 
 const Edit = ({
   auth,
@@ -50,7 +51,6 @@ const Edit = ({
   mat_desc,
   message,
   item_details,
-  materialGroupsSupplies,
   prCtrlGrp,
   materialGeneric,
 }: PageProps<{
@@ -59,7 +59,6 @@ const Edit = ({
   mat_desc: Choice[];
   message: IMessage;
   item_details: IitemDetails;
-  materialGroupsSupplies: string[];
   prCtrlGrp: Choice[];
   materialGeneric: string[];
 }>) => {
@@ -76,7 +75,16 @@ const Edit = ({
   );
   const [itemDetails, setItemDetails] = useState([]);
   const [files, setFiles] = useState([]);
-  const [apprSeq, setApprSeq] = useState<IApprover>();
+  const approverGrpId = auth.user.approvers
+    .filter((approver) => approver.type === 'pr')
+    .map((approver) => approver.plant + approver.seq + approver.prctrl_grp_id);
+  const headerGrpId = prheader.plant + prheader.appr_seq + prheader.prctrl_grp_id;
+  const disableButton =
+    prheader.status == STATUS_APPROVED ||
+    prheader.status == STATUS_REWORK ||
+    prheader.status == STATUS_REJECTED ||
+    !approverGrpId.includes(headerGrpId);
+
   const { updateMaterialPR, computeConversion, isLoading } = usePRMaterial();
   const { validateMaterials } = usePRMaterialValidation();
   const { data, setData, post, errors, reset, processing } = useForm<IPRHeader>({
@@ -100,10 +108,17 @@ const Edit = ({
   const handleOnChangeUom = (value: string, rowIndex: number) => {
     setMaterial((prevMaterial) => {
       const newMaterial = [...prevMaterial];
-      newMaterial[rowIndex] = {
-        ...newMaterial[rowIndex],
-        ...computeConversion(newMaterial[rowIndex], value),
-      };
+      if (materialGeneric.includes(newMaterial[rowIndex].mat_code)) {
+        newMaterial[rowIndex] = {
+          ...newMaterial[rowIndex],
+          ...computeConversion(newMaterial[rowIndex], value, true),
+        };
+      } else {
+        newMaterial[rowIndex] = {
+          ...newMaterial[rowIndex],
+          ...computeConversion(newMaterial[rowIndex], value),
+        };
+      }
       return newMaterial;
     });
   };
@@ -150,13 +165,13 @@ const Edit = ({
         ...keyColumn('price', floatColumn),
         title: 'Price',
         minWidth: 90,
-        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
+        disabled: ({ rowData }: any) => rowData.mat_code && !materialGeneric.includes(rowData.mat_code),
       },
       {
         ...keyColumn('per_unit', floatColumn),
         title: 'Per Unit',
         minWidth: 50,
-        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
+        disabled: ({ rowData }: any) => rowData.mat_code && !materialGeneric.includes(rowData.mat_code),
       },
       // { ...keyColumn('unit', textColumn), title: 'B.UOM', minWidth: 60, disabled: true },
       { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 120, disabled: true },
@@ -166,7 +181,7 @@ const Edit = ({
         ...keyColumn('prctrl_grp_id', selectColumn({ choices: prCtrlGrp })),
         title: 'PR Controller',
         minWidth: 200,
-        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
+        disabled: ({ rowData }: any) => rowData.mat_code && !materialGeneric.includes(rowData.mat_code),
       },
       { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 100, disabled: true },
       { ...keyColumn('purch_grp', textColumn), title: 'Purch Grp', minWidth: 90, disabled: true },
@@ -189,24 +204,28 @@ const Edit = ({
     {
       value: 'reasonForPr',
       label: 'Reason for PR',
+      tabIcon: <LetterText size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: <Textarea value={data.reason_pr} onChange={(e) => setData('reason_pr', e.target.value)} required={true} />,
     },
     {
       value: 'headerText',
       label: 'Header Text',
+      tabIcon: <LetterText size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: <Textarea value={data.header_text} onChange={(e) => setData('header_text', e.target.value)} />,
     },
     {
       value: 'workflow',
       label: 'Workflow',
+      tabIcon: <Workflow size={16} strokeWidth={1} className="text-black " />,
       visible: prheader.workflows && prheader.workflows?.length > 0,
       content: <GenericTable columns={workflowColumns} data={prheader.workflows} className="w-11/2 text-xs bg-white" />,
     },
     {
       value: 'attachment',
       label: 'Attachment',
+      tabIcon: <Paperclip size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: (
         <>
@@ -232,12 +251,14 @@ const Edit = ({
     {
       value: 'itemDetails',
       label: 'Item Details',
+      tabIcon: <List size={16} strokeWidth={1} className="text-black " />,
       visible: itemDetails.length > 0,
       content: <GenericTable columns={itemDetailsColumns} data={itemDetails} className="w-11/2 text-xs bg-white" />,
     },
     {
       value: 'action',
       label: 'Action',
+      tabIcon: <Pointer size={16} strokeWidth={1} className="text-black " />,
       visible: can(auth.user, PermissionsEnum.EditPR), //auth.permissions.pr.edit,
       content: (
         <div>
@@ -270,7 +291,7 @@ const Edit = ({
   ];
 
   const updateMaterial = async (newValue: IPRMaterial[], operations: Operation[]) => {
-    const updatedMaterial = await updateMaterialPR(newValue, operations, material, data.plant, data.doc_date, materialGroupsSupplies);
+    const updatedMaterial = await updateMaterialPR(newValue, operations, material, data.plant, data.doc_date, materialGeneric, prCtrlGrp);
     setMaterial(updatedMaterial);
   };
 
@@ -302,10 +323,6 @@ const Edit = ({
         variant: 'destructive',
         title: message.error,
       });
-    }
-
-    if (auth.user.approvers) {
-      setApprSeq(auth.user.approvers.filter((approver) => approver.type == 'pr')[0]);
     }
   }, [message]);
 
@@ -438,39 +455,9 @@ const Edit = ({
             </form>
             {can(auth.user, PermissionsEnum.ApproverPR) && ( //auth.permissions.pr.approver && (
               <div className="px-5 pb-5">
-                <Approval
-                  p_pr_number={data.pr_number}
-                  p_type="approved"
-                  p_title="approve"
-                  p_disable={
-                    prheader.status == STATUS_APPROVED ||
-                    prheader.status == STATUS_REWORK ||
-                    prheader.status == STATUS_REJECTED ||
-                    apprSeq?.seq != prheader.appr_seq
-                  }
-                />
-                <Approval
-                  p_pr_number={data.pr_number}
-                  p_type="rework"
-                  p_title="rework"
-                  p_disable={
-                    prheader.status == STATUS_APPROVED ||
-                    prheader.status == STATUS_REWORK ||
-                    prheader.status == STATUS_REJECTED ||
-                    apprSeq?.seq != prheader.appr_seq
-                  }
-                />
-                <Approval
-                  p_pr_number={data.pr_number}
-                  p_type="rejected"
-                  p_title="reject"
-                  p_disable={
-                    prheader.status == STATUS_APPROVED ||
-                    prheader.status == STATUS_REWORK ||
-                    prheader.status == STATUS_REJECTED ||
-                    apprSeq?.seq != prheader.appr_seq
-                  }
-                />
+                <Approval p_pr_number={data.pr_number} p_type="approved" p_title="approve" p_disable={disableButton} />
+                <Approval p_pr_number={data.pr_number} p_type="rework" p_title="rework" p_disable={disableButton} />
+                <Approval p_pr_number={data.pr_number} p_type="rejected" p_title="reject" p_disable={disableButton} />
               </div>
             )}
           </div>

@@ -129,7 +129,7 @@ class MaterialValuationController extends Controller
         $files             = AttachmentService::handleImport($request);
         $materialValuation = new MaterialValuationImport;
 
-        Excel::import($materialValuation, storage_path('app/'.$files[0]['filepath']));
+        Excel::import($materialValuation, storage_path('app/'.$files['filepath']));
 
         try {
             DB::statement('TRUNCATE  temp_material_valuations');

@@ -41,6 +41,7 @@ class PRReportExport implements FromArray, WithHeadings
             'Created By',
             'Requisitioner',
             'Status',
+            'Plant',
             'Reason For PR',
         ];
     }

@@ -433,7 +433,7 @@ class ReportController extends Controller
             'po_headers.deliv_addr',
             DB::raw('CASE WHEN po_materials.mat_code IS NOT NULL THEN po_materials.mat_code ELSE pr_materials.mat_code END AS mat_code'),
             DB::raw('CASE WHEN po_materials.short_text IS NOT NULL THEN po_materials.short_text ELSE pr_materials.short_text END AS short_text'),
-            'po_materials.item_text',
+            DB::raw('CASE WHEN po_materials.item_text IS NOT NULL THEN po_materials.item_text ELSE pr_materials.item_text END AS item_text'),
             'gr_headers.created_name AS gr_created_name',
             'gr_headers.entry_date',
             'gr_headers.delivery_note',
