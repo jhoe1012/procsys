@@ -195,7 +195,7 @@
             <div class='notes'>
                 {{ $poHeader->notes }} <br />
                 Remarks: PR Number/s {{ $poHeader->pomaterials->pluck('pr_number')->unique()->implode('/') }}
-                {{ \Illuminate\Support\Str::limit($poHeader->header_text, 500, '') }}
+                {{ $poHeader->header_text }}
             </div>
             <div class="amount">
                 @php
