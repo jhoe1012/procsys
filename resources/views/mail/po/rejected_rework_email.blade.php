@@ -108,9 +108,9 @@
                         <td>Unit</td>
                         <td>Total Value</td>
                         <td>Curr</td>
-                        @if ($po_header->is_mother_po)
+                        {{-- @if ($po_header->is_mother_po) --}}
                             <td>Del Date</td>
-                        @endif
+                        {{-- @endif --}}
                         <td>Mat Grp</td>
                     </tr>
                 </thead>
@@ -126,9 +126,9 @@
                             <td>{{ $pomaterial->unit }}</td>
                             <td>{{ Number::currency($pomaterial->total_value, 'PHP') }}</td>
                             <td>{{ $pomaterial->currency }}</td>
-                            @if ($po_header->is_mother_po)
+                            {{-- @if ($po_header->is_mother_po) --}}
                                 <td>{{ date('Y-m-d', strtotime($pomaterial->del_date)) }}</td>
-                            @endif
+                            {{-- @endif --}}
                             <td>{{ $pomaterial->materialGroups->mat_grp_desc }}</td>
                         </tr>
                     @endforeach
