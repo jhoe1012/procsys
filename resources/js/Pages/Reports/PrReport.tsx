@@ -56,6 +56,7 @@ export default function PrReport({ auth, prReport, queryParams }: PageProps) {
                     <th className="px-3 py-2">Created By</th>
                     <th className="px-3 py-2">Requisitioner</th>
                     <th className="px-3 py-2">Status</th>
+                    <th className="px-3 py-2">Plant</th>
                     <th className="px-3 py-2">Reason For PR</th>
                   </tr>
                 </thead>
@@ -86,6 +87,7 @@ export default function PrReport({ auth, prReport, queryParams }: PageProps) {
                         <td className="px-3 py-2">{pr.created_name}</td>
                         <td className="px-3 py-2">{pr.requested_by}</td>
                         <td className="px-3 py-2">{pr.status}</td>
+                        <td className="px-3 py-2">{pr.plant}</td>
                         <td className="px-3 py-2">{pr.reason_pr}</td>
                       </tr>
                     ))
