@@ -142,24 +142,24 @@ class VendorController extends Controller
     }
 
     public function import(Request $request)
-    { 
+    {
         try {
             $files = AttachmentService::handleImport($request);
-                if (empty($files)) {
-                    throw ValidationException::withMessages(['error' => ['No valid files were uploaded ']]);
-                }
-                $importData = new VendorImport;
-                Excel::import($importData, storage_path('app/'.$files['filepath']));
-                $getData = $importData->getVendorData();
+            if (empty($files)) {
+                throw ValidationException::withMessages(['error' => ['No valid files were uploaded ']]);
+            }
+            $importData = new VendorImport;
+            Excel::import($importData, storage_path('app/'.$files['filepath']));
+            $getData = $importData->getVendorData();
 
-                if (empty($getData)) {
-                    throw ValidationException::withMessages([
-                        'error' => ['No valid vendor records found.'],
-                    ]);
-                }
-            
+            if (empty($getData)) {
+                throw ValidationException::withMessages([
+                    'error' => ['No valid vendor records found.'],
+                ]);
+            }
+
             $emptyData = [];
-            
+
             DB::transaction(function () use ($getData, &$emptyData) {
 
                 $validData = collect($getData)
@@ -172,7 +172,7 @@ class VendorController extends Controller
                     ->values()
                     ->all();
 
-                    foreach ($validData as $data) {
+                foreach ($validData as $data) {
                     Vendor::updateOrCreate(
                         ['supplier' => $data['supplier']],
                         $data

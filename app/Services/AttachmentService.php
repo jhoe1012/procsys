@@ -46,7 +46,7 @@ class AttachmentService
         $originalName    = $file[0]->getClientOriginalName();
         $timestampedName = time().'_'.Str::slug(pathinfo($originalName, PATHINFO_FILENAME), '_').'.'.$file[0]->getClientOriginalExtension();
         $filepath        = $file[0]->storeAs('imports', $timestampedName);
-  
+
         return ['filepath' => $filepath];
-    } 
+    }
 }

@@ -425,7 +425,7 @@ class POController extends Controller
                 // $this->_updateValuation($po_header);
                 $email_status = 2;
             }
-        }else {
+        } else {
             $po_header->status   = Str::ucfirst($request->input('type'));
             $po_header->appr_seq = $request->input('type') == ApproveStatus::REWORKED ? HeaderSeq::Draft->value : HeaderSeq::Rejected->value;
             $po_header->seq      = $request->input('type') == ApproveStatus::REWORKED ? HeaderSeq::Draft->value : HeaderSeq::Cancelled->value;
@@ -434,7 +434,7 @@ class POController extends Controller
                 ->whereNull('user_id')
                 ->delete();
 
-            if($request->input('type') == ApproveStatus::REJECTED){
+            if ($request->input('type') == ApproveStatus::REJECTED) {
                 foreach ($po_header->pomaterials as $pomaterial) {
                     $pomaterial->status = PoMaterial::FLAG_DELETE;
                     $pomaterial->save();
@@ -444,7 +444,6 @@ class POController extends Controller
             }
             $email_status = 3;
         }
-        
 
         $po_header->save();
 
