@@ -53,10 +53,8 @@ export default function usePOMaterial() {
 
     return { conversion_po, ord_unit, net_price, converted_qty_po, total_value, min_order_qty, qty_open_po, unit: ord_unit, po_qty };
   };
-  
   const updateMaterialPO = (newValue: IPOMaterial[], operations: Operation[], material: IPOMaterial[], is_edit: boolean = false) => {
     const updatedMaterial = [...newValue];
-
     for (const operation of operations) {
       if (operation.type === 'UPDATE') {
         for (let i = operation.fromRowIndex; i < operation.toRowIndex; i++) {
@@ -65,7 +63,7 @@ export default function usePOMaterial() {
 
           let { total_value, net_price } = computeConversion(value, value.unit ?? '');
 
-          // Ensure min_order_qty rules apply
+
           value.po_qty =
             value.min_order_qty && value.min_order_qty > 0 && (value.po_qty ?? 0) < value.min_order_qty
               ? value.min_order_qty
@@ -104,7 +102,6 @@ export default function usePOMaterial() {
         }
       }
     }
-
     return updatedMaterial;
   };
 
