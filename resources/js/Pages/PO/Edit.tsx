@@ -195,7 +195,12 @@ const Edit = ({
       label: 'Header Text',
       tabIcon: <LetterText size={16} strokeWidth={1} className="text-black " />,
       visible: true,
-      content: <Textarea value={data.header_text} onChange={(e) => setData('header_text', e.target.value)} />,
+      content: (
+        <div>
+          <Textarea value={data.header_text} onChange={(e) => setData('header_text', e.target.value.slice(0, 500))} maxLength={500} />
+          <div className="text-xs text-right text-gray-500">{((e) => (e && e.length ? e.length : 0))(data.header_text)}/500</div>
+        </div>
+      ),
     },
     {
       value: 'approver_text',
@@ -270,7 +275,7 @@ const Edit = ({
     {
       value: 'action',
       label: 'Action',
-      tabIcon: <Pointer size={16} strokeWidth={1} className="text-black " />, 
+      tabIcon: <Pointer size={16} strokeWidth={1} className="text-black " />,
       visible: can(auth.user, PermissionsEnum.EditPO), //auth.permissions.po.edit,
       content: (
         <>
