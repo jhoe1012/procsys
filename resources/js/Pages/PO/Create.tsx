@@ -138,7 +138,16 @@ const Create = ({
       label: 'Header Text',
       tabIcon: <LetterText size={16} strokeWidth={1} className="text-black " />,
       visible: true,
-      content: <Textarea value={data.header_text} onChange={(e) => setData('header_text', e.target.value)} />,
+      content: (
+        <div>
+          <Textarea
+            value={data.header_text}
+            onChange={(e) => setData('header_text', e.target.value.slice(0, 500))}
+            maxLength={500}
+          />
+          <div className="text-xs text-right text-gray-500">{data.header_text.length}/500</div>
+        </div>
+      ),
     },
     {
       value: 'approver_text',
