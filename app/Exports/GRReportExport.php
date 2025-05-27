@@ -34,6 +34,7 @@ class GRReportExport implements FromArray, WithHeadings
             'Item No',
             'Material',
             'Material Description',
+            'Item Text',
             'Qty',
             'Unit',
             'Open PO',

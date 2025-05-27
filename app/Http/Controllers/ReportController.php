@@ -7,6 +7,7 @@ use App\Exports\MaterialReportExport;
 use App\Exports\POHistoryExport;
 use App\Exports\POReportExport;
 use App\Exports\PRReportExport;
+use App\Models\Vendor;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -44,7 +45,8 @@ class ReportController extends Controller
                 ->paginate(15)
                 ->onEachSide(5)
                 ->appends($request->query() ?: null),
-            'queryParams' => $request->query() ?: null,
+            'queryParams'   => $request->query() ?: null,
+            'vendorsChoice' => Vendor::vendorsChoice(),
 
         ]);
     }
@@ -65,8 +67,8 @@ class ReportController extends Controller
                 ->paginate(15)
                 ->onEachSide(5)
                 ->appends($request->query() ?: null),
-            'queryParams' => $request->query() ?: null,
-
+            'queryParams'   => $request->query() ?: null,
+            'vendorsChoice' => Vendor::vendorsChoice(),
         ]);
     }
 
@@ -107,7 +109,8 @@ class ReportController extends Controller
                 ->paginate(50)
                 ->onEachSide(2)
                 ->appends($request->query() ?: null),
-            'queryParams' => $request->query() ?: null,
+            'queryParams'   => $request->query() ?: null,
+            'vendorsChoice' => Vendor::vendorsChoice(),
 
         ]);
     }
@@ -130,8 +133,9 @@ class ReportController extends Controller
             'pr_materials.item_no',
             'pr_materials.mat_code',
             'pr_materials.short_text',
+            'pr_materials.item_text',
             'pr_materials.qty',
-            'pr_materials.unit',
+            'pr_materials.ord_unit as unit',
             'pr_materials.qty_open',
             'po_materials.po_qty',
             'po_materials.unit as po_unit',
@@ -208,6 +212,7 @@ class ReportController extends Controller
             'vendors.name_1',
             'po_materials.mat_code',
             'po_materials.short_text',
+            'po_materials.item_text',
             'po_materials.mat_grp',
             'po_materials.po_qty',
             'po_materials.unit',
@@ -251,13 +256,12 @@ class ReportController extends Controller
             'release_date_from' => fn ($value) => $request->input('release_date_to')
                 ? $query->whereBetween('po_headers.release_date', [$value, $request->input('release_date_to')])
                 : $query->where('po_headers.release_date', 'ilike', "%{$value}%"),
-            'purch_grp'     => fn ($value) => $query->where('po_materials.purch_grp', 'ilike', "%{$value}%"),
-            'supplier_code' => fn ($value) => $query->where('po_headers.vendor_id', 'ilike', "%{$value}%"),
-            'supplier_name' => fn ($value) => $query->where('vendors.name_1', 'ilike', "%{$value}%"),
-            'short_text'    => fn ($value) => $query->where('po_materials.short_text', 'ilike', "%{$value}%"),
-            'created_name'  => fn ($value) => $query->where('po_headers.created_name', 'ilike', "%{$value}%"),
-            'plant'         => fn ($value) => $query->where('po_headers.plant', 'ilike', "%{$value}%"),
-            'open_po'       => fn ($value) => $query->where('po_materials.po_gr_qty', '>', 0),
+            'purch_grp'    => fn ($value) => $query->where('po_materials.purch_grp', 'ilike', "%{$value}%"),
+            'short_text'   => fn ($value) => $query->where('po_materials.short_text', 'ilike', "%{$value}%"),
+            'created_name' => fn ($value) => $query->where('po_headers.created_name', 'ilike', "%{$value}%"),
+            'plant'        => fn ($value) => $query->where('po_headers.plant', $value),
+            'vendor'       => fn ($value) => $query->where('po_headers.vendor_id', $value),
+            'open_po'      => fn ($value) => $query->where('po_materials.po_gr_qty', '>', 0),
         ];
 
         // Apply filters dynamically
@@ -290,6 +294,7 @@ class ReportController extends Controller
             'gr_materials.item_no',
             'gr_materials.mat_code',
             'gr_materials.short_text',
+            'gr_materials.item_text',
             'gr_materials.gr_qty',
             'gr_materials.unit',
             'po_materials.po_gr_qty',
@@ -302,12 +307,13 @@ class ReportController extends Controller
             'gr_materials.dci',
             'gr_materials.is_cancel',
             'gr_materials.cancel_datetime',
-            'gr_materials.cancel_by'
+            'users.name AS cancel_by'
         )
             ->join('gr_headers', 'gr_headers.id', '=', 'gr_materials.gr_header_id')
             ->Join('vendors', 'vendors.supplier', '=', 'gr_headers.vendor_id')
             ->leftJoin('po_materials', 'po_materials.id', '=', 'gr_materials.po_material_id')
-            ->leftJoin('po_headers', 'po_headers.po_number', '=', 'gr_headers.po_number');
+            ->leftJoin('po_headers', 'po_headers.po_number', '=', 'gr_headers.po_number')
+            ->leftJoin('users', 'gr_materials.cancel_by', '=', 'users.id');
         $query->whereIn('gr_headers.plant', $this->_getUserPlant());
 
         // Define filterable fields and conditions
@@ -335,6 +341,8 @@ class ReportController extends Controller
             'created_name'  => fn ($value) => $query->where('gr_headers.created_name', 'ilike', "%{$value}%"),
             'delivery_note' => fn ($value) => $query->where('gr_headers.delivery_note', 'ilike', "%{$value}%"),
             'short_text'    => fn ($value) => $query->where('gr_materials.short_text', 'ilike', "%{$value}%"),
+            'plant'         => fn ($value) => $query->where('gr_headers.plant', $value),
+            'vendor'        => fn ($value) => $query->where('gr_headers.vendor_id', $value),
         ];
 
         // Apply filters dynamically
@@ -425,7 +433,7 @@ class ReportController extends Controller
             'po_headers.deliv_addr',
             DB::raw('CASE WHEN po_materials.mat_code IS NOT NULL THEN po_materials.mat_code ELSE pr_materials.mat_code END AS mat_code'),
             DB::raw('CASE WHEN po_materials.short_text IS NOT NULL THEN po_materials.short_text ELSE pr_materials.short_text END AS short_text'),
-            'po_materials.item_text',
+            DB::raw('CASE WHEN po_materials.item_text IS NOT NULL THEN po_materials.item_text ELSE pr_materials.item_text END AS item_text'),
             'gr_headers.created_name AS gr_created_name',
             'gr_headers.entry_date',
             'gr_headers.delivery_note',
@@ -474,6 +482,8 @@ class ReportController extends Controller
                 : $query->where('po_headers.deliv_date', 'ilike', "%{$value}%"),
             'open_po' => fn ($value) => $query->where('po_materials.po_gr_qty', '>', 0),
             'open_pr' => fn ($value) => $query->where('pr_materials.qty_open', '>', 0),
+            'plant'   => fn ($value) => $query->where('pr_headers.plant', $value),
+            'vendor'  => fn ($value) => $query->where('po_headers.vendor_id', $value),
         ];
         // Apply filters dynamically
         foreach (request()->only(array_keys($filters)) as $field => $value) {

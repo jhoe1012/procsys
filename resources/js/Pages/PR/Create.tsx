@@ -20,9 +20,7 @@ import { Loading, Dropzone, selectColumn, InputField, SelectField, TabFields, Al
 import { usePRMaterial, usePRMaterialValidation } from '@/Hooks';
 import { CUSTOM_DATA_SHEET_STYLE, DATE_TODAY, DEFAULT_PR_MATERIAL, PermissionsEnum } from '@/lib/constants';
 import { can } from '@/lib/helper';
-import { Item } from '@radix-ui/react-select';
-import { text } from 'node:stream/consumers';
-import { components } from 'react-select';
+import { LetterText, Paperclip } from 'lucide-react';
 
 const Create = ({
   auth,
@@ -31,7 +29,15 @@ const Create = ({
   prheader,
   materialGroupsSupplies,
   prCtrlGrp,
-}: PageProps<{ mat_code: Choice[]; mat_desc: Choice[]; prheader: IPRHeader; materialGroupsSupplies: string[]; prCtrlGrp: Choice[] }>) => {
+  materialGeneric,
+}: PageProps<{
+  mat_code: Choice[];
+  mat_desc: Choice[];
+  prheader: IPRHeader;
+  materialGroupsSupplies: string[];
+  prCtrlGrp: Choice[];
+  materialGeneric: string[];
+}>) => {
   const initialMaterial = prheader
     ? prheader.prmaterials.map((prmaterial) => ({
         ...prmaterial,
@@ -68,10 +74,17 @@ const Create = ({
   const handleOnChangeUom = (value: string, rowIndex: number) => {
     setMaterial((prevMaterial) => {
       const newMaterial = [...prevMaterial];
-      newMaterial[rowIndex] = {
-        ...newMaterial[rowIndex],
-        ...computeConversion(newMaterial[rowIndex], value),
-      };
+      if (materialGeneric.includes(newMaterial[rowIndex].mat_code)) {
+        newMaterial[rowIndex] = {
+          ...newMaterial[rowIndex],
+          ...computeConversion(newMaterial[rowIndex], value, true),
+        };
+      } else {
+        newMaterial[rowIndex] = {
+          ...newMaterial[rowIndex],
+          ...computeConversion(newMaterial[rowIndex], value),
+        };
+      }
       return newMaterial;
     });
   };
@@ -139,14 +152,14 @@ const Create = ({
       { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 90, disabled: true },
       { ...keyColumn('currency', textColumn), title: 'Curr', minWidth: 50, disabled: true },
       { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 130 },
-      { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 100, disabled: true },
-      { ...keyColumn('purch_grp', textColumn), title: 'Purch Grp', minWidth: 90, disabled: true },
       {
         ...keyColumn('prctrl_grp_id', selectColumn({ choices: prCtrlGrp })),
         title: 'PR Controller',
         minWidth: 200,
         disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
       },
+      { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 100, disabled: true },
+      { ...keyColumn('purch_grp', textColumn), title: 'Purch Grp', minWidth: 90, disabled: true },
     ],
     []
   );
@@ -155,31 +168,34 @@ const Create = ({
     {
       value: 'reasonForPr',
       label: 'Reason for PR',
+      tabIcon: <LetterText size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: <Textarea value={data.reason_pr} onChange={(e) => setData('reason_pr', e.target.value)} required={true} />,
     },
     {
       value: 'headerText',
       label: 'Header Text',
+      tabIcon: <LetterText size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: <Textarea value={data.header_text} onChange={(e) => setData('header_text', e.target.value)} />,
     },
     {
       value: 'attachment',
       label: 'Attachment',
+      tabIcon: <Paperclip size={16} strokeWidth={1} className="text-black " />,
       visible: true,
       content: <Dropzone files={files} setFiles={setFiles} />,
     },
   ];
 
   const updateMaterial = async (newValue: IPRMaterial[], operations: Operation[]) => {
-    const updatedMaterial = await updateMaterialPR(newValue, operations, material, data.plant, data.doc_date, materialGroupsSupplies);
+    const updatedMaterial = await updateMaterialPR(newValue, operations, material, data.plant, data.doc_date, materialGeneric, prCtrlGrp);
     setMaterial(updatedMaterial);
   };
 
   const handleSubmit: FormEventHandler = async (e) => {
     e.preventDefault();
-    const { isValid, updatedMaterials } = validateMaterials(material, materialGroupsSupplies);
+    const { isValid, updatedMaterials } = validateMaterials(material, materialGeneric, prCtrlGrp);
     setMaterial(updatedMaterials);
     if (isValid) {
       post(route('pr.store'));

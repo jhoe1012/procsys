@@ -26,6 +26,9 @@ class POHistoryExport implements FromArray, ShouldAutoSize, WithColumnFormatting
     public function map($data): array
     {
         return [
+            $data->mat_code,
+            $data->short_text,
+            $data->item_text,
             $data->pr_number,
             $data->po_number,
             $data->control_no,
@@ -61,9 +64,6 @@ class POHistoryExport implements FromArray, ShouldAutoSize, WithColumnFormatting
             $data->po_created_name,
             $data->deliv_addr,
             $data->po_deliv_date ? Date::dateTimeToExcel(Carbon::parse($data->po_deliv_date)) : null,
-            $data->mat_code,
-            $data->short_text,
-            $data->item_text,
             $data->gr_created_name,
             $data->entry_date ? Date::dateTimeToExcel(Carbon::parse($data->entry_date)) : null,
             $data->delivery_note,
@@ -79,11 +79,11 @@ class POHistoryExport implements FromArray, ShouldAutoSize, WithColumnFormatting
     public function columnFormats(): array
     {
         return [
-            'E'  => NumberFormat::FORMAT_DATE_DDMMYYYY,
-            'I'  => NumberFormat::FORMAT_DATE_DDMMYYYY,
-            'N'  => NumberFormat::FORMAT_DATE_DDMMYYYY,
-            'AB' => NumberFormat::FORMAT_DATE_DDMMYYYY,
-            'AI' => NumberFormat::FORMAT_DATE_DDMMYYYY,
+            'H'  => NumberFormat::FORMAT_DATE_DDMMYYYY,
+            'L'  => NumberFormat::FORMAT_DATE_DDMMYYYY,
+            'Q'  => NumberFormat::FORMAT_DATE_DDMMYYYY,
+            'AE' => NumberFormat::FORMAT_DATE_DDMMYYYY,
+            'AL' => NumberFormat::FORMAT_DATE_DDMMYYYY,
             'AN' => NumberFormat::FORMAT_DATE_DDMMYYYY,
             'AP' => NumberFormat::FORMAT_DATE_DDMMYYYY,
             'AQ' => NumberFormat::FORMAT_DATE_DDMMYYYY,
@@ -93,6 +93,9 @@ class POHistoryExport implements FromArray, ShouldAutoSize, WithColumnFormatting
     public function headings(): array
     {
         return [
+            'Material',
+            'Short Text',
+            'Item Text',
             'PR Number',
             'PO Number',
             'Control No.',
@@ -128,9 +131,6 @@ class POHistoryExport implements FromArray, ShouldAutoSize, WithColumnFormatting
             'PO Created By',
             'Deliv. Addr.',
             'PO Deliv. Date',
-            'Material',
-            'Short Text',
-            'Item Text',
             'GR Created By',
             'GR Entry Date ',
             'Delivery Note',

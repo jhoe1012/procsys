@@ -1,24 +1,27 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import { PageProps, IMessage, IGRHeader, IGRMaterials, IGRHeaderPage } from '@/types';
+import { PageProps, IMessage, IGRHeader, IGRMaterials, IGRHeaderPage, Choice } from '@/types';
 import { useState, useEffect, KeyboardEvent } from 'react';
 import { PrinterIcon } from '@heroicons/react/24/solid';
 import { can } from '@/lib/helper';
 import { PermissionsEnum, REACT_SELECT_STYLES } from '@/lib/constants';
-import AsyncSelect from 'react-select/async';
 import { Toaster, useToast } from '@/Components/ui';
 import { Modal, Pagination, TextInput } from '@/Components';
-import { fetchVendor } from '@/lib/Vendor';
+import { formatShortDate } from '@/lib/utils';
+import Select from 'react-select';
 
 const Index = ({
   auth,
   gr_header,
   queryParams = {},
   message,
-}: PageProps<{ gr_header: IGRHeaderPage }> & PageProps<{ queryParams: any }> & PageProps<{ message: IMessage }>) => {
+  vendorsChoice,
+}: PageProps<{ gr_header: IGRHeaderPage; queryParams: any; message: IMessage; vendorsChoice: Choice[] }>) => {
   const [selectedGr, setSelectedGr] = useState<IGRHeader | null>(null);
   const [grmaterials, setGrmaterials] = useState<IGRMaterials[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
+  const plantsChoice: Choice[] = auth.user.plants.map(({ plant, name1 }) => ({ value: plant, label: name1 }));
+
   const { toast } = useToast();
 
   queryParams = queryParams || {};
@@ -144,24 +147,21 @@ const Index = ({
                           placeholder="PO No. To"
                         />
                       </th>
-                      <th className="px-1 py-2">
-                        <TextInput
-                          className="h-7 text-xs p-1 m-0"
-                          defaultValue={queryParams.plant}
-                          onBlur={(e) => searchFieldChanged('plant', e.target.value)}
-                          onKeyDown={(e) => handleKeyPress('plant', e)}
+                      <th className="px-1 py-2 w-40">
+                        <Select
                           placeholder="Plant"
+                          value={plantsChoice.find(({ value }) => value === queryParams.plant)}
+                          options={plantsChoice}
+                          onChange={(option: any) => searchFieldChanged('plant', option?.value)}
+                          styles={REACT_SELECT_STYLES}
                         />
                       </th>
                       <th className="px-1 py-2">
-                        <AsyncSelect
-                          className="p-2 w-full border-gray-500"
-                          cacheOptions
-                          defaultOptions
-                          loadOptions={fetchVendor}
-                          value={queryParams.vendor ? { label: `${queryParams.vendor} `, value: queryParams.vendor } : null}
-                          onChange={(option: any) => searchFieldChanged('vendor', option?.value)}
+                        <Select
                           placeholder="Vendor"
+                          value={vendorsChoice.find(({ value }) => value === queryParams.vendor)}
+                          options={vendorsChoice}
+                          onChange={(option: any) => searchFieldChanged('vendor', option?.value)}
                           styles={REACT_SELECT_STYLES}
                         />
                       </th>
@@ -208,7 +208,7 @@ const Index = ({
                       <th className="px-3 py-2"> </th>
                       <th className="px-3 py-2 w-[5%]"> Document Number</th>
                       <th className="px-3 py-2 w-[5%]"> PO Number</th>
-                      <th className="px-3 py-2 w-[5%]"> Plant</th>
+                      <th className="px-3 py-2 w-[10%]"> Plant</th>
                       <th className="px-3 py-2 w-[30%]"> Vendor</th>
                       <th className="px-3 py-2"> Entered By</th>
                       <th className="px-3 py-2"> Entry Date</th>
@@ -241,9 +241,9 @@ const Index = ({
                             {gr.vendor_id} - {gr.vendors?.name_1}
                           </td>
                           <td className="px-3 py-2">{gr.created_name}</td>
-                          <td className="px-3 py-2">{gr.entry_date}</td>
+                          <td className="px-3 py-2">{formatShortDate(gr.entry_date)}</td>
                           {/* <td className="px-3 py-2">{gr.posting_date}</td> */}
-                          <td className="px-3 py-2">{gr.actual_date}</td>
+                          <td className="px-3 py-2">{formatShortDate(gr.actual_date)}</td>
                           <td className="px-3 py-2">
                             <a className="" href={route('gr.print', gr.id)} target="_blank">
                               <PrinterIcon className="w-6 h-6  text-green-600 hover:fill-green-300 transition-colors" />
@@ -274,6 +274,7 @@ const Index = ({
                         <th className="px-3 py-2">ItemNo</th>
                         <th className="px-3 py-2">Material</th>
                         <th className="px-3 py-2">Material Description</th>
+                        <th className="px-3 py-2">Item Text</th>
                         <th className="px-3 py-2">Qty</th>
                         <th className="px-3 py-2">Unit</th>
                         <th className="px-3 py-2">PO Del Date</th>
@@ -299,6 +300,7 @@ const Index = ({
                             <td className="px-3 py-2">{grMaterial.item_no}</td>
                             <td className="px-3 py-2">{grMaterial.mat_code}</td>
                             <td className="px-3 py-2">{grMaterial.short_text}</td>
+                            <td className="px-3 py-2">{grMaterial.item_text}</td>
                             <td className="px-3 py-2">{grMaterial.gr_qty}</td>
                             <td className="px-3 py-2">{grMaterial.unit}</td>
                             <td className="px-3 py-2">{grMaterial.po_deliv_date?.toString()}</td>

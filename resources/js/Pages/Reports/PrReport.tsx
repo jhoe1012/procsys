@@ -41,6 +41,7 @@ export default function PrReport({ auth, prReport, queryParams }: PageProps) {
                     <th className="px-3 py-2">Item</th>
                     <th className="px-3 py-2">Material</th>
                     <th className="px-3 py-2">Material Description</th>
+                    <th className="px-3 py-2">Item Text</th>
                     <th className="px-3 py-2">PR Quantity</th>
                     <th className="px-3 py-2">PR Unit</th>
                     <th className="px-3 py-2">Open PR Qty</th>
@@ -55,6 +56,7 @@ export default function PrReport({ auth, prReport, queryParams }: PageProps) {
                     <th className="px-3 py-2">Created By</th>
                     <th className="px-3 py-2">Requisitioner</th>
                     <th className="px-3 py-2">Status</th>
+                    <th className="px-3 py-2">Plant</th>
                     <th className="px-3 py-2">Reason For PR</th>
                   </tr>
                 </thead>
@@ -70,6 +72,7 @@ export default function PrReport({ auth, prReport, queryParams }: PageProps) {
                         <td className="px-3 py-2">{pr.item_no}</td>
                         <td className="px-3 py-2">{pr.mat_code}</td>
                         <td className="px-3 py-2">{pr.short_text}</td>
+                        <td className="px-3 py-2">{pr.item_text}</td>
                         <td className="px-3 py-2">{pr.qty}</td>
                         <td className="px-3 py-2">{pr.unit}</td>
                         <td className="px-3 py-2">{pr.qty_open}</td>
@@ -84,6 +87,7 @@ export default function PrReport({ auth, prReport, queryParams }: PageProps) {
                         <td className="px-3 py-2">{pr.created_name}</td>
                         <td className="px-3 py-2">{pr.requested_by}</td>
                         <td className="px-3 py-2">{pr.status}</td>
+                        <td className="px-3 py-2">{pr.plant}</td>
                         <td className="px-3 py-2">{pr.reason_pr}</td>
                       </tr>
                     ))

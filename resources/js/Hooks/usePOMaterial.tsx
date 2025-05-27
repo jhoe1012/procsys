@@ -53,7 +53,6 @@ export default function usePOMaterial() {
 
     return { conversion_po, ord_unit, net_price, converted_qty_po, total_value, min_order_qty, qty_open_po, unit: ord_unit, po_qty };
   };
-
   const updateMaterialPO = (newValue: IPOMaterial[], operations: Operation[], material: IPOMaterial[], is_edit: boolean = false) => {
     const updatedMaterial = [...newValue];
     for (const operation of operations) {
@@ -64,32 +63,45 @@ export default function usePOMaterial() {
 
           let { total_value, net_price } = computeConversion(value, value.unit ?? '');
 
+
           value.po_qty =
-            value.min_order_qty && value.min_order_qty > 0 && value.po_qty < value.min_order_qty ? value.min_order_qty : value.po_qty;
+            value.min_order_qty && value.min_order_qty > 0 && (value.po_qty ?? 0) < value.min_order_qty
+              ? value.min_order_qty
+              : (value.po_qty ?? 0);
+
+          const pastedQty = value.po_qty;
+          const pastedNetPrice = value.net_price ?? 0;
 
           if (is_edit) {
-            const _openPOWithOrigPO = value.qty_open_po + value.origPOQty;
-            value.po_qty = value.po_qty > _openPOWithOrigPO ? _openPOWithOrigPO : value.po_qty;
+            const _openPOWithOrigPO = (value.qty_open_po ?? 0) + (value.origPOQty ?? 0);
+            value.po_qty = Math.min(pastedQty, _openPOWithOrigPO);
             // Set po_gr_qty equal to po_qty to prevent the field from being disabled during editing.
             value.po_gr_qty = value.po_qty;
+            value.net_price = value.item_free ? 0 : pastedNetPrice;
           } else {
-            value.po_qty = value.po_qty > value.qty_open_po ? value.qty_open_po : value.po_qty;
+            value.po_qty = Math.min(pastedQty, value.qty_open_po ?? 0);
+            value.net_price = value.item_free ? 0 : pastedNetPrice;
           }
-          // compare old and new net price if not same will prioritize new net price
-          // recompute total value if net price and qty changes
-          if (oldValue.net_price !== value.net_price || oldValue.po_qty !== value.po_qty) {
-            net_price = value.net_price ?? 0;
-            total_value = ((net_price ?? 0) / (value.per_unit ?? 0)) * (value.po_qty ?? 0);
+
+          // Apply min_order_qty constraint after all adjustments
+          if (value.min_order_qty && value.min_order_qty > 0) {
+            value.po_qty = Math.max(value.po_qty, value.min_order_qty);
+          }
+
+          // Ensure total_value is recalculated only when necessary
+          if (oldValue.net_price !== value.net_price || oldValue.po_qty !== value.po_qty || oldValue.per_unit !== value.per_unit) {
+            net_price = value.net_price ?? oldValue.net_price ?? 0;
+            total_value = ((net_price ?? 0) / (value.per_unit ?? 1)) * (value.po_qty ?? oldValue.po_qty ?? 0);
+          } else {
+            total_value = oldValue.total_value ?? 0; // Retain the previous total_value if no changes
           }
 
           value.item_no = (operation.fromRowIndex + 1) * 10;
-          value.net_price = value.item_free ? 0 : net_price;
           value.total_value = value.item_free ? 0 : total_value;
           value.converted_qty_po = (value?.po_qty ?? 0) * (value?.conversion_po ?? 0);
         }
       }
     }
-
     return updatedMaterial;
   };
 

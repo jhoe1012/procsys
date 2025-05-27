@@ -21,6 +21,7 @@ class GRMaterialsResource extends JsonResource
             'item_no'        => $this->item_no,
             'mat_code'       => $this->mat_code,
             'short_text'     => $this->short_text,
+            'item_text'      => $this->item_text,
             'gr_qty'         => $this->gr_qty,
             'unit'           => $this->unit,
             'po_deliv_date'  => $this->po_deliv_date,

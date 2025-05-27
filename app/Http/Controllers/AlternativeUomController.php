@@ -120,7 +120,7 @@ class AlternativeUomController extends Controller
             }
 
             $importData = new AlternativeUomImport;
-            Excel::import($importData, storage_path('app/'.$files[0]['filepath']));
+            Excel::import($importData, storage_path('app/'.$files['filepath']));
             $getData = $importData->getaltUomImport();
 
             if (empty($getData)) {

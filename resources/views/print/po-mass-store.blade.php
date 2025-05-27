@@ -26,7 +26,6 @@
         .printable-area {
             width: 9in;
             height: 8.5in;
-            position: relative;
         }
 
         table,
@@ -52,11 +51,13 @@
         }
 
         .amount {
-            position: absolute;
-            right: 50px;
-            bottom: 80px;
             text-align: right;
             font-size: 25px;
+            padding: 50px 50px 0 50px;
+            margin-top: 10px;
+            /* float: right; */
+            /* top: 30vw; */
+            /* display: block; */
         }
 
         .addr {
@@ -89,6 +90,7 @@
             padding-left: 10px;
             width: 95%;
             font-size: 13px;
+
         }
 
         .line_item {
@@ -103,16 +105,11 @@
         }
 
         .buyer {
-            position: absolute;
-            left: 430px;
-            bottom: 30px;
+            padding: 30px 0 0 430px;
         }
 
         .approver {
-            position: absolute;
-            /* padding: 33px 0 0 430px; */
-            left: 430px;
-            bottom: -8px;
+            padding: 23px 0 0 430px;
         }
 
         .page-break {

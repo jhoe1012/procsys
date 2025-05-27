@@ -13,6 +13,7 @@ use App\Mail\PoRejectedReworkEmail;
 use App\Models\Approvers;
 use App\Models\ApproveStatus;
 use App\Models\DeliveryAddress;
+use App\Models\Material;
 use App\Models\MaterialGroup;
 use App\Models\MaterialNetPrice;
 use App\Models\PoHeader;
@@ -40,7 +41,7 @@ class POController extends Controller
         $user = $request->user();
 
         // Fetch user plants
-        $userPlants = $user->plants->pluck('plant')->toArray();
+        $userPlants = $user->plants()->pluck('plant')->toArray();
 
         // Initialize query with relationships
         $query = PoHeader::with(['pomaterials', 'plants', 'vendors'])
@@ -48,9 +49,19 @@ class POController extends Controller
 
         // Check approval permission and filter
         if ($user->can(PermissionsEnum::ApproverPO)) {
-            $approverSeq = $user->approvers
-                ->firstWhere('type', 'po')['seq'] ?? 0;
-            $query->where('appr_seq', '>=', $approverSeq);
+
+            $approver = $user->approvers()
+                ->where('type', 'pr')->orderBy('seq')->get();
+            $combination = $approver->map(function ($item) {
+                return "'{$item->plant}{$item->seq}'";
+            })->join(',');
+
+            if (! $approver->isEmpty()) {
+                $query->where(function ($q) use ($combination) {
+                    $q->whereRaw(DB::raw("plant||appr_seq IN ({$combination})"))
+                        ->orWhere('status', Str::ucfirst(ApproveStatus::APPROVED));
+                });
+            }
         }
         // Define filterable fields and conditions
         $filters = [
@@ -89,9 +100,10 @@ class POController extends Controller
             ->onEachSide(5);
 
         return Inertia::render('PO/Index', [
-            'po_header'   => POHeaderResource::collection($poHeader),
-            'queryParams' => $request->query() ?: null,
-            'message'     => ['success' => session('success'), 'error' => session('error')],
+            'po_header'     => POHeaderResource::collection($poHeader),
+            'queryParams'   => $request->query() ?: null,
+            'message'       => ['success' => session('success'), 'error' => session('error')],
+            'vendorsChoice' => Vendor::vendorsChoice(),
         ]);
     }
 
@@ -103,10 +115,7 @@ class POController extends Controller
         })->toArray();
 
         return Inertia::render('PO/Create', [
-            'vendors' => Vendor::selectRaw('supplier as value , supplier || \' - \'||name_1 as label')
-                ->orderBy('name_1')
-                ->get()
-                ->toArray(),
+            'vendors'         => Vendor::vendorsChoice(),
             'deliveryAddress' => DeliveryAddress::selectRaw('address as value, address as label')
                 ->whereIn('plant', $user_plants)
                 ->where('is_active', 'true')
@@ -340,16 +349,19 @@ class POController extends Controller
             'seq'      => HeaderSeq::ForApproval->value,
         ]);
 
-        $po_header->refresh();
+        $po_header->load('workflows');
         if ($firstApprover->user) {
             Mail::to($firstApprover->user->email)
                 ->send(new PoForApprovalEmail(
                     $firstApprover->user->name,
-                    $po_header
+                    $po_header,
+                    $po_header->attachments
+                        ->pluck('filepath', 'filename')
+                        ->toArray()
                 ));
         }
 
-        return to_route('po.index')->with('success', "PR {$po_header->po_number} sent for approval.");
+        return to_route('po.index')->with('success', "PO {$po_header->po_number} sent for approval.");
     }
 
     public function discard($id)
@@ -405,9 +417,7 @@ class POController extends Controller
                 $po_header->status = $approver_2nd->desc;
                 $po_header->seq    = HeaderSeq::ForApproval->value;
                 $email_status      = 1;
-            } elseif (
-                $po_header->total_po_value <= $approver->amount_to
-            ) {
+            } elseif ($po_header->total_po_value <= $approver->amount_to) {
                 $po_header->status       = Str::ucfirst(ApproveStatus::APPROVED);
                 $po_header->release_date = Carbon::now()->format('Y-m-d H:i:s');
                 $po_header->seq          = HeaderSeq::Approved->value;
@@ -417,12 +427,21 @@ class POController extends Controller
             }
         } else {
             $po_header->status   = Str::ucfirst($request->input('type'));
-            $po_header->appr_seq = $request->input('type') == ApproveStatus::REWORKED ? 0 : -1;
+            $po_header->appr_seq = $request->input('type') == ApproveStatus::REWORKED ? HeaderSeq::Draft->value : HeaderSeq::Rejected->value;
             $po_header->seq      = $request->input('type') == ApproveStatus::REWORKED ? HeaderSeq::Draft->value : HeaderSeq::Cancelled->value;
             $approver_status     = ApproveStatus::where('seq', '!=', $approver->seq)
                 ->where('po_number', operator: $po_header->po_number)
                 ->whereNull('user_id')
                 ->delete();
+
+            if ($request->input('type') == ApproveStatus::REJECTED) {
+                foreach ($po_header->pomaterials as $pomaterial) {
+                    $pomaterial->status = PoMaterial::FLAG_DELETE;
+                    $pomaterial->save();
+                    // update open and order qty in pr
+                    $this->_updatePrMaterial($pomaterial, 0, CrudActionEnum::DELETE);
+                }
+            }
             $email_status = 3;
         }
 
@@ -440,7 +459,7 @@ class POController extends Controller
         $approver_status->approved_date = now();
         $approver_status->save();
 
-        $po_header->refresh();
+        $po_header->load('workflows');
         /**
          * Send email notification
          */
@@ -449,14 +468,18 @@ class POController extends Controller
                 Mail::to($approver_2nd->user->email)
                     ->send(new PoForApprovalEmail(
                         $approver_2nd->user->name,
-                        $po_header
+                        $po_header,
+                        $po_header->attachments
+                            ->pluck('filepath', 'filename')
+                            ->toArray()
                     ));
                 break;
             case 2:
                 $finance = User::where(
                     'cc_by_deliv_addr',
                     'like',
-                    '%|'.DeliveryAddress::where('address', $po_header->deliv_addr)->pluck('id')->first().'|%'
+                    '%|'.DeliveryAddress::where('address', $po_header->deliv_addr)
+                        ->where('plant', $po_header->plant)->pluck('id')->first().'|%'
                 )->pluck('email')->toArray();
 
                 $approved_cc = [$approver->user->email, ...$finance];
@@ -593,8 +616,16 @@ class POController extends Controller
             $poHeader->save();
             $controlNo++;
         }
+        $data = [
+            'poHeaders'        => $poHeaders,
+            'genericMaterials' => Material::genericItems()->pluck('mat_code')->toArray(),
+        ];
 
-        return view("print.po-mass-{$poHeaders->first()->plant}", ['poHeaders' => $poHeaders]);
+        if ($request->input('poform') === 'smbi') {
+            return view('print.po-mass-store', $data);
+        }
+
+        return view("print.po-mass-{$poHeaders->first()->plant}", $data);
     }
 
     private function _updatePrMaterial($pomaterial, $converted_qty_old_value, CrudActionEnum $action): void
@@ -674,7 +705,7 @@ class POController extends Controller
     private function _updateNetPrice($poHeader)
     {
         $matGroupSupplies = MaterialGroup::supplies()->pluck('mat_grp_code')->toArray();
-
+        // TODO UPDATE ONLY MATERIALS THAT IS NOT GENERIC
         foreach ($poHeader->pomaterials as $poMaterial) {
             if (in_array($poMaterial->mat_grp, $matGroupSupplies)) {
                 continue;

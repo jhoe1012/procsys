@@ -16,50 +16,14 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { IGRHeader, IGRMaterials, PageProps } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { can } from '@/lib/helper';
-import { PermissionsEnum } from '@/lib/constants';
+import { CUSTOM_DATA_SHEET_STYLE, DEFAULT_GR_MATERIAL, PermissionsEnum, REACT_SELECT_STYLES } from '@/lib/constants';
+import { SelectField } from '@/Components';
 
 const Create = ({ auth }: PageProps) => {
   const dateToday = new Date().toISOString().substring(0, 10);
 
   const { toast } = useToast();
-  const [material, setMaterial] = useState<IGRMaterials[]>([
-    {
-      id: undefined,
-      gr_header_id: undefined,
-      po_material_id: undefined,
-      item_no: undefined,
-      mat_code: undefined,
-      short_text: undefined,
-      po_gr_qty: undefined,
-      gr_qty: undefined,
-      unit: undefined,
-      po_deliv_date: undefined,
-      batch: undefined,
-      mfg_date: undefined,
-      sled_bbd: undefined,
-      po_number: undefined,
-      po_item: undefined,
-      dci: undefined,
-    },
-    {
-      id: undefined,
-      gr_header_id: undefined,
-      po_material_id: undefined,
-      item_no: undefined,
-      mat_code: undefined,
-      short_text: undefined,
-      po_gr_qty: undefined,
-      gr_qty: undefined,
-      unit: undefined,
-      po_deliv_date: undefined,
-      batch: undefined,
-      mfg_date: undefined,
-      sled_bbd: undefined,
-      po_number: undefined,
-      po_item: undefined,
-      dci: undefined,
-    },
-  ]);
+  const [material, setMaterial] = useState<IGRMaterials[]>(Array(5).fill({ ...DEFAULT_GR_MATERIAL }));
 
   const { data, setData, post, errors, reset, processing } = useForm<IGRHeader>({
     id: 0,
@@ -80,25 +44,20 @@ const Create = ({ auth }: PageProps) => {
   });
 
   const columns = [
-    { ...keyColumn('item_no', intColumn), title: 'ItmNo', maxWidth: 50, disabled: true },
-    { ...keyColumn('mat_code', textColumn), title: 'Material', maxWidth: 130, disabled: true },
-    { ...keyColumn('short_text', textColumn), title: 'Material Description', maxWidth: 500, disabled: true },
-    { ...keyColumn('po_gr_qty', floatColumn), title: 'PO Qty', maxWidth: 130, disabled: true },
-    { ...keyColumn('gr_qty', floatColumn), title: 'Qty', maxWidth: 130 },
-    { ...keyColumn('unit', textColumn), title: 'Unit', maxWidth: 55 },
-    { ...keyColumn('po_deliv_date', textColumn), title: 'PO Del Date', maxWidth: 130, disabled: true },
-    { ...keyColumn('batch', textColumn), title: 'Batch', maxWidth: 130 },
-    { ...keyColumn('mfg_date', dateColumn), title: 'Mfg Date', maxWidth: 130 },
-    { ...keyColumn('sled_bbd', dateColumn), title: 'SLED/BBD', maxWidth: 130 },
-    { ...keyColumn('po_item', textColumn), title: 'PO Item', maxWidth: 55, disabled: true },
-    { ...keyColumn('dci', checkboxColumn), title: 'DCI', maxWidth: 55 },
+    { ...keyColumn('item_no', intColumn), title: 'ItmNo', minWidth: 50, disabled: true },
+    { ...keyColumn('mat_code', textColumn), title: 'Material', minWidth: 130, disabled: true },
+    { ...keyColumn('short_text', textColumn), title: 'Material Description', minWidth: 400, disabled: true },
+    { ...keyColumn('item_text', textColumn), title: 'Item Text', minWidth: 400, disabled: true },
+    { ...keyColumn('po_gr_qty', floatColumn), title: 'PO Qty', minWidth: 70, disabled: true },
+    { ...keyColumn('gr_qty', floatColumn), title: 'Qty', minWidth: 70 },
+    { ...keyColumn('unit', textColumn), title: 'Unit', minWidth: 55 },
+    { ...keyColumn('po_deliv_date', textColumn), title: 'PO Del Date', minWidth: 130, disabled: true },
+    { ...keyColumn('batch', textColumn), title: 'Batch', minWidth: 130 },
+    { ...keyColumn('mfg_date', dateColumn), title: 'Mfg Date', minWidth: 130 },
+    { ...keyColumn('sled_bbd', dateColumn), title: 'SLED/BBD', minWidth: 130 },
+    { ...keyColumn('po_item', textColumn), title: 'PO Item', minWidth: 55, disabled: true },
+    { ...keyColumn('dci', checkboxColumn), title: 'DCI', minWidth: 55 },
   ];
-
-  const customStyle = {
-    '--dsg-header-text-color': 'rgb(10, 10, 10)',
-    '--dsg-cell-disabled-background-color': 'rgb(245, 245, 245)',
-    '--dsg-border-color': '#bfbdbd',
-  };
 
   const updateMaterial = async (newValue: IGRMaterials[], operations: Operation[]) => {
     const updatedMaterial = [...newValue];
@@ -170,6 +129,7 @@ const Create = ({ auth }: PageProps) => {
         item_no: undefined,
         mat_code: item.mat_code,
         short_text: item.short_text,
+        item_text: item.item_text,
         po_gr_qty: item.po_gr_qty,
         gr_qty: undefined,
         unit: item.unit,
@@ -220,34 +180,6 @@ const Create = ({ auth }: PageProps) => {
     }
   };
 
-  const styles = {
-    control: (provided: CSSObjectWithLabel) => ({
-      ...provided,
-      minHeight: '1.75rem',
-      height: '1.75rem',
-      fontSize: '0.875rem',
-      borderColor: 'hsl(var(--input))',
-    }),
-
-    valueContainer: (provided: CSSObjectWithLabel) => ({
-      ...provided,
-      height: '1.75rem',
-      padding: '0 6px',
-    }),
-
-    input: (provided: CSSObjectWithLabel) => ({
-      ...provided,
-      margin: '0px',
-    }),
-    indicatorSeparator: () => ({
-      display: 'none',
-    }),
-    indicatorsContainer: (provided: CSSObjectWithLabel) => ({
-      ...provided,
-      height: '1.75rem',
-    }),
-  };
-
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -277,7 +209,7 @@ const Create = ({ auth }: PageProps) => {
                     }}
                     placeholder="Select PO Number"
                     required={true}
-                    styles={styles}
+                    styles={REACT_SELECT_STYLES}
                   />
                 </div>
                 <div className="flex-none w-40">
@@ -293,20 +225,16 @@ const Create = ({ auth }: PageProps) => {
                   <Input type="text" id="created_name" value={data.created_name} disabled />
                 </div>
                 <div className="flex-none w-60">
-                  <Label htmlFor="requestingPlant">Plant</Label>
-                  <CSelect value={data.plant} onValueChange={(value) => setData('plant', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Plant" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {auth.user.plants &&
-                        auth.user.plants.map((plant) => (
-                          <SelectItem value={plant.plant} key={plant.plant}>
-                            {plant.plant} {plant.name1}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </CSelect>
+                  <SelectField
+                    label="Plant"
+                    items={auth.user.plants}
+                    valueKey="plant"
+                    displayKey="name1"
+                    onValueChange={(value) => setData('plant', value)}
+                    value={auth.user.plants.find(({ plant }) => plant == data.plant)?.plant}
+                    displayValue={true}
+                    required={true}
+                  />
                 </div>
               </div>
               <div className="p-1 pt-0">
@@ -361,7 +289,7 @@ const Create = ({ auth }: PageProps) => {
                   value={material}
                   onChange={updateMaterial}
                   columns={columns}
-                  style={customStyle}
+                  style={CUSTOM_DATA_SHEET_STYLE}
                   disableExpandSelection
                   rowHeight={30}
                   className="text-sm"

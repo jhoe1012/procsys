@@ -149,8 +149,8 @@ class VendorController extends Controller
                 throw ValidationException::withMessages(['error' => ['No valid files were uploaded ']]);
             }
             $importData = new VendorImport;
-            Excel::import($importData, storage_path('app/'.$files[0]['filepath']));
-            $getData = $importData->getData();
+            Excel::import($importData, storage_path('app/'.$files['filepath']));
+            $getData = $importData->getVendorData();
 
             if (empty($getData)) {
                 throw ValidationException::withMessages([
@@ -161,41 +161,18 @@ class VendorController extends Controller
             $emptyData = [];
 
             DB::transaction(function () use ($getData, &$emptyData) {
-                $validDataLFA1 = collect($getData['vendors'])
+
+                $validData = collect($getData)
                     ->filter(fn ($row) => ! empty($row['supplier'] ?? null))
                     ->all();
 
-                $emptyDataLFA1 = collect($getData['vendors'])
+                $emptyData = collect($getData)
                     ->filter(fn ($row) => empty($row['supplier'] ?? null))
-                    ->map(fn ($row) => [
-                        'row_id' => $row['row_id'] ?? null,
-                        'sheet'  => 'LFA1',
-                    ])
+                    ->map(fn ($row) => $row['row_id'] ?? null)
                     ->values()
                     ->all();
 
-                $validDataLFM1 = collect($getData['transactions'])
-                    ->filter(fn ($row) => ! empty($row['supplier'] ?? null))
-                    ->all();
-
-                $emptyDataLFM1 = collect($getData['transactions'])
-                    ->filter(fn ($row) => empty($row['supplier'] ?? null))
-                    ->map(fn ($row) => [
-                        'row_id' => $row['row_id'] ?? null,
-                        'sheet'  => 'LFM1',
-                    ])
-                    ->values()
-                    ->all();
-
-                $emptyData = array_merge($emptyDataLFA1, $emptyDataLFM1);
-
-                foreach ($validDataLFA1 as $data) {
-                    Vendor::updateOrCreate(
-                        ['supplier' => $data['supplier']],
-                        $data
-                    );
-                }
-                foreach ($validDataLFM1 as $data) {
+                foreach ($validData as $data) {
                     Vendor::updateOrCreate(
                         ['supplier' => $data['supplier']],
                         $data

@@ -34,6 +34,7 @@ export type PageProps<T extends Record<string, unknown> = Record<string, unknown
     user: AuthUser;
     menu: any;
   };
+  vendorsChoice?: Choice[];
 };
 
 export interface IPlants {
@@ -66,6 +67,7 @@ export interface IApprover {
   amount_to: number;
   seq: number;
   desc: string;
+  prctrl_grp_id: number;
   created_by?: string;
   updated_by?: string;
   created_at?: string;
@@ -209,6 +211,7 @@ export interface IPRHeader {
   plants?: IPlants;
   prmaterials: IPRMaterial[];
   attachments?: IPRAttachment[];
+  prctrl_grp_id?: number
   _method?: string;
 }
 export interface IPRAttachment {
@@ -408,6 +411,7 @@ export interface IGRMaterials {
   item_no?: number;
   mat_code?: string;
   short_text?: string;
+  item_text?: string;
   po_gr_qty?: number;
   gr_qty?: number;
   unit?: string;
@@ -501,6 +505,7 @@ export interface GenericSelectProps<T> {
   onValueChange: (value: string) => void;
   placeholder?: string;
   displayValue?: boolean;
+  required?: boolean;
 }
 
 export interface TabItem {
@@ -508,12 +513,13 @@ export interface TabItem {
   label: string;
   visible: boolean;
   content: React.ReactNode;
+  tabIcon?: React.ReactNode;
 }
 
 export interface TabsProps {
   defaultValue: string;
   tabs: TabItem[];
-  className?: string;
+  className?: string; 
 }
 
 export interface IitemDetails {

@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import { IPRMaterial, PageProps, IPRHeader, IPRHeaderPage, IMessage } from '@/types';
+import { IPRMaterial, PageProps, IPRHeader, IPRHeaderPage, IMessage, Choice } from '@/types';
 import Modal from '@/Components/Modal';
 
 import { useState, useEffect, KeyboardEvent } from 'react';
@@ -10,8 +10,9 @@ import { useToast } from '@/Components/ui/use-toast';
 import { Toaster } from '@/Components/ui/toaster';
 import { formatLongDate, formatNumber, formatShortDate } from '@/lib/utils';
 import { can } from '@/lib/helper';
-import { PermissionsEnum } from '@/lib/constants';
+import { PermissionsEnum, REACT_SELECT_STYLES } from '@/lib/constants';
 import { badgeVariants } from '@/Components/ui';
+import Select from 'react-select';
 
 export default function Index({
   auth,
@@ -21,6 +22,7 @@ export default function Index({
 }: PageProps<{ pr_header: IPRHeaderPage; queryParams: any; message: IMessage }>) {
   const [selectedPR, setSelectedPR] = useState<IPRHeader | null>(null);
   const [prMaterial, setPrMaterial] = useState<IPRMaterial[]>([]);
+  const plantsChoice: Choice[] = auth.user.plants.map(({ plant, name1 }) => ({ value: plant, label: name1 }));
 
   queryParams = queryParams || {};
 
@@ -125,12 +127,12 @@ export default function Index({
                         />
                       </th>
                       <th className="px-1 py-2">
-                        <TextInput
-                          className="h-7 text-xs p-1 m-0"
-                          defaultValue={queryParams.plant}
-                          onBlur={(e) => searchFieldChanged('plant', e.target.value)}
-                          onKeyDown={(e) => handleKeyPress('plant', e)}
+                        <Select
                           placeholder="Plant"
+                          value={plantsChoice.find(({ value }) => value === queryParams.plant)}
+                          options={plantsChoice}
+                          onChange={(option: any) => searchFieldChanged('plant', option?.value)}
+                          styles={REACT_SELECT_STYLES}
                         />
                       </th>
                       <th className="px-1 py-2">
@@ -255,6 +257,7 @@ export default function Index({
                         <th className="px-3 py-2">itemNo</th>
                         <th className="px-3 py-2">Material</th>
                         <th className="px-3 py-2">Material Description</th>
+                        <th className="px-3 py-2">Item Text </th>
                         <th className="px-3 py-2">Del Date</th>
                         <th className="px-3 py-2">Quantity</th>
                         <th className="px-3 py-2">Open Qty</th>
@@ -271,7 +274,8 @@ export default function Index({
                           <td className="px-3 py-2">{prmaterial.item_no}</td>
                           <td className="px-3 py-2">{prmaterial.mat_code}</td>
                           <td className="px-3 py-2">{prmaterial.short_text}</td>
-                          <td className="px-3 py-2">{formatShortDate(prmaterial.del_date)}</td>
+                          <td className="px-3 py-2">{prmaterial.item_text}</td>
+                          <td className="px-3 py-2">{formatShortDate(String(prmaterial.del_date))}</td>
                           <td className="px-3 py-2">{prmaterial.qty}</td>
                           <td className="px-3 py-2">{prmaterial.qty_open}</td>
                           <td className="px-3 py-2">{prmaterial.ord_unit}</td>

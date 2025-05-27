@@ -35,12 +35,20 @@ class Vendor extends Model
         'telephone_1',
         'telephone_2',
         'vat_reg_no',
-        'currency',
-        'payment_terms',
+        // 'currency',
+        // 'payment_terms',
     ];
 
     public function poheader(): BelongsTo
     {
         return $this->belongsTo(PoHeader::class, 'vendor_id', 'supplier');
+    }
+
+    public function scopeVendorsChoice($query): array
+    {
+        return $query->selectRaw('supplier as value , supplier || \' - \'||name_1 as label')
+            ->orderBy('name_1')
+            ->get()
+            ->toArray();
     }
 }

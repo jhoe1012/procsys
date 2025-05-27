@@ -1,22 +1,22 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import { PageProps, IMessage, IPOHeaderPage, IPOHeader, IPOMaterial } from '@/types';
+import { PageProps, IMessage, IPOHeaderPage, IPOHeader, IPOMaterial, Choice } from '@/types';
 import { useState, useEffect, KeyboardEvent } from 'react';
-import { formatNumber } from '@/lib/utils';
-import AsyncSelect from 'react-select/async';
+import { formatNumber, formatShortDate } from '@/lib/utils';
 import { PermissionsEnum, REACT_SELECT_STYLES, STATUS_APPROVED } from '@/lib/constants';
-import { badgeVariants, Button, Toaster, useToast } from '@/Components/ui';
+import { badgeVariants, Button, Label, RadioGroup, RadioGroupItem, Toaster, useToast } from '@/Components/ui';
 import { Checkbox, InputField, Modal, Pagination, TextInput } from '@/Components';
-import { fetchVendor } from '@/lib/Vendor';
 import { PrinterIcon } from 'lucide-react';
 import { can } from '@/lib/helper';
+import Select from 'react-select';
 
 export default function Index({
   auth,
   po_header,
   queryParams = {},
   message,
-}: PageProps<{ po_header: IPOHeaderPage }> & PageProps<{ queryParams: any }> & PageProps<{ message: IMessage }>) {
+  vendorsChoice,
+}: PageProps<{ po_header: IPOHeaderPage; queryParams: any; message: IMessage; vendorsChoice: Choice[] }>) {
   const [selectedPO, setSelectedPO] = useState<IPOHeader | null>(null);
   const [poMaterials, setPoMaterials] = useState<IPOMaterial[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -24,6 +24,9 @@ export default function Index({
   const [checkboxPo, setCheckboxPo] = useState<number[]>([]);
   const [controlNumberModal, setControlNumberModal] = useState(false);
   const [controlNumber, setControlNumber] = useState('');
+  const [poform, setPoForm] = useState('egi');
+
+  const plantsChoice: Choice[] = auth.user.plants.map(({ plant, name1 }) => ({ value: plant, label: name1 }));
 
   queryParams = queryParams || {};
 
@@ -140,23 +143,20 @@ export default function Index({
                         />
                       </th>
                       <th className="px-1 py-2">
-                        <TextInput
-                          className="h-7 text-xs p-1 m-0 w-28"
-                          defaultValue={queryParams.plant}
-                          onBlur={(e) => searchFieldChanged('plant', e.target.value)}
-                          onKeyDown={(e) => handleKeyPress('plant', e)}
+                        <Select
                           placeholder="Plant"
+                          value={plantsChoice.find(({ value }) => value === queryParams.plant)}
+                          options={plantsChoice}
+                          onChange={(option: any) => searchFieldChanged('plant', option?.value)}
+                          styles={REACT_SELECT_STYLES}
                         />
                       </th>
                       <th className="px-1 py-2">
-                        <AsyncSelect
-                          className="p-2 w-full border-gray-500"
-                          cacheOptions
-                          defaultOptions
-                          loadOptions={fetchVendor}
-                          value={queryParams.vendor ? { label: `${queryParams.vendor} `, value: queryParams.vendor } : null}
-                          onChange={(option: any) => searchFieldChanged('vendor', option?.value)}
+                        <Select
                           placeholder="Vendor"
+                          value={vendorsChoice.find(({ value }) => value === queryParams.vendor)}
+                          options={vendorsChoice}
+                          onChange={(option: any) => searchFieldChanged('vendor', option?.value)}
                           styles={REACT_SELECT_STYLES}
                         />
                       </th>
@@ -238,8 +238,8 @@ export default function Index({
                             {po.vendor_id} - {po.vendors?.name_1}
                           </td>
                           <td className="px-3 py-2">{po.created_name}</td>
-                          <td className="px-3 py-2">{po.doc_date}</td>
-                          <td className="px-3 py-2">{po.deliv_date}</td>
+                          <td className="px-3 py-2">{formatShortDate(po.doc_date)}</td>
+                          <td className="px-3 py-2">{formatShortDate(po.deliv_date)}</td>
                           {/* <td className="px-3 py-2">{po.status}</td> */}
                           <td className="px-3 py-2">
                             <span className={badgeVariants({ variant: po.status.includes('Approval') ? 'Approval' : po.status })}>
@@ -288,6 +288,7 @@ export default function Index({
                         <th className="px-3 py-2">itemNo</th>
                         <th className="px-3 py-2">Material </th>
                         <th className="px-3 py-2">Material Description</th>
+                        <th className="px-3 py-2">Item Text </th>
                         <th className="px-3 py-2">Del Date</th>
                         <th className="px-3 py-2">Qty</th>
                         <th className="px-3 py-2">Unit</th>
@@ -304,6 +305,7 @@ export default function Index({
                             <td className="px-3 py-2">{poMaterial.item_no}</td>
                             <td className="px-3 py-2">{poMaterial.mat_code}</td>
                             <td className="px-3 py-2">{poMaterial.short_text}</td>
+                            <td className="px-3 py-2">{poMaterial.item_text}</td>
                             <td className="px-3 py-2">{poMaterial.del_date?.toString()}</td>
                             <td className="px-3 py-2">{poMaterial.po_qty}</td>
                             <td className="px-3 py-2">{poMaterial.unit}</td>
@@ -333,6 +335,7 @@ export default function Index({
                 onClose={() => {
                   setControlNumberModal(false);
                   setControlNumber('');
+                  setPoForm('egi');
                 }}
                 maxWidth="3xl">
                 <div className="p-5 flex flex-col">
@@ -346,9 +349,20 @@ export default function Index({
                     className="text-center"
                   />
 
+                  {/* <RadioGroup defaultValue="egi" className="mt-3" onValueChange={setPoForm}>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="egi" id="egi" />
+                      <Label htmlFor="egi">EGI PO Form</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="smbi" id="smbi"  />
+                      <Label htmlFor="smbi">SMBI PO Form</Label>
+                    </div>
+                  </RadioGroup> */}
+
                   <a
                     target="_blank"
-                    href={route('po.mass-print', { controlNumber: controlNumber, checkboxPo: checkboxPo })}
+                    href={route('po.mass-print', { controlNumber: controlNumber, checkboxPo: checkboxPo, poform: poform })}
                     onClick={() => setControlNumberModal(false)}
                     className="flex items-center justify-center text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1 text-center  mt-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800">
                     <PrinterIcon /> Print

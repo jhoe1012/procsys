@@ -9,6 +9,7 @@ use App\Models\GrHeader;
 use App\Models\GrMaterial;
 use App\Models\PoHeader;
 use App\Models\PoMaterial;
+use App\Models\Vendor;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -72,9 +73,10 @@ class GRController extends Controller
             ->onEachSide(5);
 
         return Inertia::render('GR/Index', [
-            'gr_header'   => GRHeaderResource::collection($gr_header),
-            'queryParams' => $request->query() ?: null,
-            'message'     => ['success' => session('success'), 'error' => session('error')],
+            'gr_header'     => GRHeaderResource::collection($gr_header),
+            'queryParams'   => $request->query() ?: null,
+            'message'       => ['success' => session('success'), 'error' => session('error')],
+            'vendorsChoice' => Vendor::vendorsChoice(),
         ]);
     }
 
@@ -84,12 +86,7 @@ class GRController extends Controller
     public function create()
     {
 
-        return Inertia::render('GR/Create', [
-            // 'ponumber' => PoHeader::select('po_number as value', 'po_number as label')
-            //     ->where('status', Str::ucfirst(ApproveStatus::APPROVED))
-            //     ->get()
-            //     ->toArray(),
-        ]);
+        return Inertia::render('GR/Create', []);
     }
 
     /**
@@ -97,18 +94,19 @@ class GRController extends Controller
      */
     public function store(Request $request)
     {
-        $gr_header               = new GrHeader;
-        $gr_header->po_number    = $request->input('po_number');
-        $gr_header->created_name = $request->input('created_name');
-        $gr_header->vendor_id    = $request->input('vendor_id');
-        $gr_header->plant        = $request->input('plant');
-
-        $gr_header->entry_date    = $request->input('entry_date');
-        $gr_header->posting_date  = $request->input('posting_date');
-        $gr_header->actual_date   = $request->input('actual_date');
-        $gr_header->delivery_note = $request->input('delivery_note');
-        $gr_header->header_text   = $request->input('header_text');
-        $gr_header->save();
+        $gr_header = GrHeader::create(
+            $request->only([
+                'po_number',
+                'created_name',
+                'vendor_id',
+                'plant',
+                'entry_date',
+                'posting_date',
+                'actual_date',
+                'delivery_note',
+                'header_text',
+            ])
+        );
 
         $gr_materials = collect($request->input('grmaterials'))
             ->filter(fn ($item) => ! empty($item['mat_code']))
@@ -118,6 +116,7 @@ class GRController extends Controller
                 'item_no'        => ($index + 1) * 10,
                 'mat_code'       => $item['mat_code'],
                 'short_text'     => $item['short_text'],
+                'item_text'      => $item['item_text'],
                 'gr_qty'         => $item['gr_qty'],
                 'unit'           => $item['unit'],
                 'po_deliv_date'  => $item['po_deliv_date'],
@@ -180,7 +179,8 @@ class GRController extends Controller
             'plants',
             'vendors',
             'pomaterials' => fn ($query) => $query->where('po_gr_qty', '>', 0)
-                ->where('status', '!=', PoMaterial::FLAG_DELETE),
+                ->whereNull('status')
+                ->orWhere('status', '=', ''),
         ])->where('po_number', $ponumber)
             ->first();
 
@@ -202,6 +202,7 @@ class GRController extends Controller
 
                 if ($gr_material->pomaterials instanceof PoMaterial) {
                     $gr_material->pomaterials->po_gr_qty += $gr_material->gr_qty;
+                    $gr_material->pomaterials->status = null;
                     $gr_material->pomaterials->save();
                 }
                 $gr_material->save();

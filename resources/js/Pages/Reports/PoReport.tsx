@@ -47,6 +47,7 @@ export default function PoReport({ auth, poReport, queryParams }: PageProps) {
                     <th className="px-3 py-2">Supplier Name</th>
                     <th className="px-3 py-2">Material</th>
                     <th className="px-3 py-2">Material Description</th>
+                    <th className="px-3 py-2">Item Text</th>
                     <th className="px-3 py-2">Matl Grp</th>
                     <th className="px-3 py-2">PO Qty</th>
                     <th className="px-3 py-2">PO Unit</th>
@@ -81,6 +82,7 @@ export default function PoReport({ auth, poReport, queryParams }: PageProps) {
                         <td className="px-1 py-2">{po.name_1}</td>
                         <td className="px-1 py-2">{po.mat_code}</td>
                         <td className="px-1 py-2">{po.short_text}</td>
+                        <td className="px-1 py-2">{po.item_text}</td>
                         <td className="px-1 py-2">{po.mat_grp}</td>
                         <td className="px-1 py-2">{po.po_qty}</td>
                         <td className="px-1 py-2">{po.unit}</td>
