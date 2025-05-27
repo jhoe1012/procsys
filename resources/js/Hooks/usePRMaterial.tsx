@@ -96,7 +96,6 @@ export default function usePRMaterial() {
               Object.assign(value, { ...computeConversion(value, value.ord_unit ?? '') });
             }
           }
-
           value.item_no = (i + 1) * 10;
         }
       }

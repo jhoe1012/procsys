@@ -51,6 +51,7 @@ const Edit = ({
   mat_desc,
   message,
   item_details,
+  materialGroupsSupplies,
   prCtrlGrp,
   materialGeneric,
 }: PageProps<{
@@ -59,6 +60,7 @@ const Edit = ({
   mat_desc: Choice[];
   message: IMessage;
   item_details: IitemDetails;
+  materialGroupsSupplies: string[];
   prCtrlGrp: Choice[];
   materialGeneric: string[];
 }>) => {
@@ -165,13 +167,13 @@ const Edit = ({
         ...keyColumn('price', floatColumn),
         title: 'Price',
         minWidth: 90,
-        disabled: ({ rowData }: any) => rowData.mat_code && !materialGeneric.includes(rowData.mat_code),
+        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
       },
       {
         ...keyColumn('per_unit', floatColumn),
         title: 'Per Unit',
         minWidth: 50,
-        disabled: ({ rowData }: any) => rowData.mat_code && !materialGeneric.includes(rowData.mat_code),
+        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
       },
       // { ...keyColumn('unit', textColumn), title: 'B.UOM', minWidth: 60, disabled: true },
       { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 120, disabled: true },
@@ -181,7 +183,7 @@ const Edit = ({
         ...keyColumn('prctrl_grp_id', selectColumn({ choices: prCtrlGrp })),
         title: 'PR Controller',
         minWidth: 200,
-        disabled: ({ rowData }: any) => rowData.mat_code && !materialGeneric.includes(rowData.mat_code),
+        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
       },
       { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 100, disabled: true },
       { ...keyColumn('purch_grp', textColumn), title: 'Purch Grp', minWidth: 90, disabled: true },
@@ -297,7 +299,7 @@ const Edit = ({
 
   const handleSubmit: FormEventHandler = async (e) => {
     e.preventDefault();
-    const { isValid, updatedMaterials } = validateMaterials(material, materialGeneric);
+    const { isValid, updatedMaterials } = validateMaterials(material, materialGeneric, prCtrlGrp);
     setMaterial(updatedMaterials);
     if (isValid) {
       post(route('pr.update', prheader.id), {

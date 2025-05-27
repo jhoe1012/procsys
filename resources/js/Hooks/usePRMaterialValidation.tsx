@@ -1,15 +1,16 @@
 import { useToast } from '@/Components/ui/use-toast';
-import { IPRMaterial } from '@/types';
+import { Choice, IPRMaterial } from '@/types';
 
 const usePRMaterialValidation = () => {
   const { toast } = useToast();
 
-  const validateMaterials = (material: IPRMaterial[], materialGeneric: string[]) => {
+  const validateMaterials = (material: IPRMaterial[], materialGeneric: string[], prCtrlGrpChoice: Choice[]) => {
     const dateToday = new Date();
     let isValid = true;
     const newErrors: string[] = [];
     const updatedMaterials = material.filter((item) => item.mat_code).map((item, index) => ({ ...item, item_no: (index + 1) * 10 }));
     const PrCtrlGrp = new Set(updatedMaterials.map((item) => item.prctrl_grp_id));
+    const prCtrlGrpValue = new Set(prCtrlGrpChoice.map((choice) => parseInt(choice.value)));
 
     if (updatedMaterials.length === 0) {
       newErrors.push('Please add at least one item');
@@ -22,7 +23,7 @@ const usePRMaterialValidation = () => {
     }
 
     for (const updatedMaterial of updatedMaterials) {
-      const { mat_code, qty, ord_unit, unit, del_date, item_no, price, per_unit, mat_grp, item_text, prctrl_grp_id  , status} = updatedMaterial;
+      const { mat_code, qty, ord_unit, del_date, item_no, price, per_unit, item_text, prctrl_grp_id  , status} = updatedMaterial;
       
       if (mat_code) {
         if (!qty || qty <= 0) {
@@ -65,7 +66,7 @@ const usePRMaterialValidation = () => {
           break;
         }
 
-        if (!prctrl_grp_id) {
+        if (!prctrl_grp_id || !prCtrlGrpValue.has(prctrl_grp_id)) {
           newErrors.push(`Please enter PR Controller  ${item_no}`);
           isValid = false;
           break;

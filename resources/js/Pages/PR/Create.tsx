@@ -26,13 +26,15 @@ const Create = ({
   auth,
   mat_code,
   mat_desc,
+  prheader,
+  materialGroupsSupplies,
   prCtrlGrp,
   materialGeneric,
-  prheader,
 }: PageProps<{
   mat_code: Choice[];
   mat_desc: Choice[];
-  prheader: IPRHeader; 
+  prheader: IPRHeader;
+  materialGroupsSupplies: string[];
   prCtrlGrp: Choice[];
   materialGeneric: string[];
 }>) => {
@@ -72,10 +74,17 @@ const Create = ({
   const handleOnChangeUom = (value: string, rowIndex: number) => {
     setMaterial((prevMaterial) => {
       const newMaterial = [...prevMaterial];
-      newMaterial[rowIndex] = {
-        ...newMaterial[rowIndex],
-        ...computeConversion(newMaterial[rowIndex], value),
-      };
+      if (materialGeneric.includes(newMaterial[rowIndex].mat_code)) {
+        newMaterial[rowIndex] = {
+          ...newMaterial[rowIndex],
+          ...computeConversion(newMaterial[rowIndex], value, true),
+        };
+      } else {
+        newMaterial[rowIndex] = {
+          ...newMaterial[rowIndex],
+          ...computeConversion(newMaterial[rowIndex], value),
+        };
+      }
       return newMaterial;
     });
   };
@@ -131,13 +140,13 @@ const Create = ({
         ...keyColumn('price', floatColumn),
         title: 'Price',
         minWidth: 90,
-        disabled: ({ rowData }: any) => rowData.mat_code && !materialGeneric.includes(rowData.mat_code),
+        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
       },
       {
         ...keyColumn('per_unit', floatColumn),
         title: 'Per Unit',
         minWidth: 50,
-        disabled: ({ rowData }: any) => rowData.mat_code && !materialGeneric.includes(rowData.mat_code),
+        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
       },
       // { ...keyColumn('unit', textColumn), title: 'B.UOM', minWidth: 60, disabled: true },
       { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 90, disabled: true },
@@ -147,7 +156,7 @@ const Create = ({
         ...keyColumn('prctrl_grp_id', selectColumn({ choices: prCtrlGrp })),
         title: 'PR Controller',
         minWidth: 200,
-        disabled: ({ rowData }: any) => rowData.mat_code && !materialGeneric.includes(rowData.mat_code),
+        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
       },
       { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 100, disabled: true },
       { ...keyColumn('purch_grp', textColumn), title: 'Purch Grp', minWidth: 90, disabled: true },
@@ -186,7 +195,7 @@ const Create = ({
 
   const handleSubmit: FormEventHandler = async (e) => {
     e.preventDefault();
-    const { isValid, updatedMaterials } = validateMaterials(material, materialGeneric);
+    const { isValid, updatedMaterials } = validateMaterials(material, materialGeneric, prCtrlGrp);
     setMaterial(updatedMaterials);
     if (isValid) {
       post(route('pr.store'));
