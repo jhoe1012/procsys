@@ -51,7 +51,7 @@ class POController extends Controller
         if ($user->can(PermissionsEnum::ApproverPO)) {
 
             $approver = $user->approvers()
-                ->where('type', 'pr')->orderBy('seq')->get();
+                ->where('type', 'po')->orderBy('seq')->get();
             $combination = $approver->map(function ($item) {
                 return "'{$item->plant}{$item->seq}'";
             })->join(',');
