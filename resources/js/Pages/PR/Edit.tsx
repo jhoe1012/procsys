@@ -59,7 +59,7 @@ const Edit = ({
   mat_code: Choice[];
   mat_desc: Choice[];
   message: IMessage;
-  item_details: IitemDetails;
+  item_details: IitemDetails[];
   materialGroupsSupplies: string[];
   prCtrlGrp: Choice[];
   materialGeneric: string[];
@@ -330,8 +330,8 @@ const Edit = ({
 
   useEffect(() => {
     const prTotal = material.filter((mat) => mat?.status != 'X').reduce((acc, mat) => acc + (mat.total_value || 0), 0);
-    const m_checked = material.filter((item) => item.sel == true).map((item) => item.mat_code)[0];
-    const m_item_details = item_details.filter((item) => item.mat_code == m_checked);
+    const m_checked = material.filter((item) => item.sel == true).map((item) => item.id)[0];
+    const m_item_details = item_details.filter((item) => item.id == m_checked);
     setData((prevHeader: IPRHeader) => ({
       ...prevHeader,
       total_pr_value: prTotal,
