@@ -17,14 +17,15 @@
         }
 
         body {
+
             margin: 0;
             padding: 0;
+
         }
 
         .printable-area {
-            width: 8.5in;
-            height: 11in;
-            position: relative;
+            width: 9in;
+            height: 8.5in;
         }
 
         table,
@@ -45,23 +46,27 @@
             text-align: right;
             font-weight: bold;
             font-size: 20px;
-            padding: 60px 80px 50px 80px;
-z        }
+            padding: 11mm 10mm 10mm 0;
+
+        }
 
         .amount {
-            position: absolute;
-            bottom: 350px;
-            right: 70px;
             text-align: right;
             font-size: 25px;
+            padding: 60px 50px 0 50px;
+            margin-top: 10px;
+            /* float: right; */
+            /* top: 30vw; */
+            /* display: block; */
         }
 
         .addr {
-            padding: 25px 40px 70px 0;
+            padding: 5px 10px 50px 0;
+            vertical-align: top;
         }
 
         .itemcode {
-            padding-left: 5px;
+            padding-left: 0;
         }
 
         .align-top {
@@ -77,36 +82,34 @@ z        }
         }
 
         .supplier_name {
-            padding: 0 0 0 50px;
+            padding: 0 0 0 0;
+            vertical-align: top;
         }
 
         .notes {
             padding-left: 10px;
-            width: 90%;
+            width: 95%;
             font-size: 13px;
 
         }
 
         .line_item {
-            min-height: 240px;
-            max-height: 240px;
+            min-height: 80mm;
+            max-height: 80mm;
+            /* margin-left: -10mm; */
             /* background-color: blue; */
         }
 
         .date {
-            padding-top: 20px;
+            padding: 22px 0 0 0;
         }
 
         .buyer {
-            position: absolute;
-            bottom: 260px;
-            left: 420px;
+            padding: 30px 0 0 430px;
         }
 
         .approver {
-            position: absolute;
-            bottom: 193px;
-            left: 420px;
+            padding: 23px 0 0 430px;
         }
 
         .page-break {
@@ -119,20 +122,21 @@ z        }
     @foreach ($poHeaders as $poHeader)
         <div class="printable-area ">
             <table>
-
-                <td colspan="5" class="ponumber"> {{ $poHeader->po_number }} </td>
+                <tr>
+                    <td colspan="5" class="ponumber"> {{ $poHeader->po_number }} </td>
                 </tr>
                 <tr>
-                    <td class="supplier_name" width='57%'>{{ $poHeader->vendors->supplier }} -
-                        {{ $poHeader->vendors->name_1 }} </td>
+                    <td> </td>
                     <td class='date'> {{ date('d-M-Y', strtotime($poHeader->doc_date)) }} </td>
                     @if (!$poHeader->is_mother_po)
                         <td class='date'> {{ date('d-M-Y', strtotime($poHeader->deliv_date)) }} </td>
                     @endif
                 </tr>
-                <tr>
-                    <td> </td>
-                    <td class="addr" colspan='2'>{{ $poHeader->deliv_addr }} </td>
+                <tr height='100mm'>
+                    <td class="supplier_name" width='60%'>{{ $poHeader->vendors->supplier }} -
+                        {{ $poHeader->vendors->name_1 }}</td>
+                    <td class="addr" colspan='3'>
+                        {{ $poHeader->deliv_addr }} </td>
 
                 </tr>
             </table>
@@ -144,20 +148,20 @@ z        }
 
                     @foreach ($poHeader->pomaterials as $pomaterial)
                         <tr>
-                            <td width='10%' class="align-top itemcode">{{ $pomaterial->mat_code }}</td>
-                            <td width='40%' class="align-top">
-                                @if (in_array($pomaterial->mat_code, $genericMaterials))
-                                    {{ $pomaterial->item_text }}
-                                @else
-                                    {{ $pomaterial->short_text }} <br>
+                            <td width='7%' class="align-top itemcode">{{ $pomaterial->mat_code }}</td>
+                            @if (in_array($pomaterial->mat_code, $genericMaterials))
+                                <td width='40%' class="align-top">{{ $pomaterial->item_text }}</td>
+                            @else
+                                <td width='40%' class="align-top">{{ $pomaterial->short_text }}
                                     @if ($pomaterial->item_text)
-                                        {{ $pomaterial->item_text }} &nbsp;&nbsp;
+                                        <br> {{ $pomaterial->item_text }}
                                     @endif
-                                @endif
-                                @if ($poHeader->is_mother_po)
-                                    <b> Delivery Date: </b>{{ date('d-M-Y', strtotime($pomaterial->del_date)) }}
-                                @endif
-                            </td>
+                                    @if ($poHeader->is_mother_po)
+                                        <br><b> Delivery Date:
+                                        </b>{{ date('m/d/Y', strtotime($pomaterial->del_date)) }}
+                                    @endif
+                                </td>
+                            @endif
                             <td width='6%' class="align-top text-right">{{ $pomaterial->po_qty }} </td>
                             <td width='8%' class="align-top">{{ $pomaterial->unit }} </td>
                             <td width='15%' class="align-top text-right pr">
