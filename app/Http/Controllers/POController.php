@@ -59,7 +59,10 @@ class POController extends Controller
             if (! $approver->isEmpty()) {
                 $query->where(function ($q) use ($combination) {
                     $q->whereRaw(DB::raw("plant||appr_seq IN ({$combination})"))
-                        ->orWhere('status', Str::ucfirst(ApproveStatus::APPROVED));
+                        ->orWhere('status', Str::ucfirst(ApproveStatus::APPROVED))
+                        ->orWhere('status', Str::ucfirst(ApproveStatus::REWORKED))
+                        ->orWhere('status', Str::ucfirst(ApproveStatus::REJECTED))
+                        ->orWhere('status', Str::ucfirst(ApproveStatus::CANCELLED));
                 });
             }
         }
