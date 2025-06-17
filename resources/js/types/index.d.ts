@@ -523,11 +523,14 @@ export interface TabsProps {
 }
 
 export interface IitemDetails {
+  id: number;
+  pr_number: number;
+  mat_code: string;
   doc: string;
-  itm: string;
-  sts: string;
   qty: number;
   unit: string;
+  sts: string;
+  itm: string;
 }
 
 export interface IUom {

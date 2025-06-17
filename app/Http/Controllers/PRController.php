@@ -251,41 +251,7 @@ class PRController extends Controller
         )->where('pr_number', $prnumber)
             ->firstOrFail();
 
-        $item_details = DB::select("SELECT b.mat_code , d.po_number AS doc , c.po_qty AS qty , c.unit AS unit, 'Ordered' AS sts, c.item_no AS itm
-                                    FROM pr_headers a
-                                    INNER JOIN pr_materials b ON
-                                        b.pr_headers_id = a.id
-                                    INNER JOIN po_materials c ON
-                                        c.pr_material_id = b.id
-                                    INNER JOIN po_headers d ON
-                                        d.id = c.po_header_id
-                                    LEFT JOIN gr_materials e ON
-                                        e.po_material_id = c.id
-                                    LEFT JOIN gr_headers f ON
-                                        f.id = e.gr_header_id
-                                    WHERE a.pr_number = {$pr_header->pr_number}
-                                    AND ( c.status <> 'X'
-                                        OR c.status IS NULL )
-                                    UNION 
-                                    SELECT b.mat_code , f.gr_number AS doc, e.gr_qty AS qty , e.unit AS unit, 'Received' AS sts, e.item_no AS itm
-                                    FROM pr_headers a
-                                    INNER JOIN pr_materials b ON
-                                        b.pr_headers_id = a.id
-                                    INNER JOIN po_materials c ON
-                                        c.pr_material_id = b.id
-                                    INNER JOIN po_headers d ON
-                                        d.id = c.po_header_id
-                                    LEFT JOIN gr_materials e ON
-                                        e.po_material_id = c.id
-                                    LEFT JOIN gr_headers f ON
-                                        f.id = e.gr_header_id
-                                    WHERE a.pr_number = {$pr_header->pr_number}
-                                    AND ( c.status <> 'X'
-                                    OR c.status IS NULL )
-                                    ORDER BY
-                                        doc, itm");
-        $item_details = collect($item_details)
-            ->filter(fn ($item) => ! empty($item->doc))->values();
+        $item_details = DB::select('SELECT * FROM view_item_details WHERE pr_number = ? AND doc IS NOT NULL ', [$pr_header->pr_number]);
 
         return Inertia::render('PR/Edit', [
             'prheader'               => new PRHeaderResource($pr_header),
@@ -303,7 +269,8 @@ class PRController extends Controller
     {
         try {
             return DB::transaction(function () use ($request, $id) {
-                $pr_header    = PrHeader::findOrFail($id);
+                $pr_header = PrHeader::with('prmaterials')->findOrFail($id);
+
                 $pr_materials = collect($request->input('prmaterials'))
                     ->filter(fn ($item) => ! empty($item['mat_code']))
                     ->map(fn ($item, $index) => $this->_mapOrUpdatePrMaterial($item, $index, $pr_header->id))
@@ -340,6 +307,23 @@ class PRController extends Controller
 
                         return $item;
                     })->values();
+
+                $pr_materials_from_user_request = $pr_materials->filter(fn ($mat) => $mat['id'] > 0)
+                    ->map(fn ($mat) => $mat['id'])
+                    ->toArray();
+
+                if (! empty($pr_materials_from_user_request)) {
+                    $pr_materials_tag_delete = $pr_header->prmaterials->filter(function ($item) use ($pr_materials_from_user_request) {
+                        return ! in_array($item->id, $pr_materials_from_user_request);
+                    });
+
+                    if (! empty($pr_materials_tag_delete)) {
+                        $pr_materials_tag_delete->each(function ($item) {
+                            $item->status = PrMaterial::FLAG_DELETE;
+                            $item->save();
+                        });
+                    }
+                }
                 $total_pr_value = $pr_materials->filter(fn ($item) => $item['status'] === null)->sum('total_value');
                 $total_pr_value = $total_pr_value != 0 ? $total_pr_value : $pr_header->total_pr_value;
                 $pr_header->update(
