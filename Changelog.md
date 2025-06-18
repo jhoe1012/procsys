@@ -1,43 +1,55 @@
-* ** v2.1.0*
-- Comment out conditional checks for 'is_mother_po' in email templates
-- Enhance PR creation and editing by adding materialGroupsSupplies data and updating validation logic for PR Controller Group 
-- Additional Column Plant for PR Report (#67) 
-- Net Price behavior additional fix for Issue #46 (#65)* additional fix for : Issue #46
-- Update usePOMaterial.tsx
-- Addional text limit for header in PO printing (#66)* Addional text limit for header in PO printing
-- Updated css for printing PO (#58)* Updated css for printing PO
-- [Fix] Update updateMaterialPR calls in Create and Edit components to include prCtrlGrp parameter
-- [Fix] Simplify UOM conversion logic in Create and Edit components
-- [Fix] Enhance UOM conversion logic to handle materialGeneric cases in Create component
-- Refactor: Update material handling logic to use materialGeneric for price and unit validation in Create and Edit components
-- Add tab icons to various forms and components for improved UI clarity
-- [Fix] PO history report item text
-- [Fix] Update logo dimensions in ApplicationLogo component and enhance button styling in Login page
-- Features/for diff po form (#62)* Add choices for different type of PO form
-- Fix approval logic
-- Temp remove selection of printing diff PO form.
-- [Fix] logic on conversion of supplies and services.
-- [Fix] PR report wrong header
-- [Bug]: Check PO cancellation which sometimes cause of wrong computation of PO PR #46 (#55)
-- Revamp on HandleImport Function (#57)* Changes on HandleImport function
-- [Fix] Editing Finished PR Fails to Proceed Due to Delivery Date Validation Including Deleted Items bug Something isn't working (#56)* Fix delivery date validation to ignore deleted items when editing PR (#53)
-- Add email attachments for approval function PR PO (#25)
-- [Bug] Fix issue when retrieving GR line items from POs with a null status. (d85a8657e298578e5da0cc92f9cb3ab88f31193f)
-- Add Item text in PR PO list (#34)
-- Add condition in email for mother PO (#33)
-- Add plant selection for PO PR GR list and report (#16)
-- Add Item text in create GR (#36)
-- [Bug]:Fix when editing a PO and adding a new line, the PO ID gets updated based on the PR ID, which results in incorrect data being saved (#40)
-- [Fix] use load() for retrieving workflows (#43)
-- [Fix] for material code select behavior (#35)
-- [Bug]: PR Create item text and PR Controller does not update value (#48)
-- Enhance Alternative UOM View with Search and Selection (#42)
-- [Refactor] update user plants fetching method and PRController query logic (#23) 
+* **v2.1.2** Tue Jun 17 2025 Lolito Cabornay <61818530+jhoe1012@users.noreply.github.com> (d67a39f)
+  - Refactor PRController to use view_item_details for item details retrieval and update Edit component to handle item_details as an array
+  - [FIX] PO Controller to  include additional status checks
+  - [FIX]  PR Controller to improve item detail retrieval.
+  - [FIX] PO mass print templates for accurate pricing calculations and formatting.
+  - [ENHANCE] alter column price 3 decimals
+
+* **v2.1.1** 
+  - Fix typo error in PO controller
+  - Remove unused files
+
+
+* **v2.1.0**
+  - Comment out conditional checks for 'is_mother_po' in email templates
+  - Enhance PR creation and editing by adding materialGroupsSupplies data and updating validation logic for PR Controller Group 
+  - Additional Column Plant for PR Report (#67) 
+  - Net Price behavior additional fix for Issue #46 (#65)* additional fix for : Issue #46
+  - Update usePOMaterial.tsx
+  - Addional text limit for header in PO printing (#66)* Addional text limit for header in PO printing
+  - Updated css for printing PO (#58)* Updated css for printing PO
+  - [Fix] Update updateMaterialPR calls in Create and Edit components to include prCtrlGrp parameter
+  - [Fix] Simplify UOM conversion logic in Create and Edit components
+  - [Fix] Enhance UOM conversion logic to handle materialGeneric cases in Create component
+  - Refactor: Update material handling logic to use materialGeneric for price and unit validation in Create and Edit components
+  - Add tab icons to various forms and components for improved UI clarity
+  - [Fix] PO history report item text
+  - [Fix] Update logo dimensions in ApplicationLogo component and enhance button styling in Login page
+  - Features/for diff po form (#62)* Add choices for different type of PO form
+  - Fix approval logic
+  - Temp remove selection of printing diff PO form.
+  - [Fix] logic on conversion of supplies and services.
+  - [Fix] PR report wrong header
+  - [Bug]: Check PO cancellation which sometimes cause of wrong computation of PO PR #46 (#55)
+  - Revamp on HandleImport Function (#57)* Changes on HandleImport function
+  - [Fix] Editing Finished PR Fails to Proceed Due to Delivery Date Validation Including Deleted Items bug Something isn't working (#56)* Fix delivery date validation to ignore deleted items when editing PR (#53)
+  - Add email attachments for approval function PR PO (#25)
+  - [Bug] Fix issue when retrieving GR line items from POs with a null status. (d85a8657e298578e5da0cc92f9cb3ab88f31193f)
+  - Add Item text in PR PO list (#34)
+  - Add condition in email for mother PO (#33)
+  - Add plant selection for PO PR GR list and report (#16)
+  - Add Item text in create GR (#36)
+  - [Bug]:Fix when editing a PO and adding a new line, the PO ID gets updated based on the PR ID, which results in incorrect data being saved (#40)
+  - [Fix] use load() for retrieving workflows (#43)
+  - [Fix] for material code select behavior (#35)
+  - [Bug]: PR Create item text and PR Controller does not update value (#48)
+  - Enhance Alternative UOM View with Search and Selection (#42)
+  - [Refactor] update user plants fetching method and PRController query logic (#23) 
 
 
 * **v2.0.1**
 
-- Fix when editing a PO and adding a new line, the PO ID gets updated based on the PR ID, which results in incorrect data being saved
+  - Fix when editing a PO and adding a new line, the PO ID gets updated based on the PR ID, which results in incorrect data being saved
 
 - Sun Mar 23 2025 Lolito Cabornay <61818530+jhoe1012@users.noreply.github.com> (c1d34b0)
 

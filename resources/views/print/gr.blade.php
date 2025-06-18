@@ -67,8 +67,12 @@
             <tr>
                 <th>Purchase Order: </th>
                 <td>{{ $grHeader->po_number }}</td>
-                <th>DR # / SI #  </th>
+                <th>DR # / SI # </th>
                 <td>{{ $grHeader->delivery_note }} </td>
+            </tr>
+              <tr>
+                <th>Recieved By: </th>
+                <td>{{ $grHeader->created_name }}</td>
             </tr>
         </table>
 
@@ -95,7 +99,11 @@
                     <tr>
                         <td widtd='5%'>{{ $grmaterial->item_no }} </td>
                         <td widtd='10%'> {{ $grmaterial->mat_code }} </td>
-                        <td widtd='35%'>{{ $grmaterial->short_text }}</td>
+                        @if (in_array($grmaterial->mat_code, $genericMaterials))
+                            <td widtd='35%'>{{ $grmaterial->item_text }}</td>
+                        @else
+                            <td widtd='35%'>{{ $grmaterial->short_text }}</td>
+                        @endif
                         <td widtd='10%'></td>
                         <td widtd='10%'>{{ $grmaterial->gr_qty }}</td>
                         <td widtd='10%'>{{ $grmaterial->unit }}</td>

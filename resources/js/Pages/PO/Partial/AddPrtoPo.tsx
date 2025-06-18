@@ -17,11 +17,13 @@ import { useCallback, useMemo, useState } from 'react';
 
 const filterInputLabel = {
   pr_number: 'PR Number',
-  mat_code: 'Material',
+  mat_code: 'Material Code',
   short_text: 'Material Description',
+  item_text: 'Item Text',
   mat_grp: 'Material Group',
   del_date: 'Delivery Date',
   purch_grp: 'Buyer Group',
+  requested_by: 'Requested By',
 };
 
 export default function AddPrtoPo({ p_plant, p_doc_date, addToPO }) {
@@ -33,9 +35,11 @@ export default function AddPrtoPo({ p_plant, p_doc_date, addToPO }) {
     pr_number: '',
     mat_code: '',
     short_text: '',
+    item_text: '',
     del_date: '',
     mat_grp: '',
     purch_grp: '',
+    requested_by:'',
   });
 
   const fetchPrMaterials = useCallback(async () => {
@@ -98,17 +102,17 @@ export default function AddPrtoPo({ p_plant, p_doc_date, addToPO }) {
           <DialogTitle>PR Selection</DialogTitle>
         </DialogHeader>
         <DialogDescription>
-          <div className="flex items-center space-x-2 w-full">
-            <div className="p-2 flex flex-wrap gap-4">
+          <div className="flex  items-center space-x-2 text-black">
+            <div className="p-2 flex flex-wrap gap-4  w-full">
               {Object.keys(filterInputs).map((key) => (
                 <InputField key={key} label={filterInputLabel[key]} id={key} value={filterInputs[key]} onChange={handleInputChange} />
               ))}
             </div>
           </div>
 
-          <div className="overflow-y-auto h-96">
-            <table className=" table-auto w-full text-sm text-left rtl:text-right text-gray-500 ">
-              <thead className="text-xs text-gray-700 uppercase bg-gray-50  border-gray-500 sticky top-0">
+          <div className="overflow-y-auto h-[70vh] text-black">
+            <table className=" table-auto w-full text-sm text-left rtl:text-right">
+              <thead className="text-xs  uppercase bg-gray-50  border-gray-500 sticky top-0">
                 <tr className="text-nowrap ">
                   <th className="px-3 py-1"> Sel</th>
                   <th className="px-3 py-1"> Pr</th>
