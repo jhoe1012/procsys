@@ -77,7 +77,7 @@ class GRController extends Controller
             'gr_header'     => GRHeaderResource::collection($gr_header),
             'queryParams'   => $request->query() ?: null,
             'message'       => ['success' => session('success'), 'error' => session('error')],
-            'vendorsChoice' => Vendor::vendorsChoice(),
+            'vendorsChoice' => Vendor::getVendorsChoice(),
         ]);
     }
 

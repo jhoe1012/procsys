@@ -106,7 +106,7 @@ class POController extends Controller
             'po_header'     => POHeaderResource::collection($poHeader),
             'queryParams'   => $request->query() ?: null,
             'message'       => ['success' => session('success'), 'error' => session('error')],
-            'vendorsChoice' => Vendor::vendorsChoice(),
+            'vendorsChoice' => Vendor::getVendorsChoice(),
         ]);
     }
 
@@ -118,7 +118,7 @@ class POController extends Controller
         })->toArray();
 
         return Inertia::render('PO/Create', [
-            'vendors'         => Vendor::vendorsChoice(),
+            'vendors'         => Vendor::getVendorsChoice(true),
             'deliveryAddress' => DeliveryAddress::selectRaw('address as value, address as label')
                 ->whereIn('plant', $user_plants)
                 ->where('is_active', 'true')
