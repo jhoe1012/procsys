@@ -99,11 +99,13 @@
                     <tr>
                         <td widtd='5%'>{{ $grmaterial->item_no }} </td>
                         <td widtd='10%'> {{ $grmaterial->mat_code }} </td>
+                        <td widtd='35%'>
                         @if (in_array($grmaterial->mat_code, $genericMaterials))
-                            <td widtd='35%'>{{ $grmaterial->item_text }}</td>
-                        @else
-                            <td widtd='35%'>{{ $grmaterial->short_text }}</td>
+                            {{ $grmaterial->item_text }}
+                        @else 
+                            {{ $grmaterial->short_text }}
                         @endif
+                        </td>
                         <td widtd='10%'></td>
                         <td widtd='10%'>{{ $grmaterial->gr_qty }}</td>
                         <td widtd='10%'>{{ $grmaterial->unit }}</td>
