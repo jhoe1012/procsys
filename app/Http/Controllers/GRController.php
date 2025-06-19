@@ -7,6 +7,7 @@ use App\Http\Resources\POHeaderResource;
 use App\Models\ApproveStatus;
 use App\Models\GrHeader;
 use App\Models\GrMaterial;
+use App\Models\Material;
 use App\Models\PoHeader;
 use App\Models\PoMaterial;
 use App\Models\Vendor;
@@ -214,9 +215,9 @@ class GRController extends Controller
 
     public function printGr(Request $request, $id)
     {
-        $grHeader = GrHeader::with(['grmaterials', 'plants', 'vendors'])->findOrFail($id);
-
-        return view('print.gr', ['grHeader' => $grHeader]);
+        $grHeader = GrHeader::with(['grmaterials', 'plants', 'vendors'])->findOrFail($id); 
+        
+        return view('print.gr', ['grHeader' => $grHeader,  'genericMaterials' => Material::genericItems()->pluck('mat_code')->toArray(),]);
     }
 
     public function searchPOControlNo(Request $request)
