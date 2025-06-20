@@ -46,7 +46,7 @@ class ReportController extends Controller
                 ->onEachSide(5)
                 ->appends($request->query() ?: null),
             'queryParams'   => $request->query() ?: null,
-            'vendorsChoice' => Vendor::vendorsChoice(),
+            'vendorsChoice' => Vendor::getVendorsChoice(),
 
         ]);
     }
@@ -68,7 +68,7 @@ class ReportController extends Controller
                 ->onEachSide(5)
                 ->appends($request->query() ?: null),
             'queryParams'   => $request->query() ?: null,
-            'vendorsChoice' => Vendor::vendorsChoice(),
+            'vendorsChoice' => Vendor::getVendorsChoice(),
         ]);
     }
 
@@ -110,7 +110,7 @@ class ReportController extends Controller
                 ->onEachSide(2)
                 ->appends($request->query() ?: null),
             'queryParams'   => $request->query() ?: null,
-            'vendorsChoice' => Vendor::vendorsChoice(),
+            'vendorsChoice' => Vendor::getVendorsChoice(),
 
         ]);
     }
