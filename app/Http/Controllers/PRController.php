@@ -36,23 +36,15 @@ class PRController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-
-        // Fetch user plants
         $userPlants = $user->plants()->pluck('plant')->toArray();
 
-        // Initialize query with relationships
-        $query = PrHeader::with(['prmaterials', 'plants'])
-            ->whereHas(
-                'prmaterials',
-                fn (Builder $q) => $q->whereIn(
-                    'prctrl_grp_id',
-                    $user->prCtrlGrp()->pluck('id')->toArray()
-                )
-            )
-            ->whereIn('plant', $userPlants);
-
-        // Check approval permission
         if ($user->can(PermissionsEnum::ApproverPR)) {
+            $query = PrHeader::with(['prmaterials', 'plants'])
+                ->whereIn('plant', $userPlants)
+                ->whereHas('workflows', function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                });
+
             $approver = $user->approvers()
                 ->where('type', 'pr')->orderBy('seq')->get();
             $combination = $approver->map(function ($item) {
@@ -65,6 +57,11 @@ class PRController extends Controller
                         ->orWhere('status', Str::ucfirst(ApproveStatus::APPROVED));
                 });
             }
+        } else {
+            // Requestor: show PRs created by the user
+            $query = PrHeader::with(['prmaterials', 'plants'])
+                ->whereIn('plant', $userPlants)
+                ->where('created_by', $user->id);
         }
 
         $filters = [
@@ -125,7 +122,7 @@ class PRController extends Controller
             'plants',
             'prmaterials',
             'prmaterials.altUoms',
-            'prmaterials.altUoms.altUomText',
+            'prmaterials.altUomText',
             'prmaterials.materialGroups',
             'workflows',
             'attachments'
@@ -244,7 +241,7 @@ class PRController extends Controller
             'plants',
             'prmaterials',
             'prmaterials.altUoms',
-            'prmaterials.altUoms.altUomText',
+            'prmaterials.altUomText',
             'prmaterials.materialGroups',
             'workflows',
             'attachments'

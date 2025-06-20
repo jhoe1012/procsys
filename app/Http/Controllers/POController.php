@@ -43,12 +43,12 @@ class POController extends Controller
         // Fetch user plants
         $userPlants = $user->plants()->pluck('plant')->toArray();
 
-        // Initialize query with relationships
-        $query = PoHeader::with(['pomaterials', 'plants', 'vendors'])
-            ->whereIn('plant', $userPlants);
-
-        // Check approval permission and filter
         if ($user->can(PermissionsEnum::ApproverPO)) {
+        $query = PoHeader::with(['pomaterials', 'plants', 'vendors'])
+            ->whereIn('plant', $userPlants)
+            ->whereHas('workflows', function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                });
 
             $approver = $user->approvers()
                 ->where('type', 'po')->orderBy('seq')->get();
@@ -65,7 +65,13 @@ class POController extends Controller
                         ->orWhere('status', Str::ucfirst(ApproveStatus::CANCELLED));
                 });
             }
+        } else {
+            // Requestor: show PRs created by the user
+            $query = PoHeader::with(['pomaterials', 'plants'])
+                ->whereIn('plant', $userPlants)
+                ->where('created_by', $user->id);
         }
+
         // Define filterable fields and conditions
         $filters = [
             'po_number_from' => fn ($value) => request('po_number_to')
@@ -516,11 +522,11 @@ class POController extends Controller
 
     public function getApprovedPr(Request $request)
     {
+
         $doc_date = date('Y-m-d', strtotime($request->input('doc_date')));
 
         $pr_material = PrMaterial::with([
-            'materialGroups',
-            'prheader',
+            'materialGroups', 
             'altUoms',
             'altUoms.altUomText',
             'materialNetPrices' => fn ($query) => $query->where('plant', $request->input('plant'))
