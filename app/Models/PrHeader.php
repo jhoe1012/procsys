@@ -67,19 +67,37 @@ class PrHeader extends Model
         return $this->hasOne(User::class, 'id', 'created_by');
     }
 
-    public function scopeApproved(Builder $query, $userPlants): Builder
+    public function scopeApproved(Builder $query, $userPlants, $userId , $isApprover): Builder
     {
-        return $query->where('status', 'Approved')->whereIn('plant', $userPlants);
+        $query->where('status', 'Approved')
+            ->whereIn('plant', $userPlants);
+
+        if ($isApprover) {
+            $query->whereHas('workflows', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            });
+        }else{
+            $query->where('created_by', $userId);
+        }
+        
+        return $query;
+    }
+    public function scopeCancelled(Builder $query, $userPlants , $userId): Builder
+    {
+        return $query->where('status', 'Cancelled')
+            ->whereIn('plant', $userPlants)
+            ->whereHas('workflows', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            });
     }
 
-    public function scopeCancelled(Builder $query, $userPlants): Builder
+    public function scopeApproval(Builder $query, $userPlants , $userId): Builder
     {
-        return $query->where('status', 'Cancelled')->whereIn('plant', $userPlants);
-    }
+        $query->where('status', 'ilike', '%approval%')
+            ->where('created_by', $userId)
+            ->whereIn('plant', $userPlants);
 
-    public function scopeApproval(Builder $query, $userPlants): Builder
-    {
-        return $query->where('status', 'ilike', '%approval%')->whereIn('plant', $userPlants);
+        return $query;
     }
 
     protected static function booted()
