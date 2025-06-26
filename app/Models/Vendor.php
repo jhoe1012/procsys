@@ -36,6 +36,7 @@ class Vendor extends Model
         'telephone_1',
         'telephone_2',
         'vat_reg_no',
+        'email_addr',
         // 'currency',
         // 'payment_terms',
     ];

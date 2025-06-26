@@ -142,6 +142,7 @@ export default function Index({
                       <th className="px-3 py-2">Telephone 1</th>
                       <th className="px-3 py-2">Telephone 2</th>
                       <th className="px-3 py-2">Vat Reg No</th>
+                      <th className="px-3 py-2">Email Address</th>
                       <th className="px-3 py-2">Action</th>
                     </tr>
                   </thead>
@@ -166,6 +167,7 @@ export default function Index({
                           <td className="px-3 py-2">{vendor.telephone_1}</td>
                           <td className="px-3 py-2">{vendor.telephone_2}</td>
                           <td className="px-3 py-2">{vendor.vat_reg_no}</td>
+                          <td className="px-3 py-2">{vendor.email_addr}</td>
 
                           <td className="px-3 py-2">
                             <Edit p_vendor={vendor} />
