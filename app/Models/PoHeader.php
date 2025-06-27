@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enum\PermissionsEnum;
 use App\Trait\CreatedUpdatedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -74,19 +75,51 @@ class PoHeader extends Model
         return $this->hasOne(User::class, 'id', 'created_by');
     }
 
-    public function scopeApproved(Builder $query, $userPlants): Builder
+    public function scopeUserPlants(Builder $query, $userPlants): Builder
     {
-        return $query->where('status', 'Approved')->whereIn('plant', $userPlants);
+        return $query->whereIn('plant', $userPlants);
     }
 
-    public function scopeCancelled(Builder $query, $userPlants): Builder
+    public function scopeApproved(Builder $query): Builder
     {
-        return $query->where('status', 'Cancelled')->whereIn('plant', $userPlants);
+        return $query->where('status', 'Approved');
     }
 
-    public function scopeApproval(Builder $query, $userPlants): Builder
+    public function scopeCancelled(Builder $query): Builder
     {
-        return $query->where('status', 'ilike', '%approval%')->whereIn('plant', $userPlants);
+        return $query->where('status', 'Cancelled');
+    }
+
+    public function scopeApproval(Builder $query): Builder
+    {
+        return $query->where('status', 'ilike', '%approval%');
+    }
+
+    public function scopeWithApprovalAccess(Builder $query, User $user, bool $getApprove = false): Builder
+    {
+        if ($user->can(PermissionsEnum::ApproverPO)) {
+
+            $approver = $user->approvers()
+                ->where('type', 'po')->orderBy('seq')->get();
+
+            if (! $approver->isEmpty()) {
+                $combination = $approver->map(function ($item) {
+                    return "('{$item->plant}',{$item->seq})";
+                })->join(',');
+
+                $query->where(function ($q) use ($combination, $getApprove) {
+                    $q->whereRaw("(plant,appr_seq) IN ({$combination})")
+                        // Add condition to filter approved and cancelled statuses for PO list, and show only pending approvals in the dashboard.
+                        ->when(
+                            $getApprove,
+                            fn ($q) => $q->orWhere('status', ApproveStatus::APPROVED)
+                                ->orWhere('status', ApproveStatus::CANCELLED)
+                        );
+                });
+            }
+        }
+
+        return $query;
     }
 
     protected static function booted()

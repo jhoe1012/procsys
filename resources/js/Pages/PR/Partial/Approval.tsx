@@ -5,6 +5,7 @@ import SecondaryButton from '@/Components/SecondaryButton';
 import { useForm } from '@inertiajs/react';
 import { Button } from '@/Components/ui/button';
 import { Textarea } from '@/Components/ui/textarea';
+import { STATUS_APPROVED } from '@/lib/constants';
 
 export default function Approval({
   p_pr_number = '',
@@ -43,9 +44,9 @@ export default function Approval({
   };
 
   const stylesMap: Record<string, string> = {
-    approved: 'bg-green-500 hover:bg-green-600',
-    rejected: 'bg-red-500 hover:bg-red-600',
-    rework: '',
+    Approved: 'bg-green-500 hover:bg-green-600',
+    Rejected: 'bg-red-500 hover:bg-red-600',
+    Rework: '',
   };
 
   const styles = stylesMap[p_type] || '';
@@ -65,7 +66,7 @@ export default function Approval({
           <h2 className="text-lg font-medium text-gray-900">
             Are you sure you want to {p_title} this Purchase Requisition ?
           </h2>
-          {p_type != 'approved' ? (
+          {p_type != STATUS_APPROVED ? (
             <Textarea
               placeholder="message"
               value={data.message}

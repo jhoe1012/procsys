@@ -5,6 +5,7 @@ import SecondaryButton from '@/Components/SecondaryButton';
 import { useForm } from '@inertiajs/react';
 import { Button } from '@/Components/ui/button';
 import { Textarea } from '@/Components/ui/textarea';
+import { STATUS_APPROVED } from '@/lib/constants';
 
 export default function Approval({
   p_po_number,
@@ -43,9 +44,9 @@ export default function Approval({
   };
 
   const stylesMap: Record<string, string> = {
-    approved: 'bg-green-500 hover:bg-green-600',
-    rejected: 'bg-red-500 hover:bg-red-600',
-    rework: '',
+    Approved: 'bg-green-500 hover:bg-green-600',
+    Rejected: 'bg-red-500 hover:bg-red-600',
+    Rework: '',
   };
 
   const styles = stylesMap[p_type] || '';
@@ -63,16 +64,12 @@ export default function Approval({
       <Modal show={confirmApproval} onClose={closeModal}>
         <form onSubmit={approvePr} className="p-6">
           <h2 className="text-lg font-medium text-gray-900">Are you sure you want to {p_title} this Purchase Order ?</h2>
-          {/* {p_type != 'approved' ? ( */}
           <Textarea
             placeholder="Notes"
             value={data.message}
             onChange={(e) => setData('message', e.target.value)}
-            required={p_type != 'approved'}
-          />
-          {/* ) : ( */}
-          {/* '' */}
-          {/* )} */}
+            required={p_type != STATUS_APPROVED}
+          /> 
 
           <div className="mt-6 flex justify-end">
             <SecondaryButton onClick={closeModal}>Cancel</SecondaryButton>

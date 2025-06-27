@@ -13,7 +13,6 @@ use App\Models\PoMaterial;
 use App\Models\Vendor;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class GRController extends Controller
@@ -215,16 +214,16 @@ class GRController extends Controller
 
     public function printGr(Request $request, $id)
     {
-        $grHeader = GrHeader::with(['grmaterials', 'plants', 'vendors'])->findOrFail($id); 
-        
-        return view('print.gr', ['grHeader' => $grHeader,  'genericMaterials' => Material::genericItems()->pluck('mat_code')->toArray(),]);
+        $grHeader = GrHeader::with(['grmaterials', 'plants', 'vendors'])->findOrFail($id);
+
+        return view('print.gr', ['grHeader' => $grHeader,  'genericMaterials' => Material::genericItems()->pluck('mat_code')->toArray()]);
     }
 
     public function searchPOControlNo(Request $request)
     {
 
         $poHeader = PoHeader::select('po_number', 'control_no')
-            ->where('status', Str::ucfirst(ApproveStatus::APPROVED))
+            ->where('status', ApproveStatus::APPROVED)
             ->whereNotNull('control_no')
             ->where(fn ($query) => $query->where('po_number', 'ilike', "%{$request->input('search')}%")
                 ->orWhere('control_no', 'ilike', "%{$request->input('search')}%"))
