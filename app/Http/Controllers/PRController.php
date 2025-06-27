@@ -488,13 +488,12 @@ class PRController extends Controller
         $withOpenQty = $prMaterials->filter(fn ($material) => $material->qty_ordered !== null && $material->qty_ordered > 0);
 
         DB::transaction(function () use ($toFlag) {
-            // TODO WRAP IN IF CONDITIO
-            foreach ($toFlag as $material) {
-                $material->status = PrMaterial::FLAG_DELETE;
-                $material->save();
-            }
-
             if ($toFlag->isNotEmpty()) {
+                foreach ($toFlag as $material) {
+                    $material->status = PrMaterial::FLAG_DELETE;
+                    $material->save();
+                }
+                
                 $prHeader                 = $toFlag->first()->prheader;
                 $prHeader->total_pr_value = PrMaterial::where('pr_headers_id', $prHeader->id)
                     ->where(fn ($query) => $query->where('status', '<>', 'X')->orWhereNull('status'))
