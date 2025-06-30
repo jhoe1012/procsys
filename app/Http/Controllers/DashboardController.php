@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Enum\PermissionsEnum;
 use App\Models\PoHeader;
 use App\Models\PrHeader;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -13,41 +12,43 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $user       = $request->user();
-        $userPlants = $user->plants->pluck('plant')->toArray();
+        $user          = $request->user();
+        $userPlants    = $user->plants->pluck('plant')->toArray();
+        $userPrCtrlGrp = $user->prCtrlGrp->pluck('id')->toArray();
+        $prHeader      = [];
+        $poHeader      = [];
 
-        $prHeader['total']     = PrHeader::whereIn('plant', $userPlants)->count();
-        $prHeader['approved']  = PrHeader::approved($userPlants)->count();
-        $prHeader['cancelled'] = PrHeader::cancelled($userPlants)->count();
-
-        if ($user->can(PermissionsEnum::ApproverPR)) {
-            $prApprSeq = $user->approvers
-                ->firstWhere('type', 'pr') ?? 0;
-
-            $prHeader['approval'] = PrHeader::approval($userPlants)
-                ->whereHas(
-                    'prmaterials',
-                    fn (Builder $q) => $q->where('prctrl_grp_id', $prApprSeq->prctrl_grp_id)
-                )->where('appr_seq', '>=', $prApprSeq->seq)
+        if ($user->hasAnyPermission([PermissionsEnum::CreatePR, PermissionsEnum::ApproverPR])) {
+            $prHeader['total'] = PrHeader::userPlants($userPlants)
+                ->userPrCtrlGrp($userPrCtrlGrp)
                 ->count();
-
-        } else {
-            $prHeader['approval'] = PrHeader::approval($userPlants)
+            $prHeader['approved'] = PrHeader::approved()
+                ->userPlants($userPlants)
+                ->userPrCtrlGrp($userPrCtrlGrp)
+                ->count();
+            $prHeader['cancelled'] = PrHeader::cancelled()
+                ->userPlants($userPlants)
+                ->userPrCtrlGrp($userPrCtrlGrp)
+                ->count();
+            $prHeader['approval'] = PrHeader::approval()
+                ->userPlants($userPlants)
+                ->userPrCtrlGrp($userPrCtrlGrp)
+                ->withApprovalAccess($user)
                 ->count();
         }
 
-        $poHeader['total']     = PoHeader::whereIn('plant', $userPlants)->count();
-        $poHeader['approved']  = PoHeader::approved($userPlants)->count();
-        $poHeader['cancelled'] = PoHeader::cancelled($userPlants)->count();
-
-        if ($user->can(PermissionsEnum::ApproverPO)) {
-            $poApprSeq = $user->approvers
-                ->firstWhere('type', 'po')['seq'] ?? 0;
-            $poHeader['approval'] = PoHeader::approval($userPlants)
-                ->where('appr_seq', '>=', $poApprSeq)
+        if ($user->hasAnyPermission([PermissionsEnum::CreatePO, PermissionsEnum::ApproverPO])) {
+            $poHeader['total']    = PoHeader::userPlants($userPlants)->count();
+            $poHeader['approved'] = PoHeader::approved()
+                ->userPlants($userPlants)
                 ->count();
-        } else {
-            $poHeader['approval'] = PoHeader::approval($userPlants)->count();
+            $poHeader['cancelled'] = PoHeader::cancelled()
+                ->userPlants($userPlants)
+                ->count();
+            $poHeader['approval'] = PoHeader::approval()
+                ->userPlants($userPlants)
+                ->withApprovalAccess($user)
+                ->count();
         }
 
         return Inertia::render('Dashboard/Index', [

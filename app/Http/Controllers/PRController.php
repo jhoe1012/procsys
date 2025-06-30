@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Enum\HeaderSeq;
-use App\Enum\PermissionsEnum;
 use App\Enum\RolesEnum;
 use App\Http\Resources\PRHeaderResource;
 use App\Mail\PrApprovedEmail;
@@ -20,7 +19,6 @@ use App\Models\PrMaterial;
 use App\Models\User;
 use App\Services\AttachmentService;
 use Carbon\Carbon;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -38,34 +36,14 @@ class PRController extends Controller
         $user = $request->user();
 
         // Fetch user plants
-        $userPlants = $user->plants()->pluck('plant')->toArray();
+        $userPlants    = $user->plants()->pluck('plant')->toArray();
+        $userPrCtrlGrp = $user->prCtrlGrp()->pluck('id')->toArray();
 
         // Initialize query with relationships
         $query = PrHeader::with(['prmaterials', 'plants'])
-            ->whereHas(
-                'prmaterials',
-                fn (Builder $q) => $q->whereIn(
-                    'prctrl_grp_id',
-                    $user->prCtrlGrp()->pluck('id')->toArray()
-                )
-            )
-            ->whereIn('plant', $userPlants);
-
-        // Check approval permission
-        if ($user->can(PermissionsEnum::ApproverPR)) {
-            $approver = $user->approvers()
-                ->where('type', 'pr')->orderBy('seq')->get();
-            $combination = $approver->map(function ($item) {
-                return "'{$item->plant}{$item->seq}{$item->prctrl_grp_id}'";
-            })->join(',');
-
-            if (! $approver->isEmpty()) {
-                $query->where(function ($q) use ($combination) {
-                    $q->whereRaw(DB::raw("plant||appr_seq||prctrl_grp_id IN ({$combination})"))
-                        ->orWhere('status', Str::ucfirst(ApproveStatus::APPROVED));
-                });
-            }
-        }
+            ->userPrCtrlGrp($userPrCtrlGrp)
+            ->userPlants($userPlants)
+            ->withApprovalAccess($user, true);
 
         $filters = [
             'pr_number_from' => fn ($value) => request('pr_number_to')
@@ -165,7 +143,7 @@ class PRController extends Controller
                         'doc_date'       => Carbon::parse($request->input('doc_date'))->format('Y-m-d'),
                         'total_pr_value' => $total_pr_value,
                         'appr_seq'       => 0,
-                        'status'         => Str::ucfirst(ApproveStatus::DRAFT),
+                        'status'         => ApproveStatus::DRAFT,
                         'prctrl_grp_id'  => $pr_materials->first()['prctrl_grp_id'] ?? null,
                     ]
                 ));
@@ -341,7 +319,7 @@ class PRController extends Controller
                             'total_pr_value' => $total_pr_value,
                             'appr_seq'       => 0,
                             'seq'            => HeaderSeq::Draft->value,
-                            'status'         => Str::ucfirst(ApproveStatus::DRAFT),
+                            'status'         => ApproveStatus::DRAFT,
                             'prctrl_grp_id'  => $pr_materials->first()['prctrl_grp_id'] ?? null,
                         ]
                     )
@@ -399,7 +377,7 @@ class PRController extends Controller
                 $pr_header->total_pr_value >= $approver->amount_from
                 && $pr_header->total_pr_value <= $approver->amount_to
             ) {
-                $pr_header->status       = Str::ucfirst(ApproveStatus::APPROVED);
+                $pr_header->status       = ApproveStatus::APPROVED;
                 $pr_header->release_date = Carbon::now()->format('Y-m-d H:i:s');
                 $pr_header->seq          = HeaderSeq::Approved->value;
                 $email_status            = 2;
@@ -493,7 +471,7 @@ class PRController extends Controller
         $pr_header = PrHeader::with(['prmaterials' => fn ($query) => $query->whereNull('status')->orWhere('status', '')])
             ->findOrFail($id);
         if ($pr_header->prmaterials->isEmpty()) {
-            $pr_header->status   = Str::ucfirst(ApproveStatus::CANCELLED);
+            $pr_header->status   = ApproveStatus::CANCELLED;
             $pr_header->appr_seq = -1;
             $pr_header->seq      = HeaderSeq::Cancelled->value;
             $pr_header->save();
@@ -510,12 +488,12 @@ class PRController extends Controller
         $withOpenQty = $prMaterials->filter(fn ($material) => $material->qty_ordered !== null && $material->qty_ordered > 0);
 
         DB::transaction(function () use ($toFlag) {
-            foreach ($toFlag as $material) {
-                $material->status = PrMaterial::FLAG_DELETE;
-                $material->save();
-            }
-
             if ($toFlag->isNotEmpty()) {
+                foreach ($toFlag as $material) {
+                    $material->status = PrMaterial::FLAG_DELETE;
+                    $material->save();
+                }
+                
                 $prHeader                 = $toFlag->first()->prheader;
                 $prHeader->total_pr_value = PrMaterial::where('pr_headers_id', $prHeader->id)
                     ->where(fn ($query) => $query->where('status', '<>', 'X')->orWhereNull('status'))
@@ -562,7 +540,7 @@ class PRController extends Controller
     public function recall($id)
     {
         $prHeader           = PrHeader::findOrFail($id);
-        $prHeader->status   = Str::ucfirst(ApproveStatus::DRAFT);
+        $prHeader->status   = ApproveStatus::DRAFT;
         $prHeader->appr_seq = 0;
         $prHeader->seq      = HeaderSeq::Draft->value;
         $prHeader->save();

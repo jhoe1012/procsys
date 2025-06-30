@@ -500,9 +500,9 @@ const Edit = ({
             </form>
             {can(auth.user, PermissionsEnum.ApproverPO) && ( //auth.permissions.po.approver && (
               <div className="px-5 pb-5">
-                <Approval p_po_number={data.po_number} p_type="approved" p_title="approve" p_disable={disableButton} />
-                <Approval p_po_number={data.po_number} p_type="rework" p_title="rework" p_disable={disableButton} />
-                <Approval p_po_number={data.po_number} p_type="rejected" p_title="reject" p_disable={disableButton} />
+                <Approval p_po_number={data.po_number} p_type={STATUS_APPROVED} p_title="approve" p_disable={disableButton} />
+                <Approval p_po_number={data.po_number} p_type={STATUS_REWORK} p_title="rework" p_disable={disableButton} />
+                <Approval p_po_number={data.po_number} p_type={STATUS_REJECTED} p_title="reject" p_disable={disableButton} />
               </div>
             )}
           </div>

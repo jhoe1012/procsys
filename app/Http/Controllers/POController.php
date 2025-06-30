@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Enum\CrudActionEnum;
 use App\Enum\HeaderSeq;
-use App\Enum\PermissionsEnum;
 use App\Http\Resources\POHeaderResource;
 use App\Http\Resources\PRMaterialsResource;
 use App\Mail\PoApprovedEmail;
@@ -14,7 +13,6 @@ use App\Models\Approvers;
 use App\Models\ApproveStatus;
 use App\Models\DeliveryAddress;
 use App\Models\Material;
-use App\Models\MaterialGroup;
 use App\Models\MaterialNetPrice;
 use App\Models\PoHeader;
 use App\Models\PoMaterial;
@@ -45,27 +43,9 @@ class POController extends Controller
 
         // Initialize query with relationships
         $query = PoHeader::with(['pomaterials', 'plants', 'vendors'])
-            ->whereIn('plant', $userPlants);
+            ->userPlants($userPlants)
+            ->withApprovalAccess($user, true);
 
-        // Check approval permission and filter
-        if ($user->can(PermissionsEnum::ApproverPO)) {
-
-            $approver = $user->approvers()
-                ->where('type', 'po')->orderBy('seq')->get();
-            $combination = $approver->map(function ($item) {
-                return "'{$item->plant}{$item->seq}'";
-            })->join(',');
-
-            if (! $approver->isEmpty()) {
-                $query->where(function ($q) use ($combination) {
-                    $q->whereRaw(DB::raw("plant||appr_seq IN ({$combination})"))
-                        ->orWhere('status', Str::ucfirst(ApproveStatus::APPROVED))
-                        ->orWhere('status', Str::ucfirst(ApproveStatus::REWORKED))
-                        ->orWhere('status', Str::ucfirst(ApproveStatus::REJECTED))
-                        ->orWhere('status', Str::ucfirst(ApproveStatus::CANCELLED));
-                });
-            }
-        }
         // Define filterable fields and conditions
         $filters = [
             'po_number_from' => fn ($value) => request('po_number_to')
@@ -160,7 +140,7 @@ class POController extends Controller
                         'doc_date'       => Carbon::parse($request->input('doc_date'))->format('Y-m-d'),
                         'total_po_value' => $total_po_value,
                         'appr_seq'       => 0,
-                        'status'         => Str::ucfirst(ApproveStatus::DRAFT),
+                        'status'         => ApproveStatus::DRAFT,
                     ]
                 ));
 
@@ -296,7 +276,7 @@ class POController extends Controller
                         'total_po_value' => $total_po_value,
                         'appr_seq'       => 0,
                         'seq'            => HeaderSeq::Draft->value,
-                        'status'         => Str::ucfirst(ApproveStatus::DRAFT),
+                        'status'         => ApproveStatus::DRAFT,
                     ]
                 ));
 
@@ -385,7 +365,7 @@ class POController extends Controller
         $po_header = PoHeader::with(['pomaterials' => fn ($query) => $query->whereNull('status')
             ->orWhere('status', '')])->findOrFail($id);
         if ($po_header->pomaterials->isEmpty()) {
-            $po_header->status   = Str::ucfirst(ApproveStatus::CANCELLED);
+            $po_header->status   = ApproveStatus::CANCELLED;
             $po_header->appr_seq = -1;
             $po_header->seq      = HeaderSeq::Cancelled->value;
             $po_header->save();
@@ -421,7 +401,7 @@ class POController extends Controller
                 $po_header->seq    = HeaderSeq::ForApproval->value;
                 $email_status      = 1;
             } elseif ($po_header->total_po_value <= $approver->amount_to) {
-                $po_header->status       = Str::ucfirst(ApproveStatus::APPROVED);
+                $po_header->status       = ApproveStatus::APPROVED;
                 $po_header->release_date = Carbon::now()->format('Y-m-d H:i:s');
                 $po_header->seq          = HeaderSeq::Approved->value;
                 $this->_updateNetPrice($po_header);
@@ -528,7 +508,7 @@ class POController extends Controller
                 ->whereDate('valid_to', '>=', $doc_date),
         ])
             ->whereHas('prheader', fn ($query) => $query->where('plant', $request->input('plant'))
-                ->where('status', Str::ucfirst(ApproveStatus::APPROVED)))
+                ->where('status', ApproveStatus::APPROVED))
             ->where('qty_open', '>', 0)
             ->whereNull('status')
             ->orderBy('pr_headers_id', 'desc')
@@ -567,7 +547,7 @@ class POController extends Controller
             'plants',
             'vendors',
             'pomaterials.taxClass',
-            'workflows'   => fn ($query) => $query->where('status', Str::ucfirst(ApproveStatus::APPROVED)),
+            'workflows'   => fn ($query) => $query->where('status', ApproveStatus::APPROVED),
             'pomaterials' => fn ($query) => $query->whereNull('status')->orWhere('status', ''),
         ])->findOrFail($id);
 
@@ -580,7 +560,7 @@ class POController extends Controller
     public function recall($id)
     {
         $poHeader           = PoHeader::findOrFail($id);
-        $poHeader->status   = Str::ucfirst(ApproveStatus::DRAFT);
+        $poHeader->status   = ApproveStatus::DRAFT;
         $poHeader->appr_seq = 0;
         $poHeader->seq      = HeaderSeq::Draft->value;
         $poHeader->save();
@@ -607,7 +587,7 @@ class POController extends Controller
             'plants',
             'vendors',
             'pomaterials.taxClass',
-            'workflows'   => fn ($query) => $query->where('status', Str::ucfirst(ApproveStatus::APPROVED)),
+            'workflows'   => fn ($query) => $query->where('status', ApproveStatus::APPROVED),
             'pomaterials' => fn ($query) => $query->whereNull('status')->orWhere('status', ''),
         ])->whereIn('id', $request->input('checkboxPo'))->orderBy('id')->get();
 
@@ -707,10 +687,9 @@ class POController extends Controller
 
     private function _updateNetPrice($poHeader)
     {
-        $matGroupSupplies = MaterialGroup::supplies()->pluck('mat_grp_code')->toArray();
-        // TODO UPDATE ONLY MATERIALS THAT IS NOT GENERIC
+        $genericItems = Material::genericItems()->pluck('mat_code')->toArray();
         foreach ($poHeader->pomaterials as $poMaterial) {
-            if (in_array($poMaterial->mat_grp, $matGroupSupplies)) {
+            if (in_array($poMaterial->mat_code, $genericItems)) {
                 continue;
             }
             MaterialNetPrice::updateOrCreate(
