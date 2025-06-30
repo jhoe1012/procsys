@@ -35,6 +35,7 @@ class VendorResource extends JsonResource
             'telephone_1'   => $this->telephone_1,
             'telephone_2'   => $this->telephone_2,
             'vat_reg_no'    => $this->vat_reg_no,
+            'email_addr'    => $this->email_addr,
             'created_at'    => $this->created_at,
             'updated_at'    => $this->updated_at,
         ];

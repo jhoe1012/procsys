@@ -27,6 +27,7 @@ export default function Edit({ p_vendor }: { p_vendor: IVendor }) {
     telephone_1: p_vendor.telephone_1,
     telephone_2: p_vendor.telephone_2,
     vat_reg_no: p_vendor.vat_reg_no,
+    email_addr: p_vendor.email_addr,
   });
 
   const updateVendor: FormEventHandler = (e) => {
@@ -238,6 +239,22 @@ export default function Edit({ p_vendor }: { p_vendor: IVendor }) {
                   maxLength={100}
                 />
               </div>
+            </div>
+              <div className="flex px-2">
+                <div className="p-1 w-6/12">
+                  <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="email_addr">
+                    Email Address
+                  </Label>
+                  <Input
+                    className="m-2 w-full border-gray-300 h-10"
+                    type="email"
+                    id="email_addr"
+                    defaultValue={data.email_addr}
+                    onChange={(e) => setData('email_addr', e.target.value)}
+                    maxLength={100}
+                    required={false}
+                  />
+                </div>
             </div>
 
             <div className="grid justify-items-center m-3">

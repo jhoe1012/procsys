@@ -25,7 +25,8 @@ export default function Create() {
     city_2: '',
     telephone_1: '',
     telephone_2: '',
-    vat_reg_no: '',
+    vat_reg_no: '',  
+    email_addr: '',
   });
 
   const createVendor: FormEventHandler = (e) => {
@@ -236,6 +237,23 @@ export default function Create() {
                   defaultValue={data.vat_reg_no}
                   onChange={(e) => setData('vat_reg_no', e.target.value)}
                   maxLength={100}
+                />
+              </div>
+            </div>
+
+            <div className="flex px-2">
+              <div className="p-1 w-6/12">
+                <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="email_addr">
+                  Email Address
+                </Label>
+                <Input
+                  className="m-2 w-full border-gray-300 h-10"
+                  type="email"
+                  id="email_addr"
+                  defaultValue={data.email_addr}
+                  onChange={(e) => setData('email_addr', e.target.value)}
+                  maxLength={100}
+                  required={false}
                 />
               </div>
             </div>
