@@ -458,11 +458,10 @@ class POController extends Controller
                     ));
                 break;
             case 2:
-                $finance = User::where(
-                    'cc_by_deliv_addr',
-                    'like',
-                    '%|'.DeliveryAddress::where('address', $po_header->deliv_addr)
-                        ->where('plant', $po_header->plant)->pluck('id')->first().'|%'
+                $finance = User::whereHas(
+                    'deliveryAddress',
+                    fn ($query) => $query->where('address', $po_header->deliv_addr)
+                        ->where('plant', $po_header->plant)
                 )->pluck('email')->toArray();
 
                 $approved_cc = [$approver->user->email, ...$finance];
