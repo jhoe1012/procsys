@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
-import { PageProps, IMessage, IApproverPage } from '@/types';
+import { PageProps, IMessage, IApproverPage, IPlants, IPrCtrlGrp, Choice } from '@/types';
 import { useEffect, KeyboardEvent } from 'react';
 import Pagination from '@/Components/Pagination';
 import TextInput from '@/Components/TextInput';
@@ -8,19 +8,23 @@ import { useToast } from '@/Components/ui/use-toast';
 import { Toaster } from '@/Components/ui/toaster';
 import Create from './Create';
 import Edit from './Edit';
-import { Choice } from '@/Components/SelectComponent';
+import Select from 'react-select';
+import { REACT_SELECT_STYLES } from '@/lib/constants';
 
 export default function Index({
   auth,
   approvers,
-  queryParams,
   plants,
+  prCtrlGrps,
+  queryParams,
   message,
-}: PageProps<{ approvers: IApproverPage }> &
-  PageProps<{ queryParams: any }> &
-  PageProps<{ plants: Choice }> &
-  PageProps<{ message: IMessage }>) {
+}: PageProps<{ approvers: IApproverPage; plants: IPlants[]; prCtrlGrps: IPrCtrlGrp[]; queryParams: any; message: IMessage }>) {
   const { toast } = useToast();
+  const plantChoice: Choice[] = plants.map((plant) => ({ label: plant.name1, value: plant.plant }));
+  const prCtrlGrpsChoice: Choice[] = prCtrlGrps.map((item) => ({
+    label: `${item.plant_id} - ${item.prctrl_grp} ${item.prctrl_desc}`,
+    value: item.id,
+  }));
 
   useEffect(() => {
     if (message?.success) {
@@ -55,7 +59,7 @@ export default function Index({
       header={
         <div className="flex flex-row justify-between">
           <h2 className="font-semibold text-xl text-gray-800 leading-tight">Approvers List</h2>
-          <Create p_plants={plants} />
+          <Create plantChoice={plantChoice} prCtrlGrpsChoice={prCtrlGrpsChoice} />
         </div>
       }>
       <Head title="View Approvers" />
@@ -72,11 +76,14 @@ export default function Index({
                     <tr className="text-nowrap">
                       <th className="px-3 py-2"></th>
                       <th className="px-3 py-2">
-                        <TextInput
-                          className="h-7 text-xs p-1 m-0"
-                          defaultValue={queryParams.plant}
-                          onBlur={(e) => searchFieldChanged('plant', e.target.value)}
-                          onKeyDown={(e) => handleKeyPress('plant', e)}
+                        <Select
+                          id="plant"
+                          className="m-2 max-w-32 min-w-32  border-gray-500"
+                          options={plantChoice}
+                          value={queryParams.plant ? { label: `${queryParams.plant} `, value: queryParams.plant } : null}
+                          onChange={(option: any) => searchFieldChanged('plant', option?.value)}
+                          placeholder="Plants"
+                          styles={REACT_SELECT_STYLES}
                         />
                       </th>
                       <th className="px-3 py-2">
@@ -112,8 +119,9 @@ export default function Index({
                       <th className="px-3 py-2">Position</th>
                       <th className="px-3 py-2">Amount From</th>
                       <th className="px-3 py-2">Amount To</th>
-                      <th className="px-3 py-2">Sequence</th>
+                      <th className="px-3 py-2">Seq</th>
                       <th className="px-3 py-2">Description</th>
+                      <th className="px-3 py-2">Ctrl Grp</th>
                       <th className="px-3 py-2">Action</th>
                     </tr>
                   </thead>
@@ -133,8 +141,9 @@ export default function Index({
                           <td className="px-3 py-2">{approver.amount_to}</td>
                           <td className="px-3 py-2">{approver.seq}</td>
                           <td className="px-3 py-2">{approver.desc}</td>
+                          <td className="px-3 py-2">{approver.prCtrlGrps?.prctrl_desc}</td>
                           <td className="px-3 py-2">
-                            <Edit p_plants={plants} p_approver={approver} />
+                            <Edit plantChoice={plantChoice} p_approver={approver} prCtrlGrpsChoice={prCtrlGrpsChoice} />
                           </td>
                         </tr>
                       ))

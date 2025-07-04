@@ -76,6 +76,8 @@ export interface IApprover {
   updated_at?: string;
   plants?: IPlants;
   user?: User;
+  prCtrlGrps?: IPrCtrlGrp;
+  prCtrlGrpsChoice?: Choice;
   _method?: string;
 }
 export interface IMaterial {
@@ -379,6 +381,8 @@ export interface IVendor {
   vat_reg_no: string;
   created_at?: string;
   updated_at?: string;
+  _method?: string;
+  email_addr?: string;
 }
 
 export interface IGRHeader {
@@ -483,7 +487,7 @@ export interface IAlternativeUom {
 
 export type Choice = {
   label: string;
-  value: string;
+  value: string | number;
 };
 
 export interface FormFieldProps {

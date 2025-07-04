@@ -5,10 +5,11 @@ import { Label } from '@/Components/ui/label';
 import AsyncSelect from 'react-select/async';
 import { Input } from '@/Components/ui/input';
 import { Button } from '@/Components/ui/button';
-import { IApprover } from '@/types';
+import { Choice, IApprover } from '@/types';
 import Select from 'react-select';
+import { fetchUser } from '@/lib/User';
 
-export default function Create({ p_plants }) {
+export default function Create({ plantChoice, prCtrlGrpsChoice }: { plantChoice: Choice[]; prCtrlGrpsChoice: Choice[] }) {
   const [showModal, setShowModal] = useState(false);
 
   const { data, setData, post, processing, reset, errors } = useForm<IApprover>({
@@ -20,10 +21,11 @@ export default function Create({ p_plants }) {
     amount_to: 0,
     seq: 0,
     desc: '',
+    prctrl_grp_id: undefined,
   });
   const approver_type = [
-    { label: 'PO', value: 'PO' },
-    { label: 'PR', value: 'PR' },
+    { label: 'PO', value: 'po' },
+    { label: 'PR', value: 'pr' },
   ];
 
   const createApprover: FormEventHandler = (e) => {
@@ -32,7 +34,6 @@ export default function Create({ p_plants }) {
     post(route('approver.store'), {
       preserveScroll: true,
       onSuccess: () => closeModal(),
-      //   onError: () => passwordInput.current?.focus(),
       onFinish: () => reset(),
     });
   };
@@ -43,28 +44,11 @@ export default function Create({ p_plants }) {
     reset();
   };
 
-  const fetchUser = async (inputValue) => {
-    if (!inputValue) return [];
-
-    try {
-      const response = await window.axios.get(route('user.search', { search: inputValue }));
-
-      return response.data.data.map((item) => ({
-        value: item.id,
-        label: item.name,
-        position: item.position,
-      }));
-    } catch (e) {
-      console.log('Error fetching data:', e);
-      return [];
-    }
-  };
-
   return (
     <section className={`space-y-6`}>
       <Button onClick={() => setShowModal(true)}>Add</Button>
 
-      <Modal show={showModal} onClose={closeModal} maxWidth="lg">
+      <Modal show={showModal} onClose={closeModal} maxWidth="2xl">
         <form onSubmit={createApprover}>
           <div className="m-2">
             <div className="flex ">
@@ -74,7 +58,6 @@ export default function Create({ p_plants }) {
               <Select
                 id="type"
                 className="m-2 w-full border-gray-500"
-                value={data.typeChoice}
                 options={approver_type}
                 onChange={(option: any) => setData({ ...data, type: option?.value })}
                 placeholder="Select Type"
@@ -88,9 +71,8 @@ export default function Create({ p_plants }) {
               <Select
                 id="plant"
                 className="m-2 w-full border-gray-500"
-                value={data.plantChoice}
-                options={p_plants}
-                onChange={(option: any) => setData({ ...data, plant: option?.value, plantChoice: option })}
+                options={plantChoice}
+                onChange={(option: any) => setData({ ...data, plant: option?.value,  })}
                 placeholder="Select Plant"
                 required={true}
               />
@@ -104,12 +86,25 @@ export default function Create({ p_plants }) {
                 className="m-2 w-full border-gray-500"
                 cacheOptions
                 defaultOptions
-                loadOptions={fetchUser}
-                value={data.user_idChoice}
+                loadOptions={fetchUser} 
                 onChange={(option: any) => {
                   setData({ ...data, user_id: option.value, user_idChoice: option, position: option.position });
                 }}
                 placeholder="Select User"
+                required={true}
+              />
+            </div>
+            <div className="flex ">
+              <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="plant">
+                Controller Group
+              </Label>
+              <Select
+                id="prctrl_grp"
+                className="m-2 w-full border-gray-500"
+                // value={data.prctrl_grp_id}
+                options={prCtrlGrpsChoice}
+                onChange={(option: any) => setData({ ...data, prctrl_grp_id: option?.value })}
+                placeholder="Select Cotroller Group"
                 required={true}
               />
             </div>
