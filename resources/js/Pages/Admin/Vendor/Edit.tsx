@@ -10,7 +10,7 @@ import { PencilSquareIcon } from '@heroicons/react/24/solid';
 export default function Edit({ p_vendor }: { p_vendor: IVendor }) {
   const [showModal, setShowModal] = useState(false);
 
-  const { data, setData, post, processing, reset, errors } = useForm<IVendor>({
+  const { data, setData, patch, processing, reset, errors } = useForm<IVendor>({
     supplier: p_vendor.supplier,
     account_group: p_vendor.account_group,
     tax_number: p_vendor.tax_number,
@@ -28,12 +28,13 @@ export default function Edit({ p_vendor }: { p_vendor: IVendor }) {
     telephone_2: p_vendor.telephone_2,
     vat_reg_no: p_vendor.vat_reg_no,
     email_addr: p_vendor.email_addr,
+    _method: 'patch',
   });
 
   const updateVendor: FormEventHandler = (e) => {
     e.preventDefault();
 
-    post(route('vendor.update'), {
+    patch(route('vendor.update', p_vendor.id), {
       preserveScroll: true,
       onSuccess: () => closeModal(),
       onFinish: () => reset(),
@@ -79,6 +80,7 @@ export default function Edit({ p_vendor }: { p_vendor: IVendor }) {
                   defaultValue={data.account_group}
                   onChange={(e) => setData('account_group', e.target.value)}
                   maxLength={100}
+                  required={true}
                 />
               </div>
               <div className="p-1 w-3/12">
@@ -240,21 +242,21 @@ export default function Edit({ p_vendor }: { p_vendor: IVendor }) {
                 />
               </div>
             </div>
-              <div className="flex px-2">
-                <div className="p-1 w-6/12">
-                  <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="email_addr">
-                    Email Address
-                  </Label>
-                  <Input
-                    className="m-2 w-full border-gray-300 h-10"
-                    type="email"
-                    id="email_addr"
-                    defaultValue={data.email_addr}
-                    onChange={(e) => setData('email_addr', e.target.value)}
-                    maxLength={100}
-                    required={false}
-                  />
-                </div>
+            <div className="flex px-2">
+              <div className="p-1 w-6/12">
+                <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="email_addr">
+                  Email Address
+                </Label>
+                <Input
+                  className="m-2 w-full border-gray-300 h-10"
+                  type="email"
+                  id="email_addr"
+                  defaultValue={data.email_addr}
+                  onChange={(e) => setData('email_addr', e.target.value)}
+                  maxLength={100}
+                  required={false}
+                />
+              </div>
             </div>
 
             <div className="grid justify-items-center m-3">

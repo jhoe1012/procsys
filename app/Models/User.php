@@ -83,4 +83,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(PrctrlGrp::class);
     }
+
+    public function deliveryAddress(): BelongsToMany
+    {
+        return $this->belongsToMany(DeliveryAddress::class);
+    }
 }

@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+use App\Models\DeliveryAddress;
 use App\Models\Plant;
+use App\Models\PrctrlGrp;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
@@ -22,7 +24,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $query = User::query();
-        $query->with(['roles', 'plants']);
+        $query->with(['roles', 'plants', 'deliveryAddress', 'prCtrlGrp']);
 
         $filters = [
             'name'     => fn ($value) => $query->where('name', 'ilike', "%{$value}%"),
@@ -50,11 +52,13 @@ class UserController extends Controller
             ->appends($request->query() ?: null);
 
         return Inertia::render('Admin/Users/Index', [
-            'users'       => UserResource::collection($users),
-            'roles'       => Role::all()->toArray(),
-            'plants'      => Plant::all()->toArray(),
-            'queryParams' => $request->query() ?: null,
-            'message'     => ['success' => session('success'), 'error' => session('error')],
+            'users'           => UserResource::collection($users),
+            'roles'           => Role::all()->toArray(),
+            'plants'          => Plant::all()->toArray(),
+            'prCtrlGrps'      => PrctrlGrp::all()->toArray(),
+            'deliveryAddress' => DeliveryAddress::all()->toArray(),
+            'queryParams'     => $request->query() ?: null,
+            'message'         => ['success' => session('success'), 'error' => session('error')],
         ]);
     }
 
@@ -72,11 +76,13 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', Rules\Password::defaults()],
-            'roles'    => ['required'],
-            'plants'   => ['required'],
+            'name'            => ['required', 'string', 'max:255'],
+            'email'           => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'password'        => ['required', Rules\Password::defaults()],
+            'roles'           => ['required'],
+            'plants'          => ['required'],
+            'prCtrlGrps'      => ['nullable', 'array'],
+            'deliveryAddress' => ['nullable', 'array'],
         ]);
 
         $user = User::create([
@@ -84,11 +90,12 @@ class UserController extends Controller
             'email'    => $request->email,
             'position' => $request->position,
             'password' => Hash::make($request->password),
-
         ]);
 
         $user->assignRole([$request->roles]);
         $user->plants()->sync($request->plants);
+        $user->prCtrlGrp()->sync($request->prCtrlGrps);
+        $user->deliveryAddress()->sync($request->deliveryAddress);
         event(new Registered($user));
 
         return back()->with('success', 'User Created Successfully');
@@ -125,12 +132,13 @@ class UserController extends Controller
             'name'     => $request->name,
             'position' => $request->position,
         ]);
-        // UserRoleRelation::where('user_id', $user->id)->delete();
+
         DB::table('model_has_roles')->where('model_id', $user->id)->delete();
         $user->assignRole($request->roles);
         $user->plants()->sync($request->plants);
+        $user->prCtrlGrp()->sync($request->prCtrlGrps);
+        $user->deliveryAddress()->sync($request->deliveryAddress);
 
-        // Cache::forget('all-permissions-' . $user->id);
         return back()->with('success', 'User Updated Successfully');
     }
 
