@@ -34,4 +34,9 @@ class Approvers extends Model
     {
         return $this->belongsTo(Plant::class, 'plant', 'plant');
     }
+
+    public function prCtrlGrp(): BelongsTo
+    {
+        return $this->belongsTo(PrctrlGrp::class, 'prctrl_grp_id', 'id');
+    }
 }

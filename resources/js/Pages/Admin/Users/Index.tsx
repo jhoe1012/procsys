@@ -1,6 +1,6 @@
 import { Toaster, useToast } from '@/Components/ui';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { IMessage, IUserPage, PageProps, IPlants, IRoles } from '@/types';
+import { IMessage, IUserPage, PageProps, IPlants, IRoles, IDeliveryAddress, IPrCtrlGrp } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { KeyboardEvent, useEffect } from 'react';
 import Create from './Create';
@@ -8,6 +8,7 @@ import { Pagination, TextInput } from '@/Components';
 import Edit from './Edit';
 import Select from 'react-select';
 import { REACT_SELECT_STYLES } from '@/lib/constants';
+import AttributeDetails from './AttributeDetails';
 
 export default function Index({
   auth,
@@ -16,7 +17,17 @@ export default function Index({
   plants,
   queryParams,
   message,
-}: PageProps<{ users: IUserPage; roles: IRoles[]; plants: IPlants[]; queryParams: any; message: IMessage }>) {
+  prCtrlGrps,
+  deliveryAddress,
+}: PageProps<{
+  users: IUserPage;
+  roles: IRoles[];
+  plants: IPlants[];
+  queryParams: any;
+  message: IMessage;
+  prCtrlGrps: IPrCtrlGrp[];
+  deliveryAddress: IDeliveryAddress[];
+}>) {
   const { toast } = useToast();
   const _roles = roles.map((role) => ({ label: role.name, value: role.name }));
   const _plants = plants.map((plant) => ({ label: plant.name1, value: plant.plant }));
@@ -54,7 +65,7 @@ export default function Index({
       header={
         <div className="flex flex-row justify-between">
           <h2 className="font-semibold text-xl text-gray-800 leading-tight">User List</h2>
-          <Create roles={roles} plants={plants} />
+          <Create roles={roles} plants={plants} prCtrlGrp={prCtrlGrps} deliveryAddress={deliveryAddress} />
         </div>
       }>
       <Head title="View user" />
@@ -124,6 +135,8 @@ export default function Index({
                       <th className="px-3 py-2">Position</th>
                       <th className="px-3 py-2 ">Role</th>
                       <th className="px-3 py-2">Plant</th>
+                      <th className="px-3 py-2">Ctrl Grp</th>
+                      <th className="px-3 py-2">For Fin. CC addr.</th>
                       <th className="px-3 py-2">Action</th>
                     </tr>
                   </thead>
@@ -132,13 +145,57 @@ export default function Index({
                     {users.data.length > 0 ? (
                       users.data.map((user) => (
                         <tr className="bg-white border-b" key={user.id}>
-                          <td className="px-3 py-2">{user.name}</td>
-                          <td className="px-3 py-2">{user.email}</td>
-                          <td className="px-3 py-2">{user.position}</td>
-                          <td className="px-3 py-2">{user.roles && user.roles.map((role) => role.name).join(', ')}</td>
-                          <td className="px-3 py-2">{user.plants && user.plants.map((plant) => plant.name1).join(', ')}</td>
-                          <td className="px-3 py-2">
-                            <Edit user={user} roles={roles} plants={plants} />
+                          <td className="px-3 py-2 max- w-[15%]">{user.name}</td>
+                          <td className="px-3 py-2 max- w-[10%]">{user.email}</td>
+                          <td className="px-3 py-2 max- w-[10%]">{user.position}</td>
+                          <td className="px-3 py-2 max- w-[10%]">{user.roles && user.roles.map((role) => role.name).join(', ')}</td>
+                          <td className="px-3 py-2 max- w-[10%]">
+                            {user.plants && (
+                              <AttributeDetails
+                                columns={[
+                                  { header: 'Plant', key: 'plant' },
+                                  { header: 'Plant Name', key: 'name1' },
+                                ]}
+                                data={user.plants}
+                                label={user.plants.map((plant) => plant.plant).join(', ')}
+                              />
+                            )}
+                          </td>
+                          <td className="px-3 py-2 max- w-[5%]">
+                            {user.prCtrlGrps && (
+                              <AttributeDetails
+                                columns={[
+                                  { header: 'ID', key: 'id' },
+                                  { header: 'Plant ID', key: 'plant_id' },
+                                  { header: 'Controller Group', key: 'prctrl_grp' },
+                                  { header: 'Controller Description', key: 'prctrl_desc' },
+                                ]}
+                                data={user.prCtrlGrps}
+                                label={user.prCtrlGrps
+                                  .map((prCtrlGrp) => prCtrlGrp.id)
+                                  .join(', ')
+                                  .substring(0, 10)}
+                              />
+                            )}
+                          </td>
+                          <td className="px-3 py-2 max- w-[5%]">
+                            {user.delivery_addresses && (
+                              <AttributeDetails
+                                columns={[
+                                  { header: 'ID', key: 'id' },
+                                  { header: 'Plant', key: 'plant' },
+                                  { header: 'Address', key: 'address' },
+                                ]}
+                                data={user.delivery_addresses}
+                                label={user.delivery_addresses
+                                  .map((del_addr) => del_addr.id)
+                                  .join(', ')
+                                  .substring(0, 10)}
+                              />
+                            )}
+                          </td>
+                          <td className="px-3 py-2 max- w-[5%]">
+                            <Edit user={user} roles={roles} plants={plants} prCtrlGrp={prCtrlGrps} deliveryAddress={deliveryAddress} />
                           </td>
                         </tr>
                       ))

@@ -8,6 +8,8 @@ export interface User {
   plants?: IPlants[];
   approvers?: IApprover[];
   roles?: IRoles[];
+  prCtrlGrps?: IPrCtrlGrp[];
+  delivery_addresses?: IDeliveryAddress[];
 }
 
 export interface AuthUser {
@@ -74,6 +76,8 @@ export interface IApprover {
   updated_at?: string;
   plants?: IPlants;
   user?: User;
+  prCtrlGrps?: IPrCtrlGrp;
+  prCtrlGrpsChoice?: Choice;
   _method?: string;
 }
 export interface IMaterial {
@@ -211,7 +215,7 @@ export interface IPRHeader {
   plants?: IPlants;
   prmaterials: IPRMaterial[];
   attachments?: IPRAttachment[];
-  prctrl_grp_id?: number
+  prctrl_grp_id?: number;
   _method?: string;
 }
 export interface IPRAttachment {
@@ -377,6 +381,8 @@ export interface IVendor {
   vat_reg_no: string;
   created_at?: string;
   updated_at?: string;
+  _method?: string;
+  email_addr?: string;
 }
 
 export interface IGRHeader {
@@ -481,7 +487,7 @@ export interface IAlternativeUom {
 
 export type Choice = {
   label: string;
-  value: string;
+  value: string | number;
 };
 
 export interface FormFieldProps {
@@ -519,7 +525,7 @@ export interface TabItem {
 export interface TabsProps {
   defaultValue: string;
   tabs: TabItem[];
-  className?: string; 
+  className?: string;
 }
 
 export interface IitemDetails {
@@ -550,4 +556,24 @@ export interface IRoles {
   description: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface IPrCtrlGrp {
+  id: number;
+  plant_id: number;
+  prctrl_grp: string;
+  prctrl_desc: string;
+  created_by: number;
+  updated_by: number;
+}
+
+export interface IDeliveryAddress {
+  id: number;
+  plant: string;
+  address: string;
+  is_active: boolean;
+  created_by: number;
+  updated_by: number;
+  created_at: number;
+  updated_at: number;
 }
