@@ -35,43 +35,13 @@ class HandleInertiaRequests extends Middleware
         $user  = $request->user();
 
         if ($user) {
-            $menus = (new MenuService)->getMenus();
-            // $menus = $menu;
+            $menus = (new MenuService)->getMenus(); 
         }
 
         return [
             ...parent::share($request),
             'auth' => [
                 'user' => $user ? new AuthUserResource($user) : null,
-                // 'permissions' => [
-                //     'pr' => [
-                //         'create' => $request->user()?->can('create.pr'),
-                //         'read' => $request->user()?->can('read.pr'),
-                //         'edit' => $request->user()?->can('edit.pr'),
-                //         'delete' => $request->user()?->can('delete.pr'),
-                //         'approver' => $request->user()?->can('approve.pr'),
-                //     ],
-                //     'po' => [
-                //         'create' => $request->user()?->can('create.po'),
-                //         'read' => $request->user()?->can('read.po'),
-                //         'edit' => $request->user()?->can('edit.po'),
-                //         'delete' => $request->user()?->can('delete.po'),
-                //         'approver' => $request->user()?->can('approve.po'),
-                //     ],
-                //     'gr' =>
-                //     [
-                //         'create' => $request->user()?->can('create.gr'),
-                //         'read' => $request->user()?->can('read.gr'),
-                //         'edit' => $request->user()?->can('edit.gr'),
-                //         'delete' => $request->user()?->can('delete.gr'),
-                //         'approver' => $request->user()?->can('approve.gr'),
-                //         'cancel' =>  $request->user()?->can('cancel.gr'),
-                //     ],
-                //     'admin' =>
-                //     [
-                //         'read' => $request->user()?->can('admin'),
-                //     ]
-                // ],
                 'menu' => $menus,
             ],
         ];

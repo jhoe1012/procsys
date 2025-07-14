@@ -22,7 +22,12 @@ class MenuService
         $user        = Auth::user();
         $this->menus = [
             [
-                'label'       => 'Purchase Requisition',
+                'label'       => 'Production Plan',
+                'permissions' => true,
+                'childrens'   => [],
+            ],
+            [
+                'label'       => 'Procurement',
                 'permissions' => $user->can(PermissionsEnum::ReadPR),
                 'childrens'   => [
                     [
@@ -35,13 +40,6 @@ class MenuService
                         'permissions' => $user->can(PermissionsEnum::CreatePR),
                         'href'        => route('pr.create'),
                     ],
-
-                ],
-            ],
-            [
-                'label'       => 'Purchase Order',
-                'permissions' => $user->can(PermissionsEnum::ReadPO),
-                'childrens'   => [
                     [
                         'label'       => 'PO Listing',
                         'permissions' => $user->can(PermissionsEnum::ReadPO),
@@ -52,11 +50,10 @@ class MenuService
                         'permissions' => $user->can(PermissionsEnum::CreatePO),
                         'href'        => route('po.create'),
                     ],
-
                 ],
             ],
             [
-                'label'       => 'Goods Receipt',
+                'label'       => 'Inbound',
                 'permissions' => $user->can(PermissionsEnum::ReadGR),
                 'childrens'   => [
                     [
@@ -71,6 +68,21 @@ class MenuService
                     ],
 
                 ],
+            ],
+            [
+                'label'       => 'Production Exec',
+                'permissions' => true,
+                'childrens'   => [],
+            ],
+            [
+                'label'       => 'FG Whs',
+                'permissions' => true,
+                'childrens'   => [],
+            ],
+            [
+                'label'       => 'Outbound',
+                'permissions' => true,
+                'childrens'   => [],
             ],
             [
                 'label'       => 'Reports',
