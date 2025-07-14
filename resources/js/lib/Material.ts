@@ -8,7 +8,8 @@ export const fetchMaterial = async (inputValue: string) => {
 
     return response.data.data.map((material: IMaterial) => ({
       value: material.mat_code,
-      label: `${material.mat_code} - ${material.mat_desc}`,
+      label: `${material.mat_code} - ${material.mat_desc}`, 
+      mappedPlants: material.mappedPlants || [], 
     }));
   } catch (e) {
     console.log('Error fetching data:', e);

@@ -26,11 +26,14 @@ class PurchasingGroupResource extends JsonResource
             'max_lot_size'    => $this->max_lot_size,
             'fix_lot_size'    => $this->fix_lot_size,
             'rounding_value'  => $this->rounding_value,
-            'created_by'      => $this->created_by,
-            'updated_by'      => $this->updated_by,
+            'prctrl_grp_id'   => $this->prctrl_grp_id,
+            'created_by'      => new UserResource($this->whenLoaded('createdBy')),
+            'updated_by'      => new UserResource($this->whenLoaded('updatedBy')),
             'created_at'      => $this->created_at,
             'updated_at'      => $this->updated_at,
             'prCtrlGrp'       => new PrControllerGroupResource($this->whenLoaded('prCtrlGrp')),
+            'materials'     => new MaterialResource($this->whenLoaded('materials')),
+            'plants'        => new PlantResource($this->whenLoaded('plants')),
 
         ];
     }

@@ -11,7 +11,7 @@ class UpdatePurchasingGroupRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,8 +21,18 @@ class UpdatePurchasingGroupRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            //
+         return [
+            'mat_code' => 'required',
+            'plant' => 'required',
+            'purch_grp' => 'required',
+            'unit_issue' => 'required',
+            'plan_deliv_time' => 'required',
+            'gr_proc_time' => 'required',
+            'min_lot_size' => 'required',
+            'max_lot_size' => 'required',
+            'fix_lot_size' => 'required',
+            'rounding_value' => 'required',
+            'prctrl_grp_id' => 'required',
         ];
     }
 }

@@ -21,6 +21,7 @@ class PrControllerGroupResource extends JsonResource
             'prctrl_desc' => $this->prctrl_desc,
             'created_by'  => $this->created_by,
             'updated_by'  => $this->updated_by,
+            'plant'       => $this->plant,
         ];
     }
 }

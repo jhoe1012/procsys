@@ -80,6 +80,7 @@ export interface IApprover {
   prCtrlGrpsChoice?: Choice;
   _method?: string;
 }
+
 export interface IMaterial {
   id?: number;
   mat_code: string;
@@ -100,6 +101,7 @@ export interface IMaterial {
   altUoms?: IAlternativeUom[];
   _method?: string;
   mat_groupChoice?: Choice;
+  mappedPlants?: any[]; // This can be an array of strings or objects depending on your use case
 }
 
 export interface IMaterialGroups {
@@ -170,6 +172,14 @@ export interface IMaterialValuationPage extends IPagination {
 
 export interface IVendorPage extends IPagination {
   data: IVendor[];
+}
+
+export interface IPurchasingGroupPage extends IPagination {
+  data: IPurchasingGroup[];
+}
+
+export interface IPrCtrlGrpPage extends IPagination {
+  data: IPrCtrlGrp[];
 }
 
 export interface IApproverPage extends IPagination {
@@ -382,7 +392,34 @@ export interface IVendor {
   created_at?: string;
   updated_at?: string;
   _method?: string;
-  email_addr?: string;
+  email_1?: string;
+  email_2?: string;
+  payment_terms?: string;
+}
+
+export interface IPurchasingGroup {
+  id?: number;
+  mat_code: string;
+  mat_codeChoice?: Choice;
+  plant: string;
+  plant_codeChoice: Choice;
+  purch_grp: string;
+  purch_grpChoice?: Choice;
+  unit_issue: string;
+  plan_deliv_time: string;
+  gr_proc_time: string;
+  min_lot_size: string;
+  max_lot_size: string;
+  fix_lot_size: string;
+  rounding_value: string;
+  created_by?: User;
+  updated_by?: User;
+  created_at?: string;
+  updated_at?: string;
+  prctrl_grp_id: number; 
+  plants?: IPlants;
+  materials?: IMaterial;
+   _method?: string;
 }
 
 export interface IGRHeader {
@@ -565,6 +602,7 @@ export interface IPrCtrlGrp {
   prctrl_desc: string;
   created_by: number;
   updated_by: number;
+  plant : string;
 }
 
 export interface IDeliveryAddress {
@@ -576,4 +614,8 @@ export interface IDeliveryAddress {
   updated_by: number;
   created_at: number;
   updated_at: number;
+}
+export interface IProcurementGroup {
+  purch_grp: string;
+  name1: string;
 }

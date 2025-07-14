@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Trait\CreatedUpdatedBy;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,8 +12,15 @@ use Illuminate\Support\Facades\DB;
 
 class PrctrlGrp extends Model
 {
-    use HasFactory;
 
+    use CreatedUpdatedBy, HasFactory;
+
+    protected $fillable = [
+        // 'plant_id',
+        'prctrl_grp',
+        'prctrl_desc',
+        'plant',
+    ];
     /**
      * The user that belong to the PrctrlGrp
      */
@@ -20,7 +28,6 @@ class PrctrlGrp extends Model
     {
         return $this->belongsToMany(User::class);
     }
-
     /**
      * Get all of the purchasingGroup for the PrctrlGrp
      */
@@ -38,5 +45,10 @@ class PrctrlGrp extends Model
             )
             ->get()
             ->toArray();
+    }
+
+    public function plant()
+    {
+        return $this->belongsTo(Plant::class, 'plant_id', 'id');
     }
 }

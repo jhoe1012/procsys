@@ -34,6 +34,7 @@ class MaterialResource extends JsonResource
             'materialGroups'     => new MaterialGroupResource($this->whenLoaded('materialGroups')),
             'altUoms'            => AlternativeUomResource::collection($this->whenLoaded('altUoms')),
             'purchasingGroups'   => new PurchasingGroupResource($this->whenLoaded('purchasingGroups')),
+            'mappedPlants'     => $this->purchasingGroupsChecker->pluck('plant')->unique()->values(),
         ];
     }
 }

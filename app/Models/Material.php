@@ -81,4 +81,10 @@ class Material extends Model
     {
         $query->where('is_active', true);
     }
+    
+    public function purchasingGroupsChecker(): HasMany
+    {
+        return $this->hasMany(PurchasingGroup::class, 'mat_code', 'mat_code');
+    }
+
 }
