@@ -504,7 +504,8 @@ class POController extends Controller
             'altUoms.altUomText',
             'materialNetPrices' => fn ($query) => $query->where('plant', $request->input('plant'))
                 ->whereDate('valid_from', '<=', $doc_date)
-                ->whereDate('valid_to', '>=', $doc_date),
+                ->whereDate('valid_to', '>=', $doc_date)
+                ->orderBy('valid_from', 'desc'),
         ])
             ->whereHas('prheader', fn ($query) => $query->where('plant', $request->input('plant'))
                 ->where('status', ApproveStatus::APPROVED))
@@ -699,10 +700,10 @@ class POController extends Controller
                     'currency'      => $poMaterial->currency,
                     'uom'           => $poMaterial->unit,
                     'per_unit'      => $poMaterial->per_unit,
-                    'valid_from'    => $poHeader->doc_date->format('Y-m-d'),
-                    'min_order_qty' => 0,
                 ],
                 [
+                    'valid_from'    => $poHeader->doc_date->format('Y-m-d'),
+                    'min_order_qty' => 0,
                     'price'    => $poMaterial->net_price,
                     'valid_to' => Carbon::parse($poHeader->doc_date)->addMonths(5)->format('Y-m-d'),
 
