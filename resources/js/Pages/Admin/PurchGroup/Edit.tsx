@@ -20,18 +20,7 @@ export default function Edit({
   prctrlgrp: IPrCtrlGrp[];
 }) {
   const [showModal, setShowModal] = useState(false);
-  const [mappedPlants, setMappedPlants] = useState<string[]>([]);
-  const [unmappedPlants, setUnmappedPlants] = useState<IPlants[]>(plants);
   const [filteredPrCtrlGrp, setFilteredPrCtrlGrp] = useState<IPrCtrlGrp[]>([]);
-
-  const procGrpOptions = procgrps.map((p) => ({
-    label: `${p.purch_grp} (${p.name1})`,
-    value: p.purch_grp,
-  }));
-  const prctrlGrpOptions = prctrlgrp.map((grp) => ({
-    label: `${grp.prctrl_grp} (${grp.prctrl_desc})`,
-    value: grp.id,
-  }));
 
   const { data, setData, patch, processing, reset, errors } = useForm<IPurchasingGroup>({
     id: p_purchgrp.id,
@@ -53,37 +42,22 @@ export default function Edit({
     _method: 'patch',
   });
 
-  const handleMaterialChange = (option: any | null) => {
-    setData('mat_code', option?.value ?? '');
-    setData('plant', '');
-    setMappedPlants(option?.mappedPlants || []);
-  };
-
-  const handlePlantChange = (plantCode: string) => {
-    setData('plant', plantCode);
-    setFilteredPrCtrlGrp(prctrlgrp.filter((grp) => grp.plant === plantCode));
-  };
-
   useEffect(() => {
-    if (showModal && p_purchgrp.materials?.mappedPlants) {
-      const mapped = p_purchgrp.materials.mappedPlants;
-      setMappedPlants(mapped);
-      handlePlantChange(data.plant);
-
-      const currentPlant = data.plant;
-
-      const filtered = plants.filter((plant) => !mapped.includes(String(plant.plant)) || String(plant.plant) === currentPlant);
-
-      setUnmappedPlants(filtered);
+    if (showModal) {
+      const filtered = prctrlgrp.filter((grp) => grp.plant === data.plant);
+      setFilteredPrCtrlGrp(filtered);
     }
-  }, [showModal]);
+  }, [showModal, prctrlgrp, data.plant]);
 
   const updatePurchGrp: FormEventHandler = (e) => {
     e.preventDefault();
 
     patch(route('purchgrp.update', p_purchgrp.id), {
       preserveScroll: true,
-      onSuccess: () => closeModal(),
+      onSuccess: () => {
+        closeModal();
+        router.reload();
+      },
       onFinish: () => reset(),
     });
   };
@@ -103,16 +77,12 @@ export default function Edit({
               <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="material">
                 Material
               </Label>
-              <AsyncSelect
+              <Input
+                className="m-2 w-full border-gray-300 h-10 "
                 id="material"
-                className="m-2 w-full border-gray-500"
-                cacheOptions
-                defaultOptions
-                loadOptions={fetchMaterial}
-                value={data.mat_codeChoice}
-                onChange={handleMaterialChange}
-                placeholder=" Material"
-                required
+                value={data.mat_codeChoice?.label || ''}
+                readOnly
+                disabled
               />
             </div>
             <div className="flex">
@@ -122,26 +92,32 @@ export default function Edit({
               <Select
                 id="plant"
                 className="m-2 w-full border-gray-500"
-                options={unmappedPlants.map((plant) => ({ label: plant.name1, value: plant.plant }))}
-                value={
-                  unmappedPlants.find((p) => p.plant === data.plant)
-                    ? { label: unmappedPlants.find((p) => p.plant === data.plant)?.name1, value: data.plant }
-                    : null
-                }
+                options={plants.map((plant) => ({
+                  label: `${plant.plant} - ${plant.name1}`,
+                  value: String(plant.plant),
+                }))}
+                value={(() => {
+                  const selected = plants.find((p) => String(p.plant) === String(data.plant));
+                  return selected ? { label: `${selected.plant} - ${selected.name1}`, value: String(selected.plant) } : null;
+                })()}
                 onChange={(option) => {
-                  setData('plant', option ? option.value : '');
-                  handlePlantChange(option ? option.value : '');
+                  const selectedPlant = option ? option.value : '';
+                  setData('plant', selectedPlant);
+
+                  const filtered = prctrlgrp.filter((grp) => grp.plant === selectedPlant);
+                  setFilteredPrCtrlGrp(filtered);
                 }}
-                placeholder=" Plant"
+                placeholder="Select Plant"
               />
             </div>
             <div className="flex">
-              <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="prctrl_grp">
-                Controller Groups
+              <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="prctrl_grp_id">
+                Controller Group
               </Label>
               <Select
                 id="prctrl_grp_id"
                 name="prctrl_grp_id"
+                className="m-2 w-full border-gray-500"
                 options={filteredPrCtrlGrp.map((grp) => ({
                   label: `${grp.prctrl_grp} (${grp.prctrl_desc})`,
                   value: grp.id,
@@ -157,8 +133,7 @@ export default function Edit({
                     }))
                     .find((opt) => opt.value === data.prctrl_grp_id) || null
                 }
-                placeholder=" Controller Group"
-                className="m-2 w-full border-gray-500"
+                placeholder="Select Controller Group"
               />
             </div>
             <div className="flex">
@@ -167,13 +142,24 @@ export default function Edit({
               </Label>
               <Select
                 id="purch_grp"
+                name="purch_grp"
                 className="m-2 w-full border-gray-500"
-                options={procGrpOptions}
+                options={procgrps.map((grp) => ({
+                  label: `${grp.purch_grp} - ${grp.name1}`,
+                  value: grp.purch_grp,
+                }))}
+                placeholder="Select Purchase Group"
                 onChange={(option: any) => {
                   setData('purch_grp', option ? option.value : '');
                 }}
-                value={procGrpOptions.find((opt) => opt.value === data.purch_grp) || null}
-                placeholder="Purchase Group"
+                value={
+                  procgrps
+                    .map((grp) => ({
+                      label: `${grp.purch_grp} - ${grp.name1}`,
+                      value: grp.purch_grp,
+                    }))
+                    .find((opt) => opt.value === data.purch_grp) || null
+                }
               />
             </div>
             <div className="flex ">

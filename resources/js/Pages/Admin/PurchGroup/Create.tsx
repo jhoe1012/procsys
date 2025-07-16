@@ -17,7 +17,7 @@ export default function Create({
   prctrlgrp: IPrCtrlGrp[];
 }) {
   const [showModal, setShowModal] = useState(false);
-  const [mappedPlants, setMappedPlants] = useState<string[]>([]);
+  const [mappedPlants, setMappedPlants] = useState([]);
   const [unmappedPlants, setUnmappedPlants] = useState<IPlants[]>(plants);
   const [filteredPrCtrlGrp, setFilteredPrCtrlGrp] = useState<IPrCtrlGrp[]>([]);
 
@@ -52,7 +52,9 @@ export default function Create({
   };
 
   useEffect(() => {
-    setUnmappedPlants(mappedPlants.length > 0 ? plants.filter((plant) => !mappedPlants.includes(String(plant.plant))) : plants);
+    const mappedPlantCodes = mappedPlants.map((mp: any) => mp.plant);
+    const filtered = plants.filter((plant) => !mappedPlantCodes.includes(plant.plant));
+    setUnmappedPlants(filtered);
   }, [mappedPlants, plants]);
 
   const createPurchGrp = (e: FormEvent) => {
@@ -111,7 +113,6 @@ export default function Create({
                   handlePlantChange(option ? option.value : '');
                 }}
                 placeholder=" Plant"
-                
               />
             </div>
             <div className="flex">

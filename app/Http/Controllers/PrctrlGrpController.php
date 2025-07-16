@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\PrControllerGroupResource;
 use App\Http\Requests\StorePrCtrlGrpRequest;
+use App\Http\Requests\UpdatePrCtrlGrpRequest;
 use App\Models\Plant;
 use App\Models\PrctrlGrp;
 use Illuminate\Http\Request;
@@ -76,9 +77,11 @@ class PrctrlGrpController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+       public function update(UpdatePrCtrlGrpRequest $request, PrctrlGrp $prctrlgrp)
     {
-        //
+        $prctrlgrp->update($request->validated());
+
+        return back()->with('success', 'PR Controller Group updated successfully');
     }
 
     /**

@@ -22,7 +22,7 @@ class PurchasingGroupController extends Controller
    public function index(Request $request)
     { 
         $query = PurchasingGroup::query();
-        $query = $query->with(['plants', 'materials', 'prCtrlGrp']);
+        $query = $query->with(['plants', 'materials', 'prCtrlGrp' ]);
 
         if (request('mat_code')) {
             $query->where('mat_code', 'ilike', '%'.request('mat_code').'%');
@@ -97,7 +97,8 @@ class PurchasingGroupController extends Controller
      * Update the specified resource in storage.
      */
     public function update(UpdatePurchasingGroupRequest $request, PurchasingGroup $purchgrp)
-    {
+    {   
+
         $purchgrp->update($request->validated());
 
         return back()->with('success', 'Purchase Group updated successfully');

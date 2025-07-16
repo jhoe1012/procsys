@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StorePrCtrlGrpRequest extends FormRequest
+class UpdatePrCtrlGrpRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,7 +21,7 @@ class StorePrCtrlGrpRequest extends FormRequest
      */
     public function rules(): array
     {
-          return [
+        return [
             'plant' => 'required',
             'prctrl_grp' => 'required',
             'prctrl_desc' => 'required',

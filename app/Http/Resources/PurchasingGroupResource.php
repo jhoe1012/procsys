@@ -21,7 +21,7 @@ class PurchasingGroupResource extends JsonResource
             'purch_grp'       => $this->purch_grp,
             'unit_issue'      => $this->unit_issue,
             'plan_deliv_time' => $this->plan_deliv_time,
-            'gr_proc_time'    => $this->gr_proc_time,
+            'gr_proc_time'    => $this->gr_proc_time, 
             'min_lot_size'    => $this->min_lot_size,
             'max_lot_size'    => $this->max_lot_size,
             'fix_lot_size'    => $this->fix_lot_size,
