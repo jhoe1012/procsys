@@ -130,8 +130,18 @@ const Edit = ({
       { ...keyColumn('sel', checkboxColumn), title: 'Sel', minWidth: 30 },
       { ...keyColumn('status', textColumn), title: 'Sts', disabled: true, minWidth: 35 },
       { ...keyColumn('item_no', intColumn), title: 'ItmNo', disabled: true, minWidth: 55 },
-      { ...keyColumn('mat_code', selectColumn({ choices: mat_code })), title: 'Material', minWidth: 120 },
-      { ...keyColumn('short_text', selectColumn({ choices: mat_desc })), title: 'Material Description', minWidth: 400 },
+      {
+        ...keyColumn('mat_code', selectColumn({ choices: mat_code })),
+        title: 'Material',
+        minWidth: 120,
+        disabled: ({ rowData }: any) => rowData.qty_ordered > 0,
+      },
+      {
+        ...keyColumn('short_text', selectColumn({ choices: mat_desc })),
+        title: 'Material Description',
+        minWidth: 400,
+        disabled: ({ rowData }: any) => rowData.qty_ordered > 0,
+      },
       {
         ...keyColumn(
           'item_text',
@@ -145,6 +155,7 @@ const Edit = ({
         ),
         title: 'Item Text',
         minWidth: 300,
+        disabled: ({ rowData }: any) => rowData.qty_ordered > 0,
       },
       { ...keyColumn('qty', floatColumn), title: 'Qty', minWidth: 70, disabled: ({ rowData }: any) => rowData.qty_ordered > 0 },
       {
@@ -178,7 +189,7 @@ const Edit = ({
       // { ...keyColumn('unit', textColumn), title: 'B.UOM', minWidth: 60, disabled: true },
       { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 120, disabled: true },
       { ...keyColumn('currency', textColumn), title: 'Curr', minWidth: 40, disabled: true },
-      { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 130 },
+      { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 130, disabled: ({ rowData }: any) => rowData.qty_ordered > 0 },
       {
         ...keyColumn('prctrl_grp_id', selectColumn({ choices: prCtrlGrp })),
         title: 'PR Controller',
@@ -414,8 +425,10 @@ const Edit = ({
                       <Button
                         type="submit"
                         variant="outline"
-                        className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] disabled:cursor-not-allowed disabled:opacity-100 disabled:bg-gray-100"
-                        disabled={prheader.appr_seq == SEQ_REJECT || processing}>
+                        className="bg-[#f8c110] hover:border-gray-500 hover:bg-[#f8c110] disabled:cursor-not-allowed disabled:opacity-100 disabled:bg-gray-100"
+                        disabled={
+                          prheader.appr_seq === SEQ_REJECT || processing || (material?.some((mat) => (mat.qty_ordered || 0) > 0) ?? false)
+                        }>
                         Save
                       </Button>
                       <Link
@@ -447,7 +460,8 @@ const Edit = ({
                         href={route('pr.recall', prheader.id)}
                         as="button"
                         type="button"
-                        className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2  border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:border-gray-500 disabled:cursor-not-allowed disabled:opacity-100 disabled:bg-gray-100">
+                        className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2  border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:border-gray-500 disabled:cursor-not-allowed disabled:opacity-100 disabled:bg-gray-100"
+                        disabled={material?.some((mat) => (mat.qty_ordered || 0) > 0) ?? false}>
                         Recall
                       </Link>
                     </>

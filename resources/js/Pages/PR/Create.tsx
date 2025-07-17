@@ -91,11 +91,11 @@ const Create = ({
 
   const columns = useMemo(
     () => [
-      { ...keyColumn('sel', checkboxColumn), title: 'Sel', minWidth: 30 },
-      { ...keyColumn('status', textColumn), title: 'Sts', disabled: true, minWidth: 35 },
-      { ...keyColumn('item_no', intColumn), title: 'ItmNo', disabled: true, minWidth: 55 },
-      { ...keyColumn('mat_code', selectColumn({ choices: mat_code })), title: 'Material', minWidth: 120 },
-      { ...keyColumn('short_text', selectColumn({ choices: mat_desc })), title: 'Material Description', minWidth: 400 },
+      // { ...keyColumn('sel', checkboxColumn), title: 'Sel', minWidth: 30 },
+      // { ...keyColumn('status', textColumn), title: 'Sts', disabled: true, minWidth: 35 },
+      { ...keyColumn('item_no', intColumn), title: 'ItmNo', disabled: true, minWidth: 50 },
+      { ...keyColumn('mat_code', selectColumn({ choices: mat_code })), title: 'Material', minWidth: 120},
+      { ...keyColumn('short_text', selectColumn({ choices: mat_desc })), title: 'Material Description', minWidth: 250 },
       {
         ...keyColumn(
           'item_text',
@@ -108,24 +108,15 @@ const Create = ({
           })
         ),
         title: 'Item Text',
-        minWidth: 300,
+        minWidth: 200,
       },
       { ...keyColumn('qty', floatColumn), title: 'Qty', minWidth: 70 },
       {
         ...keyColumn('ord_unit', textColumn),
         title: 'Ord UOM',
-        minWidth: 55,
+        minWidth: 60,
         disabled: true,
       },
-      // {
-      //   ...keyColumn('altUomSelect', {
-      //     component: ({ rowData, rowIndex }) => rowData && <AltUom rowData={rowData} rowIndex={rowIndex} handleOnChange={handleOnChange} />,
-      //   }),
-      //   disabled: true,
-      //   title: '',
-      //   minWidth: 20,
-      //   maxWidth: 20,
-      // },
       {
         ...keyColumn('alt_uom', {
           component: ({ rowData, rowIndex }: { rowData: IAlternativeUom[]; rowIndex: number }) =>
@@ -133,33 +124,33 @@ const Create = ({
         }),
         disabled: true,
         title: '',
-        minWidth: 20,
-        maxWidth: 20,
+        minWidth: 30,
+        maxWidth: 30,
       },
       {
         ...keyColumn('price', floatColumn),
         title: 'Price',
-        minWidth: 90,
+        minWidth: 80,
         disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
       },
       {
         ...keyColumn('per_unit', floatColumn),
         title: 'Per Unit',
-        minWidth: 50,
+        minWidth: 60,
         disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
       },
       // { ...keyColumn('unit', textColumn), title: 'B.UOM', minWidth: 60, disabled: true },
-      { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 90, disabled: true },
-      { ...keyColumn('currency', textColumn), title: 'Curr', minWidth: 50, disabled: true },
-      { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 130 },
+      { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 100, disabled: true },
+      { ...keyColumn('currency', textColumn), title: 'Curr', minWidth: 55, disabled: true },
+      { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 120 },
       {
         ...keyColumn('prctrl_grp_id', selectColumn({ choices: prCtrlGrp })),
         title: 'PR Controller',
-        minWidth: 200,
+        minWidth: 160,
         disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
       },
-      { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 100, disabled: true },
-      { ...keyColumn('purch_grp', textColumn), title: 'Purch Grp', minWidth: 90, disabled: true },
+      { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 90, disabled: true },
+      { ...keyColumn('purch_grp', textColumn), title: 'Purch Grp', minWidth: 80, disabled: true },
     ],
     []
   );
