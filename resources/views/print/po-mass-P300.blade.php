@@ -169,7 +169,15 @@
                                     ? Number::currency($pomaterial->net_price * ($pomaterial->taxClass?->tax_value * 0.01 + 1), 'PHP')
                                     : Number::currency($pomaterial->net_price, 'PHP') }}
                             </td>
-                            @php
+                             @php
+                             if (in_array( $poHeader->vendors->supplier, ['101164'])) {
+                                $totalValue =
+                                    $pomaterial->taxClass?->tax_class == 1
+                                        ? (  $pomaterial->net_price  * $pomaterial->po_qty ) * ($pomaterial->taxClass?->tax_value * 0.01 + 1)   
+                                        :  $pomaterial->net_price * $pomaterial->po_qty ;
+                                $grandTotal += $totalValue;
+                             } else { 
+
                                 $totalValue =
                                     $pomaterial->taxClass?->tax_class == 1
                                         ? round(
@@ -178,6 +186,7 @@
                                             ) * $pomaterial->po_qty 
                                         : round($pomaterial->net_price * $pomaterial->po_qty, 2);
                                 $grandTotal += $totalValue;
+                            }
                             @endphp
                             <td width='15%' class="align-top text-right pr">
                                 @php
