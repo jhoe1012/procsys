@@ -6,6 +6,7 @@ use App\Trait\CreatedUpdatedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PurchasingGroup extends Model
 {
@@ -22,6 +23,7 @@ class PurchasingGroup extends Model
         'max_lot_size',
         'fix_lot_size',
         'rounding_value',
+        'prtl_grp_id',
     ];
 
     /**
@@ -30,5 +32,15 @@ class PurchasingGroup extends Model
     public function prCtrlGrp(): BelongsTo
     {
         return $this->belongsTo(PrctrlGrp::class, 'prctrl_grp_id', 'id');
+    }
+
+    public function plants(): BelongsTo
+    {
+        return $this->belongsTo(Plant::class, 'plant', 'plant');
+    }
+
+    public function materials(): BelongsTo
+    {
+        return $this->belongsTo(Material::class, 'mat_code', 'mat_code');
     }
 }
