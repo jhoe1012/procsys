@@ -349,16 +349,16 @@ export default function Index({
                     className="text-center"
                   />
 
-                  {/* <RadioGroup defaultValue="egi" className="mt-3" onValueChange={setPoForm}>
+                  <RadioGroup defaultValue="egi" className="mt-3" onValueChange={setPoForm}>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="egi" id="egi" />
-                      <Label htmlFor="egi">EGI PO Form</Label>
+                      <Label htmlFor="egi">EGI/DBI PO Form</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="smbi" id="smbi"  />
+                      <RadioGroupItem value="smbi" id="smbi" />
                       <Label htmlFor="smbi">SMBI PO Form</Label>
                     </div>
-                  </RadioGroup> */}
+                  </RadioGroup>
 
                   <a
                     target="_blank"

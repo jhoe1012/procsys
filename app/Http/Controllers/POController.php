@@ -405,7 +405,6 @@ class POController extends Controller
                 $po_header->release_date = Carbon::now()->format('Y-m-d H:i:s');
                 $po_header->seq          = HeaderSeq::Approved->value;
                 $this->_updateNetPrice($po_header);
-                // $this->_updateValuation($po_header);
                 $email_status = 2;
             }
         } else {
@@ -712,5 +711,4 @@ class POController extends Controller
         }
     }
 
-    private function _updateValuation($poHeader) {}
 }
