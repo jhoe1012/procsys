@@ -11,21 +11,20 @@
 
     <style>
         * {
-            /* outline: 1px red solid; */
+             /* outline: 1px red solid;  */
             font-family: Tahoma, "Trebuchet MS", sans-serif;
-            font-size: 15px;
+            font-size: 16px;
         }
 
         body {
-
             margin: 0;
             padding: 0;
-
         }
 
         .printable-area {
             width: 8.5in;
-            height:7in;
+            height: 10.9in;
+            position: relative;
         }
 
         table,
@@ -46,25 +45,23 @@
             text-align: right;
             font-weight: bold;
             font-size: 20px;
-            padding: 8mm 12mm 5mm 0;
+            padding: 100px 80px 10px 80px;
+z        }
 
-        }
-
-       .amount {
+        .amount {
             position: absolute;
-            right: 120px;
-            bottom: 520px;
+            bottom: 280px;
+            right: 90px;
             text-align: right;
             font-size: 25px;
         }
 
         .addr {
-            padding: 5px 10px 40px 0;
-            vertical-align: top;
+            padding: 25px 40px 70px 0;
         }
 
         .itemcode {
-            padding-left: 0;
+            padding-left: 5px;
         }
 
         .align-top {
@@ -80,39 +77,37 @@
         }
 
         .supplier_name {
-            padding: 0 0 0 0;
-            vertical-align: top;
+            padding: 0 0 0 50px;
         }
 
         .notes {
             padding-left: 10px;
-            width: 95%;
+            width: 90%;
             font-size: 13px;
 
         }
 
         .line_item {
-            min-height: 55mm;
-            max-height: 55mm;
-            /* margin-left: -10mm; */
+            min-height: 280px;
+            max-height: 280px;
             /* background-color: blue; */
         }
 
         .date {
-            padding: 10px 0 0 0;
+            padding-top: 20px;
         }
 
-       .buyer {
+        .buyer {
             position: absolute;
-            left: 380px;
-            bottom: 490px;
+            bottom: 210px;
+            left: 420px;
+            
         }
 
         .approver {
             position: absolute;
-            /* padding: 33px 0 0 430px; */
-            left: 380px;
-            bottom: 450px;
+            bottom: 153px;
+            left: 420px;
         }
 
         .page-break {
@@ -125,21 +120,20 @@
     @foreach ($poHeaders as $poHeader)
         <div class="printable-area ">
             <table>
-                <tr>
-                    <td colspan="5" class="ponumber"> {{ $poHeader->po_number }} </td>
+
+                <td colspan="5" class="ponumber"> {{ $poHeader->po_number }} </td>
                 </tr>
                 <tr>
-                    <td> </td>
+                    <td class="supplier_name" width='53%'>{{ $poHeader->vendors->supplier }} -
+                        {{ $poHeader->vendors->name_1 }} </td>
                     <td class='date'> {{ date('d-M-Y', strtotime($poHeader->doc_date)) }} </td>
                     @if (!$poHeader->is_mother_po)
                         <td class='date'> {{ date('d-M-Y', strtotime($poHeader->deliv_date)) }} </td>
                     @endif
                 </tr>
-                <tr height='55mm'>
-                    <td class="supplier_name" width='58%'>{{ $poHeader->vendors->supplier }} -
-                        {{ $poHeader->vendors->name_1 }}</td>
-                    <td class="addr" colspan='3'>
-                        {{ $poHeader->deliv_addr }} </td>
+                <tr>
+                    <td> </td>
+                    <td class="addr" colspan='2'>{{ $poHeader->deliv_addr }} </td>
 
                 </tr>
             </table>
@@ -151,8 +145,8 @@
 
                     @foreach ($poHeader->pomaterials as $pomaterial)
                         <tr>
-                            <td width='7%' class="align-top itemcode">{{ $pomaterial->mat_code }}</td>
-                            <td width='39%' class="align-top">
+                            <td width='8%' class="align-top itemcode">{{ $pomaterial->mat_code }}</td>
+                            <td width='26%' class="align-top">
                                 @if (in_array($pomaterial->mat_code, $genericMaterials))
                                     {{ $pomaterial->item_text }}
                                 @else
@@ -165,24 +159,33 @@
                                     <b> Delivery Date: </b>{{ date('d-M-Y', strtotime($pomaterial->del_date)) }}
                                 @endif
                             </td>
-                            <td width='8%' class="align-top text-right">{{ $pomaterial->po_qty }} </td>
-                            <td width='8%' class="align-top">{{ $pomaterial->unit }} </td>
-                            <td width='14%' class="align-top ">
+                            <td width='6%' class="align-top text-right">{{ $pomaterial->po_qty }} </td>
+                            <td width='10%' class="align-top">{{ $pomaterial->unit }} </td>
+                            <td width='13%' class="align-top">
                                 {{ $pomaterial->taxClass?->tax_class == 1
                                     ? Number::currency($pomaterial->net_price * ($pomaterial->taxClass?->tax_value * 0.01 + 1), 'PHP')
                                     : Number::currency($pomaterial->net_price, 'PHP') }}
                             </td>
                             @php
+                             if (in_array( $poHeader->vendors->supplier, ['101164'])) {
+                                $totalValue =
+                                    $pomaterial->taxClass?->tax_class == 1
+                                        ? (  $pomaterial->net_price  * $pomaterial->po_qty ) * ($pomaterial->taxClass?->tax_value * 0.01 + 1)   
+                                        :  $pomaterial->net_price * $pomaterial->po_qty ;
+                                $grandTotal += $totalValue;
+                             } else { 
+
                                 $totalValue =
                                     $pomaterial->taxClass?->tax_class == 1
                                         ? round(
-                                                $pomaterial->net_price * ($pomaterial->taxClass?->tax_value * 0.01 + 1),
+                                                $pomaterial->net_price  * ($pomaterial->taxClass?->tax_value * 0.01 + 1),
                                                 2,
-                                            ) * $pomaterial->po_qty
-                                        : round($pomaterial->net_price * $pomaterial->po_qty);
+                                            ) * $pomaterial->po_qty 
+                                        : round($pomaterial->net_price * $pomaterial->po_qty, 2);
                                 $grandTotal += $totalValue;
+                            }
                             @endphp
-                            <td  class="align-top ">
+                            <td width='20%' class="align-top">
                                 @php
                                     echo Number::currency($totalValue, 'PHP');
                                 @endphp
