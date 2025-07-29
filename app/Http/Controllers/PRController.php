@@ -581,7 +581,6 @@ class PRController extends Controller
             ['pr_headers_id' => $pr_header_id, 'id' => $item['id'] ?? null]
         );
     }
-    
     public function showPrDetails($prnumber)
     {
         $pr_header = PrHeader::with([

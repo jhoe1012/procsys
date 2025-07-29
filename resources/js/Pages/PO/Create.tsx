@@ -137,7 +137,13 @@ const Create = ({
                 rowData={rowData}
                 rowIndex={rowIndex}
                 handleOnChange={handleOnChange}
-                onCollectAttachments={(attachments) => setCollectedAttachments((prev) => [...prev, ...attachments])}
+                onCollectAttachments={(attachments) =>
+                  setCollectedAttachments((prev) => {
+                    const seen = new Set(prev.map((file) => `${file.filename}|${file.path}`));
+                    const filtered = attachments.filter((file) => !seen.has(`${file.filename}|${file.path}`));
+                    return [...prev, ...filtered];
+                  })
+                }
               />
             ) : (
               <></>
@@ -209,15 +215,15 @@ const Create = ({
       content: (
         <>
           <div className="mb-4">
-            <div className="font-semibold text-xs mb-1">Attachments via Drag & Drop:</div>
-            <div className="border border-dashed border-gray-300 rounded-md p-3 bg-gray-50">
+            <div className="font-semibold text-xs mb-1 text-blue-700">Attachments via Drag & Drop:</div>
+            <div className="border border-dashed border-blue-300 rounded-md p-3 bg-gray-50">
               <Dropzone files={files} setFiles={setFiles} />
             </div>
           </div>
           {collectedAttachments && collectedAttachments.length > 0 && (
-            <div className="mb-4">
-              <div className="font-semibold text-xs mb-1">Extended Attachments from PR:</div>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 border-t border-gray-200 pt-3 mt-2">
+            <div className="mb-4 border border-dashed border-red-500 rounded-md p-3">
+              <div className="font-semibold text-xs mb-1 text-red-700">Extended Attachments from PR:</div>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 border-t border-dashed border-red-200 pt-3 mt-2">
                 {collectedAttachments.map((file, idx) => (
                   <li
                     key={file.path + idx}
@@ -263,8 +269,14 @@ const Create = ({
 
   useEffect(() => {
     const poTotal = material.reduce((acc, mat) => acc + (mat.total_value || 0), 0);
-    setData((prevHeader: IPOHeader) => ({ ...prevHeader, total_po_value: poTotal, attachment: files, pomaterials: material , extended_attachments: collectedAttachments }));
-  }, [material, files , collectedAttachments]);
+    setData((prevHeader: IPOHeader) => ({
+      ...prevHeader,
+      total_po_value: poTotal,
+      attachment: files,
+      pomaterials: material,
+      extended_attachments: collectedAttachments,
+    }));
+  }, [material, files, collectedAttachments]);
 
   useEffect(() => {
     if (errors.hasOwnProperty('error')) {
@@ -361,10 +373,10 @@ const Create = ({
                   <span className="text-xs font-medium leading-none p-2">Mother PO</span>
                 </div>
               </div>
-              <div className="p-1 pt-0">
+              <div className="p-5 pt-0">
                 <TabFields defaultValue="header_text" className="max-w-8xl" tabs={headerTabs} />
               </div>
-              <div className="p-2">
+              <div className="p-5 pt-0">
                 <DataSheetGrid
                   value={material}
                   onChange={updateMaterial}
@@ -383,8 +395,8 @@ const Create = ({
                   <Input type="text" value={formatNumber(data.total_po_value)} readOnly disabled />
                 </div>
               </div>
-              <div className="p-2 pt-0">
-                <div className="p-5 justify-end grid grid-cols-8 gap-4">
+              <div className="p-5 pt-0">
+                <div className="justify-end grid grid-cols-8 gap-4">
                   {can(auth.user, PermissionsEnum.CreatePO) && ( //auth.permissions.po.create && (
                     <>
                       <Button variant="outline" disabled={processing} className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110]">

@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from '@inertiajs/react';
-import { XMarkIcon } from '@heroicons/react/24/solid';
 
 interface Attachment {
   id: number;
@@ -9,31 +8,39 @@ interface Attachment {
 }
 
 interface AttachmentListProps {
-  attachments: Attachment[] | undefined; // List of attachments
-  canDelete: boolean; // Permission to edit attachments
+  attachments: Attachment[] | undefined;
+  canDelete: boolean;
 }
 
 const AttachmentList: React.FC<AttachmentListProps> = ({ attachments, canDelete }) => {
   return (
-    <ul className="mt-3 mb-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+    <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 border-t border-gray-200 pt-3 mt-2">
       {attachments &&
         attachments.map((attachment) => (
-          <li key={attachment.id} className="relative h-12 rounded-md shadow-lg p-2 bg-white">
+          <li
+            key={attachment.id}
+            className="relative h-14 p-2 rounded-md border shadow-sm bg-white flex items-center justify-between"
+          >
+            <div className="flex flex-col flex-1 min-w-0">
+              <span className="text-xs text-blue-600 truncate">
+                <a href={`/${attachment.filepath}`} download>
+                  {attachment.filename}
+                </a>
+              </span>
+            </div>
             {canDelete && (
               <Link
                 preserveScroll
                 href={route('attachment.delete', attachment.id)}
                 method="delete"
                 as="button"
-                className="w-7 h-7  bg-slate-100 rounded-full flex justify-center items-center absolute top-3 right-2 hover:bg-red-200 transition-colors">
-                <XMarkIcon className="w-6 h-6  text-red-600 hover:fill-red-700 transition-colors" />
+                className="ml-2 px-2 py-1 text-[10px] text-red-600 bg-red-100 rounded hover:bg-red-200"
+                aria-label="Remove attachment"
+                title="Remove"
+              >
+                Remove
               </Link>
             )}
-            <p className="mt-2 text-blue-600 text-sm font-medium truncate pr-7">
-              <a href={`/${attachment.filepath}`} download={true}>
-                {attachment.filename}
-              </a>
-            </p>
           </li>
         ))}
     </ul>

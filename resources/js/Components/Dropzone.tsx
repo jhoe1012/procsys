@@ -1,17 +1,19 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { ArrowUpTrayIcon, XMarkIcon } from '@heroicons/react/24/solid';
 
 const Dropzone = ({ files, setFiles, multiple = true }) => {
-  const onDrop = useCallback((acceptedFiles) => {
-    if (acceptedFiles?.length) {
-      if (multiple) {
-        setFiles((previousFiles) => [...previousFiles, ...acceptedFiles]);
-      } else {
-        setFiles([acceptedFiles[0]]);
+  const onDrop = useCallback(
+    (acceptedFiles) => {
+      if (acceptedFiles?.length) {
+        if (multiple) {
+          setFiles((previousFiles) => [...previousFiles, ...acceptedFiles]);
+        } else {
+          setFiles([acceptedFiles[0]]);
+        }
       }
-    }
-  }, []);
+    },
+    [multiple, setFiles]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     maxSize: 1024 * 10000,
@@ -25,23 +27,27 @@ const Dropzone = ({ files, setFiles, multiple = true }) => {
       <div {...getRootProps()}>
         <input {...getInputProps()} />
         <div className="flex flex-col items-center justify-center gap-4 border-2 border-dashed border-blue-400 text-lg p-5 min-w-full">
-          <ArrowUpTrayIcon className="w-5 h-5 fill-current" />
-          {isDragActive ? <p> Drop Files here...</p> : <p>Drag & Drop files here, or click to select files</p>}
+          <svg className="w-5 h-5 fill-current text-blue-400" viewBox="0 0 20 20">
+            <path d="M10 3v10m0 0l-3-3m3 3l3-3M4 17h12" />
+          </svg>
+          {isDragActive ? <p>Drop Files here...</p> : <p>Drag & Drop files here, or click to select files</p>}
         </div>
       </div>
 
-      {/* Accepted files */}
-
-      <ul className="mt-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-5 ">
+      <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 border-t border-gray-200 pt-3 mt-2">
         {files?.map((file) => (
-          <li key={file.name} className="relative h-12 rounded-md shadow-lg p-2 bg-gray-100">
+          <li key={file.name} className="relative h-14 p-2 rounded-md border shadow-sm bg-white flex items-center justify-between">
+            <div className="flex flex-col flex-1 min-w-0">
+              <span className="text-xs text-gray-700 truncate">{file.name}</span>
+            </div>
             <button
               type="button"
-              className="w-7 h-7  bg-slate-100 rounded-full flex justify-center items-center absolute top-3 right-2 hover:bg-red-200 transition-colors"
-              onClick={() => removeFile(file.name)}>
-              <XMarkIcon className="w-6 h-6  text-red-600 hover:fill-red-700 transition-colors" />
+              className="ml-2 px-2 py-1 text-[10px] text-red-600 bg-red-100 rounded hover:bg-red-200"
+              onClick={() => removeFile(file.name)}
+              aria-label="Remove file"
+              title="Remove">
+              Remove
             </button>
-            <p className="mt-2 text-black text-sm font-medium truncate pr-7">{file.name}</p>
           </li>
         ))}
       </ul>
@@ -50,3 +56,21 @@ const Dropzone = ({ files, setFiles, multiple = true }) => {
 };
 
 export default Dropzone;
+
+{
+  /* <li key={file.path + idx} className="relative h-14 p-2 rounded-md border shadow-sm bg-white flex items-center justify-between">
+  <div className="flex flex-col flex-1 min-w-0">
+    <span className="text-xs text-gray-700 truncate">{file.filename}</span>
+    <span className="text-[10px] text-gray-500 truncate">PR: {file.pr_number}</span>
+  </div>
+  <button
+    type="button"
+    className="ml-2 px-2 py-1 text-[10px] text-red-600 bg-red-100 rounded hover:bg-red-200"
+    onClick={() => {
+      setCollectedAttachments((prev) => prev.filter((_, i) => i !== idx));
+    }}
+    aria-label="Remove file">
+    Remove
+  </button>
+</li>; */
+}

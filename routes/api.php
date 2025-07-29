@@ -18,6 +18,7 @@ Route::get('/po-vendor/{vendor}', [VendorController::class, 'show'])->name('po.v
 
 Route::get('/pr-details/{prnumber}', [PRController::class, 'showPrDetails'])->name('pr.details');
 
+
 Route::get('/vendor-search', [VendorController::class, 'search'])->name('vendor.search');
 Route::get('/material-search', [MaterialController::class, 'search'])->name('material.search');
 Route::get('/altuom-search', [AlternativeUomController::class, 'search'])->name('altuom.search');

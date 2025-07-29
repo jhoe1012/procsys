@@ -24,7 +24,9 @@ export default function PrNumber({
   const { toast } = useToast();
   const collectSelectedAttachmentPaths = () => {
     const prNumber = prDetails?.pr_number || rowData?.pr_number || rowData;
-    const selected = selectedFiles.map((file) => ({
+    // Remove duplicates by filename + path
+    const uniqueFiles = Array.from(new Map(selectedFiles.map((file) => [`${file.filename}|${file.filepath}`, file])).values());
+    const selected = uniqueFiles.map((file) => ({
       filename: file.filename,
       path: file.filepath,
       pr_number: prNumber,
@@ -70,7 +72,8 @@ export default function PrNumber({
       if (exists) {
         return prev.filter((f) => !(f.filename === file.filename && f.filepath === file.filepath));
       }
-      return [...prev, file];
+      // Only add if not already present
+      return [...prev.filter((f) => !(f.filename === file.filename && f.filepath === file.filepath)), file];
     });
   };
 
@@ -85,7 +88,7 @@ export default function PrNumber({
       label: 'Reason for PR',
       tabIcon: <LetterText size={16} strokeWidth={1} className="text-black " />,
       visible: true,
-      content: <Textarea value={prDetails?.reason_pr || ''} readOnly  />,
+      content: <Textarea value={prDetails?.reason_pr || ''} readOnly />,
     },
     {
       value: 'attachment',
@@ -156,7 +159,7 @@ export default function PrNumber({
       <button
         type="button"
         onClick={handleOpenModal}
-        className="w-full h-full text-dark bg-[#f8c110] border cursor-pointer p-0 m-0 hover:bg-yellow-300"
+        className="w-full h-full text-dark underline text-lg  cursor-pointer p-0 m-0  "
         aria-label="Show PR Details"
         style={{ minWidth: 0, minHeight: 0 }}>
         {typeof rowData === 'object' ? rowData.pr_number : rowData}

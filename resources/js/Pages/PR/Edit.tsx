@@ -242,11 +242,18 @@ const Edit = ({
       visible: true,
       content: (
         <>
-          <AttachmentList
-            attachments={prheader.attachments}
-            canDelete={can(auth.user, PermissionsEnum.EditPR) /* auth.permissions.pr.edit */}
-          />
-          <Dropzone files={files} setFiles={setFiles} />
+          <div className="mb-4">
+            <div className="font-semibold text-xs mb-1 text-blue-700">Attachments via Drag & Drop:</div>
+            <div className="border border-dashed border-blue-300 rounded-md p-3 bg-gray-50">
+              <Dropzone files={files} setFiles={setFiles} />
+            </div>
+            <div className="mt-6">
+              <div className="font-semibold text-xs mb-1 text-green-700">Uploaded Attachments:</div>
+              <div className="border border-dashed border-green-500 rounded-md p-3">
+                <AttachmentList attachments={prheader.attachments} canDelete={can(auth.user, PermissionsEnum.EditPR)} />
+              </div>
+            </div>
+          </div>
         </>
       ),
     },
