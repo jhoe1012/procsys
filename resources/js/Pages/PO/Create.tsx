@@ -2,7 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Button, Input, Label, Textarea, Toaster, useToast } from '@/Components/ui';
 import { CUSTOM_DATA_SHEET_STYLE, DATE_TODAY, PermissionsEnum } from '@/lib/constants';
-import { Choice, IAlternativeUom, IPOHeader, IPOMaterial, IVendor, PageProps } from '@/types';
+import { Choice, IAlternativeUom, IPOHeader, IPOMaterial, IPRHeader, IVendor, PageProps } from '@/types';
 import { FormEventHandler, useEffect, useMemo, useState } from 'react';
 import {
   checkboxColumn,
@@ -16,7 +16,7 @@ import {
 } from 'react-datasheet-grid';
 import 'react-datasheet-grid/dist/style.css';
 import { Operation } from 'react-datasheet-grid/dist/types';
-import { AltUom, Checkbox, Dropzone, InputField, ReactSelectField, SelectField, TabFields, VendorCard } from '@/Components';
+import { AltUom, Checkbox, Dropzone, InputField, ReactSelectField, SelectField, TabFields, VendorCard, PrNumber } from '@/Components';
 import { formatNumber } from '@/lib/utils';
 import AddPrtoPo from './Partial/AddPrtoPo';
 import { usePOMaterial, usePOMaterialValidation } from '@/Hooks';
@@ -31,6 +31,7 @@ const Create = ({
 }: PageProps<{ vendors: Choice[]; deliveryAddress: Choice[]; supplierNotes: Choice[] }>) => {
   const { toast } = useToast();
   const [files, setFiles] = useState([]);
+  const [collectedAttachments, setCollectedAttachments] = useState<any[]>([]);
   const [material, setMaterial] = useState<IPOMaterial[]>([]);
   const [vendor, setVendor] = useState<IVendor | undefined>();
   const { computeConversion, updateMaterialPO, getVendorInfo } = usePOMaterial();
@@ -50,6 +51,7 @@ const Create = ({
     header_text: '',
     approver_text: '',
     attachment: undefined,
+    extended_attachments: collectedAttachments,
     total_po_value: 0,
     status: '',
     appr_seq: 0,
@@ -127,11 +129,28 @@ const Create = ({
       { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 120 },
       { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 200, disabled: true },
       { ...keyColumn('requested_by', textColumn), title: 'Requested By', minWidth: 150 },
-      { ...keyColumn('pr_number', textColumn), title: 'PR Number', minWidth: 120, disabled: true },
+      {
+        ...keyColumn('pr_number', {
+          component: ({ rowData, rowIndex, ...rest }) =>
+            rowData ? (
+              <PrNumber
+                rowData={rowData}
+                rowIndex={rowIndex}
+                handleOnChange={handleOnChange}
+                onCollectAttachments={(attachments) => setCollectedAttachments((prev) => [...prev, ...attachments])}
+              />
+            ) : (
+              <></>
+            ),
+        }),
+        disabled: true,
+        title: 'PR Number',
+        minWidth: 120,
+        maxWidth: 120,
+      },
     ],
     []
   );
-
   const headerTabs = [
     {
       value: 'header_text',
@@ -140,11 +159,7 @@ const Create = ({
       visible: true,
       content: (
         <div>
-          <Textarea
-            value={data.header_text}
-            onChange={(e) => setData('header_text', e.target.value.slice(0, 500))}
-            maxLength={500}
-          />
+          <Textarea value={data.header_text} onChange={(e) => setData('header_text', e.target.value.slice(0, 500))} maxLength={500} />
           <div className="text-xs text-right text-gray-500">{data.header_text.length}/500</div>
         </div>
       ),
@@ -191,7 +206,42 @@ const Create = ({
       label: 'Attachment',
       tabIcon: <Paperclip size={16} strokeWidth={1} className="text-black " />,
       visible: true,
-      content: <Dropzone files={files} setFiles={setFiles} />,
+      content: (
+        <>
+          <div className="mb-4">
+            <div className="font-semibold text-xs mb-1">Attachments via Drag & Drop:</div>
+            <div className="border border-dashed border-gray-300 rounded-md p-3 bg-gray-50">
+              <Dropzone files={files} setFiles={setFiles} />
+            </div>
+          </div>
+          {collectedAttachments && collectedAttachments.length > 0 && (
+            <div className="mb-4">
+              <div className="font-semibold text-xs mb-1">Extended Attachments from PR:</div>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 border-t border-gray-200 pt-3 mt-2">
+                {collectedAttachments.map((file, idx) => (
+                  <li
+                    key={file.path + idx}
+                    className="relative h-14 p-2 rounded-md border shadow-sm bg-white flex items-center justify-between">
+                    <div className="flex flex-col flex-1 min-w-0">
+                      <span className="text-xs text-gray-700 truncate">{file.filename}</span>
+                      <span className="text-[10px] text-gray-500 truncate">PR: {file.pr_number}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="ml-2 px-2 py-1 text-[10px] text-red-600 bg-red-100 rounded hover:bg-red-200"
+                      onClick={() => {
+                        setCollectedAttachments((prev) => prev.filter((_, i) => i !== idx));
+                      }}
+                      aria-label="Remove file">
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </>
+      ),
     },
     {
       value: 'vendor',
@@ -213,8 +263,8 @@ const Create = ({
 
   useEffect(() => {
     const poTotal = material.reduce((acc, mat) => acc + (mat.total_value || 0), 0);
-    setData((prevHeader: IPOHeader) => ({ ...prevHeader, total_po_value: poTotal, attachment: files, pomaterials: material }));
-  }, [material, files]);
+    setData((prevHeader: IPOHeader) => ({ ...prevHeader, total_po_value: poTotal, attachment: files, pomaterials: material , extended_attachments: collectedAttachments }));
+  }, [material, files , collectedAttachments]);
 
   useEffect(() => {
     if (errors.hasOwnProperty('error')) {
@@ -244,6 +294,7 @@ const Create = ({
     e.preventDefault();
     const { isValid, updatedMaterials } = validateMaterials(material);
     setMaterial(updatedMaterials);
+
     if (isValid) {
       post(route('po.store'));
     }

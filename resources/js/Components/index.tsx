@@ -23,3 +23,4 @@ export { default as InputLabel } from '@/Components/InputLabel';
 export { default as InputError } from '@/Components/InputError';
 export { default as PrimaryButton } from '@/Components/PrimaryButton';
 export { default as DownloadButton } from '@/Components/DownloadButton';
+export { default as PrNumber } from '@/Components/PrNumber';

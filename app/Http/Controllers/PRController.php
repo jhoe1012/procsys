@@ -245,10 +245,10 @@ class PRController extends Controller
 
     public function update(Request $request, $id)
     {
+
         try {
             return DB::transaction(function () use ($request, $id) {
-                $pr_header = PrHeader::with('prmaterials')->findOrFail($id);
-
+                $pr_header = PrHeader::findOrFail($id);
                 $pr_materials = collect($request->input('prmaterials'))
                     ->filter(fn ($item) => ! empty($item['mat_code']))
                     ->map(fn ($item, $index) => $this->_mapOrUpdatePrMaterial($item, $index, $pr_header->id))
@@ -580,5 +580,19 @@ class PRController extends Controller
             $this->_mapPrMaterialData($item, $index),
             ['pr_headers_id' => $pr_header_id, 'id' => $item['id'] ?? null]
         );
+    }
+    
+    public function showPrDetails($prnumber)
+    {
+        $pr_header = PrHeader::with([
+            'prmaterials',
+            'workflows',
+            'attachments',
+            'plants',
+        ])
+        ->where('pr_number', $prnumber)
+        ->firstOrFail();
+
+        return new PRHeaderResource($pr_header);
     }
 }

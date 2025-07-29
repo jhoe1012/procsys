@@ -152,6 +152,14 @@ class POController extends Controller
                     $po_header->attachments()->saveMany($attachments);
                 }
 
+                $extendedAttachments = $request->input('extended_attachments', []);
+                foreach ($extendedAttachments as $attachment) {
+                    $po_header->attachments()->create([
+                        'filename' => $attachment['filename'] ?? null,
+                        'filepath' => $attachment['path'] ?? null,
+                    ]);
+                }
+
                 return to_route('po.edit', $po_header->po_number)->with('success', "PO {$po_header->po_number} created.");
             }, 2);
         } catch (\Exception $exception) {
@@ -280,6 +288,21 @@ class POController extends Controller
                     ]
                 ));
 
+                $extendedAttachments = $request->input('extended_attachments', []);
+               foreach ($extendedAttachments as $attachment) {
+                    $exists = $po_header->attachments()
+                        ->where('filename', $attachment['filename'] ?? null)
+                        ->where('filepath', $attachment['path'] ?? null)
+                        ->where('po_header_id', $po_header->id) // Use the current header's id
+                        ->exists();
+
+                    if (! $exists) {
+                        $po_header->attachments()->create([
+                            'filename' => $attachment['filename'] ?? null,
+                            'filepath' => $attachment['path'] ?? null,
+                        ]);
+                    }
+                }
                 if ($attachments = AttachmentService::handleAttachments($request)) {
                     $po_header->attachments()->saveMany($attachments);
                 }

@@ -37,6 +37,7 @@ import {
   SelectField,
   TabFields,
   VendorCard,
+  PrNumber,
 } from '@/Components';
 import { formatNumber } from '@/lib/utils';
 import Approval from './Partial/Approval';
@@ -52,7 +53,15 @@ const Edit = ({
   message,
   deliveryAddress,
   supplierNotes,
-}: PageProps<{ vendors: []; poheader: IPOHeader; message: IMessage; deliveryAddress: Choice[]; supplierNotes: Choice[] }>) => {
+  onCollectAttachments,
+}: PageProps<{
+  vendors: [];
+  poheader: IPOHeader;
+  message: IMessage;
+  deliveryAddress: Choice[];
+  supplierNotes: Choice[];
+  onCollectAttachments?: (attachments: { filename: string; path: string }[]) => void;
+}>) => {
   const { toast } = useToast();
 
   const approverGrpId = auth.user.approvers.filter((approver) => approver.type === 'po').map((approver) => approver.plant + approver.seq);
@@ -64,6 +73,7 @@ const Edit = ({
     !approverGrpId.includes(headerGrpId);
   const [vendor, setVendor] = useState<IVendor | undefined>(poheader.vendors);
   const [files, setFiles] = useState([]);
+  const [collectedAttachments, setCollectedAttachments] = useState<any[]>([]);
   const { computeConversion, updateMaterialPO, getVendorInfo } = usePOMaterial();
   const { validateMaterials } = usePOMaterialValidation();
 
@@ -92,6 +102,7 @@ const Edit = ({
     header_text: poheader.header_text,
     approver_text: poheader.approver_text,
     attachment: undefined,
+    extended_attachments: collectedAttachments,
     total_po_value: poheader.total_po_value,
     deliv_addr: poheader.deliv_addr,
     pomaterials: [],
@@ -173,7 +184,25 @@ const Edit = ({
       { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 120 },
       { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 200, disabled: true },
       { ...keyColumn('requested_by', textColumn), title: 'Requested By', minWidth: 150 },
-      { ...keyColumn('pr_number', textColumn), title: 'PR Number', minWidth: 120, disabled: true },
+      {
+        ...keyColumn('pr_number', {
+          component: ({ rowData, rowIndex, ...rest }) =>
+            rowData ? (
+              <PrNumber
+                rowData={rowData}
+                rowIndex={rowIndex}
+                handleOnChange={handleOnChange}
+                onCollectAttachments={(attachments) => setCollectedAttachments((prev) => [...prev, ...attachments])}
+              />
+            ) : (
+              <></>
+            ),
+        }),
+        disabled: true,
+        title: 'PR Number',
+        minWidth: 120,
+        maxWidth: 120,
+      },
     ],
     []
   );
@@ -239,19 +268,66 @@ const Edit = ({
         />
       ),
     },
+    // {
+    //   value: 'attachment',
+    //   label: 'Attachment',
+    //   tabIcon: <Paperclip size={16} strokeWidth={1} className="text-black " />,
+
+    //   visible: true,
+    //   content: (
+    //     <>
+    //       <AttachmentList
+    //         attachments={poheader.attachments}
+    //         canDelete={can(auth.user, PermissionsEnum.EditPO) /* auth.permissions.po.edit */}
+    //       />
+    //       <Dropzone files={files} setFiles={setFiles} />,
+    //     </>
+    //   ),
+    // },
+
     {
       value: 'attachment',
       label: 'Attachment',
       tabIcon: <Paperclip size={16} strokeWidth={1} className="text-black " />,
-
       visible: true,
       content: (
         <>
-          <AttachmentList
-            attachments={poheader.attachments}
-            canDelete={can(auth.user, PermissionsEnum.EditPO) /* auth.permissions.po.edit */}
-          />
-          <Dropzone files={files} setFiles={setFiles} />,
+          <div className="mb-4">
+            <div className="font-semibold text-xs mb-1">Attachments via Drag & Drop:</div>
+            <div className="border border-dashed border-gray-300 rounded-md p-3 bg-gray-50">
+              <Dropzone files={files} setFiles={setFiles} />
+            </div>
+            <AttachmentList
+              attachments={poheader.attachments}
+              canDelete={can(auth.user, PermissionsEnum.EditPO) /* auth.permissions.po.edit */}
+            />
+          </div>
+          {collectedAttachments && collectedAttachments.length > 0 && (
+            <div className="mb-4">
+              <div className="font-semibold text-xs mb-1">Extended Attachments from PR:</div>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 border-t border-gray-200 pt-3 mt-2">
+                {collectedAttachments.map((file, idx) => (
+                  <li
+                    key={file.path + idx}
+                    className="relative h-14 p-2 rounded-md border shadow-sm bg-white flex items-center justify-between">
+                    <div className="flex flex-col flex-1 min-w-0">
+                      <span className="text-xs text-gray-700 truncate">{file.filename}</span>
+                      <span className="text-[10px] text-gray-500 truncate">PR: {file.pr_number}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="ml-2 px-2 py-1 text-[10px] text-red-600 bg-red-100 rounded hover:bg-red-200"
+                      onClick={() => {
+                        setCollectedAttachments((prev) => prev.filter((_, i) => i !== idx));
+                      }}
+                      aria-label="Remove file">
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </>
       ),
     },
@@ -335,8 +411,14 @@ const Edit = ({
 
   useEffect(() => {
     const poTotal = material.filter((mat) => mat?.status != 'X').reduce((acc, mat) => acc + (mat.total_value || 0), 0);
-    setData((prevHeader: IPOHeader) => ({ ...prevHeader, total_po_value: poTotal, attachment: files, pomaterials: material }));
-  }, [material, files]);
+    setData((prevHeader: IPOHeader) => ({
+      ...prevHeader,
+      total_po_value: poTotal,
+      attachment: files,
+      pomaterials: material,
+      extended_attachments: collectedAttachments,
+    }));
+  }, [material, files, collectedAttachments]);
 
   useEffect(() => {
     if (errors.hasOwnProperty('error')) {
@@ -356,8 +438,10 @@ const Edit = ({
     e.preventDefault();
     const { isValid, updatedMaterials } = validateMaterials(material);
     setMaterial(updatedMaterials);
+    setData('extended_attachments', collectedAttachments);
     if (isValid) {
       post(route('po.update', poheader.id), {
+        // extended_attachments: collectedAttachments,
         preserveScroll: true,
         preserveState: false,
         onSuccess: (page) => {
