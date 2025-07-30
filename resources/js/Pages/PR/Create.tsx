@@ -42,7 +42,6 @@ const Create = ({
     ? prheader.prmaterials.map((prmaterial) => ({
         ...prmaterial,
         mat_grp_desc: prmaterial.materialGroups?.mat_grp_desc ?? '',
-        del_date: undefined,
         qty: undefined,
         altUomSelect: [
           ...new Set([prmaterial.ord_unit, ...(prmaterial.alt_uom ? prmaterial.alt_uom.map((item: IAlternativeUom) => item.alt_uom) : [])]),
@@ -188,9 +187,12 @@ const Create = ({
     },
   ];
 
-  const updateMaterial = async (newValue: IPRMaterial[], operations: Operation[]) => {
-    const updatedMaterial = await updateMaterialPR(newValue, operations, material, data.plant, data.doc_date, materialGeneric, prCtrlGrp);
-    setMaterial(updatedMaterial);
+  const updateMaterial = (newValue: IPRMaterial[], operations: Operation[]) => {
+    const fixedMaterial = newValue.map((row) => ({
+      ...row,
+      del_date: typeof row.del_date === 'string' ? new Date(row.del_date) : row.del_date,
+    }));
+    setMaterial(fixedMaterial);
   };
 
   const handleSubmit: FormEventHandler = async (e) => {
@@ -259,7 +261,7 @@ const Create = ({
               </div>
               <div className="p-5 pt-0">
                 <DataSheetGrid
-                  createRow={() => DEFAULT_PR_MATERIAL}
+                createRow={() => ({ ...DEFAULT_PR_MATERIAL, del_date: DATE_TODAY })}
                   value={material}
                   onChange={updateMaterial}
                   columns={columns}

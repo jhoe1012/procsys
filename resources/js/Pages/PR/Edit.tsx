@@ -248,12 +248,14 @@ const Edit = ({
             <div className="border border-dashed border-blue-300 rounded-md p-3 bg-gray-50">
               <Dropzone files={files} setFiles={setFiles} />
             </div>
-            <div className="mt-6">
-              <div className="font-semibold text-xs mb-1 text-green-700">Uploaded Attachments:</div>
-              <div className="border border-dashed border-green-500 rounded-md p-3">
-                <AttachmentList attachments={prheader.attachments} canDelete={can(auth.user, PermissionsEnum.EditPR)} />
+            {prheader.attachments && prheader.attachments.length > 0 && (
+              <div className="mt-6">
+                <div className="font-semibold text-xs mb-1 text-green-700">Uploaded Attachments:</div>
+                <div className="border border-dashed border-green-500 rounded-md p-3">
+                  <AttachmentList attachments={prheader.attachments} canDelete={can(auth.user, PermissionsEnum.EditPR)} />
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </>
       ),
@@ -453,7 +455,7 @@ const Edit = ({
               <div className="p-5">
                 <TabFields defaultValue="reasonForPr" className="max-w-8xl" tabs={headerTabs} />
               </div>
-              <div className="p-2">
+               <div className="p-5 pt-0">
                 <DataSheetGrid
                   createRow={() => DEFAULT_PR_MATERIAL}
                   value={material}
@@ -473,7 +475,7 @@ const Edit = ({
                   <Input type="text" value={formatNumber(data.total_pr_value)} readOnly disabled />
                 </div>
               </div>
-              <div className="p-2 pt-0">
+              <div className="p-5 pt-0">
                 <TabFields defaultValue="itemDetails" className="max-w-8xl" tabs={footerTabs} />
                 <div className="p-5 justify-end grid grid-cols-8 gap-4">
                   {can(auth.user, PermissionsEnum.EditPR) && ( //auth.permissions.pr.edit && (

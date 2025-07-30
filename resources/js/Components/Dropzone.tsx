@@ -1,7 +1,14 @@
 import { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { X } from 'lucide-react';
 
-const Dropzone = ({ files, setFiles, multiple = true }) => {
+const Dropzone = ({
+  files,
+  setFiles,
+  collectedAttachments = [],
+  setCollectedAttachments,
+  multiple = true,
+}) => {
   const onDrop = useCallback(
     (acceptedFiles) => {
       if (acceptedFiles?.length) {
@@ -20,7 +27,17 @@ const Dropzone = ({ files, setFiles, multiple = true }) => {
     onDrop,
   });
 
-  const removeFile = (name) => setFiles((files) => files.filter((file) => file.name !== name));
+  const displayFiles = [...files, ...collectedAttachments].filter((file, idx, arr) => {
+    const key = `${file.filename || file.name}|${file.path || ''}`;
+    return arr.findIndex(f => `${f.filename || f.name}|${f.path || ''}` === key) === idx;
+  });
+
+  const removeFile = (file) => {
+    setFiles((prev) => prev.filter((f) => (f.name || f.filename) !== (file.name || file.filename)));
+    if (setCollectedAttachments) {
+      setCollectedAttachments((prev) => prev.filter((f) => (f.name || f.filename) !== (file.name || file.filename)));
+    }
+  };
 
   return (
     <>
@@ -35,18 +52,29 @@ const Dropzone = ({ files, setFiles, multiple = true }) => {
       </div>
 
       <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 border-t border-gray-200 pt-3 mt-2">
-        {files?.map((file) => (
-          <li key={file.name} className="relative h-14 p-2 rounded-md border shadow-sm bg-white flex items-center justify-between">
+        {displayFiles.map((file, idx) => (
+          <li
+            key={(file.path || file.name || '') + idx}
+            className="relative h-16 p-3 rounded-md border shadow-sm bg-white flex items-center justify-between"
+          >
             <div className="flex flex-col flex-1 min-w-0">
-              <span className="text-xs text-gray-700 truncate">{file.name}</span>
+              <span className="text-sm font-medium text-gray-900 truncate">
+                {file.filename || file.name}
+              </span>
+              {file.pr_number && (
+                <span className="text-xs text-blue-600 truncate mt-1">
+                  PR:<span className="font-semibold">{file.pr_number}</span>
+                </span>
+              )}
             </div>
             <button
               type="button"
-              className="ml-2 px-2 py-1 text-[10px] text-red-600 bg-red-100 rounded hover:bg-red-200"
-              onClick={() => removeFile(file.name)}
+              className="ml-2 px-2 py-1 text-xs text-red-700 bg-red-100 rounded hover:bg-red-200 flex items-center justify-center"
+              onClick={() => removeFile(file)}
               aria-label="Remove file"
-              title="Remove">
-              Remove
+              title="Remove"
+            >
+              <X size={16} strokeWidth={2} />
             </button>
           </li>
         ))}
@@ -56,21 +84,3 @@ const Dropzone = ({ files, setFiles, multiple = true }) => {
 };
 
 export default Dropzone;
-
-{
-  /* <li key={file.path + idx} className="relative h-14 p-2 rounded-md border shadow-sm bg-white flex items-center justify-between">
-  <div className="flex flex-col flex-1 min-w-0">
-    <span className="text-xs text-gray-700 truncate">{file.filename}</span>
-    <span className="text-[10px] text-gray-500 truncate">PR: {file.pr_number}</span>
-  </div>
-  <button
-    type="button"
-    className="ml-2 px-2 py-1 text-[10px] text-red-600 bg-red-100 rounded hover:bg-red-200"
-    onClick={() => {
-      setCollectedAttachments((prev) => prev.filter((_, i) => i !== idx));
-    }}
-    aria-label="Remove file">
-    Remove
-  </button>
-</li>; */
-}

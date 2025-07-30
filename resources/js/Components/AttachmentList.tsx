@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from '@inertiajs/react';
+import { X } from 'lucide-react';
 
 interface Attachment {
   id: number;
@@ -19,14 +20,17 @@ const AttachmentList: React.FC<AttachmentListProps> = ({ attachments, canDelete 
         attachments.map((attachment) => (
           <li
             key={attachment.id}
-            className="relative h-14 p-2 rounded-md border shadow-sm bg-white flex items-center justify-between"
+            className="relative h-16 p-3 rounded-md border shadow-sm bg-white flex items-center justify-between"
           >
             <div className="flex flex-col flex-1 min-w-0">
-              <span className="text-xs text-blue-600 truncate">
-                <a href={`/${attachment.filepath}`} download>
-                  {attachment.filename}
-                </a>
-              </span>
+              <a
+                href={`/${attachment.filepath}`}
+                download
+                className="text-sm font-medium text-blue-700 hover:underline truncate"
+                title={attachment.filename}
+              >
+                {attachment.filename}
+              </a>
             </div>
             {canDelete && (
               <Link
@@ -34,11 +38,11 @@ const AttachmentList: React.FC<AttachmentListProps> = ({ attachments, canDelete 
                 href={route('attachment.delete', attachment.id)}
                 method="delete"
                 as="button"
-                className="ml-2 px-2 py-1 text-[10px] text-red-600 bg-red-100 rounded hover:bg-red-200"
+                className="ml-2 px-2 py-1 text-xs text-red-700 bg-red-100 rounded hover:bg-red-200 flex items-center justify-center"
                 aria-label="Remove attachment"
                 title="Remove"
               >
-                Remove
+                <X size={16} strokeWidth={2} />
               </Link>
             )}
           </li>

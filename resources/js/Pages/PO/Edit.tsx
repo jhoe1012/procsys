@@ -285,7 +285,12 @@ const Edit = ({
           <div className="mb-4 ml-0">
             <div className="font-semibold text-xs mb-1 text-blue-700">Attachments via Drag & Drop:</div>
             <div className="border border-dashed border-blue-300 rounded-md p-3 bg-gray-50">
-              <Dropzone files={files} setFiles={setFiles} />
+              <Dropzone
+                files={files}
+                setFiles={setFiles}
+                collectedAttachments={collectedAttachments}
+                setCollectedAttachments={setCollectedAttachments}
+              />
             </div>
             {poheader.attachments && poheader.attachments.length > 0 && (
               <div className="mt-6">
@@ -296,32 +301,6 @@ const Edit = ({
               </div>
             )}
           </div>
-          {collectedAttachments && collectedAttachments.length > 0 && (
-            <div className="mb-4 ml-0 border border-dashed border-red-500 rounded-md p-3">
-              <div className="font-semibold text-xs mb-1 text-red-700">Extended Attachments from PR:</div>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 border-t border-red-200 pt-3 mt-2">
-                {collectedAttachments.map((file, idx) => (
-                  <li
-                    key={file.path + idx}
-                    className="relative h-14 p-2 rounded-md border shadow-sm bg-white flex items-center justify-between">
-                    <div className="flex flex-col flex-1 min-w-0">
-                      <span className="text-xs text-gray-700 truncate">{file.filename}</span>
-                      <span className="text-[10px] text-gray-500 truncate">PR: {file.pr_number}</span>
-                    </div>
-                    <button
-                      type="button"
-                      className="ml-2 px-2 py-1 text-[10px] text-red-600 bg-red-100 rounded hover:bg-red-200"
-                      onClick={() => {
-                        setCollectedAttachments((prev) => prev.filter((_, i) => i !== idx));
-                      }}
-                      aria-label="Remove file">
-                      Remove
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </>
       ),
     },
