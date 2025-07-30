@@ -1,30 +1,28 @@
-import 'react-datasheet-grid/dist/style.css';
-import { FormEventHandler, useState } from 'react';
-import { checkboxColumn, DataSheetGrid, dateColumn, floatColumn, intColumn, keyColumn, textColumn } from 'react-datasheet-grid';
-import { Operation } from 'react-datasheet-grid/dist/types';
-import { CSSObjectWithLabel } from 'react-select';
-import AsyncSelect from 'react-select/async';
+import { SelectField } from '@/Components';
 import { Button } from '@/Components/ui/button';
 import { Card, CardContent } from '@/Components/ui/card';
 import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
-import { Select as CSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/ui/tabs';
 import { Toaster } from '@/Components/ui/toaster';
 import { useToast } from '@/Components/ui/use-toast';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { IGRHeader, IGRMaterials, PageProps } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { can } from '@/lib/helper';
 import { CUSTOM_DATA_SHEET_STYLE, DEFAULT_GR_MATERIAL, PermissionsEnum, REACT_SELECT_STYLES } from '@/lib/constants';
-import { SelectField } from '@/Components';
+import { can } from '@/lib/helper';
+import { Choice, IGRHeader, IGRMaterials, PageProps } from '@/types';
+import { Head, Link, useForm } from '@inertiajs/react';
+import debounce from 'lodash/debounce';
+import { FormEventHandler, useCallback, useEffect, useState } from 'react';
+import { checkboxColumn, DataSheetGrid, dateColumn, floatColumn, intColumn, keyColumn, textColumn } from 'react-datasheet-grid';
+import 'react-datasheet-grid/dist/style.css';
+import { Operation } from 'react-datasheet-grid/dist/types';
+import AsyncSelect from 'react-select/async';
 
 const Create = ({ auth }: PageProps) => {
   const dateToday = new Date().toISOString().substring(0, 10);
 
   const { toast } = useToast();
   const [material, setMaterial] = useState<IGRMaterials[]>(Array(5).fill({ ...DEFAULT_GR_MATERIAL }));
-
   const { data, setData, post, errors, reset, processing } = useForm<IGRHeader>({
     id: 0,
     gr_number: undefined,
@@ -41,6 +39,7 @@ const Create = ({ auth }: PageProps) => {
     header_text: '',
     is_cancel: false,
     grmaterials: [],
+    transaction: 'Goods Receipt',
   });
 
   const columns = [
@@ -50,13 +49,14 @@ const Create = ({ auth }: PageProps) => {
     { ...keyColumn('item_text', textColumn), title: 'Item Text', minWidth: 400, disabled: true },
     { ...keyColumn('po_gr_qty', floatColumn), title: 'PO Qty', minWidth: 70, disabled: true },
     { ...keyColumn('gr_qty', floatColumn), title: 'Qty', minWidth: 70 },
-    { ...keyColumn('unit', textColumn), title: 'Unit', minWidth: 55 },
+    { ...keyColumn('unit', textColumn), title: 'Unit', minWidth: 55, disabled: true },
     { ...keyColumn('po_deliv_date', textColumn), title: 'PO Del Date', minWidth: 130, disabled: true },
     { ...keyColumn('batch', textColumn), title: 'Batch', minWidth: 130 },
     { ...keyColumn('mfg_date', dateColumn), title: 'Mfg Date', minWidth: 130 },
     { ...keyColumn('sled_bbd', dateColumn), title: 'SLED/BBD', minWidth: 130 },
-    { ...keyColumn('po_item', textColumn), title: 'PO Item', minWidth: 55, disabled: true },
     { ...keyColumn('dci', checkboxColumn), title: 'DCI', minWidth: 55 },
+    { ...keyColumn('po_item', textColumn), title: 'PO Item', minWidth: 55, disabled: true },
+    { ...keyColumn('sloc', textColumn), title: 'Sloc', minWidth: 55, disabled: true },
   ];
 
   const updateMaterial = async (newValue: IGRMaterials[], operations: Operation[]) => {
@@ -140,6 +140,8 @@ const Create = ({ auth }: PageProps) => {
         po_number: response.data.po_number,
         po_item: item.item_no,
         dci: false,
+        sloc: response.data?.deliv_sloc ? response.data?.deliv_sloc : item.purchasingGroups.sloc_ep,
+        item_cat: item.purchasingGroups.item_cat,
       }));
 
       setData({
@@ -157,7 +159,7 @@ const Create = ({ auth }: PageProps) => {
     }
   };
 
-  const fetchPoControlNo = async (inputValue) => {
+  const fetchPoControlNo = async (inputValue: string) => {
     if (!inputValue) return [];
 
     try {
@@ -173,12 +175,30 @@ const Create = ({ auth }: PageProps) => {
     }
   };
 
+  const debouncedFetchPoControlNo = useCallback(
+    debounce((inputValue, callback) => {
+      fetchPoControlNo(inputValue).then(callback);
+    }, 1000),
+    []
+  );
+
   const handleSubmit: FormEventHandler = async (e) => {
     e.preventDefault();
     if (handleCheck()) {
       post(route('gr.store'));
     }
   };
+
+  const transactions: Choice[] = [{ label: 'Goods Receipt', value: 'Goods Receipt' }];
+
+  useEffect(() => {
+    if (errors.hasOwnProperty('error')) {
+      toast({
+        variant: 'destructive',
+        description: errors.error,
+      });
+    }
+  }, [errors]);
 
   return (
     <AuthenticatedLayout
@@ -193,8 +213,16 @@ const Create = ({ auth }: PageProps) => {
             <form onSubmit={handleSubmit}>
               <div className="p-5 flex flex-wrap gap-4">
                 <div className="flex-none w-40">
-                  <Label>&nbsp;</Label>
-                  <Input type="text" defaultValue="Goods Reciept" disabled />
+                  <SelectField
+                    label="Transaction"
+                    items={transactions}
+                    valueKey="label"
+                    displayKey="value"
+                    onValueChange={(value) => setData('transaction', value)}
+                    value={transactions.find(({ value }) => value == data.transaction)?.value}
+                    displayValue={false}
+                    required={true}
+                  />
                 </div>
 
                 <div className="flex-none w-60">
@@ -202,7 +230,7 @@ const Create = ({ auth }: PageProps) => {
                   <AsyncSelect
                     cacheOptions
                     defaultOptions
-                    loadOptions={fetchPoControlNo}
+                    loadOptions={debouncedFetchPoControlNo}
                     value={data.po_number ? { label: `${data.control_no} | ${data.po_number}`, value: data.po_number } : null}
                     onChange={(option: any) => {
                       getPODetails(option?.value);
@@ -298,7 +326,7 @@ const Create = ({ auth }: PageProps) => {
 
               <div className="p-2 pt-0">
                 <div className="p-5 justify-end grid grid-cols-8 gap-4">
-                  {can(auth.user, PermissionsEnum.CreateGR) && ( //auth.permissions.gr.create && (
+                  {can(auth.user, PermissionsEnum.CreateGR) && (
                     <>
                       <Button variant="outline" disabled={processing} className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110]">
                         Post

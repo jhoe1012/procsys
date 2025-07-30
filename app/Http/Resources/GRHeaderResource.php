@@ -28,14 +28,15 @@ class GRHeaderResource extends JsonResource
             'actual_date'   => $this->actual_date,
             'delivery_note' => $this->delivery_note,
             'header_text'   => $this->header_text,
-            // 'is_cancel' => $this->is_cancel,
-            'created_by'  => $this->created_by,
-            'updated_by'  => $this->updated_by,
-            'created_at'  => $this->created_at,
-            'updated_at'  => $this->updated_at,
-            'plants'      => new PlantResource($this->whenLoaded('plants')),
-            'vendors'     => new VendorResource($this->whenLoaded('vendors')),
-            'grmaterials' => GRMaterialsResource::collection($this->whenLoaded('grmaterials')),
+            'is_reversal'   => $this->is_reversal,
+            'transaction'   => $this->transaction,
+            'created_by'    => $this->created_by,
+            'updated_by'    => $this->updated_by,
+            'created_at'    => $this->created_at,
+            'updated_at'    => $this->updated_at,
+            'plants'        => new PlantResource($this->whenLoaded('plants')),
+            'vendors'       => new VendorResource($this->whenLoaded('vendors')),
+            'grmaterials'   => GRMaterialsResource::collection($this->whenLoaded('grmaterials')),
         ];
     }
 }

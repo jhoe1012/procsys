@@ -41,9 +41,9 @@ const Show = ({ auth, grheader }: PageProps & PageProps<{ grheader: IGRHeader }>
           <div className="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg">
             {/* <form onSubmit={handleSubmit}> */}
             <div className="p-5 flex flex-wrap gap-4">
-              <div className="flex-none w-40">
+              <div className="flex-none w-48">
                 <Label>&nbsp;</Label>
-                <Input type="text" defaultValue="Goods Reciept" disabled />
+                 <Input type="text" id="gr_number" value={grheader.transaction} disabled />
               </div>
               <div className="flex-none w-60">
                 <Label>PO Number</Label>

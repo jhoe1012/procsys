@@ -26,6 +26,8 @@ class PurchasingGroupResource extends JsonResource
             'max_lot_size'    => $this->max_lot_size,
             'fix_lot_size'    => $this->fix_lot_size,
             'rounding_value'  => $this->rounding_value,
+            'item_cat'        => $this->item_cat,
+            'sloc_ep'         => $this->sloc_ep,
             'created_by'      => $this->created_by,
             'updated_by'      => $this->updated_by,
             'created_at'      => $this->created_at,

@@ -90,4 +90,9 @@ class PoMaterial extends Model
     {
         return $this->hasOne(MaterialGroup::class, 'mat_grp_code', 'mat_grp');
     }
+
+    public function purchasingGroups(): HasOne
+    {
+        return $this->hasOne(PurchasingGroup::class, 'mat_code', 'mat_code');
+    }
 }

@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('gr_headers', function (Blueprint $table) {
-            $table->string('transaction', 32)->nullable();
-            $table->boolean('is_reversal')->default(false);
+        Schema::table('po_headers', function (Blueprint $table) {
+            $table->string('deliv_sloc', 4)->nullable();
         });
     }
 
@@ -22,9 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('gr_headers', function (Blueprint $table) {
-            $table->dropColumn('transaction');
-            $table->dropColumn('is_reversal');
+        Schema::table('po_headers', function (Blueprint $table) {
+            $table->dropColumn('deliv_sloc');
         });
     }
 };
