@@ -486,10 +486,8 @@ const Edit = ({
     e.preventDefault();
     const { isValid, updatedMaterials } = validateMaterials(material);
     setMaterial(updatedMaterials);
-    setData('extended_attachments', collectedAttachments);
     if (isValid) {
       post(route('po.update', poheader.id), {
-        // extended_attachments: collectedAttachments,
         preserveScroll: true,
         preserveState: false,
         onSuccess: (page) => {
