@@ -248,7 +248,7 @@ class PRController extends Controller
 
         try {
             return DB::transaction(function () use ($request, $id) {
-                $pr_header = PrHeader::findOrFail($id);
+                $pr_header = PrHeader::with('prmaterials')->findOrFail($id);
                 $pr_materials = collect($request->input('prmaterials'))
                     ->filter(fn ($item) => ! empty($item['mat_code']))
                     ->map(fn ($item, $index) => $this->_mapOrUpdatePrMaterial($item, $index, $pr_header->id))
