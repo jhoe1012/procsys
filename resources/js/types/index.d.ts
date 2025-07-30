@@ -408,6 +408,8 @@ export interface IGRHeader {
   updated_at?: string;
   grmaterials: IGRMaterials[];
   _method?: string;
+  transaction?: string;
+  is_reversal?: boolean;
 }
 
 export interface IGRMaterials {
@@ -428,6 +430,8 @@ export interface IGRMaterials {
   po_number?: string;
   po_item?: number;
   dci?: boolean;
+  sloc?: string;
+  item_cat?: string;
   is_cancel?: boolean;
   created_by?: string;
   updated_by?: string;
@@ -576,4 +580,16 @@ export interface IDeliveryAddress {
   updated_by: number;
   created_at: number;
   updated_at: number;
+}
+
+export interface IPlantSloc {
+  id?: number;
+  plant?: string;
+  sloc?: string;
+  sloc_name?: string;
+  is_sloc_blocked?: boolean;
+  created_by?: string;
+  updated_by?: string;
+  created_at?: string;
+  updated_at?: string;
 }

@@ -1,13 +1,13 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, router } from '@inertiajs/react';
-import { PageProps, IMessage, IGRHeader, IGRMaterials, IGRHeaderPage, Choice } from '@/types';
-import { useState, useEffect, KeyboardEvent } from 'react';
-import { PrinterIcon } from '@heroicons/react/24/solid';
-import { can } from '@/lib/helper';
-import { PermissionsEnum, REACT_SELECT_STYLES } from '@/lib/constants';
-import { Toaster, useToast } from '@/Components/ui';
 import { Modal, Pagination, TextInput } from '@/Components';
+import { Toaster, useToast } from '@/Components/ui';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { PermissionsEnum, REACT_SELECT_STYLES } from '@/lib/constants';
+import { can } from '@/lib/helper';
 import { formatShortDate } from '@/lib/utils';
+import { Choice, IGRHeader, IGRHeaderPage, IGRMaterials, IMessage, PageProps } from '@/types';
+import { PrinterIcon } from '@heroicons/react/24/solid';
+import { Head, Link, router } from '@inertiajs/react';
+import { KeyboardEvent, useEffect, useState } from 'react';
 import Select from 'react-select';
 
 const Index = ({
@@ -206,6 +206,7 @@ const Index = ({
                   <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b-2 border-gray-500">
                     <tr className="text-nowrap">
                       <th className="px-3 py-2"> </th>
+                      <th className="px-3 py-2 max-w-[5%]"> Transaction</th>
                       <th className="px-3 py-2 w-[5%]"> Document Number</th>
                       <th className="px-3 py-2 w-[5%]"> PO Number</th>
                       <th className="px-3 py-2 w-[10%]"> Plant</th>
@@ -232,6 +233,7 @@ const Index = ({
                               }}
                             />
                           </td>
+                          <td className="px-3 py-2">{gr.transaction}</td>
                           <td className="px-3 py-2">{gr.gr_number}</td>
                           <td className="px-3 py-2">{gr.po_number}</td>
                           <td className="px-3 py-2">
@@ -307,6 +309,7 @@ const Index = ({
                             <td className="px-3 py-2">{grMaterial.batch}</td>
                             <td className="px-3 py-2">{grMaterial.mfg_date?.toString()}</td>
                             <td className="px-3 py-2">{grMaterial.sled_bbd?.toString()}</td>
+                            <td className="px-3 py-2">{grMaterial.po_item}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -317,7 +320,7 @@ const Index = ({
                   <div>
                     {selectedGr?.id && (
                       <>
-                        {can(auth.user, PermissionsEnum.CancelGR) && ( //auth.permissions.gr.cancel && (
+                        {can(auth.user, PermissionsEnum.CancelGR) && !selectedGr.is_reversal && (
                           <Link
                             href={route('gr.edit', selectedGr.gr_number)}
                             className=" p-3 m-3 bg-gray-100 inline-flex items-center justify-center whitespace-nowrap rounded-md text-xs font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input  hover:bg-gray-400 hover:text-accent-foreground hover:border-gray-500">

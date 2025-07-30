@@ -48,6 +48,7 @@ class POMaterialsResource extends JsonResource
             'materialNetPrices' => MaterialNetPriceResource::collection($this->whenLoaded('materialNetPrices')),
             'alt_uom'           => AlternativeUomResource::collection($this->whenLoaded('altUoms')),
             'materialGroups'    => new MaterialGroupResource($this->whenLoaded('materialGroups')),
+            'purchasingGroups'  => new PurchasingGroupResource($this->whenLoaded('purchasingGroups')),
         ];
     }
 }

@@ -12,7 +12,8 @@ class GrHeader extends Model
 {
     use CreatedUpdatedBy, HasFactory;
 
-    protected $fillable = ['po_number',
+    protected $fillable = [
+        'po_number',
         'created_name',
         'vendor_id',
         'plant',
@@ -20,7 +21,10 @@ class GrHeader extends Model
         'posting_date',
         'actual_date',
         'delivery_note',
-        'header_text', ];
+        'header_text',
+        'transaction',
+        'is_reversal',
+    ];
 
     public function grmaterials(): HasMany
     {

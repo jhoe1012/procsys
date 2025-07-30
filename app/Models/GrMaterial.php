@@ -6,6 +6,8 @@ use App\Trait\CreatedUpdatedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class GrMaterial extends Model
 {
@@ -26,12 +28,23 @@ class GrMaterial extends Model
         'po_number',
         'po_item',
         'dci',
+        'base_qty',
+        'base_uom',
+        'base_amount,',
+        'plant',
+        'prior_qty',
+        'prior_val',
+        'sloc',
+        'movement_type',
+        'gr_number_ref',
+        'item_no_ref',
     ];
 
     protected function casts(): array
     {
         return [
-            'gr_qty' => 'float',
+            'gr_qty'   => 'float',
+            'base_qty' => 'float',
         ];
     }
 
@@ -43,5 +56,25 @@ class GrMaterial extends Model
     public function pomaterials(): BelongsTo
     {
         return $this->belongsTo(PoMaterial::class, 'po_material_id', 'id');
+    }
+
+    public function altUoms(): HasMany
+    {
+        return $this->hasMany(AlternativeUom::class, 'mat_code', 'mat_code');
+    }
+
+    public function material(): HasOne
+    {
+        return $this->hasOne(Material::class, 'mat_code', 'mat_code');
+    }
+
+    public function valuations(): HasMany
+    {
+        return $this->hasMany(MaterialValuation::class, 'mat_code', 'mat_code');
+    }
+
+    public function purchasingGroups(): HasOne
+    {
+        return $this->hasOne(PurchasingGroup::class, 'mat_code', 'mat_code');
     }
 }

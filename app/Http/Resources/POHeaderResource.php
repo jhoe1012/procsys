@@ -33,6 +33,7 @@ class POHeaderResource extends JsonResource
             'deliv_date'     => $this->deliv_date ? $this->deliv_date->format('Y-m-d') : null,
             'notes'          => $this->notes,
             'print_count'    => $this->print_count,
+            'deliv_sloc'     => $this->deliv_sloc,
             'created_by'     => $this->created_by,
             'updated_by'     => $this->updated_by,
             'created_at'     => $this->created_at->format('Y-m-d H:m:i'),

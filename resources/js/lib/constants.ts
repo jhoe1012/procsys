@@ -49,6 +49,8 @@ export const DEFAULT_GR_MATERIAL = {
   po_number: undefined,
   po_item: undefined,
   dci: undefined,
+  sloc: undefined,
+  item_cat: undefined,
 };
 
 // Custom style for react select for index
@@ -115,17 +117,6 @@ export const CUSTOM_DATA_SHEET_STYLE = {
   '--dsg-border-color': '#bfbdbd',
 };
 
-// export const NOTES = [
-//   'NOTE: PLEASE PROVIDE COA/COI/LOG WITH MICROBIOLOGY & PHYSICO-CHEM ANALYSIS IN EVERY DELIVERY.  FOR MEAT PRODUCTS, PLEASE ALSO PROVIDE MEAT INSPECTION CERTIFICATE. *** PLEASE PROVIDE COPY OF PO REFERENCE/S DURING DELIVERIES',
-//   '*** PLEASE PROVIDE COPY OF PO REFERENCE/S DURING DELIVERIES. FOR SERVICES, PLEASE PROVIDE SERVICE REPORT AFTER THE SERVICE.',
-// ];
-
-// export const DELIVERY_ADDRESS = [
-//   'BLOCK 6 LOT 8, PSD II, DIVERSION ROAD, BUHANGIN, DAVAO CITY',
-//   'DOOR 2 PLUG HOLDING BLDG, DIHO ROAD CABANTIAN, DAVAO CITY',
-//   '#76 ANACONDA COMPOUND F. MARIANO AVE., DELA PAZ, PASIG CITY',
-// ];
-
 export enum PermissionsEnum {
   CreatePR = 'create.pr',
   EditPR = 'edit.pr',
@@ -147,4 +138,9 @@ export enum PermissionsEnum {
   ApproverGR = 'approver.gr',
   CancelGR = 'cancel.gr',
   Admin = 'admin',
+}
+
+export enum ItemCategoryEnum {
+  Stock = 'L',
+  NonStock = 'N',
 }

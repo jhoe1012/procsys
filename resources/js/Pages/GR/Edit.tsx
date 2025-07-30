@@ -1,22 +1,23 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { PageProps, IGRMaterials, IGRHeader } from '@/types';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/ui/tabs';
+import { useToast } from '@/Components/ui';
 import { Button } from '@/Components/ui/button';
+import { Card, CardContent } from '@/Components/ui/card';
 import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
-import 'react-datasheet-grid/dist/style.css';
-import { useState, FormEventHandler } from 'react';
-import { DataSheetGrid, checkboxColumn, textColumn, intColumn, keyColumn, floatColumn } from 'react-datasheet-grid';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/ui/tabs';
 import { Toaster } from '@/Components/ui/toaster';
-import { Card, CardContent } from '@/Components/ui/card';
-import { Operation } from 'react-datasheet-grid/dist/types';
-import { can } from '@/lib/helper';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { CUSTOM_DATA_SHEET_STYLE, PermissionsEnum } from '@/lib/constants';
+import { can } from '@/lib/helper';
+import { IGRHeader, IGRMaterials, PageProps } from '@/types';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { FormEventHandler, useEffect, useState } from 'react';
+import { DataSheetGrid, checkboxColumn, floatColumn, intColumn, keyColumn, textColumn } from 'react-datasheet-grid';
+import 'react-datasheet-grid/dist/style.css';
+import { Operation } from 'react-datasheet-grid/dist/types';
 
 const Edit = ({ auth, grheader }: PageProps & PageProps<{ grheader: IGRHeader }>) => {
   const [material, setMaterial] = useState<IGRMaterials[]>(grheader.grmaterials);
-
+  const { toast } = useToast();
   const { data, setData, post, errors, reset, transform, processing } = useForm<IGRHeader>({
     id: grheader.id,
     gr_number: grheader.gr_number,
@@ -33,6 +34,7 @@ const Edit = ({ auth, grheader }: PageProps & PageProps<{ grheader: IGRHeader }>
     is_cancel: false,
     grmaterials: grheader.grmaterials,
     _method: 'patch',
+    transaction: 'Cancel: ' + grheader.transaction,
   });
 
   const columns = [
@@ -61,6 +63,15 @@ const Edit = ({ auth, grheader }: PageProps & PageProps<{ grheader: IGRHeader }>
     post(route('gr.cancel', grheader.id));
   };
 
+  useEffect(() => {
+    if (errors.hasOwnProperty('error')) {
+      toast({
+        variant: 'destructive',
+        description: errors.error,
+      });
+    }
+  }, [errors]);
+
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -73,23 +84,20 @@ const Edit = ({ auth, grheader }: PageProps & PageProps<{ grheader: IGRHeader }>
           <div className="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg">
             <form onSubmit={handleSubmit}>
               <div className="p-5 flex flex-wrap gap-4">
-                <div className="flex-none w-40">
+                <div className="flex-none w-48">
                   <Label>&nbsp;</Label>
-                  <Input type="text" defaultValue="Goods Reciept" disabled />
+                  <Input type="text" id="transaction" value={data.transaction} disabled />
                 </div>
-                <div className="flex-none w-40">
-                  <Label>&nbsp;</Label>
-                  <Input type="text" defaultValue="Cancellation" disabled />
-                </div>
-                <div className="flex-none w-40">
+
+                <div className="flex-none w-28">
                   <Label>PO Number</Label>
                   <Input type="text" id="po_number" value={data.po_number} disabled />
                 </div>
-                <div className="flex-none w-40">
+                <div className="flex-none w-28">
                   <Label htmlFor="gr_number">Document Number</Label>
                   <Input type="text" id="gr_number" value={data.gr_number} disabled />
                 </div>
-                <div className="flex-none w-52">
+                <div className="flex-none w-80">
                   <Label>Vendor</Label>
                   <Input type="text" value={data.vendor_id} disabled />
                 </div>
