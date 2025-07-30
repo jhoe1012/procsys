@@ -1,0 +1,94 @@
+rules:
+  # SQL Injection in PHP (Laravel)
+  - id: laravel-sql-injection
+    pattern: "DB::select($QUERY)"
+    message: "Possible SQL injection: avoid using raw queries with user input in Laravel."
+    languages: [php]
+    severity: ERROR
+
+  # Usage of env() in Laravel outside config
+  - id: laravel-env-in-production
+    pattern: "env($ANY)"
+    message: "Avoid using env() outside config files in Laravel. Use config() instead."
+    languages: [php]
+    severity: WARNING
+
+  # Hardcoded secrets in PHP/JS/TS
+  - id: hardcoded-secret
+    patterns:
+      - pattern: "password = \"$SECRET\""
+      - pattern: "apiKey = \"$SECRET\""
+      - pattern: "secret = \"$SECRET\""
+    message: "Hardcoded secrets detected. Use environment variables or secret management."
+    languages: [php, javascript, typescript]
+    severity: ERROR
+
+  # React: dangerouslySetInnerHTML
+  - id: react-dangerouslysetinnerhtml
+    pattern: "<div dangerouslySetInnerHTML={{ __html: $HTML }} />"
+    message: "Avoid using dangerouslySetInnerHTML in React; it can lead to XSS vulnerabilities."
+    languages: [javascript, typescript, jsx, tsx]
+    severity: ERROR
+
+  # React: Inline event handlers with user input
+  - id: react-inline-event-user-input
+    pattern: "<button onClick={() => $FUNC($USER_INPUT)} />"
+    message: "Validate user input before using it in event handlers."
+    languages: [javascript, typescript, jsx, tsx]
+    severity: WARNING
+
+  # Tailwind: Unsafe dynamic class names
+  - id: tailwind-dynamic-class
+    pattern: "className={$DYNAMIC}"
+    message: "Be cautious with dynamic Tailwind class names; validate input to prevent injection."
+    languages: [javascript, typescript, jsx, tsx]
+    severity: WARNING
+
+  # Inertia.js: Direct user input to props
+  - id: inertia-direct-user-input
+    pattern: "<Inertia $PROP={$USER_INPUT} />"
+    message: "Validate user input before passing to Inertia props."
+    languages: [javascript, typescript, jsx, tsx]
+    severity: WARNING
+
+  # PostgreSQL: Direct SQL queries in JS/TS
+  - id: direct-sql-query-js
+    pattern: "client.query($QUERY)"
+    message: "Direct SQL queries in JS/TS can be unsafe. Use parameterized queries to prevent SQL injection."
+    languages: [javascript, typescript]
+    severity: ERROR
+
+  # General: Usage of eval (JS/TS)
+  - id: no-eval
+    pattern: "eval($EXPR)"
+    message: "Avoid using eval(); it can lead to code injection vulnerabilities."
+    languages: [javascript, typescript]
+    severity: ERROR
+
+  # General: Usage of document.write (JS/TS)
+  - id: no-document-write
+    pattern: "document.write($EXPR)"
+    message: "Avoid using document.write(); it can lead to XSS vulnerabilities."
+    languages: [javascript, typescript]
+    severity: ERROR
+
+  # General: Usage of innerHTML assignment (JS/TS)
+  - id: no-innerhtml
+    pattern: "$OBJ.innerHTML = $EXPR"
+    message: "Avoid assigning to innerHTML; it can lead to XSS vulnerabilities."
+    languages: [javascript, typescript]
+    severity: ERROR
+
+  # General: Usage of unsafe HTTP (JS/TS)
+  - id: no-unsafe-http
+    pattern: "fetch(\"http://$URL\", ...)"
+    message: "Use HTTPS instead of HTTP for network requests."
+    languages: [javascript, typescript]
+    severity: WARNING
+
+  # General: Missing CSRF protection in Laravel
+  - id: laravel-missing-csrf
+    pattern: "<form ...>"
+    message: "Ensure CSRF protection is enabled for forms in Laravel."
+    languages: [php]
+    severity: WARNING
