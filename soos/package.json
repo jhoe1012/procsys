@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@soos-io/soos-sast": "^1.2.2"
+  }
+}
