@@ -118,9 +118,13 @@ class POController extends Controller
     {
         try {
             return DB::transaction(function () use ($request) {
+
+                $header_deliv_date = $request->input('deliv_date');
+                $is_mother_po = $request->input('is_mother_po', false);
+                
                 $po_materials = collect($request->input('pomaterials'))
                     ->filter(fn ($item) => ! empty($item['mat_code']))
-                    ->map(fn ($item, $index) => new PoMaterial($this->_mapPoMaterialData($item, $index)))
+                    ->map(fn ($item, $index) => new PoMaterial($this->_mapPoMaterialData($item, $index, $header_deliv_date, $is_mother_po)))
                     ->values();
                 $total_po_value = $po_materials->sum('total_value');
                 $po_header      = PoHeader::create(array_merge(
@@ -216,10 +220,13 @@ class POController extends Controller
     {
         try {
             return DB::transaction(function () use ($request, $id) {
-                $po_header    = PoHeader::findOrFail($id);
+                $po_header      = PoHeader::findOrFail($id);
+                $header_deliv_date = $request->input('deliv_date');
+                $is_mother_po      = $request->input('is_mother_po', false);
+
                 $po_materials = collect($request->input('pomaterials'))
                     ->filter(fn ($item) => ! empty($item['mat_code']) || $item['status'] !== 'X')
-                    ->map(fn ($item, $index) => $this->_mapOrUpdatePoMaterial($item, $index, $po_header->id))
+                    ->map(fn ($item, $index) => $this->_mapOrUpdatePoMaterial($item, $index, $po_header->id, $header_deliv_date, $is_mother_po))
                     ->map(function ($item) {
                         $converted_qty_old_value = 0;
                         if (isset($item['id'])) {
@@ -671,8 +678,10 @@ class POController extends Controller
         }
     }
 
-    private function _mapPoMaterialData(array $item, int $index)
+    private function _mapPoMaterialData(array $item, int $index, $header_deliv_date = null, $is_mother_po = false)
     {
+        // If regular PO, use header delivery date; if mother PO, use line item delivery date
+        $del_date = $is_mother_po ? $item['del_date'] : $header_deliv_date;
         return [
             'pr_material_id' => $item['pr_material_id'],
             'item_no'        => ($index + 1) * 10,
@@ -686,7 +695,7 @@ class POController extends Controller
             'total_value'    => $item['po_qty'] * $item['net_price'],
             'item_free'      => $item['item_free'] ?? false,
             'currency'       => $item['currency'],
-            'del_date'       => Carbon::parse($item['del_date'])->format('Y-m-d'),
+            'del_date'       => Carbon::parse($del_date)->format('Y-m-d'),
             'mat_grp'        => $item['mat_grp'],
             'requested_by'   => $item['requested_by'],
             'pr_number'      => $item['pr_number'],
@@ -701,10 +710,10 @@ class POController extends Controller
         ];
     }
 
-    private function _mapOrUpdatePoMaterial(array $item, int $index, int $po_header_id)
+    private function _mapOrUpdatePoMaterial(array $item, int $index, int $po_header_id, $header_deliv_date = null, $is_mother_po = false)
     {
         return array_merge(
-            $this->_mapPoMaterialData($item, $index),
+            $this->_mapPoMaterialData($item, $index, $header_deliv_date, $is_mother_po),
             ['po_header_id' => $po_header_id, 'id' => $item['id'] ?? null]
         );
     }

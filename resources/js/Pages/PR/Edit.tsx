@@ -27,7 +27,7 @@ import {
 import { formatNumber } from '@/lib/utils';
 import { Choice, IAlternativeUom, IitemDetails, IMessage, IPRHeader, IPRMaterial, IWorkflow, PageProps } from '@/types';
 import { Head, useForm, Link } from '@inertiajs/react';
-import { FormEventHandler, useEffect, useMemo, useState } from 'react';
+import { FormEventHandler, useEffect, useMemo, useRef, useState } from 'react';
 import {
   checkboxColumn,
   DataSheetGrid,
@@ -43,6 +43,7 @@ import { Operation } from 'react-datasheet-grid/dist/types';
 import Approval from './Partial/Approval';
 import { can } from '@/lib/helper';
 import { LetterText, List, Paperclip, Pointer, Workflow } from 'lucide-react';
+import isEqual from 'lodash.isequal';
 
 const Edit = ({
   auth,
@@ -294,7 +295,9 @@ const Edit = ({
             p_description="Flag delete this item(s)?"
             p_title="Flag Delete"
             p_url={route('pr.flag.delete')}
-            p_disable={material.filter((mat) => mat.sel == true).length == 0}
+            p_disable={
+              material.filter((mat) => mat.sel == true).length == 0 || (material?.some((mat) => (mat.qty_ordered || 0) > 0) ?? false)
+            }
             p_items={{ ids: material.filter((mat) => mat.sel == true).map((mat) => mat.id) }}
           />
 
@@ -329,6 +332,52 @@ const Edit = ({
         },
       });
     }
+  };
+
+  const initialDataRef = useRef<{
+    data: Partial<IPRHeader>;
+    material: IPRMaterial[];
+    files: any[];
+  }>();
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    if (
+      prheader &&
+      prheader.prmaterials &&
+      prheader.attachments &&
+      material.length === prheader.prmaterials.length &&
+      !initialDataRef.current
+    ) {
+      initialDataRef.current = {
+        data: {
+          requested_by: data.requested_by,
+          plant: data.plant,
+          reason_pr: data.reason_pr,
+          header_text: data.header_text,
+        },
+        material: material, // direct reference
+        files: [],
+      };
+      setIsReady(true);
+    }
+  }, [prheader, material.length]);
+
+  const hasChanges = () => {
+    if (!initialDataRef.current) return false;
+    const dataChanged = !isEqual(
+      {
+        requested_by: data.requested_by,
+        plant: data.plant,
+        reason_pr: data.reason_pr,
+        header_text: data.header_text,
+      },
+      initialDataRef.current.data
+    );
+    const materialChanged = !isEqual(material, initialDataRef.current.material);
+    const filesChanged = !isEqual(files, initialDataRef.current.files);
+
+    return dataChanged || materialChanged || filesChanged;
   };
 
   useEffect(() => {
@@ -434,7 +483,11 @@ const Edit = ({
                         variant="outline"
                         className="bg-[#f8c110] hover:border-gray-500 hover:bg-[#f8c110] disabled:cursor-not-allowed disabled:opacity-100 disabled:bg-gray-100"
                         disabled={
-                          prheader.appr_seq === SEQ_REJECT || processing || (material?.some((mat) => (mat.qty_ordered || 0) > 0) ?? false)
+                          prheader.appr_seq === SEQ_REJECT ||
+                          processing ||
+                          (material?.some((mat) => (mat.qty_ordered || 0) > 0) ?? false) ||
+                          !isReady ||
+                          !hasChanges()
                         }>
                         Save
                       </Button>
@@ -449,8 +502,7 @@ const Edit = ({
                         href={route('pr.submit', prheader.id)}
                         as="button"
                         type="button"
-                        className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none border border-input bg-[#f8c110] hover:bg-[#f8c110] hover:text-accent-foreground hover:border-gray-500
-                        disabled:cursor-not-allowed disabled:opacity-100 disabled:bg-gray-100 ">
+                        className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2  border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:border-gray-500 disabled:cursor-not-allowed disabled:opacity-100 disabled:bg-gray-100">
                         Submit
                       </Link>
 
