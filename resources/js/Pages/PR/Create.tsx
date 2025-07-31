@@ -42,7 +42,6 @@ const Create = ({
     ? prheader.prmaterials.map((prmaterial) => ({
         ...prmaterial,
         mat_grp_desc: prmaterial.materialGroups?.mat_grp_desc ?? '',
-        del_date: undefined,
         qty: undefined,
         altUomSelect: [
           ...new Set([prmaterial.ord_unit, ...(prmaterial.alt_uom ? prmaterial.alt_uom.map((item: IAlternativeUom) => item.alt_uom) : [])]),
@@ -94,7 +93,7 @@ const Create = ({
       // { ...keyColumn('sel', checkboxColumn), title: 'Sel', minWidth: 30 },
       // { ...keyColumn('status', textColumn), title: 'Sts', disabled: true, minWidth: 35 },
       { ...keyColumn('item_no', intColumn), title: 'ItmNo', disabled: true, minWidth: 50 },
-      { ...keyColumn('mat_code', selectColumn({ choices: mat_code })), title: 'Material', minWidth: 120},
+      { ...keyColumn('mat_code', selectColumn({ choices: mat_code })), title: 'Material', minWidth: 120 },
       { ...keyColumn('short_text', selectColumn({ choices: mat_desc })), title: 'Material Description', minWidth: 250 },
       {
         ...keyColumn(
@@ -175,7 +174,16 @@ const Create = ({
       label: 'Attachment',
       tabIcon: <Paperclip size={16} strokeWidth={1} className="text-black " />,
       visible: true,
-      content: <Dropzone files={files} setFiles={setFiles} />,
+      content: (
+        <>
+          <div className="mb-4">
+            <div className="font-semibold text-xs mb-1 text-blue-700">Attachments via Drag & Drop:</div>
+            <div className="border border-dashed border-blue-300 rounded-md p-3 bg-gray-50">
+              <Dropzone files={files} setFiles={setFiles} />
+            </div>
+          </div>
+        </>
+      ),
     },
   ];
 
@@ -245,12 +253,12 @@ const Create = ({
                   displayValue={true}
                 />
               </div>
-              <div className="p-1 pt-0">
+              <div className="p-5 pt-0">
                 <TabFields defaultValue="reasonForPr" className="max-w-8xl" tabs={tabs} />
               </div>
-              <div className="p-2">
+              <div className="p-5 pt-0">
                 <DataSheetGrid
-                  createRow={() => DEFAULT_PR_MATERIAL}
+                 createRow={() => DEFAULT_PR_MATERIAL}
                   value={material}
                   onChange={updateMaterial}
                   columns={columns}
@@ -269,8 +277,8 @@ const Create = ({
                   <Input type="text" value={formatNumber(data.total_pr_value)} readOnly disabled />
                 </div>
               </div>
-              <div className="p-2 pt-0">
-                <div className="p-5 justify-end grid grid-cols-8 gap-4">
+              <div className="p-5 pt-0">
+                <div className="justify-end grid grid-cols-8 gap-4">
                   {can(auth.user, PermissionsEnum.CreatePR) && ( //auth.permissions.pr.create && (
                     <>
                       <Button variant="outline" disabled={processing} className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] ">

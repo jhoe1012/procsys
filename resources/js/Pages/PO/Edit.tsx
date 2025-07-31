@@ -2,7 +2,7 @@ import { Button, Input, Label, Textarea, Toaster, useToast } from '@/Components/
 import { Choice, IAlternativeUom, IMessage, IPOHeader, IPOMaterial, IVendor, IWorkflow, PageProps } from '@/types';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler, useEffect, useMemo, useState } from 'react';
+import { FormEventHandler, useEffect, useMemo, useState, useRef } from 'react';
 import 'react-datasheet-grid/dist/style.css';
 import {
   checkboxColumn,
@@ -37,6 +37,7 @@ import {
   SelectField,
   TabFields,
   VendorCard,
+  PrNumberCard,
 } from '@/Components';
 import { formatNumber } from '@/lib/utils';
 import Approval from './Partial/Approval';
@@ -44,6 +45,7 @@ import AddPrtoPo from './Partial/AddPrtoPo';
 import { Operation } from 'react-datasheet-grid/dist/types';
 import { can } from '@/lib/helper';
 import { LetterText, NotebookPen, Paperclip, Pointer, Truck, Warehouse, Workflow } from 'lucide-react';
+import isEqual from 'lodash.isequal';
 
 const Edit = ({
   auth,
@@ -52,7 +54,15 @@ const Edit = ({
   message,
   deliveryAddress,
   supplierNotes,
-}: PageProps<{ vendors: []; poheader: IPOHeader; message: IMessage; deliveryAddress: Choice[]; supplierNotes: Choice[] }>) => {
+  onCollectAttachments,
+}: PageProps<{
+  vendors: [];
+  poheader: IPOHeader;
+  message: IMessage;
+  deliveryAddress: Choice[];
+  supplierNotes: Choice[];
+  onCollectAttachments?: (attachments: { filename: string; path: string }[]) => void;
+}>) => {
   const { toast } = useToast();
 
   const approverGrpId = auth.user.approvers.filter((approver) => approver.type === 'po').map((approver) => approver.plant + approver.seq);
@@ -64,6 +74,7 @@ const Edit = ({
     !approverGrpId.includes(headerGrpId);
   const [vendor, setVendor] = useState<IVendor | undefined>(poheader.vendors);
   const [files, setFiles] = useState([]);
+  const [collectedAttachments, setCollectedAttachments] = useState<any[]>([]);
   const { computeConversion, updateMaterialPO, getVendorInfo } = usePOMaterial();
   const { validateMaterials } = usePOMaterialValidation();
 
@@ -92,6 +103,7 @@ const Edit = ({
     header_text: poheader.header_text,
     approver_text: poheader.approver_text,
     attachment: undefined,
+    extended_attachments: collectedAttachments,
     total_po_value: poheader.total_po_value,
     deliv_addr: poheader.deliv_addr,
     pomaterials: [],
@@ -173,7 +185,31 @@ const Edit = ({
       { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 120 },
       { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 200, disabled: true },
       { ...keyColumn('requested_by', textColumn), title: 'Requested By', minWidth: 150 },
-      { ...keyColumn('pr_number', textColumn), title: 'PR Number', minWidth: 120, disabled: true },
+      {
+        ...keyColumn('pr_number', {
+          component: ({ rowData, rowIndex, ...rest }) =>
+            rowData ? (
+              <PrNumberCard
+                rowData={rowData}
+                rowIndex={rowIndex}
+                handleOnChange={handleOnChange}
+                onCollectAttachments={(attachments) =>
+                  setCollectedAttachments((prev) => {
+                    const seen = new Set(prev.map((file) => `${file.filename}|${file.path}`));
+                    const filtered = attachments.filter((file) => !seen.has(`${file.filename}|${file.path}`));
+                    return [...prev, ...filtered];
+                  })
+                }
+              />
+            ) : (
+              <></>
+            ),
+        }),
+        disabled: true,
+        title: 'PR Number',
+        minWidth: 120,
+        maxWidth: 120,
+      },
     ],
     []
   );
@@ -243,15 +279,28 @@ const Edit = ({
       value: 'attachment',
       label: 'Attachment',
       tabIcon: <Paperclip size={16} strokeWidth={1} className="text-black " />,
-
       visible: true,
       content: (
         <>
-          <AttachmentList
-            attachments={poheader.attachments}
-            canDelete={can(auth.user, PermissionsEnum.EditPO) /* auth.permissions.po.edit */}
-          />
-          <Dropzone files={files} setFiles={setFiles} />,
+          <div className="mb-4 ml-0">
+            <div className="font-semibold text-xs mb-1 text-blue-700">Attachments via Drag & Drop:</div>
+            <div className="border border-dashed border-blue-300 rounded-md p-3 bg-gray-50">
+              <Dropzone
+                files={files}
+                setFiles={setFiles}
+                collectedAttachments={collectedAttachments}
+                setCollectedAttachments={setCollectedAttachments}
+              />
+            </div>
+            {poheader.attachments && poheader.attachments.length > 0 && (
+              <div className="mt-6">
+                <div className="border border-dashed border-green-500 rounded-md p-3">
+                  <div className="font-semibold text-xs mb-1 text-green-700">Uploaded Attachments:</div>
+                  <AttachmentList attachments={poheader.attachments} canDelete={can(auth.user, PermissionsEnum.EditPR)} />
+                </div>
+              </div>
+            )}
+          </div>
         </>
       ),
     },
@@ -318,6 +367,81 @@ const Edit = ({
     setMaterial(updateMaterial);
   };
 
+  // Add initialDataRef for change detection
+  const initialDataRef = useRef<{
+    data: Partial<IPOHeader>;
+    material: IPOMaterial[];
+    files: any[];
+    onCollectAttachments: any[];
+  }>();
+
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    if (
+      poheader &&
+      poheader.pomaterials &&
+      poheader.attachments &&
+      material.length === poheader.pomaterials.length &&
+      !initialDataRef.current
+    ) {
+      initialDataRef.current = {
+        data: {
+          control_no: data.control_no,
+          vendor_id: data.vendor_id,
+          plant: data.plant,
+          header_text: data.header_text,
+          approver_text: data.approver_text,
+          notes: data.notes,
+          deliv_addr: data.deliv_addr,
+          deliv_date: data.deliv_date,
+          is_mother_po: data.is_mother_po,
+        },
+        material: material, // direct reference, no cleanMaterial
+        files: files,
+        onCollectAttachments: collectedAttachments,
+      };
+      setIsReady(true);
+    }
+  }, [
+    poheader,
+    material.length,
+    data.control_no,
+    data.vendor_id,
+    data.plant,
+    data.header_text,
+    data.approver_text,
+    data.notes,
+    data.deliv_addr,
+    data.deliv_date,
+    data.is_mother_po,
+    files,
+    collectedAttachments,
+  ]);
+
+  const hasChanges = () => {
+    if (!initialDataRef.current) return false;
+    const dataChanged = !isEqual(
+      {
+        control_no: data.control_no,
+        vendor_id: data.vendor_id,
+        plant: data.plant,
+        header_text: data.header_text,
+        approver_text: data.approver_text,
+        notes: data.notes,
+        deliv_addr: data.deliv_addr,
+        deliv_date: data.deliv_date,
+        is_mother_po: data.is_mother_po,
+      },
+      initialDataRef.current.data
+    );
+    const materialChanged = !isEqual(material, initialDataRef.current.material);
+    const filesChanged = !isEqual(files, initialDataRef.current.files);
+    const attachmentsChanged = !isEqual(collectedAttachments, initialDataRef.current.onCollectAttachments);
+
+    return dataChanged || materialChanged || filesChanged || attachmentsChanged;
+  };
+
   useEffect(() => {
     if (message?.success) {
       toast({
@@ -335,8 +459,14 @@ const Edit = ({
 
   useEffect(() => {
     const poTotal = material.filter((mat) => mat?.status != 'X').reduce((acc, mat) => acc + (mat.total_value || 0), 0);
-    setData((prevHeader: IPOHeader) => ({ ...prevHeader, total_po_value: poTotal, attachment: files, pomaterials: material }));
-  }, [material, files]);
+    setData((prevHeader: IPOHeader) => ({
+      ...prevHeader,
+      total_po_value: poTotal,
+      attachment: files,
+      pomaterials: material,
+      extended_attachments: collectedAttachments,
+    }));
+  }, [material, files, collectedAttachments]);
 
   useEffect(() => {
     if (errors.hasOwnProperty('error')) {
@@ -435,10 +565,10 @@ const Edit = ({
                   <span className="text-xs font-medium leading-none p-2">Mother PO</span>
                 </div>
               </div>
-              <div className="p-1 pt-0">
+              <div className="p-5 pt-0">
                 <TabFields defaultValue="header_text" className="max-w-8xl" tabs={headerTabs} />
               </div>
-              <div className="p-2">
+              <div className="p-5 pt-0">
                 <DataSheetGrid
                   value={material}
                   onChange={updateMaterial}
@@ -457,7 +587,7 @@ const Edit = ({
                   <Input id="total" type="text" value={formatNumber(data.total_po_value)} readOnly disabled />
                 </div>
               </div>
-              <div className="p-2 pt-0">
+              <div className="p-5 pt-0">
                 <TabFields defaultValue="action" className="max-w-8xl" tabs={footerTabs} />
 
                 <div className="p-5 justify-end grid grid-cols-8 gap-4">
@@ -466,7 +596,7 @@ const Edit = ({
                       <Button
                         variant="outline"
                         className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] disabled:cursor-not-allowed disabled:opacity-100 disabled:bg-gray-100"
-                        disabled={poheader.appr_seq == SEQ_REJECT || processing}>
+                        disabled={poheader.appr_seq == SEQ_REJECT || processing || !isReady || !hasChanges()}>
                         Save
                       </Button>
                       <Link
