@@ -37,7 +37,7 @@ import {
   SelectField,
   TabFields,
   VendorCard,
-  PrNumber,
+  PrNumberCard,
 } from '@/Components';
 import { formatNumber } from '@/lib/utils';
 import Approval from './Partial/Approval';
@@ -189,7 +189,7 @@ const Edit = ({
         ...keyColumn('pr_number', {
           component: ({ rowData, rowIndex, ...rest }) =>
             rowData ? (
-              <PrNumber
+              <PrNumberCard
                 rowData={rowData}
                 rowIndex={rowIndex}
                 handleOnChange={handleOnChange}

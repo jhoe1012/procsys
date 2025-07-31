@@ -6,7 +6,7 @@ import TextInput from '@/Components/TextInput';
 import { LetterText, Paperclip } from 'lucide-react';
 import { ArrowUpTrayIcon, XMarkIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
 import { formatLongDate, formatNumber, formatShortDate } from '@/lib/utils';
-export default function PrNumber({
+export default function PrNumberCard({
   rowData,
   rowIndex,
   handleOnChange,

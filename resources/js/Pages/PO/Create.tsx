@@ -16,7 +16,7 @@ import {
 } from 'react-datasheet-grid';
 import 'react-datasheet-grid/dist/style.css';
 import { Operation } from 'react-datasheet-grid/dist/types';
-import { AltUom, Checkbox, Dropzone, InputField, ReactSelectField, SelectField, TabFields, VendorCard, PrNumber } from '@/Components';
+import { AltUom, Checkbox, Dropzone, InputField, ReactSelectField, SelectField, TabFields, VendorCard, PrNumberCard } from '@/Components';
 import { formatNumber } from '@/lib/utils';
 import AddPrtoPo from './Partial/AddPrtoPo';
 import { usePOMaterial, usePOMaterialValidation } from '@/Hooks';
@@ -133,7 +133,7 @@ const Create = ({
         ...keyColumn('pr_number', {
           component: ({ rowData, rowIndex, ...rest }) =>
             rowData ? (
-              <PrNumber
+              <PrNumberCard
                 rowData={rowData}
                 rowIndex={rowIndex}
                 handleOnChange={handleOnChange}
