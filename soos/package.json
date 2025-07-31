@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "@soos-io/soos-sast": "^1.2.2"
+    "@soos-io/soos-sast": "^1.2.2",
+    "@soos-io/soos-sca": "^4.2.2"
   }
 }
