@@ -187,12 +187,9 @@ const Create = ({
     },
   ];
 
-  const updateMaterial = (newValue: IPRMaterial[], operations: Operation[]) => {
-    const fixedMaterial = newValue.map((row) => ({
-      ...row,
-      del_date: typeof row.del_date === 'string' ? new Date(row.del_date) : row.del_date,
-    }));
-    setMaterial(fixedMaterial);
+  const updateMaterial = async (newValue: IPRMaterial[], operations: Operation[]) => {
+    const updatedMaterial = await updateMaterialPR(newValue, operations, material, data.plant, data.doc_date, materialGeneric, prCtrlGrp);
+    setMaterial(updatedMaterial);
   };
 
   const handleSubmit: FormEventHandler = async (e) => {
@@ -261,7 +258,7 @@ const Create = ({
               </div>
               <div className="p-5 pt-0">
                 <DataSheetGrid
-                createRow={() => ({ ...DEFAULT_PR_MATERIAL, del_date: DATE_TODAY })}
+                 createRow={() => DEFAULT_PR_MATERIAL}
                   value={material}
                   onChange={updateMaterial}
                   columns={columns}
