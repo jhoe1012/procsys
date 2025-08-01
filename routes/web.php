@@ -28,6 +28,15 @@ Route::get('/auth/{provider}/redirect', [SocialController::class, 'redirect'])
 Route::get('/auth/{provider}/callback', [SocialController::class, 'callback'])
     ->where('provider', 'azure|google');
 
+    
+Route::get('/dast-scan', function () {
+    return response()->json([
+        'status' => 'OK',
+        'message' => 'SOOS DAST scan route is accessible.'
+    ]);
+});
+
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
