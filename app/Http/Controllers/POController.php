@@ -61,8 +61,13 @@ class POController extends Controller
                 ? $query->whereBetween('doc_date', [$value, request('doc_date_to')])
                 : $query->whereDate('doc_date', $value),
             'deliv_date_from' => fn ($value) => request('deliv_date_to')
-                ? $query->whereBetween('deliv_date', [$value, request('deliv_date_to')])
-                : $query->whereDate('deliv_date', $value),
+                ? $query->whereHas('pomaterials', function ($q) use ($value) {
+                    $to = request('deliv_date_to');
+                    $q->whereBetween('del_date', [$value, $to]);
+                })
+                : $query->whereHas('pomaterials', function ($q) use ($value) {
+                    $q->whereDate('del_date', $value);
+                }),
             'status'     => fn ($value) => $query->where('status', 'ilike', "%{$value}%"),
             'control_no' => fn ($value) => $value === 'blank'
                 ? $query->whereNull('control_no')

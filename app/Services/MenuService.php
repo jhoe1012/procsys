@@ -148,7 +148,7 @@ class MenuService
                         'href'        => route('approver.index'),
                     ],
                     [
-                        'label'       => 'Purchase Groups',
+                        'label'       => 'Material Purchasing Groups',
                         'permissions' => $user->can(PermissionsEnum::Admin),
                         'href'        => route('purchgrp.index'),
                     ],
