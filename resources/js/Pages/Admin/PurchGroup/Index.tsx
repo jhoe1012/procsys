@@ -62,7 +62,7 @@ export default function Index({
       menus={auth.menu}
       header={
         <div className="flex flex-row justify-between">
-          <h2 className="font-semibold text-xl text-gray-800 leading-tight">Purchase Groups</h2>
+          <h2 className="font-semibold text-xl text-gray-800 leading-tight">Material Purchasing Groups</h2>
           <div className="flex gap-2"></div>
           <Create procgrps={procgrps} prctrlgrp={prctrlgrp} plants={plants} />
         </div>

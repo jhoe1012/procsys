@@ -126,6 +126,9 @@ const Edit = ({
     });
   };
 
+  /** Check if any material item has a quantity already ordered (i.e., linked to a purchase order) */
+  const hasAnyPO = material.some((mat) => (mat.qty_ordered || 0) > 0);
+
   const columns = useMemo(
     () => [
       { ...keyColumn('sel', checkboxColumn), title: 'Sel', minWidth: 30 },
@@ -135,13 +138,13 @@ const Edit = ({
         ...keyColumn('mat_code', selectColumn({ choices: mat_code })),
         title: 'Material',
         minWidth: 120,
-        disabled: ({ rowData }: any) => rowData.qty_ordered > 0,
+        disabled: hasAnyPO,
       },
       {
         ...keyColumn('short_text', selectColumn({ choices: mat_desc })),
         title: 'Material Description',
         minWidth: 400,
-        disabled: ({ rowData }: any) => rowData.qty_ordered > 0,
+        disabled: hasAnyPO,
       },
       {
         ...keyColumn(
@@ -156,9 +159,9 @@ const Edit = ({
         ),
         title: 'Item Text',
         minWidth: 300,
-        disabled: ({ rowData }: any) => rowData.qty_ordered > 0,
+        disabled: hasAnyPO,
       },
-      { ...keyColumn('qty', floatColumn), title: 'Qty', minWidth: 70, disabled: ({ rowData }: any) => rowData.qty_ordered > 0 },
+      { ...keyColumn('qty', floatColumn), title: 'Qty', minWidth: 70, disabled: hasAnyPO },
       {
         ...keyColumn('ord_unit', textColumn),
         title: 'Ord UOM',
@@ -179,28 +182,27 @@ const Edit = ({
         ...keyColumn('price', floatColumn),
         title: 'Price',
         minWidth: 90,
-        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
+        disabled: hasAnyPO || (({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp)),
       },
       {
         ...keyColumn('per_unit', floatColumn),
         title: 'Per Unit',
         minWidth: 50,
-        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
+        disabled: hasAnyPO || (({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp)),
       },
-      // { ...keyColumn('unit', textColumn), title: 'B.UOM', minWidth: 60, disabled: true },
       { ...keyColumn('total_value', floatColumn), title: 'Total Value', minWidth: 120, disabled: true },
       { ...keyColumn('currency', textColumn), title: 'Curr', minWidth: 40, disabled: true },
-      { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 130, disabled: ({ rowData }: any) => rowData.qty_ordered > 0 },
+      { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 130, disabled: hasAnyPO },
       {
         ...keyColumn('prctrl_grp_id', selectColumn({ choices: prCtrlGrp })),
         title: 'PR Controller',
         minWidth: 200,
-        disabled: ({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp),
+        disabled: hasAnyPO || (({ rowData }: any) => rowData.mat_grp && !materialGroupsSupplies.includes(rowData.mat_grp)),
       },
       { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 100, disabled: true },
       { ...keyColumn('purch_grp', textColumn), title: 'Purch Grp', minWidth: 90, disabled: true },
     ],
-    []
+    [hasAnyPO, material]
   );
 
   const workflowColumns = useMemo(
@@ -297,9 +299,7 @@ const Edit = ({
             p_description="Flag delete this item(s)?"
             p_title="Flag Delete"
             p_url={route('pr.flag.delete')}
-            p_disable={
-              material.filter((mat) => mat.sel == true).length == 0 || (material?.some((mat) => (mat.qty_ordered || 0) > 0) ?? false)
-            }
+            p_disable={material.filter((mat) => mat.sel == true).length == 0 || hasAnyPO}
             p_items={{ ids: material.filter((mat) => mat.sel == true).map((mat) => mat.id) }}
           />
 
@@ -455,7 +455,7 @@ const Edit = ({
               <div className="p-5">
                 <TabFields defaultValue="reasonForPr" className="max-w-8xl" tabs={headerTabs} />
               </div>
-               <div className="p-5 pt-0">
+              <div className="p-5 pt-0">
                 <DataSheetGrid
                   createRow={() => DEFAULT_PR_MATERIAL}
                   value={material}
@@ -484,13 +484,7 @@ const Edit = ({
                         type="submit"
                         variant="outline"
                         className="bg-[#f8c110] hover:border-gray-500 hover:bg-[#f8c110] disabled:cursor-not-allowed disabled:opacity-100 disabled:bg-gray-100"
-                        disabled={
-                          prheader.appr_seq === SEQ_REJECT ||
-                          processing ||
-                          (material?.some((mat) => (mat.qty_ordered || 0) > 0) ?? false) ||
-                          !isReady ||
-                          !hasChanges()
-                        }>
+                        disabled={prheader.appr_seq === SEQ_REJECT || processing || hasAnyPO || !isReady || !hasChanges()}>
                         Save
                       </Button>
                       <Link
@@ -499,7 +493,7 @@ const Edit = ({
                         Cancel
                       </Link>
                       <Link
-                        disabled={prheader.appr_seq != SEQ_DRAFT}
+                        disabled={prheader.appr_seq != SEQ_DRAFT || hasAnyPO}
                         preserveScroll
                         href={route('pr.submit', prheader.id)}
                         as="button"
@@ -510,19 +504,18 @@ const Edit = ({
 
                       <Discard
                         p_id={prheader.id}
-                        p_disable={prheader.appr_seq != SEQ_DRAFT}
+                        p_disable={prheader.appr_seq != SEQ_DRAFT || hasAnyPO}
                         p_title="Discard this Purchase Requisition ?"
                         p_url="pr.discard"
                       />
 
                       <Link
-                        // disabled={prheader.status == STATUS_APPROVED}
                         preserveScroll
                         href={route('pr.recall', prheader.id)}
                         as="button"
                         type="button"
                         className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2  border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:border-gray-500 disabled:cursor-not-allowed disabled:opacity-100 disabled:bg-gray-100"
-                        disabled={material?.some((mat) => (mat.qty_ordered || 0) > 0) ?? false}>
+                        disabled={hasAnyPO}>
                         Recall
                       </Link>
                     </>
