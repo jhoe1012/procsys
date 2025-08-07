@@ -10,7 +10,7 @@ export default function Edit({ prctrlgrps, plants }: { prctrlgrps: IPrCtrlGrp; p
   const { data, setData, put, processing, reset, errors } = useForm({
     prctrl_grp: prctrlgrps.prctrl_grp,
     prctrl_desc: prctrlgrps.prctrl_desc,
-    plants: prctrlgrps.plant,
+    plant: prctrlgrps.plant,
   });
 
   const [showModal, setShowModal] = useState(false);
@@ -21,11 +21,11 @@ export default function Edit({ prctrlgrps, plants }: { prctrlgrps: IPrCtrlGrp; p
     value: p.plant,
   }));
   useEffect(() => {
-    if (showModal && data.plants) {
-      const matched = plantsOption.find((opt) => opt.value === data.plants);
+    if (showModal && data.plant) {
+      const matched = plantsOption.find((opt) => opt.value === data.plant);
       setSelectedPlantOption(matched || null);
     }
-  }, [showModal, data.plants]);
+  }, [showModal, data.plant]);
 
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault();
@@ -58,7 +58,7 @@ export default function Edit({ prctrlgrps, plants }: { prctrlgrps: IPrCtrlGrp; p
                 options={plantsOption}
                 value={selectedPlantOption}
                 onChange={(option) => {
-                  setData('plants', option ? option.value : '');
+                  setData('plant', option ? option.value : ''); // <-- singular
                   setSelectedPlantOption(option || null);
                 }}
                 placeholder="Plant"
