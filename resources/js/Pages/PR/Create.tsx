@@ -22,6 +22,7 @@ import { CUSTOM_DATA_SHEET_STYLE, DATE_TODAY, DEFAULT_PR_MATERIAL, PermissionsEn
 import { can } from '@/lib/helper';
 import { LetterText, Paperclip } from 'lucide-react';
 
+
 const Create = ({
   auth,
   mat_code,
@@ -52,7 +53,7 @@ const Create = ({
   const [material, setMaterial] = useState<IPRMaterial[]>(initialMaterial);
   const { toast } = useToast();
   const [files, setFiles] = useState([]);
-  const { updateMaterialPR, computeConversion, isLoading } = usePRMaterial();
+  const { updateMaterialPR, computeConversion, isLoading, getMaterialInfo } = usePRMaterial();
   const { validateMaterials } = usePRMaterialValidation();
   const { data, setData, post, errors, reset, processing } = useForm<IPRHeader>({
     id: 0,
@@ -69,6 +70,7 @@ const Create = ({
     deliv_addr: '',
     prmaterials: [],
   });
+  const [isMaterialRefreshing, setIsMaterialRefreshing] = useState(false);
 
   const handleOnChangeUom = (value: string, rowIndex: number) => {
     setMaterial((prevMaterial) => {
@@ -248,7 +250,28 @@ const Create = ({
                   items={auth.user.plants}
                   valueKey="plant"
                   displayKey="name1"
-                  onValueChange={(value) => setData('plant', value)}
+                  onValueChange={async (value) => {
+                    setIsMaterialRefreshing(true);
+                    setData('plant', value);
+                    const refreshedMaterial = await Promise.all(
+                      material.map(async (mat) => {
+                        if (mat.mat_code) {
+                          const info = await getMaterialInfo(mat.mat_code, value, data.doc_date);
+                          if (info) {
+                            return {
+                              ...mat,
+                              plant: value,
+                              prctrl_grp_id: info.purchasingGroups?.prCtrlGrp?.id || prCtrlGrp[0]?.value || undefined,
+                              prctrl_grp: info.purchasingGroups?.prCtrlGrp || null,
+                            };
+                          }
+                        }
+                        return { ...mat, plant: value, prctrl_grp: null };
+                      })
+                    );
+                    setMaterial(refreshedMaterial);
+                    setIsMaterialRefreshing(false);
+                  }}
                   value={data.plant}
                   displayValue={true}
                 />
@@ -258,7 +281,7 @@ const Create = ({
               </div>
               <div className="p-5 pt-0">
                 <DataSheetGrid
-                 createRow={() => DEFAULT_PR_MATERIAL}
+                  createRow={() => DEFAULT_PR_MATERIAL}
                   value={material}
                   onChange={updateMaterial}
                   columns={columns}
@@ -281,7 +304,11 @@ const Create = ({
                 <div className="justify-end grid grid-cols-8 gap-4">
                   {can(auth.user, PermissionsEnum.CreatePR) && ( //auth.permissions.pr.create && (
                     <>
-                      <Button variant="outline" disabled={processing} className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] ">
+                      <Button
+                        variant="outline"
+                        disabled={processing || isMaterialRefreshing}
+                        className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] "
+                      >
                         Save
                       </Button>
                       <Link
