@@ -78,6 +78,7 @@ const Edit = ({
   );
   const [itemDetails, setItemDetails] = useState([]);
   const [files, setFiles] = useState([]);
+  const [isMaterialRefreshing, setIsMaterialRefreshing] = useState(false);
   const approverGrpId = auth.user.approvers
     .filter((approver) => approver.type === 'pr')
     .map((approver) => approver.plant + approver.seq + approver.prctrl_grp_id);
@@ -88,7 +89,7 @@ const Edit = ({
     prheader.status == STATUS_REJECTED ||
     !approverGrpId.includes(headerGrpId);
 
-  const { updateMaterialPR, computeConversion, isLoading } = usePRMaterial();
+  const { updateMaterialPR, computeConversion, isLoading, getMaterialInfo } = usePRMaterial();
   const { validateMaterials } = usePRMaterialValidation();
   const { data, setData, post, errors, reset, processing } = useForm<IPRHeader>({
     id: prheader.id,
@@ -447,7 +448,28 @@ const Edit = ({
                   items={auth.user.plants}
                   valueKey="plant"
                   displayKey="name1"
-                  onValueChange={(value) => setData('plant', value)}
+                  onValueChange={async (value) => {
+                    setIsMaterialRefreshing(true);
+                    setData('plant', value);
+                    const refreshedMaterial = await Promise.all(
+                      material.map(async (mat) => {
+                        if (mat.mat_code) {
+                          const info = await getMaterialInfo(mat.mat_code, value, data.doc_date);
+                          if (info) {
+                            return {
+                              ...mat,
+                              plant: value,
+                              prctrl_grp_id: info.purchasingGroups?.prCtrlGrp?.id || prCtrlGrp[0]?.value || undefined,
+                              prctrl_grp: info.purchasingGroups?.prCtrlGrp?.prctrl_grp || null,
+                            };
+                          }
+                        }
+                        return { ...mat, plant: value, prctrl_grp: null };
+                      })
+                    );
+                    setMaterial(refreshedMaterial);
+                    setIsMaterialRefreshing(false);
+                  }}
                   value={data.plant}
                   displayValue={true}
                 />
@@ -484,7 +506,9 @@ const Edit = ({
                         type="submit"
                         variant="outline"
                         className="bg-[#f8c110] hover:border-gray-500 hover:bg-[#f8c110] disabled:cursor-not-allowed disabled:opacity-100 disabled:bg-gray-100"
-                        disabled={prheader.appr_seq === SEQ_REJECT || processing || hasAnyPO || !isReady || !hasChanges()}>
+                        disabled={
+                          prheader.appr_seq === SEQ_REJECT || processing || hasAnyPO || !isReady || !hasChanges() || isMaterialRefreshing
+                        }>
                         Save
                       </Button>
                       <Link
