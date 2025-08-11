@@ -10,7 +10,7 @@ import { PencilSquareIcon } from '@heroicons/react/24/solid';
 export default function Edit({ p_vendor }: { p_vendor: IVendor }) {
   const [showModal, setShowModal] = useState(false);
 
-  const { data, setData, post, processing, reset, errors } = useForm<IVendor>({
+  const { data, setData, patch, processing, reset, errors } = useForm<IVendor>({
     supplier: p_vendor.supplier,
     account_group: p_vendor.account_group,
     tax_number: p_vendor.tax_number,
@@ -25,14 +25,18 @@ export default function Edit({ p_vendor }: { p_vendor: IVendor }) {
     address: p_vendor.address,
     city_2: p_vendor.city_2,
     telephone_1: p_vendor.telephone_1,
-    telephone_2: p_vendor.telephone_2,
+    // telephone_2: p_vendor.telephone_2,
     vat_reg_no: p_vendor.vat_reg_no,
+    email_1: p_vendor.email_1,
+    // email_2: p_vendor.email_2,
+    payment_terms: p_vendor.payment_terms,
+    _method: 'patch',
   });
 
   const updateVendor: FormEventHandler = (e) => {
     e.preventDefault();
 
-    post(route('vendor.update'), {
+    patch(route('vendor.update', p_vendor.id), {
       preserveScroll: true,
       onSuccess: () => closeModal(),
       onFinish: () => reset(),
@@ -78,6 +82,7 @@ export default function Edit({ p_vendor }: { p_vendor: IVendor }) {
                   defaultValue={data.account_group}
                   onChange={(e) => setData('account_group', e.target.value)}
                   maxLength={100}
+                  required={true}
                 />
               </div>
               <div className="p-1 w-3/12">
@@ -213,16 +218,17 @@ export default function Edit({ p_vendor }: { p_vendor: IVendor }) {
                 />
               </div>
               <div className="p-1 w-3/12">
-                <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="telephone_2">
-                  Telephone 2
+                <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="payment_terms">
+                  Payment Terms
                 </Label>
                 <Input
-                  className="m-2 w-full border-gray-300 h-10 "
+                  className="m-2 w-full border-gray-300 h-10"
                   type="text"
-                  id="telephone_2"
-                  defaultValue={data.telephone_2}
-                  onChange={(e) => setData('telephone_2', e.target.value)}
+                  id="payment_terms"
+                  defaultValue={data.payment_terms}
+                  onChange={(e) => setData('payment_terms', e.target.value)}
                   maxLength={100}
+                  required={false}
                 />
               </div>
               <div className="p-1 w-3/12">
@@ -239,6 +245,22 @@ export default function Edit({ p_vendor }: { p_vendor: IVendor }) {
                 />
               </div>
             </div>
+            <div className="flex px-2">
+              <div className="p-1 w-6/12">
+                <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="email_1">
+                  Email Address
+                </Label>
+                <Input
+                  className="m-2 w-full border-gray-300 h-10"
+                  type="email"
+                  id="email_1"
+                  defaultValue={data.email_1}
+                  onChange={(e) => setData('email_1', e.target.value)}
+                  maxLength={100}
+                  required={false}
+                />
+              </div>
+            </div> 
 
             <div className="grid justify-items-center m-3">
               <Button variant="outline" disabled={processing} className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-60">

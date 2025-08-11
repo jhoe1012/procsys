@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Trait\CreatedUpdatedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -35,6 +36,7 @@ class Vendor extends Model
         'telephone_1',
         'telephone_2',
         'vat_reg_no',
+        'email_addr',
         // 'currency',
         // 'payment_terms',
     ];
@@ -44,11 +46,19 @@ class Vendor extends Model
         return $this->belongsTo(PoHeader::class, 'vendor_id', 'supplier');
     }
 
-    public function scopeVendorsChoice($query): array
+    public static function getVendorsChoice(bool $active = false): array
     {
-        return $query->selectRaw('supplier as value , supplier || \' - \'||name_1 as label')
+        return self::selectRaw('supplier as value , supplier || \' - \'||name_1 as label')
+            ->when($active, function (Builder $query) {
+                $query->active();
+            })
             ->orderBy('name_1')
             ->get()
             ->toArray();
+    }
+
+     public function scopeActive(Builder $query): void
+    {
+        $query->where('is_active', true);
     }
 }

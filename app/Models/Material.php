@@ -53,11 +53,12 @@ class Material extends Model
     public function updatedBy(): HasOne
     {
         return $this->hasOne(User::class, 'id', 'updated_by');
-    }
-
+    } 
+    
     public static function getMaterialCode(): array
     {
         return self::select('mat_code as value', 'mat_code as label')
+            ->active()
             ->orderBy('mat_code')
             ->get()
             ->toArray();
@@ -66,13 +67,24 @@ class Material extends Model
     public static function getMaterialDescription(): array
     {
         return self::select('mat_desc as value', 'mat_desc as label')
+            ->active()
             ->orderBy('mat_desc')
             ->get()
             ->toArray();
     }
-
-    public static function scopeGenericItems(Builder $query): void
+    public function scopeGenericItems(Builder $query): void
     {
         $query->where('is_generic', true);
     }
+
+    public function scopeActive(Builder $query): void
+    {
+        $query->where('is_active', true);
+    }
+    
+    public function purchasingGroupsChecker(): HasMany
+    {
+        return $this->hasMany(PurchasingGroup::class, 'mat_code', 'mat_code');
+    }
+
 }

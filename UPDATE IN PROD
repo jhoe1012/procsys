@@ -1,0 +1,45 @@
+INSERT INTO delivery_address_user (user_id,delivery_address_id) VALUES
+	 (27,1),
+	 (27,2),
+	 (27,3),
+	 (29,1),
+	 (29,3),
+	 (47,5),
+	 (48,4),
+	 (48,5),
+	 (52,1),
+	 (52,2);
+INSERT INTO delivery_address_user (user_id,delivery_address_id) VALUES
+	 (52,3),
+	 (52,4),
+	 (52,5),
+	 (52,6),
+	 (52,7),
+	 (52,8),
+	 (52,9),
+	 (53,5),
+	 (53,4),
+	 (54,5),
+	 (94,6),
+	 (94,7);
+INSERT INTO delivery_address_user (user_id,delivery_address_id) VALUES
+	 (98,7),
+	 (115,9);
+
+INSERT INTO procurement_groups (purch_grp,name1,created_at,updated_at) VALUES
+	 ('B01','Raw Materials - Manufactured',NULL,NULL),
+	 ('B02','Raw Materials - Agricultural',NULL,NULL),
+	 ('B03','Packaging',NULL,NULL),
+	 ('B04','IT, Equipment, Parts, Vehicles, R&M - Plant, Warehouse, HO',NULL,NULL),
+	 ('B05','Equipment, Parts, R&M - Stores, Furnitures & Fixtures',NULL,NULL),
+	 ('B06','Construction, Signages & Racks - Stores',NULL,NULL),
+	 ('B07','Marketing & Uniforms',NULL,NULL),
+	 ('B08','Supplies',NULL,NULL),
+	 ('B09','Sugar & Sweeteners, Fats & Oils, Flour & Starches',NULL,NULL),
+	 ('B10','Logistics & Services',NULL,NULL);
+INSERT INTO procurement_groups (purch_grp,name1,created_at,updated_at) VALUES
+	 ('B11','Fuel, Hardware & Tools, IT Out of Scope',NULL,NULL),
+	 ('B12','Construction, Signages & Racks - Office, Plants & Warehouse',NULL,NULL),
+	 ('B13','Construction, Signages & Racks - Office, Plants & Warehouse 2',NULL,NULL),
+	 ('B14','Construction, Signages & Racks - Stores 2',NULL,NULL);
+

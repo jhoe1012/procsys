@@ -46,7 +46,7 @@ class ReportController extends Controller
                 ->onEachSide(5)
                 ->appends($request->query() ?: null),
             'queryParams'   => $request->query() ?: null,
-            'vendorsChoice' => Vendor::vendorsChoice(),
+            'vendorsChoice' => Vendor::getVendorsChoice(),
 
         ]);
     }
@@ -68,7 +68,7 @@ class ReportController extends Controller
                 ->onEachSide(5)
                 ->appends($request->query() ?: null),
             'queryParams'   => $request->query() ?: null,
-            'vendorsChoice' => Vendor::vendorsChoice(),
+            'vendorsChoice' => Vendor::getVendorsChoice(),
         ]);
     }
 
@@ -110,7 +110,7 @@ class ReportController extends Controller
                 ->onEachSide(2)
                 ->appends($request->query() ?: null),
             'queryParams'   => $request->query() ?: null,
-            'vendorsChoice' => Vendor::vendorsChoice(),
+            'vendorsChoice' => Vendor::getVendorsChoice(),
 
         ]);
     }
@@ -242,8 +242,8 @@ class ReportController extends Controller
                 ? $query->whereBetween('po_headers.doc_date', [$value, $request->input('doc_date_to')])
                 : $query->where('po_headers.doc_date', 'ilike', "%{$value}%"),
             'deliv_date_from' => fn ($value) => $request->input('deliv_date_to')
-                ? $query->whereBetween('po_headers.deliv_date', [$value, $request->input('deliv_date_to')])
-                : $query->where('po_headers.deliv_date', 'ilike', "%{$value}%"),
+                ? $query->whereBetween('po_materials.del_date', [$value, $request->input('deliv_date_to')])
+                : $query->whereDate('po_materials.del_date', $value),
             'ponumber_from' => fn ($value) => $request->input('ponumber_to')
                 ? $query->whereBetween('po_headers.po_number', [$value, $request->input('ponumber_to')])
                 : $query->where('po_headers.po_number', 'ilike', "%{$value}%"),
@@ -478,8 +478,8 @@ class ReportController extends Controller
             'short_text' => fn ($value) => $query->where(fn (Builder $q) => $q->where('pr_materials.short_text', 'ilike', "%{$value}%")
                 ->orwhere('po_materials.short_text', 'ilike', "%{$value}%")),
             'deliv_date_from' => fn ($value) => $request->input('deliv_date_to')
-                ? $query->whereBetween('po_headers.deliv_date', [$value, $request->input('deliv_date_to')])
-                : $query->where('po_headers.deliv_date', 'ilike', "%{$value}%"),
+                ? $query->whereBetween('po_materials.del_date', [$value, $request->input('deliv_date_to')])
+                : $query->whereDate('po_materials.del_date', $value),
             'open_po' => fn ($value) => $query->where('po_materials.po_gr_qty', '>', 0),
             'open_pr' => fn ($value) => $query->where('pr_materials.qty_open', '>', 0),
             'plant'   => fn ($value) => $query->where('pr_headers.plant', $value),

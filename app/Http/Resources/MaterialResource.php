@@ -14,7 +14,6 @@ class MaterialResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-
         return [
             'id'                 => $this->id,
             'mat_code'           => $this->mat_code,
@@ -34,6 +33,7 @@ class MaterialResource extends JsonResource
             'materialGroups'     => new MaterialGroupResource($this->whenLoaded('materialGroups')),
             'altUoms'            => AlternativeUomResource::collection($this->whenLoaded('altUoms')),
             'purchasingGroups'   => new PurchasingGroupResource($this->whenLoaded('purchasingGroups')),
+            'mappedPlants'       =>  PurchasingGroupResource::collection($this->whenLoaded('purchasingGroupsChecker')),
         ];
     }
 }

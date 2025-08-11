@@ -24,8 +24,11 @@ export default function Create() {
     address: '',
     city_2: '',
     telephone_1: '',
-    telephone_2: '',
+    // telephone_2: '',
     vat_reg_no: '',
+    email_1: '',
+    // email_2: '',
+    payment_terms: '',
   });
 
   const createVendor: FormEventHandler = (e) => {
@@ -213,16 +216,17 @@ export default function Create() {
                 />
               </div>
               <div className="p-1 w-3/12">
-                <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="telephone_2">
-                  Telephone 2
+                <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="payment_terms">
+                  Payment Terms
                 </Label>
                 <Input
-                  className="m-2 w-full border-gray-300 h-10 "
+                  className="m-2 w-full border-gray-300 h-10"
                   type="text"
-                  id="telephone_2"
-                  defaultValue={data.telephone_2}
-                  onChange={(e) => setData('telephone_2', e.target.value)}
+                  id="payment_terms"
+                  defaultValue={data.payment_terms}
+                  onChange={(e) => setData('payment_terms', e.target.value)}
                   maxLength={100}
+                  required={false}
                 />
               </div>
               <div className="p-1 w-3/12">
@@ -236,6 +240,23 @@ export default function Create() {
                   defaultValue={data.vat_reg_no}
                   onChange={(e) => setData('vat_reg_no', e.target.value)}
                   maxLength={100}
+                />
+              </div>
+            </div>
+
+            <div className="flex px-2">
+              <div className="p-1 w-6/12">
+                <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="email_1">
+                  Email Address
+                </Label>
+                <Input
+                  className="m-2 w-full border-gray-300 h-10"
+                  type="email"
+                  id="email_1"
+                  defaultValue={data.email_1}
+                  onChange={(e) => setData('email_1', e.target.value)}
+                  maxLength={100}
+                  required={false}
                 />
               </div>
             </div>

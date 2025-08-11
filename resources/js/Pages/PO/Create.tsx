@@ -2,7 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Button, Input, Label, Textarea, Toaster, useToast } from '@/Components/ui';
 import { CUSTOM_DATA_SHEET_STYLE, DATE_TODAY, PermissionsEnum } from '@/lib/constants';
-import { Choice, IAlternativeUom, IPOHeader, IPOMaterial, IVendor, PageProps } from '@/types';
+import { Choice, IAlternativeUom, IPOHeader, IPOMaterial, IPRHeader, IVendor, PageProps } from '@/types';
 import { FormEventHandler, useEffect, useMemo, useState } from 'react';
 import {
   checkboxColumn,
@@ -16,7 +16,7 @@ import {
 } from 'react-datasheet-grid';
 import 'react-datasheet-grid/dist/style.css';
 import { Operation } from 'react-datasheet-grid/dist/types';
-import { AltUom, Checkbox, Dropzone, InputField, ReactSelectField, SelectField, TabFields, VendorCard } from '@/Components';
+import { AltUom, Checkbox, Dropzone, InputField, ReactSelectField, SelectField, TabFields, VendorCard, PrNumberCard } from '@/Components';
 import { formatNumber } from '@/lib/utils';
 import AddPrtoPo from './Partial/AddPrtoPo';
 import { usePOMaterial, usePOMaterialValidation } from '@/Hooks';
@@ -31,6 +31,7 @@ const Create = ({
 }: PageProps<{ vendors: Choice[]; deliveryAddress: Choice[]; supplierNotes: Choice[] }>) => {
   const { toast } = useToast();
   const [files, setFiles] = useState([]);
+  const [collectedAttachments, setCollectedAttachments] = useState<any[]>([]);
   const [material, setMaterial] = useState<IPOMaterial[]>([]);
   const [vendor, setVendor] = useState<IVendor | undefined>();
   const { computeConversion, updateMaterialPO, getVendorInfo } = usePOMaterial();
@@ -50,6 +51,7 @@ const Create = ({
     header_text: '',
     approver_text: '',
     attachment: undefined,
+    extended_attachments: collectedAttachments,
     total_po_value: 0,
     status: '',
     appr_seq: 0,
@@ -71,10 +73,10 @@ const Create = ({
 
   const columns = useMemo(
     () => [
-      { ...keyColumn('sel', checkboxColumn), title: 'Sel', minWidth: 30 },
-      { ...keyColumn('status', textColumn), title: 'Sts', minWidth: 35, disabled: true },
+      // { ...keyColumn('sel', checkboxColumn), title: 'Sel', minWidth: 30 },
+      // { ...keyColumn('status', textColumn), title: 'Sts', minWidth: 35, disabled: true },
       { ...keyColumn('item_no', intColumn), title: 'ItmNo', minWidth: 55, disabled: true },
-      { ...keyColumn('mat_code', textColumn), title: 'Material', minWidth: 120, disabled: true },
+      { ...keyColumn('mat_code', textColumn), title: 'Material', minWidth: 120, disabled: true  },
       { ...keyColumn('short_text', textColumn), title: 'Material Description', minWidth: 400, disabled: true },
       {
         ...keyColumn(
@@ -127,11 +129,34 @@ const Create = ({
       { ...keyColumn('del_date', dateColumn), title: 'Del Date', minWidth: 120 },
       { ...keyColumn('mat_grp_desc', textColumn), title: 'Mat Grp', minWidth: 200, disabled: true },
       { ...keyColumn('requested_by', textColumn), title: 'Requested By', minWidth: 150 },
-      { ...keyColumn('pr_number', textColumn), title: 'PR Number', minWidth: 120, disabled: true },
+      {
+        ...keyColumn('pr_number', {
+          component: ({ rowData, rowIndex, ...rest }) =>
+            rowData ? (
+              <PrNumberCard
+                rowData={rowData}
+                rowIndex={rowIndex}
+                handleOnChange={handleOnChange}
+                onCollectAttachments={(attachments) =>
+                  setCollectedAttachments((prev) => {
+                    const seen = new Set(prev.map((file) => `${file.filename}|${file.path}`));
+                    const filtered = attachments.filter((file) => !seen.has(`${file.filename}|${file.path}`));
+                    return [...prev, ...filtered];
+                  })
+                }
+              />
+            ) : (
+              <></>
+            ),
+        }),
+        disabled: true,
+        title: 'PR Number',
+        minWidth: 120,
+        maxWidth: 120,
+      },
     ],
     []
   );
-
   const headerTabs = [
     {
       value: 'header_text',
@@ -140,11 +165,7 @@ const Create = ({
       visible: true,
       content: (
         <div>
-          <Textarea
-            value={data.header_text}
-            onChange={(e) => setData('header_text', e.target.value.slice(0, 500))}
-            maxLength={500}
-          />
+          <Textarea value={data.header_text} onChange={(e) => setData('header_text', e.target.value.slice(0, 500))} maxLength={500} />
           <div className="text-xs text-right text-gray-500">{data.header_text.length}/500</div>
         </div>
       ),
@@ -191,7 +212,21 @@ const Create = ({
       label: 'Attachment',
       tabIcon: <Paperclip size={16} strokeWidth={1} className="text-black " />,
       visible: true,
-      content: <Dropzone files={files} setFiles={setFiles} />,
+      content: (
+        <>
+          <div className="mb-4">
+            <div className="font-semibold text-xs mb-1 text-blue-700">Attachments via Drag & Drop:</div>
+            <div className="border border-dashed border-blue-300 rounded-md p-3 bg-gray-50">
+              <Dropzone
+                files={files}
+                setFiles={setFiles}
+                collectedAttachments={collectedAttachments}
+                setCollectedAttachments={setCollectedAttachments}
+              />
+            </div>
+          </div>
+        </>
+      ),
     },
     {
       value: 'vendor',
@@ -213,8 +248,14 @@ const Create = ({
 
   useEffect(() => {
     const poTotal = material.reduce((acc, mat) => acc + (mat.total_value || 0), 0);
-    setData((prevHeader: IPOHeader) => ({ ...prevHeader, total_po_value: poTotal, attachment: files, pomaterials: material }));
-  }, [material, files]);
+    setData((prevHeader: IPOHeader) => ({
+      ...prevHeader,
+      total_po_value: poTotal,
+      attachment: files,
+      pomaterials: material,
+      extended_attachments: collectedAttachments,
+    }));
+  }, [material, files, collectedAttachments]);
 
   useEffect(() => {
     if (errors.hasOwnProperty('error')) {
@@ -244,6 +285,7 @@ const Create = ({
     e.preventDefault();
     const { isValid, updatedMaterials } = validateMaterials(material);
     setMaterial(updatedMaterials);
+
     if (isValid) {
       post(route('po.store'));
     }
@@ -310,10 +352,10 @@ const Create = ({
                   <span className="text-xs font-medium leading-none p-2">Mother PO</span>
                 </div>
               </div>
-              <div className="p-1 pt-0">
+              <div className="p-5 pt-0">
                 <TabFields defaultValue="header_text" className="max-w-8xl" tabs={headerTabs} />
               </div>
-              <div className="p-2">
+              <div className="p-5 pt-0">
                 <DataSheetGrid
                   value={material}
                   onChange={updateMaterial}
@@ -332,8 +374,8 @@ const Create = ({
                   <Input type="text" value={formatNumber(data.total_po_value)} readOnly disabled />
                 </div>
               </div>
-              <div className="p-2 pt-0">
-                <div className="p-5 justify-end grid grid-cols-8 gap-4">
+              <div className="p-5 pt-0">
+                <div className="justify-end grid grid-cols-8 gap-4">
                   {can(auth.user, PermissionsEnum.CreatePO) && ( //auth.permissions.po.create && (
                     <>
                       <Button variant="outline" disabled={processing} className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110]">

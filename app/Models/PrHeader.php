@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enum\PermissionsEnum;
 use App\Trait\CreatedUpdatedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -67,19 +68,57 @@ class PrHeader extends Model
         return $this->hasOne(User::class, 'id', 'created_by');
     }
 
-    public function scopeApproved(Builder $query, $userPlants): Builder
+    public function scopeUserPrCtrlGrp(Builder $query, array $prctrl_grp_ids): Builder
     {
-        return $query->where('status', 'Approved')->whereIn('plant', $userPlants);
+        return $query->whereIn('prctrl_grp_id', $prctrl_grp_ids);
     }
 
-    public function scopeCancelled(Builder $query, $userPlants): Builder
+    public function scopeUserPlants(Builder $query, array $userPlants): Builder
     {
-        return $query->where('status', 'Cancelled')->whereIn('plant', $userPlants);
+        return $query->whereIn('plant', $userPlants);
     }
 
-    public function scopeApproval(Builder $query, $userPlants): Builder
+    public function scopeApproved(Builder $query): Builder
     {
-        return $query->where('status', 'ilike', '%approval%')->whereIn('plant', $userPlants);
+        return $query->where('status', 'Approved');
+    }
+
+    public function scopeCancelled(Builder $query): Builder
+    {
+        return $query->where('status', 'Cancelled');
+    }
+
+    public function scopeApproval(Builder $query): Builder
+    {
+        return $query->where('status', 'ilike', '%Approval%');
+    }
+
+    public function scopeWithApprovalAccess(Builder $query, User $user, bool $getApprove = false): Builder
+    {
+        if ($user->can(PermissionsEnum::ApproverPR)) {
+            $approvers = $user->approvers()
+                ->where('type', 'pr')
+                ->orderBy('seq')
+                ->get();
+
+            if ($approvers->isNotEmpty()) {
+                $combinations = $approvers->map(function ($item) {
+                    return "('{$item->plant}',{$item->seq},{$item->prctrl_grp_id})";
+                })->join(',');
+
+                $query->where(function ($q) use ($combinations, $getApprove) {
+                    $q->whereRaw("(plant, appr_seq, prctrl_grp_id) IN ({$combinations})")
+                        // Add condition to filter approved and cancelled statuses for PR list, and show only pending approvals in the dashboard.
+                        ->when(
+                            $getApprove,
+                            fn ($q) => $q->orWhere('status', ApproveStatus::APPROVED)
+                                ->orWhere('status', ApproveStatus::CANCELLED)
+                        );
+                });
+            }
+        }
+
+        return $query;
     }
 
     protected static function booted()

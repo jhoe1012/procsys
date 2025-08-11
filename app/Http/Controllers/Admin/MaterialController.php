@@ -128,7 +128,10 @@ class MaterialController extends Controller
             return;
         }
 
-        $material = Material::where('mat_code', 'ilike', "%{$request->input('search')}%")
+        $material = Material::with([
+            'purchasingGroupsChecker',
+        ])
+            ->where('mat_code', 'ilike', "%{$request->input('search')}%")
             ->orWhere('mat_desc', 'ilike', "%{$request->input('search')}%")
             ->orWhere('old_mat_code', 'ilike', "%{$request->input('search')}%")
             ->get();

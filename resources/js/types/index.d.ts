@@ -8,6 +8,8 @@ export interface User {
   plants?: IPlants[];
   approvers?: IApprover[];
   roles?: IRoles[];
+  prCtrlGrps?: IPrCtrlGrp[];
+  delivery_addresses?: IDeliveryAddress[];
 }
 
 export interface AuthUser {
@@ -74,8 +76,11 @@ export interface IApprover {
   updated_at?: string;
   plants?: IPlants;
   user?: User;
+  prCtrlGrps?: IPrCtrlGrp;
+  prCtrlGrpsChoice?: Choice;
   _method?: string;
 }
+
 export interface IMaterial {
   id?: number;
   mat_code: string;
@@ -96,6 +101,7 @@ export interface IMaterial {
   altUoms?: IAlternativeUom[];
   _method?: string;
   mat_groupChoice?: Choice;
+  mappedPlants?: any[]; // This can be an array of strings or objects depending on your use case
 }
 
 export interface IMaterialGroups {
@@ -168,6 +174,14 @@ export interface IVendorPage extends IPagination {
   data: IVendor[];
 }
 
+export interface IPurchasingGroupPage extends IPagination {
+  data: IPurchasingGroup[];
+}
+
+export interface IPrCtrlGrpPage extends IPagination {
+  data: IPrCtrlGrp[];
+}
+
 export interface IApproverPage extends IPagination {
   data: IApprover[];
 }
@@ -211,7 +225,7 @@ export interface IPRHeader {
   plants?: IPlants;
   prmaterials: IPRMaterial[];
   attachments?: IPRAttachment[];
-  prctrl_grp_id?: number
+  prctrl_grp_id?: number;
   _method?: string;
 }
 export interface IPRAttachment {
@@ -377,6 +391,35 @@ export interface IVendor {
   vat_reg_no: string;
   created_at?: string;
   updated_at?: string;
+  _method?: string;
+  email_1?: string;
+  email_2?: string;
+  payment_terms?: string;
+}
+
+export interface IPurchasingGroup {
+  id?: number;
+  mat_code: string;
+  mat_codeChoice?: Choice;
+  plant: string;
+  plant_codeChoice: Choice;
+  purch_grp: string;
+  purch_grpChoice?: Choice;
+  unit_issue: string;
+  plan_deliv_time: string;
+  gr_proc_time: string;
+  min_lot_size: string;
+  max_lot_size: string;
+  fix_lot_size: string;
+  rounding_value: string;
+  created_by?: User;
+  updated_by?: User;
+  created_at?: string;
+  updated_at?: string;
+  prctrl_grp_id: number; 
+  plants?: IPlants;
+  materials?: IMaterial;
+   _method?: string;
 }
 
 export interface IGRHeader {
@@ -481,7 +524,7 @@ export interface IAlternativeUom {
 
 export type Choice = {
   label: string;
-  value: string;
+  value: string | number;
 };
 
 export interface FormFieldProps {
@@ -519,7 +562,7 @@ export interface TabItem {
 export interface TabsProps {
   defaultValue: string;
   tabs: TabItem[];
-  className?: string; 
+  className?: string;
 }
 
 export interface IitemDetails {
@@ -550,4 +593,29 @@ export interface IRoles {
   description: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface IPrCtrlGrp {
+  id: number;
+  plant_id: number;
+  prctrl_grp: string;
+  prctrl_desc: string;
+  created_by: number;
+  updated_by: number;
+  plant : string;
+}
+
+export interface IDeliveryAddress {
+  id: number;
+  plant: string;
+  address: string;
+  is_active: boolean;
+  created_by: number;
+  updated_by: number;
+  created_at: number;
+  updated_at: number;
+}
+export interface IProcurementGroup {
+  purch_grp: string;
+  name1: string;
 }

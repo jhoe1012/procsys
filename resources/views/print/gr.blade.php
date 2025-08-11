@@ -71,7 +71,7 @@
                 <td>{{ $grHeader->delivery_note }} </td>
             </tr>
               <tr>
-                <th>Recieved By: </th>
+                <th>Received By: </th>
                 <td>{{ $grHeader->created_name }}</td>
             </tr>
         </table>

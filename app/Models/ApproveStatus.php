@@ -13,17 +13,17 @@ class ApproveStatus extends Model
 
     const SAVED = 'saved';
 
-    const DRAFT = 'draft';
+    const DRAFT = 'Draft';
 
     const SUBMITTED = 'submitted';
 
-    const APPROVED = 'approved';
+    const APPROVED = 'Approved';
 
-    const REWORKED = 'rework';
+    const REWORKED = 'Rework';
 
-    const REJECTED = 'rejected';
+    const REJECTED = 'Rejected';
 
-    const CANCELLED = 'cancelled';
+    const CANCELLED = 'Cancelled';
 
     protected $fillable = [
         'pr_number',

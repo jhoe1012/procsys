@@ -239,7 +239,7 @@ export default function Index({
                           </td>
                           <td className="px-3 py-2">{po.created_name}</td>
                           <td className="px-3 py-2">{formatShortDate(po.doc_date)}</td>
-                          <td className="px-3 py-2">{formatShortDate(po.deliv_date)}</td>
+                          <td className="px-3 py-2">{po.deliv_date ? formatShortDate(po.deliv_date) : ''}</td>
                           {/* <td className="px-3 py-2">{po.status}</td> */}
                           <td className="px-3 py-2">
                             <span className={badgeVariants({ variant: po.status.includes('Approval') ? 'Approval' : po.status })}>
@@ -352,10 +352,10 @@ export default function Index({
                   {/* <RadioGroup defaultValue="egi" className="mt-3" onValueChange={setPoForm}>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="egi" id="egi" />
-                      <Label htmlFor="egi">EGI PO Form</Label>
+                      <Label htmlFor="egi">EGI/DBI PO Form</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="smbi" id="smbi"  />
+                      <RadioGroupItem value="smbi" id="smbi" />
                       <Label htmlFor="smbi">SMBI PO Form</Label>
                     </div>
                   </RadioGroup> */}

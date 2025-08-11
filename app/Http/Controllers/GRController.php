@@ -13,7 +13,6 @@ use App\Models\PoMaterial;
 use App\Models\Vendor;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class GRController extends Controller
@@ -77,7 +76,7 @@ class GRController extends Controller
             'gr_header'     => GRHeaderResource::collection($gr_header),
             'queryParams'   => $request->query() ?: null,
             'message'       => ['success' => session('success'), 'error' => session('error')],
-            'vendorsChoice' => Vendor::vendorsChoice(),
+            'vendorsChoice' => Vendor::getVendorsChoice(),
         ]);
     }
 
@@ -122,8 +121,8 @@ class GRController extends Controller
                 'unit'           => $item['unit'],
                 'po_deliv_date'  => $item['po_deliv_date'],
                 'batch'          => $item['batch'] ?? null,
-                'mfg_date'       => Carbon::parse($item['mfg_date'])->format('Y-m-d'),
-                'sled_bbd'       => Carbon::parse($item['sled_bbd'])->format('Y-m-d'),
+                'mfg_date'       => $item['mfg_date'] ? Carbon::parse($item['mfg_date'])->format('Y-m-d') : null,
+                'sled_bbd'       => $item['mfg_date'] ? Carbon::parse($item['sled_bbd'])->format('Y-m-d') : null,
                 'po_number'      => $item['po_number'],
                 'po_item'        => $item['po_item'],
                 'dci'            => $item['gr_qty'] >= $item['po_gr_qty'] ?: $item['dci'],
@@ -215,16 +214,16 @@ class GRController extends Controller
 
     public function printGr(Request $request, $id)
     {
-        $grHeader = GrHeader::with(['grmaterials', 'plants', 'vendors'])->findOrFail($id); 
-        
-        return view('print.gr', ['grHeader' => $grHeader,  'genericMaterials' => Material::genericItems()->pluck('mat_code')->toArray(),]);
+        $grHeader = GrHeader::with(['grmaterials', 'plants', 'vendors'])->findOrFail($id);
+
+        return view('print.gr', ['grHeader' => $grHeader,  'genericMaterials' => Material::genericItems()->pluck('mat_code')->toArray()]);
     }
 
     public function searchPOControlNo(Request $request)
     {
 
         $poHeader = PoHeader::select('po_number', 'control_no')
-            ->where('status', Str::ucfirst(ApproveStatus::APPROVED))
+            ->where('status', ApproveStatus::APPROVED)
             ->whereNotNull('control_no')
             ->where(fn ($query) => $query->where('po_number', 'ilike', "%{$request->input('search')}%")
                 ->orWhere('control_no', 'ilike', "%{$request->input('search')}%"))

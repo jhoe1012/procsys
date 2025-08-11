@@ -21,9 +21,9 @@ export default function Index({
   PageProps<{ queryParams: any }> &
   PageProps<{ plant: Choice }> &
   PageProps<{ message: IMessage }>) {
-  const { toast } = useToast();
 
 
+  const { toast } = useToast();  
   useEffect(() => {
     if (message?.success) {
       toast({
@@ -140,8 +140,10 @@ export default function Index({
                       <th className="px-3 py-2">Postal Code</th>
                       <th className="px-3 py-2">Street</th>
                       <th className="px-3 py-2">Telephone 1</th>
-                      <th className="px-3 py-2">Telephone 2</th>
+                      {/* <th className="px-3 py-2">Telephone 2</th> */}
                       <th className="px-3 py-2">Vat Reg No</th>
+                      <th className="px-3 py-2">Email Address</th>
+                      <th className="px-3 py-2">Payment Terms </th>
                       <th className="px-3 py-2">Action</th>
                     </tr>
                   </thead>
@@ -164,9 +166,11 @@ export default function Index({
                           <td className="px-3 py-2">{vendor.postal_code}</td>
                           <td className="px-3 py-2 text-nowrap">{vendor.street}</td>
                           <td className="px-3 py-2">{vendor.telephone_1}</td>
-                          <td className="px-3 py-2">{vendor.telephone_2}</td>
+                          {/* <td className="px-3 py-2">{vendor.telephone_2}</td> */}
                           <td className="px-3 py-2">{vendor.vat_reg_no}</td>
 
+                          <td className="px-3 py-2">{vendor.email_1}</td>
+                          <td className="px-3 py-2">{vendor.payment_terms}</td>
                           <td className="px-3 py-2">
                             <Edit p_vendor={vendor} />
                           </td>

@@ -13,9 +13,11 @@ use App\Http\Controllers\GRController;
 use App\Http\Controllers\MaterialNetPriceController;
 use App\Http\Controllers\POController;
 use App\Http\Controllers\PRController;
+use App\Http\Controllers\PrctrlGrpController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\VendorController;
+use App\Http\Controllers\PurchasingGroupController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
@@ -99,6 +101,9 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('user', UserController::class)->only(['index', 'store', 'update']);
 
+    Route::resource('purchgrp', PurchasingGroupController::class)->only(['index', 'store', 'update']);
+     Route::resource('prctrlgrp', PrctrlGrpController::class)->only(['index', 'store', 'update']);
+   
     Route::get('/report-pr', [ReportController::class, 'prReport'])->name('report.pr');
     Route::get('/report-pr-download', [ReportController::class, 'downloadPrReport'])->name('download.report.pr');
     Route::get('/report-po', [ReportController::class, 'poReport'])->name('report.po');

@@ -8,8 +8,17 @@ import { Button } from '@/Components/ui/button';
 import { Choice, IApprover } from '@/types';
 import Select from 'react-select';
 import { PencilSquareIcon } from '@heroicons/react/24/solid';
+import { fetchUser } from '@/lib/User';
 
-export default function Edit({ p_plants, p_approver }: { p_plants: Choice; p_approver: IApprover }) {
+export default function Edit({
+  plantChoice,
+  p_approver,
+  prCtrlGrpsChoice,
+}: {
+  plantChoice: Choice[];
+  p_approver: IApprover;
+  prCtrlGrpsChoice: Choice[];
+}) {
   const [showModal, setShowModal] = useState(false);
 
   const { data, setData, patch, processing, reset, errors } = useForm<IApprover>({
@@ -24,12 +33,19 @@ export default function Edit({ p_plants, p_approver }: { p_plants: Choice; p_app
     amount_to: p_approver.amount_to,
     seq: p_approver.seq,
     desc: p_approver.desc,
+    prctrl_grp_id: p_approver.prctrl_grp_id,
+    prCtrlGrpsChoice: p_approver.prCtrlGrps
+      ? {
+          value: p_approver.prCtrlGrps?.id,
+          label: `${p_approver.prCtrlGrps?.plant_id} - ${p_approver.prCtrlGrps?.prctrl_grp} ${p_approver.prCtrlGrps?.prctrl_desc}`,
+        }
+      :null,
     _method: 'patch',
   });
 
   const approver_type = [
-    { label: 'PO', value: 'PO' },
-    { label: 'PR', value: 'PR' },
+    { label: 'PO', value: 'po' },
+    { label: 'PR', value: 'pr' },
   ];
 
   const updateApprover: FormEventHandler = (e) => {
@@ -48,23 +64,6 @@ export default function Edit({ p_plants, p_approver }: { p_plants: Choice; p_app
     reset();
   };
 
-  const fetchUser = async (inputValue) => {
-    if (!inputValue) return [];
-
-    try {
-      const response = await window.axios.get(route('user.search', { search: inputValue }));
-
-      return response.data.data.map((item) => ({
-        value: item.id,
-        label: item.name,
-        position: item.position,
-      }));
-    } catch (e) {
-      console.log('Error fetching data:', e);
-      return [];
-    }
-  };
-
   return (
     <section className={`space-y-6`}>
       <PencilSquareIcon onClick={() => setShowModal(true)} className="size-6 cursor-pointer text-blue-500" />
@@ -79,9 +78,9 @@ export default function Edit({ p_plants, p_approver }: { p_plants: Choice; p_app
               <Select
                 id="type"
                 className="m-2 w-full border-gray-500"
-                value={data.typeChoice}
+                value={approver_type.find((type) => type.value == data.type)}
                 options={approver_type}
-                onChange={(option: any) => setData({ ...data, type: option?.value })}
+                onChange={(option: any) => setData({ ...data, type: option?.value, typeChoice: option })}
                 placeholder="Select Type"
                 required={true}
               />
@@ -93,8 +92,8 @@ export default function Edit({ p_plants, p_approver }: { p_plants: Choice; p_app
               <Select
                 id="plant"
                 className="m-2 w-full border-gray-500"
-                value={data.plantChoice}
-                options={p_plants}
+                value={ plantChoice.find((plant) => plant.value == data.plant ) }
+                options={plantChoice}
                 onChange={(option: any) => setData({ ...data, plant: option?.value, plantChoice: option })}
                 placeholder="Select Plant"
                 required={true}
@@ -115,6 +114,20 @@ export default function Edit({ p_plants, p_approver }: { p_plants: Choice; p_app
                   setData({ ...data, user_id: option.value, user_idChoice: option, position: option.position });
                 }}
                 placeholder="Select User"
+                required={true}
+              />
+            </div>
+            <div className="flex ">
+              <Label className="p-3 w-3/12 text-sm content-center text-right" htmlFor="plant">
+                Controller Group
+              </Label>
+              <Select
+                id="prctrl_grp"
+                className="m-2 w-full border-gray-500"
+                value={prCtrlGrpsChoice.find((grp) => grp.value == data.prctrl_grp_id)}
+                options={prCtrlGrpsChoice}
+                onChange={(option: any) => setData({ ...data, prctrl_grp_id: option?.value  })}
+                placeholder="Select Cotroller Group"
                 required={true}
               />
             </div>
@@ -182,7 +195,7 @@ export default function Edit({ p_plants, p_approver }: { p_plants: Choice; p_app
 
             <div className="grid justify-items-center m-3">
               <Button variant="outline" disabled={processing} className="bg-[#f8c110]  hover:border-gray-500 hover:bg-[#f8c110] w-60">
-                Save
+                Update
               </Button>
             </div>
           </div>

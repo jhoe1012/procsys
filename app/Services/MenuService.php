@@ -147,6 +147,16 @@ class MenuService
                         'permissions' => $user->can(PermissionsEnum::Admin),
                         'href'        => route('approver.index'),
                     ],
+                    [
+                        'label'       => 'Material Purchasing Groups',
+                        'permissions' => $user->can(PermissionsEnum::Admin),
+                        'href'        => route('purchgrp.index'),
+                    ],
+                    [
+                        'label'       => 'PR Controller Groups',
+                        'permissions' => $user->can(PermissionsEnum::Admin),
+                        'href'        => route('prctrlgrp.index'),
+                    ],
                 ],
             ],
         ];

@@ -79,7 +79,10 @@ class VendorController extends Controller
         $vendor->street        = $request->input('street');
         $vendor->telephone_1   = $request->input('telephone_1');
         $vendor->telephone_2   = $request->input('telephone_2');
-        $vendor->vat_reg_no    = $request->input('vat_reg_no');
+        $vendor->vat_reg_no    = $request->input('vat_reg_no');        
+        $vendor->email_1       = $request->input('email_1');
+        $vendor->email_2       = $request->input('email_2');
+        $vendor->payment_terms = $request->input('payment_terms');
         $vendor->save();
     }
 
@@ -120,6 +123,9 @@ class VendorController extends Controller
         $vendor->telephone_1   = $request->input('telephone_1');
         $vendor->telephone_2   = $request->input('telephone_2');
         $vendor->vat_reg_no    = $request->input('vat_reg_no');
+        $vendor->email_1       = $request->input('email_1');
+        $vendor->email_2       = $request->input('email_2');
+        $vendor->payment_terms = $request->input('payment_terms');
         $vendor->save();
     }
 

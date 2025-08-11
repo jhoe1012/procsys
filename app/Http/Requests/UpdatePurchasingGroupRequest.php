@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\StorePurchasingGroupRequest;
 
 class UpdatePurchasingGroupRequest extends FormRequest
 {
@@ -11,7 +12,7 @@ class UpdatePurchasingGroupRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,8 +22,18 @@ class UpdatePurchasingGroupRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            //
+         return [
+            'mat_code' => 'required',
+            'plant' => 'required',
+            'purch_grp' => 'required',
+            'unit_issue' => 'nullable',
+            'plan_deliv_time' => 'nullable',
+            'gr_proc_time' => 'nullable',
+            'min_lot_size' => 'nullable',
+            'max_lot_size' => 'nullable',
+            'fix_lot_size' => 'nullable',
+            'rounding_value' => 'nullable',
+            'prctrl_grp_id' => 'required',
         ];
     }
 }
