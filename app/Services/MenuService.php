@@ -108,6 +108,11 @@ class MenuService
                 'permissions' => $user->can(PermissionsEnum::Admin),
                 'childrens'   => [
                     [
+                        'label'       => 'Audit Trail',
+                        'permissions' => $user->can(PermissionsEnum::Admin),
+                        'href'        => route('audit.index'),
+                    ],
+                    [
                         'label'       => 'Vendors',
                         'permissions' => $user->can(PermissionsEnum::Admin),
                         'href'        => route('vendor.index'),
