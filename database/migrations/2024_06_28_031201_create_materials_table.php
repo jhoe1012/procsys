@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('materials', function (Blueprint $table) {
             $table->id();
-            $table->string('mat_code', 20)->unique();
             $table->string('mat_desc');
+            $table->string('mat_code', 20)->unique();
             $table->string('old_mat_code', 20)->nullable(true);
             $table->string('mat_type', 10)->nullable(true);
             $table->string('mat_grp_code', 20)->nullable(true);

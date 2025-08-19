@@ -20,15 +20,27 @@ class MenuService
     {
 
         $user        = Auth::user();
+
         $this->menus = [
             [
                 'label'       => 'Production Plan',
-                'permissions' => true,
-                'childrens'   => [],
+                'permissions' => $user->can(PermissionsEnum::ReadImportCBB),
+                'childrens'   => [
+                    [
+                        'label'       => 'Import Orders from CBB',
+                        'permissions' => $user->can(PermissionsEnum::ReadImportCBB),
+                        'href'        => route('store-orders.import'),
+                    ],
+                    [
+                        'label'       => 'Production Orders',
+                        'permissions' => $user->can(PermissionsEnum::ReadProdOrd),
+                        'href'        => route('production-plan.index'),
+                    ],
+                ],
             ],
             [
                 'label'       => 'Procurement',
-                'permissions' => $user->can(PermissionsEnum::ReadPR),
+                'permissions' => $user->canAny([PermissionsEnum::ReadPR, PermissionsEnum::ReadPO]),
                 'childrens'   => [
                     [
                         'label'       => 'PR Listing',

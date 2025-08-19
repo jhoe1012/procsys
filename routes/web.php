@@ -13,9 +13,11 @@ use App\Http\Controllers\GRController;
 use App\Http\Controllers\MaterialNetPriceController;
 use App\Http\Controllers\POController;
 use App\Http\Controllers\PRController;
+use App\Http\Controllers\ProductionPlanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\VendorController;
+use App\Models\ProductionPlan;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
@@ -110,6 +112,17 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/report-pohistory', [ReportController::class, 'poHistoryReport'])->name('report.pohistory');
     Route::get('/report-pohistory-download', [ReportController::class, 'downloadPoHistoryReport'])->name('download.report.pohistory');
+
+    Route::middleware(['can:' . PermissionsEnum::ReadImportCBB->value])->group(function () {
+        Route::match(['get', 'post'], '/store-orders', [ProductionPlanController::class, 'importStoreOrder'])
+            ->name('store-orders.import');
+    });
+
+    Route::middleware(['can:' . PermissionsEnum::ReadProdOrd->value])->group(function () {
+        // Route::post('/production-plan-create', [ProductionPlanController::class, 'createUpdateProdOrd'])->name('production-plan.create');
+        Route::post('/production-order-import', [ProductionPlanController::class, 'import'])->name('production.order.import');
+        Route::resource('production-plan', ProductionPlanController::class)->only(['store', 'create', 'index']);
+    });
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

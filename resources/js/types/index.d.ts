@@ -593,3 +593,25 @@ export interface IPlantSloc {
   created_at?: string;
   updated_at?: string;
 }
+
+export interface IProductionOrder {
+  id?: number;
+  orders?: number;
+  material?: string;
+  target_qty_ou?: number;
+  target_uom_ou?: string;
+  target_qty_bu?: number;
+  target_uom_bu?: string;
+  date_created?: string;
+  basic_start?: string;
+  basic_finish?: string;
+  date_released?: string;
+  date_started_actual?: string;
+  date_finished_actual?: string;
+  production_date?: string;
+  delivery_date?: string;
+  created_by?: string;
+  updated_by?: string;
+  created_at?: string;
+  updated_at?: string;
+}

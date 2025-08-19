@@ -17,39 +17,6 @@ class RolesSeeder extends Seeder
      */
     public function run(): void
     {
-        // include_once dirname(__FILE__) . '/../permissions/pr-role.php';
-        // include_once dirname(__FILE__) . '/../permissions/po-role.php';
-        // include_once dirname(__FILE__) . '/../permissions/gr-role.php';
-        // include_once dirname(__FILE__) . '/../permissions/admin-role.php';
-
-        // DB::table('user_role_relations')->insert([
-        //     // ['role_id' => 1, 'user_id' => 5],
-        //     // ['role_id' => 3, 'user_id' => 1],
-        //     // ['role_id' => 5, 'user_id' => 2],
-        //     // ['role_id' => 6, 'user_id' => 3],
-
-        //     // ['role_id' => 2, 'user_id' => 6],
-        //     // ['role_id' => 2, 'user_id' => 7],
-        //     // ['role_id' => 2, 'user_id' => 8],
-        //     // ['role_id' => 2, 'user_id' => 9],
-
-        //     // ['role_id' => 4, 'user_id' => 6],
-        //     // ['role_id' => 4, 'user_id' => 7],
-        //     // ['role_id' => 4, 'user_id' => 8],
-        //     // ['role_id' => 4, 'user_id' => 9],
-
-        //     ['role_id' => 1, 'user_id' => 1],
-        //     ['role_id' => 2, 'user_id' => 2],
-        //     ['role_id' => 2, 'user_id' => 3],
-        //     ['role_id' => 2, 'user_id' => 4],
-        //     ['role_id' => 3, 'user_id' => 1],
-        //     ['role_id' => 4, 'user_id' => 2],
-        //     ['role_id' => 4, 'user_id' => 3],
-        //     ['role_id' => 4, 'user_id' => 4],
-        //     ['role_id' => 5, 'user_id' => 1],
-        //     ['role_id' => 6, 'user_id' => 2],
-        //     ['role_id' => 7, 'user_id' => 1],
-        // ]);
 
         Role::truncate();
         Permission::truncate();
@@ -64,6 +31,9 @@ class RolesSeeder extends Seeder
         $prViewerRole    = Role::create(['name' => RolesEnum::PRViewer->value]);
         $poViewerRole    = Role::create(['name' => RolesEnum::POViewer->value]);
         $grViewerRole    = Role::create(['name' => RolesEnum::GRViewer->value]);
+        $importCbbRole  = Role::create(['name' => RolesEnum::ImportCBB->value]);
+        $prodOrdCreatorRole = Role::create(['name' => RolesEnum::ProdOrdCreator->value]);
+        $prodOrdViewerRole = Role::create(['name' => RolesEnum::ProdOrdViewer->value]);
 
         $createPrPermission  = Permission::create(['name' => PermissionsEnum::CreatePR->value]);
         $editPrPermission    = Permission::create(['name' => PermissionsEnum::EditPR->value]);
@@ -85,6 +55,14 @@ class RolesSeeder extends Seeder
         $approveGrPermission = Permission::create(['name' => PermissionsEnum::ApproverGR->value]);
         $cancelGrPermission  = Permission::create(['name' => PermissionsEnum::CancelGR->value]);
         $adminPermission     = Permission::create(['name' => PermissionsEnum::Admin->value]);
+        $readImportCbbPermission = Permission::create(['name' => PermissionsEnum::ReadImportCBB->value]);
+        $createImportCbbPermission = Permission::create(['name' => PermissionsEnum::CreateImportCBB->value]);
+        $updateImportCbbPermission = Permission::create(['name' => PermissionsEnum::UpdateImportCBB->value]);
+        $deleteImportCbbPermission = Permission::create(['name' => PermissionsEnum::DeleteImportCBB->value]);
+        $createProdOrdPermission = Permission::create(['name' => PermissionsEnum::CreateProdOrd->value]);
+        $readProdOrdPermission = Permission::create(['name' => PermissionsEnum::ReadProdOrd->value]);
+        $updateProdOrdPermission = Permission::create(['name' => PermissionsEnum::UpdateProdOrd->value]);
+        $deleteProdOrdPermission = Permission::create(['name' => PermissionsEnum::DeleteProdOrd->value]);
 
         $prRequestorRole->syncPermissions([$createPrPermission, $editPrPermission, $updatePrPermission, $deletePrPermission, $readPrPermission]);
         $prApproverRole->syncPermissions([$approvePrPermission,  $readPrPermission]);
@@ -96,33 +74,10 @@ class RolesSeeder extends Seeder
         $prViewerRole->syncPermissions([$readPrPermission]);
         $poViewerRole->syncPermissions([$readPoPermission]);
         $grViewerRole->syncPermissions([$readGrPermission]);
+        $importCbbRole->syncPermissions([$readImportCbbPermission, $createImportCbbPermission, $updateImportCbbPermission, $deleteImportCbbPermission]);
+        $prodOrdCreatorRole->syncPermissions([$createProdOrdPermission, $readProdOrdPermission, $updateProdOrdPermission, $deleteProdOrdPermission]);
+        $prodOrdViewerRole->syncPermissions([$readProdOrdPermission]);
 
-        User::find(1)->assignRole([$prRequestorRole, $poRequestorRole, $grCreatorRole, $adminRole]);
-        User::find(2)->assignRole([$prApproverRole]);
-        User::find(3)->assignRole([$poRequestorRole]);
-        User::find(4)->assignRole([$grCreatorRole]);
-        User::find(5)->assignRole([$prRequestorRole, $poRequestorRole, $grCreatorRole, $adminRole]);
-        User::find(8)->assignRole([$prApproverRole]);
-        User::find(10)->assignRole([$prRequestorRole]);
-        User::find(11)->assignRole([$prApproverRole]);
-        User::find(12)->assignRole([$adminRole]);
-        User::find(13)->assignRole([$grCreatorRole]);
-        User::find(14)->assignRole([$prViewerRole, $poRequestorRole]);
-        User::find(15)->assignRole([$grCreatorRole]);
-        User::find(16)->assignRole([$prApproverRole, $grManagerRole]);
-        User::find(17)->assignRole([$poApproverRole, $prViewerRole]);
-        User::find(21)->assignRole([$poApproverRole]);
-        User::find(22)->assignRole([$prViewerRole, $poRequestorRole]);
-        User::find(23)->assignRole([$grCreatorRole]);
-        User::find(24)->assignRole([$poApproverRole]);
-        User::find(25)->assignRole([$grCreatorRole]);
-        User::find(26)->assignRole([$grCreatorRole]);
-        User::find(27)->assignRole([$grViewerRole, $poViewerRole]);
-        User::find(28)->assignRole([$grViewerRole, $poViewerRole]);
-        User::find(29)->assignRole([$grViewerRole, $poViewerRole]);
-        User::find(30)->assignRole([$grCreatorRole, $grManagerRole]);
-        User::find(31)->assignRole([$grCreatorRole]);
-        User::find(32)->assignRole([$grCreatorRole]);
-        User::find(33)->assignRole([$grViewerRole]);
+        User::find(1)->assignRole([$prRequestorRole, $poRequestorRole, $grCreatorRole, $adminRole, $importCbbRole, $prodOrdCreatorRole]);
     }
 }

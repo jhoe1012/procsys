@@ -53,6 +53,16 @@ export const DEFAULT_GR_MATERIAL = {
   item_cat: undefined,
 };
 
+export const DEFAULT_PROD_ORDER = {
+  mat_code: undefined,
+  short_text: undefined,
+  uom: undefined,
+  to_create_qty: undefined,
+  created_qty: undefined,
+  released_qty: undefined,
+  total_qty: undefined,
+};
+
 // Custom style for react select for index
 export const REACT_SELECT_STYLES = {
   control: (provided: CSSObjectWithLabel) => ({
@@ -138,6 +148,14 @@ export enum PermissionsEnum {
   ApproverGR = 'approver.gr',
   CancelGR = 'cancel.gr',
   Admin = 'admin',
+  CreateImportCBB = 'create.importcbb',
+  ReadImportCBB = 'read.importcbb',
+  UpdateImportCBB = 'update.importcbb',
+  DeleteImportCBB = 'delete.importcbb',
+  CreateProdOrd = 'create.prodord',
+  ReadProdOrd = 'read.prodord',
+  UpdateProdOrd = 'update.prodord',
+  DeleteProdOrd = 'delete.prodord',
 }
 
 export enum ItemCategoryEnum {

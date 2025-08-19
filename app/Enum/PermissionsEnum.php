@@ -24,4 +24,12 @@ enum PermissionsEnum: string
     case ApproverGR = 'approver.gr';
     case CancelGR   = 'cancel.gr';
     case Admin      = 'admin';
+    case CreateImportCBB = 'create.importcbb';
+    case ReadImportCBB = 'read.importcbb';
+    case UpdateImportCBB = 'update.importcbb';
+    case DeleteImportCBB = 'delete.importcbb';
+    case CreateProdOrd = 'create.prodord';
+    case ReadProdOrd = 'read.prodord';
+    case UpdateProdOrd = 'update.prodord';
+    case DeleteProdOrd = 'delete.prodord';
 }
