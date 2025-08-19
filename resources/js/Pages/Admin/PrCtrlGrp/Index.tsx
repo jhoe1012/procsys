@@ -63,9 +63,9 @@ export default function Index({
       <div className="py-2">
         <div className="max-w-8xl mx-auto sm:px-6 lg:px-2">
           <div className="bg-gray-50 text-black overflow-hidden shadow-sm sm:rounded-lg">
-            <div className="p-5 flex flex-wrap gap-2">
-              <div className="flex-1 overflow-x-auto">
-                <table className="w-[78rem] text-xs text-left rtl:text-right text-gray-500 ">
+           <div className="p-5 flex flex-wrap gap-2">
+              <div className="flex-1">
+                <table className=" table-auto w-full text-xs text-left rtl:text-right text-gray-500">
                   <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b-2 border-gray-500">
                     <tr className="text-nowrap">
                       <th className="px-3 py-2">
