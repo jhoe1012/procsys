@@ -124,7 +124,9 @@ export default function PrNumberCard({
                   </span>
                 </div>
                 <a
-                  href={file.filepath}
+                  href={`/${file.filepath}`}
+                  download
+ 
                   target="_blank"
                   rel="noopener noreferrer"
                   className="ml-2 px-2 py-1 text-[10px] text-blue-600 bg-blue-100 rounded hover:bg-blue-200"
