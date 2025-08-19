@@ -296,7 +296,7 @@ const Edit = ({
               <div className="mt-6">
                 <div className="border border-dashed border-green-500 rounded-md p-3">
                   <div className="font-semibold text-xs mb-1 text-green-700">Uploaded Attachments:</div>
-                  <AttachmentList attachments={poheader.attachments} canDelete={can(auth.user, PermissionsEnum.EditPR)} />
+                  <AttachmentList attachments={poheader.attachments} canDelete={can(auth.user, PermissionsEnum.EditPO)} />
                 </div>
               </div>
             )}
