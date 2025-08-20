@@ -619,10 +619,11 @@ export interface IDeliveryAddress {
   created_at: number;
   updated_at: number;
 }
+
 export interface IProcurementGroup {
   purch_grp: string;
   name1: string;
-}}}
+}
 
 export interface ICHGHeader {
   data_chgno: number;
