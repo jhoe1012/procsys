@@ -38,16 +38,26 @@ return new class extends Migration
                     data_type, data_refno, data_table, data_field,
                     data_chgno, data_chgtyp, data_oldvalue, data_newvalue, short_text
                 ) VALUES
-                    ('Approvers', NEW.id, 'approvers', 'type', change_no, 'I', NULL, NEW.type, 'Type'),
-                    ('Approvers', NEW.id, 'approvers', 'plant', change_no, 'I', NULL, NEW.plant, 'Plant'),
-                    ('Approvers', NEW.id, 'approvers', 'user_id', change_no, 'I', NULL, (SELECT name FROM users WHERE id = NEW.user_id), 'Approver'),
-                    ('Approvers', NEW.id, 'approvers', 'prctrl_grp_id', change_no, 'I', NULL, (SELECT prctrl_desc FROM prctrl_grps WHERE id = NEW.prctrl_grp_id), 'PR Control Group'),
-                    ('Approvers', NEW.id, 'approvers', 'position', change_no, 'I', NULL, NEW.position, 'Position'),
-                    ('Approvers', NEW.id, 'approvers', 'amount_from', change_no, 'I', NULL, NEW.amount_from::text, 'Amount From'),
-                    ('Approvers', NEW.id, 'approvers', 'amount_to', change_no, 'I', NULL, NEW.amount_to::text, 'Amount To'),
-                    ('Approvers', NEW.id, 'approvers', 'seq', change_no, 'I', NULL, NEW.seq::text, 'Sequence'),
-                    ('Approvers', NEW.id, 'approvers', 'desc', change_no, 'I', NULL, NEW.\"desc\", 'Description'),
-                    ('Approvers', NEW.id, 'approvers', 'updated_by', change_no, 'I', NULL, (SELECT name FROM users WHERE id = NEW.updated_by), 'Created By');
+                    ('Approvers', NEW.id, 'approvers', 'type', change_no, 'I', NULL, NEW.type,
+                        (SELECT col_description('approvers'::regclass, attnum) FROM pg_attribute WHERE attrelid = 'approvers'::regclass AND attname = 'type')),
+                    ('Approvers', NEW.id, 'approvers', 'plant', change_no, 'I', NULL, NEW.plant,
+                        (SELECT col_description('approvers'::regclass, attnum) FROM pg_attribute WHERE attrelid = 'approvers'::regclass AND attname = 'plant')),
+                    ('Approvers', NEW.id, 'approvers', 'user_id', change_no, 'I', NULL, (SELECT name FROM users WHERE id = NEW.user_id),
+                        (SELECT col_description('approvers'::regclass, attnum) FROM pg_attribute WHERE attrelid = 'approvers'::regclass AND attname = 'user_id')),
+                    ('Approvers', NEW.id, 'approvers', 'prctrl_grp_id', change_no, 'I', NULL, (SELECT prctrl_desc FROM prctrl_grps WHERE id = NEW.prctrl_grp_id),
+                        (SELECT col_description('approvers'::regclass, attnum) FROM pg_attribute WHERE attrelid = 'approvers'::regclass AND attname = 'prctrl_grp_id')),
+                    ('Approvers', NEW.id, 'approvers', 'position', change_no, 'I', NULL, NEW.position,
+                        (SELECT col_description('approvers'::regclass, attnum) FROM pg_attribute WHERE attrelid = 'approvers'::regclass AND attname = 'position')),
+                    ('Approvers', NEW.id, 'approvers', 'amount_from', change_no, 'I', NULL, NEW.amount_from::text,
+                        (SELECT col_description('approvers'::regclass, attnum) FROM pg_attribute WHERE attrelid = 'approvers'::regclass AND attname = 'amount_from')),
+                    ('Approvers', NEW.id, 'approvers', 'amount_to', change_no, 'I', NULL, NEW.amount_to::text,
+                        (SELECT col_description('approvers'::regclass, attnum) FROM pg_attribute WHERE attrelid = 'approvers'::regclass AND attname = 'amount_to')),
+                    ('Approvers', NEW.id, 'approvers', 'seq', change_no, 'I', NULL, NEW.seq::text,
+                        (SELECT col_description('approvers'::regclass, attnum) FROM pg_attribute WHERE attrelid = 'approvers'::regclass AND attname = 'seq')),
+                    ('Approvers', NEW.id, 'approvers', 'desc', change_no, 'I', NULL, NEW.\"desc\",
+                        (SELECT col_description('approvers'::regclass, attnum) FROM pg_attribute WHERE attrelid = 'approvers'::regclass AND attname = 'desc')),
+                    ('Approvers', NEW.id, 'approvers', 'updated_by', change_no, 'I', NULL, (SELECT name FROM users WHERE id = NEW.updated_by),
+                        (SELECT col_description('approvers'::regclass, attnum) FROM pg_attribute WHERE attrelid = 'approvers'::regclass AND attname = 'updated_by'));
                 RETURN NEW;
             END IF;
 
@@ -89,7 +99,7 @@ return new class extends Migration
                         ) VALUES (
                             'Approvers', NEW.id, 'approvers', 'type',
                             change_no, 'U', OLD.type, NEW.type,
-                            'Changed type from \"' || COALESCE(OLD.type, '') || '\" to \"' || COALESCE(NEW.type, '') || '\"'
+                            (SELECT col_description('approvers'::regclass, attnum) FROM pg_attribute WHERE attrelid = 'approvers'::regclass AND attname = 'type')
                         );
                     END IF;
 
@@ -100,7 +110,7 @@ return new class extends Migration
                         ) VALUES (
                             'Approvers', NEW.id, 'approvers', 'plant',
                             change_no, 'U', OLD.plant, NEW.plant,
-                            'Plant'
+                            (SELECT col_description('approvers'::regclass, attnum) FROM pg_attribute WHERE attrelid = 'approvers'::regclass AND attname = 'plant')
                         );
                     END IF;
 
@@ -113,7 +123,7 @@ return new class extends Migration
                             change_no, 'U',
                             (SELECT name FROM users WHERE id = OLD.user_id),
                             (SELECT name FROM users WHERE id = NEW.user_id),
-                            'Approver'
+                            (SELECT col_description('approvers'::regclass, attnum) FROM pg_attribute WHERE attrelid = 'approvers'::regclass AND attname = 'user_id')
                         );
                     END IF;
 
@@ -126,7 +136,7 @@ return new class extends Migration
                             change_no, 'U',
                             (SELECT prctrl_desc FROM prctrl_grps WHERE id = OLD.prctrl_grp_id),
                             (SELECT prctrl_desc FROM prctrl_grps WHERE id = NEW.prctrl_grp_id),
-                            'PR Control Group'
+                            (SELECT col_description('approvers'::regclass, attnum) FROM pg_attribute WHERE attrelid = 'approvers'::regclass AND attname = 'prctrl_grp_id')
                         );
                     END IF;
 
@@ -137,7 +147,7 @@ return new class extends Migration
                         ) VALUES (
                             'Approvers', NEW.id, 'approvers', 'position',
                             change_no, 'U', OLD.position, NEW.position,
-                            'Position'
+                            (SELECT col_description('approvers'::regclass, attnum) FROM pg_attribute WHERE attrelid = 'approvers'::regclass AND attname = 'position')
                         );
                     END IF;
 
@@ -148,7 +158,7 @@ return new class extends Migration
                         ) VALUES (
                             'Approvers', NEW.id, 'approvers', 'amount_from',
                             change_no, 'U', OLD.amount_from::text, NEW.amount_from::text,
-                            'Amount'
+                            (SELECT col_description('approvers'::regclass, attnum) FROM pg_attribute WHERE attrelid = 'approvers'::regclass AND attname = 'amount_from')
                         );
                     END IF;
 
@@ -159,7 +169,7 @@ return new class extends Migration
                         ) VALUES (
                             'Approvers', NEW.id, 'approvers', 'amount_to',
                             change_no, 'U', OLD.amount_to::text, NEW.amount_to::text,
-                            'Amount'
+                            (SELECT col_description('approvers'::regclass, attnum) FROM pg_attribute WHERE attrelid = 'approvers'::regclass AND attname = 'amount_to')
                         );
                     END IF;
 
@@ -170,7 +180,7 @@ return new class extends Migration
                         ) VALUES (
                             'Approvers', NEW.id, 'approvers', 'seq',
                             change_no, 'U', OLD.seq::text, NEW.seq::text,
-                            'Seq'
+                            (SELECT col_description('approvers'::regclass, attnum) FROM pg_attribute WHERE attrelid = 'approvers'::regclass AND attname = 'seq')
                         );
                     END IF;
 
@@ -181,21 +191,7 @@ return new class extends Migration
                         ) VALUES (
                             'Approvers', NEW.id, 'approvers', 'desc',
                             change_no, 'U', OLD.\"desc\", NEW.\"desc\",
-                            'Description'
-                        );
-                    END IF;
-
-                    IF OLD.updated_by IS DISTINCT FROM NEW.updated_by THEN
-                        INSERT INTO chg_details (
-                            data_type, data_refno, data_table, data_field,
-                            data_chgno, data_chgtyp, data_oldvalue, data_newvalue, short_text
-                        ) VALUES (
-                            'Approvers', NEW.id, 'approvers', 'updated_by',
-                            change_no, 'U',
-                            (SELECT name FROM users WHERE id = OLD.updated_by),
-                            (SELECT name FROM users WHERE id = NEW.updated_by),
-                            'Changed updated_by from \"' || COALESCE((SELECT name FROM users WHERE id = OLD.updated_by), '') ||
-                            '\" to \"' || COALESCE((SELECT name FROM users WHERE id = NEW.updated_by), '') || '\"'
+                            (SELECT col_description('approvers'::regclass, attnum) FROM pg_attribute WHERE attrelid = 'approvers'::regclass AND attname = 'desc')
                         );
                     END IF;
 
