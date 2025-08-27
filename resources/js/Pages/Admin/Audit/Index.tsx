@@ -123,8 +123,8 @@ export default function Index({
                     <tr className="text-nowrap">
                       <th className="px-3 py-2">Short Text </th>
                       <th className="px-3 py-2">Action</th>
-                      <th className="px-3 py-2">New Value</th>
                       <th className="px-3 py-2">Old Value</th>
+                      <th className="px-3 py-2">New Value</th>
                       <th className="px-3 py-2">User</th>
                       <th className="px-3 py-2">Date</th>
                       <th className="px-3 py-2">Time</th>
@@ -137,8 +137,8 @@ export default function Index({
                           <tr key={detail.id}>
                             <td className="px-3 py-2">{detail.short_text}</td>
                             <td className="px-3 py-2">{ACTION_LABELS[detail.data_chgtyp] ?? detail.data_chgtyp}</td>
-                            <td className="px-3 py-2">{detail.data_newvalue}</td>
                             <td className="px-3 py-2">{detail.data_oldvalue}</td>
+                            <td className="px-3 py-2">{detail.data_newvalue}</td>
                             <td className="px-3 py-2">{header.user?.name ?? '-'}</td>
                             <td className="px-3 py-2">{new Date(header.timestamp).toLocaleDateString()}</td>
                             <td className="px-3 py-2">{new Date(header.timestamp).toLocaleTimeString()}</td>
