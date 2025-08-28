@@ -190,7 +190,7 @@ class ReportController extends Controller
             }
         }
 
-        $query->orderBy('pr_headers.pr_number')
+        $query->orderBy('pr_headers.pr_number', 'desc')
             ->orderBy('pr_materials.item_no');
 
         return $query;
@@ -271,7 +271,7 @@ class ReportController extends Controller
             }
         }
 
-        $query->orderBy('po_headers.po_number')
+        $query->orderBy('po_headers.po_number' , 'desc')
             ->orderBy('po_materials.item_no');
 
         return $query;
@@ -352,7 +352,7 @@ class ReportController extends Controller
             }
         }
 
-        $query->orderBy('gr_headers.gr_number')
+        $query->orderBy('gr_headers.gr_number' , 'desc')
             ->orderBy('gr_materials.item_no');
 
         return $query;
@@ -496,7 +496,7 @@ class ReportController extends Controller
             }
         }
 
-        $query->orderBy('pr_headers.pr_number')
+        $query->orderBy('pr_headers.pr_number' , 'desc')
             ->orderBy('pr_materials.item_no')->get();
 
         return $query;

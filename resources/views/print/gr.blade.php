@@ -62,7 +62,12 @@
                 <th>Vendor: </th>
                 <td>{{ $grHeader->vendors->supplier }}</td>
                 <th>Vendor Name: </th>
-                <td>{{ $grHeader->vendors->name_1 }}</td>
+                <td>
+                    {{ $grHeader->vendors->name_1 }}
+                    @if ($grHeader->vendors->supplier == 'V0000')
+                        / {{ $grHeader->poHeader->header_text }}
+                    @endif
+                </td>
             </tr>
             <tr>
                 <th>Purchase Order: </th>
@@ -70,7 +75,7 @@
                 <th>DR # / SI # </th>
                 <td>{{ $grHeader->delivery_note }} </td>
             </tr>
-              <tr>
+            <tr>
                 <th>Received By: </th>
                 <td>{{ $grHeader->created_name }}</td>
             </tr>
@@ -100,11 +105,11 @@
                         <td widtd='5%'>{{ $grmaterial->item_no }} </td>
                         <td widtd='10%'> {{ $grmaterial->mat_code }} </td>
                         <td widtd='35%'>
-                        @if (in_array($grmaterial->mat_code, $genericMaterials))
-                            {{ $grmaterial->item_text }}
-                        @else 
-                            {{ $grmaterial->short_text }}
-                        @endif
+                            @if (in_array($grmaterial->mat_code, $genericMaterials))
+                                {{ $grmaterial->item_text }}
+                            @else
+                                {{ $grmaterial->short_text }}
+                            @endif
                         </td>
                         <td widtd='10%'></td>
                         <td widtd='10%'>{{ $grmaterial->gr_qty }}</td>

@@ -21,6 +21,11 @@ class GrHeader extends Model
         'actual_date',
         'delivery_note',
         'header_text', ];
+    
+    public function poHeader(): HasOne
+    {
+        return $this->hasOne(PoHeader::class, 'po_number', 'po_number');
+    }
 
     public function grmaterials(): HasMany
     {
