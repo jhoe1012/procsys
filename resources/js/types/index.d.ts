@@ -197,6 +197,10 @@ export interface IUserPage extends IPagination {
   data: User[];
 }
 
+export interface ICHGHeaderPage extends IPagination {
+  data: ICHGHeader[];
+}
+
 export interface ILink {
   url: string | undefined;
   label: string;
@@ -615,7 +619,32 @@ export interface IDeliveryAddress {
   created_at: number;
   updated_at: number;
 }
+
 export interface IProcurementGroup {
   purch_grp: string;
   name1: string;
+}
+
+export interface ICHGHeader {
+  data_chgno: number;
+  chgtyp_label: string;
+  data_refno: number;
+  user_id: number;
+  timestamp: number;
+  data_chgtyp: string;
+  chg_details: ICHGDetails[];
+  user?: User;
+}
+
+export interface ICHGDetails {
+  id: number;
+  data_type: string;
+  data_refno: number;
+  data_table: string;
+  data_field: string;
+  data_chgno: number;
+  data_chgtyp: string;
+  data_oldvalue: string;
+  data_newvalue: string;
+  short_text: string;
 }

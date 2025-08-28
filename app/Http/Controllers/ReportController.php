@@ -190,7 +190,7 @@ class ReportController extends Controller
             }
         }
 
-        $query->orderBy('pr_headers.pr_number')
+        $query->orderBy('pr_headers.pr_number', 'desc')
             ->orderBy('pr_materials.item_no');
 
         return $query;
@@ -242,8 +242,8 @@ class ReportController extends Controller
                 ? $query->whereBetween('po_headers.doc_date', [$value, $request->input('doc_date_to')])
                 : $query->where('po_headers.doc_date', 'ilike', "%{$value}%"),
             'deliv_date_from' => fn ($value) => $request->input('deliv_date_to')
-                ? $query->whereBetween('po_materials.del_date', [$value, $request->input('deliv_date_to')])
-                : $query->whereDate('po_materials.del_date', $value),
+                ? $query->whereBetween('po_headers.deliv_date', [$value, $request->input('deliv_date_to')])
+                : $query->where('po_headers.deliv_date', 'ilike', "%{$value}%"),
             'ponumber_from' => fn ($value) => $request->input('ponumber_to')
                 ? $query->whereBetween('po_headers.po_number', [$value, $request->input('ponumber_to')])
                 : $query->where('po_headers.po_number', 'ilike', "%{$value}%"),
@@ -271,7 +271,7 @@ class ReportController extends Controller
             }
         }
 
-        $query->orderBy('po_headers.po_number')
+        $query->orderBy('po_headers.po_number' , 'desc')
             ->orderBy('po_materials.item_no');
 
         return $query;
@@ -352,7 +352,7 @@ class ReportController extends Controller
             }
         }
 
-        $query->orderBy('gr_headers.gr_number')
+        $query->orderBy('gr_headers.gr_number' , 'desc')
             ->orderBy('gr_materials.item_no');
 
         return $query;
@@ -407,7 +407,10 @@ class ReportController extends Controller
             DB::raw("CASE WHEN pr_materials.status = 'X' THEN  pr_materials.qty * -1 ELSE pr_materials.qty END  AS pr_qty"),
             DB::raw("CASE WHEN pr_materials.status = 'X' THEN pr_materials.qty_open * -1 ELSE pr_materials.qty_open END  AS  pr_qty_open"),
             'pr_materials.ord_unit AS pr_unit',
-            DB::raw("CASE WHEN pr_materials.status = 'X' THEN 'Deleted' END AS pr_mat_stat"),
+            DB::raw("CASE WHEN pr_materials.status = 'X'  THEN 'Deleted'
+                            WHEN pr_materials.status      = 'C' THEN 'Closed'
+                            ELSE pr_materials.status
+                            END AS pr_mat_stat"),
             'po_materials.item_no AS po_item_no',
             DB::raw("CASE WHEN po_materials.status = 'X' THEN po_materials.po_qty *-1 ELSE  po_materials.po_qty END AS po_qty"),
             DB::raw("CASE WHEN po_materials.status = 'X' THEN po_materials.net_price *-1 ELSE po_materials.net_price END   AS net_price"),
@@ -416,6 +419,7 @@ class ReportController extends Controller
             'po_materials.unit AS po_unit',
             DB::raw("CASE WHEN po_materials.status = 'X' THEN 'Deleted' 
                                  WHEN po_materials.status = 'D' THEN 'Delivery Completed' 
+                                 ELSE po_materials.status 
                                  END  AS po_mat_stat"),
             'gr_materials.item_no AS gr_item_no',
             DB::raw('CASE WHEN gr_materials.is_cancel = TRUE THEN gr_materials.gr_qty * -1 ELSE gr_materials.gr_qty END AS gr_qty'),
@@ -478,8 +482,8 @@ class ReportController extends Controller
             'short_text' => fn ($value) => $query->where(fn (Builder $q) => $q->where('pr_materials.short_text', 'ilike', "%{$value}%")
                 ->orwhere('po_materials.short_text', 'ilike', "%{$value}%")),
             'deliv_date_from' => fn ($value) => $request->input('deliv_date_to')
-                ? $query->whereBetween('po_materials.del_date', [$value, $request->input('deliv_date_to')])
-                : $query->whereDate('po_materials.del_date', $value),
+                ? $query->whereBetween('po_headers.deliv_date', [$value, $request->input('deliv_date_to')])
+                : $query->where('po_headers.deliv_date', 'ilike', "%{$value}%"),
             'open_po' => fn ($value) => $query->where('po_materials.po_gr_qty', '>', 0),
             'open_pr' => fn ($value) => $query->where('pr_materials.qty_open', '>', 0),
             'plant'   => fn ($value) => $query->where('pr_headers.plant', $value),
@@ -492,7 +496,7 @@ class ReportController extends Controller
             }
         }
 
-        $query->orderBy('pr_headers.pr_number')
+        $query->orderBy('pr_headers.pr_number' , 'desc')
             ->orderBy('pr_materials.item_no')->get();
 
         return $query;

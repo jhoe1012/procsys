@@ -1,9 +1,11 @@
 <?php
 
 use App\Enum\PermissionsEnum;
+use App\Http\Controllers\Admin\ChgHeader;
 use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\MaterialValuationController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\ChgController;
 use App\Http\Controllers\AlternativeUomController;
 use App\Http\Controllers\ApproverController;
 use App\Http\Controllers\AttachmentController;
@@ -81,6 +83,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/val-price-update/{materialValuation}', [MaterialValuationController::class, 'update'])->name('val_price.update');
     Route::post('/val-price-import', [MaterialValuationController::class, 'import'])->name('val_price.import');
     Route::get('/val-price-download-error', [MaterialValuationController::class, 'export'])->name('val_price.download.error');
+
+    Route::resource('/audit', ChgController::class)->only(['index', 'store', 'update']);
 
     // Route::middleware(['can:'.PermissionsEnum::Admin->value])->group(function () {
     Route::get('/vendors', [VendorController::class, 'index'])->name('vendor.index');
