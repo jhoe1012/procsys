@@ -24,7 +24,7 @@ export function DataTableActions({ href }: { href: string }) {
         <DropdownMenuLabel>Exports</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
-          <a href={href} target="_blank" className="flex gap-2" download={true}>
+          <a href={href} target="_blank" rel="noopener" className="flex gap-2" download={true}>
             <Download className="size-4" strokeWidth={1} />
             Export to Excel
           </a>

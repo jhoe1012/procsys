@@ -245,7 +245,7 @@ const Index = ({
                           {/* <td className="px-3 py-2">{gr.posting_date}</td> */}
                           <td className="px-3 py-2">{formatShortDate(gr.actual_date)}</td>
                           <td className="px-3 py-2">
-                            <a className="" href={route('gr.print', gr.id)} target="_blank">
+                            <a className="" href={route('gr.print', gr.id)} target="_blank" rel="noopener">
                               <PrinterIcon className="w-6 h-6  text-green-600 hover:fill-green-300 transition-colors" />
                             </a>
                           </td>
