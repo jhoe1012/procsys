@@ -62,7 +62,7 @@ export default function AdminUpload({ url, pageName }: { url: string; pageName: 
             {pageName == 'Valuation Price List' && (
               <p>
                 Please check
-                <a href={route('val_price.download.error')} target="_blank" className="text-blue-500 p-2 underline">
+                <a href={route('val_price.download.error')} target="_blank" rel="noopener"  className="text-blue-500 p-2 underline">
                   IMPORT ERROR LOG.xlsx
                 </a>
                 for errors.
